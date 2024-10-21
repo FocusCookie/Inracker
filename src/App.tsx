@@ -1,7 +1,7 @@
 import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import "./styles/global.css";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
@@ -14,7 +14,7 @@ function App() {
 
   return (
     <main className="container">
-      <h1>Welcome to Tauri + React</h1>
+      <h1 className="text-red-500 text-4xl">Welcome to Tauri + React</h1>
 
       <div className="row">
         <a href="https://vitejs.dev" target="_blank">
@@ -34,8 +34,7 @@ function App() {
         onSubmit={(e) => {
           e.preventDefault();
           greet();
-        }}
-      >
+        }}>
         <input
           id="greet-input"
           onChange={(e) => setName(e.currentTarget.value)}
