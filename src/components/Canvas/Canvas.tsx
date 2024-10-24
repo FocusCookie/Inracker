@@ -189,36 +189,6 @@ function Canvas({ background, elements, onElementClick, onDrawed }: Props) {
     }
   }
 
-  useEffect(() => {
-    const canvas = ref.current;
-    const ctx = canvas?.getContext("2d");
-
-    if (canvas && ctx) {
-      setDrawingSizeToCanvasSize();
-      drawElements(elements);
-    }
-
-    window.addEventListener("resize", setDrawingSizeToCanvasSize);
-
-    window.addEventListener("keypress", showGrabCursor);
-    window.addEventListener("keyup", hideGrabCursor);
-
-    return () => {
-      window.removeEventListener("resize", setDrawingSizeToCanvasSize);
-      window.removeEventListener("keypress", showGrabCursor);
-      window.removeEventListener("keyup", hideGrabCursor);
-    };
-  }, [showGrabCursor, hideGrabCursor]);
-
-  useEffect(() => {
-    setDrawingSizeToCanvasSize();
-    window.addEventListener("resize", setDrawingSizeToCanvasSize);
-
-    return () => {
-      window.removeEventListener("resize", setDrawingSizeToCanvasSize);
-    };
-  }, [zoom, panOffset.current]);
-
   function isCursorOnCanvas(
     canvas: HTMLCanvasElement,
     mousePosition: { x: number; y: number }
@@ -298,6 +268,36 @@ function Canvas({ background, elements, onElementClick, onDrawed }: Props) {
       }
     }
   }
+
+  useEffect(() => {
+    const canvas = ref.current;
+    const ctx = canvas?.getContext("2d");
+
+    if (canvas && ctx) {
+      setDrawingSizeToCanvasSize();
+      drawElements(elements);
+    }
+
+    window.addEventListener("resize", setDrawingSizeToCanvasSize);
+
+    window.addEventListener("keypress", showGrabCursor);
+    window.addEventListener("keyup", hideGrabCursor);
+
+    return () => {
+      window.removeEventListener("resize", setDrawingSizeToCanvasSize);
+      window.removeEventListener("keypress", showGrabCursor);
+      window.removeEventListener("keyup", hideGrabCursor);
+    };
+  }, [showGrabCursor, hideGrabCursor]);
+
+  useEffect(() => {
+    setDrawingSizeToCanvasSize();
+    window.addEventListener("resize", setDrawingSizeToCanvasSize);
+
+    return () => {
+      window.removeEventListener("resize", setDrawingSizeToCanvasSize);
+    };
+  }, [zoom, panOffset.current]);
 
   return (
     <div className="relative w-full h-full">
