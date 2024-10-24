@@ -1,13 +1,22 @@
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import {
-  BoxIcon,
   Cross2Icon,
   PaddingIcon,
-  PlusIcon,
   ZoomInIcon,
   ZoomOutIcon,
 } from "@radix-ui/react-icons";
+
+const MIN_ZOOM = 0.1;
+const ZOOM_DELTA = 0.1;
+const OFFSET = { x: 0, y: 0 };
+
+type Props = {
+  background?: HTMLImageElement;
+  elements: CanvasElement[];
+  onElementClick: (element: CanvasElement | undefined) => void;
+  onDrawed: (element: CanvasElement) => void;
+};
 
 type CanvasElement = {
   id: string;
@@ -20,26 +29,16 @@ type CanvasElement = {
   color?: string;
 };
 
-type Props = {
-  background?: HTMLImageElement;
-  elements: CanvasElement[];
-  onElementClick: (element: CanvasElement | undefined) => void;
-  onDrawed: (element: CanvasElement) => void;
-};
-
-const ZOOM_DELTA = 0.1;
-const OFFSET = { x: 0, y: 0 };
-
 //TODO: Think about the CanvasElement id when drawing a new element is date and time as s enough and save?
 
 function Canvas({ background, elements, onElementClick, onDrawed }: Props) {
   const ref = useRef<HTMLCanvasElement>(null);
   const [zoom, setZoom] = useState<number>(1);
+  const [isDrawing, setIsDrawing] = useState<boolean>(false);
+  const [showPaneCursor, setShowPaneCursor] = useState<boolean>(false);
   const panOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const isPanningRef = useRef<boolean>(false);
   const startPanningRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [isDrawing, setIsDrawing] = useState<boolean>(false);
-  const [showPaneCursor, setShowPaneCursor] = useState<boolean>(false);
   const startDrawingRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const newDrawnElement = useRef<CanvasElement | undefined>(undefined);
 
@@ -57,11 +56,11 @@ function Canvas({ background, elements, onElementClick, onDrawed }: Props) {
   }
 
   function zoomIn() {
-    setZoom((prevZoom) => Math.max(0.1, prevZoom + ZOOM_DELTA));
+    setZoom((prevZoom) => Math.max(MIN_ZOOM, prevZoom + ZOOM_DELTA));
   }
 
   function zoomOut() {
-    setZoom((prevZoom) => Math.max(0.1, prevZoom - ZOOM_DELTA));
+    setZoom((prevZoom) => Math.max(MIN_ZOOM, prevZoom - ZOOM_DELTA));
   }
 
   function handleMouseDownOnCanvas(event: React.MouseEvent<HTMLCanvasElement>) {
