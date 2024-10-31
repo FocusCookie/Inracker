@@ -4,6 +4,7 @@ import ReactDOM from "react-dom/client";
 import "./styles/global.css";
 import { routeTree } from "./routeTree.gen";
 import "./i18next";
+import "@fontsource-variable/inter";
 
 const router = createRouter({ routeTree });
 
