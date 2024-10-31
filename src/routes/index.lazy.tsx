@@ -1,17 +1,12 @@
-import { createLazyFileRoute } from "@tanstack/react-router";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
+import Welcome from "@/pages/Welcome/Welcome";
 
 export const Route = createLazyFileRoute("/")({
   component: Index,
 });
 
 function Index() {
-  return (
-    <div className="p-2">
-      <h3 className={cn("text-emerald-500 text-4xl")}>Welcome Home!</h3>
+  const navigate = useNavigate();
 
-      <Button size="sm">Hello</Button>
-    </div>
-  );
+  return <Welcome onLetUsRole={() => navigate({ to: "/about" })} />;
 }

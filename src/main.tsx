@@ -3,6 +3,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./styles/global.css";
 import { routeTree } from "./routeTree.gen";
+import "./i18next";
+import "@fontsource-variable/inter";
 
 const router = createRouter({ routeTree });
 
@@ -16,6 +18,8 @@ const rootElement = document.getElementById("root")!;
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <div className="w-full h-full bg-black p-4">
+      <RouterProvider router={router} />
+    </div>{" "}
   </React.StrictMode>
 );
