@@ -1,10 +1,8 @@
 import i18n from "i18next";
-// Bindings for React: allow components to
-// re-render when language changes.
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
-import PageWelcomeEN from "@/translations/en/pages/Welcome.json";
-import PageWelcomeDE from "@/translations/de/pages/Welcome.json";
+import PageWelcomeEN from "@/translations/en/pages/welcome.json";
+import PageWelcomeDE from "@/translations/de/pages/welcome.json";
 
 const resources = {
   en: {
