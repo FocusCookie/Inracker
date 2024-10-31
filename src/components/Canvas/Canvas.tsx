@@ -549,7 +549,7 @@ function Canvas({
                 src={player.img}
                 alt={`Picture of Player ${player.name}`}
               />
-              {playersTokenState.find((state) => state.id === player.id)
+              {!playersTokenState.find((state) => state.id === player.id)
                 ?.visible && (
                 <div className="h-6 w-6 bg-white/20 backdrop-blur flex justify-center items-center row-start-1 row-end-2 col-start-1 col-end-1 rounded-full">
                   <EyeNoneIcon className="h-4 w-4 text-white " />
