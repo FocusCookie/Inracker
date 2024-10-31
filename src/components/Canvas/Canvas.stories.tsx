@@ -12,7 +12,7 @@ const background = new Image();
 background.src = testBackground;
 
 const meta = {
-  title: "Example/Canvas",
+  title: "Components/Canvas",
   component: Canvas,
   parameters: {
     layout: "centered",
