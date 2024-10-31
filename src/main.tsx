@@ -18,6 +18,8 @@ const rootElement = document.getElementById("root")!;
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <div className="w-full h-full bg-black p-4">
+      <RouterProvider router={router} />
+    </div>{" "}
   </React.StrictMode>
 );
