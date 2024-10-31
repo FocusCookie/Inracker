@@ -2,316 +2,532 @@ import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import {
   Cross2Icon,
+  EyeNoneIcon,
   PaddingIcon,
   ZoomInIcon,
   ZoomOutIcon,
 } from "@radix-ui/react-icons";
 
 const MIN_ZOOM = 0.1;
-const ZOOM_DELTA = 0.1;
-const OFFSET = { x: 0, y: 0 };
+const MAX_ZOOM = 5;
+const ZOOM_DELTA = 0.2;
+const DRAW_RECT_FILL_COLOR = "rgba(255, 255, 255, 0.3)";
+const DRAW_RECT_STROKE_COLOR = "rgba(0, 0, 0, 0.6)";
+const PLAYER_SELECTION_CIRCLE_STROKE_COLOR = "rgba(255, 0, 0, 0.8";
+const PLAYER_SELECTION_CIRCLE_RADIUS = 50;
 
 type Props = {
   background?: HTMLImageElement;
   elements: CanvasElement[];
-  onElementClick: (element: CanvasElement | undefined) => void;
+  players: Player[];
+  selectedPlayer: Player | null;
+  onPlayerSelect: (player: Player) => void;
   onDrawed: (element: CanvasElement) => void;
+  onElementClick: (id: string) => void;
+  onPlayerMove: (player: Player) => void;
+};
+
+export type Player = {
+  id: number;
+  img: string;
+  coordinates: { x: number; y: number };
+  health: number;
+  name: string;
+  buffs: Buff[];
+  debuffs: Buff[];
+};
+
+type Buff = {
+  title: string;
+  icon: string;
+  value: number;
 };
 
 type CanvasElement = {
   id: string;
-  type: "background" | "rect";
   x: number;
   y: number;
   width: number;
   height: number;
-  url?: string;
-  color?: string;
+  color: string;
+  title: string;
+  icon?: string;
+  onClick: (id: string) => void;
 };
 
-//TODO: Think about the CanvasElement id when drawing a new element is date and time as s enough and save?
+function Canvas({
+  background,
+  elements,
+  players,
+  selectedPlayer,
+  onPlayerMove,
+  onPlayerSelect,
+  onDrawed,
+  onElementClick,
+}: Props) {
+  const svgRef = useRef<SVGSVGElement>(null);
 
-function Canvas({ background, elements, onElementClick, onDrawed }: Props) {
-  const ref = useRef<HTMLCanvasElement>(null);
+  const [viewBox, setViewBox] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }>({
+    x: 0,
+    y: 0,
+    width: 1000,
+    height: 1000,
+  });
   const [zoom, setZoom] = useState<number>(1);
+  const [isPanning, setIsPanning] = useState<boolean>(false);
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
-  const [showPaneCursor, setShowPaneCursor] = useState<boolean>(false);
-  const panOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const isPanningRef = useRef<boolean>(false);
-  const startPanningRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const startDrawingRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const newDrawnElement = useRef<CanvasElement | undefined>(undefined);
+  const panStartPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const initialCTM = useRef<DOMMatrix | null>(null);
+  const tempRectRef = useRef<SVGRectElement | null>(null);
+  const drawStartPos = useRef<{ x: number; y: number } | null>(null);
+  const draggedPlayer = useRef<Player | null>(null);
+  const dragStartPos = useRef<{ x: number; y: number } | null>(null);
+  const temporaryPlayerPosition = useRef<{
+    playerId: number;
+    coordinates: { x: number; y: number };
+  } | null>(null);
+  const [, forceUpdate] = useState({});
+  const viewBoxStartOnPanStart = useRef<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
+  const [playersTokenState, setPlayersTokenState] = useState<
+    Array<{
+      id: Player["id"];
+      visible: boolean;
+    }>
+  >(
+    players.map((player) => {
+      return { id: player.id, visible: true };
+    })
+  );
 
-  function setDrawingSizeToCanvasSize() {
-    const canvas = ref.current;
-    const ctx = canvas?.getContext("2d");
+  const transformScreenCoordsToSvgCoords = (
+    event: MouseEvent | React.MouseEvent<SVGSVGElement>
+  ) => {
+    if (!svgRef.current || !initialCTM.current) return { x: 0, y: 0 };
 
-    if (canvas && ctx) {
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
+    const svg = svgRef.current;
+    const point = svg.createSVGPoint();
+    point.x = event.clientX;
+    point.y = event.clientY;
 
-      drawElements(elements);
+    const transformedPoint = point.matrixTransform(
+      initialCTM.current.inverse()
+    );
+
+    return {
+      x: transformedPoint.x,
+      y: transformedPoint.y,
+    };
+  };
+
+  const handleMouseDown = (
+    event: React.MouseEvent<SVGSVGElement, MouseEvent>
+  ) => {
+    if (isPanning && svgRef.current) {
+      const svg = svgRef.current;
+
+      const CTM = svg.getScreenCTM();
+      if (!CTM) return;
+      initialCTM.current = CTM;
+
+      const coords = transformScreenCoordsToSvgCoords(event);
+      panStartPosition.current = coords;
+      const currentViewBox = svg
+        ?.getAttribute("viewBox")
+        ?.split(" ")
+        .map(Number);
+
+      if (currentViewBox) {
+        viewBoxStartOnPanStart.current = {
+          x: currentViewBox[0],
+          y: currentViewBox[1],
+        };
+      }
+
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
     }
-  }
+
+    if (isDrawing && svgRef.current) {
+      const svg = svgRef.current;
+      const CTM = svg.getScreenCTM();
+      if (!CTM) return;
+      initialCTM.current = CTM;
+
+      const coords = transformScreenCoordsToSvgCoords(event);
+      drawStartPos.current = coords;
+
+      // create temporary rect
+      const rect = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "rect"
+      );
+      rect.setAttribute("x", coords.x.toString());
+      rect.setAttribute("y", coords.y.toString());
+      rect.setAttribute("width", "0");
+      rect.setAttribute("height", "0");
+      rect.setAttribute("rx", "4");
+      rect.setAttribute("ry", "4");
+      rect.setAttribute("fill", DRAW_RECT_FILL_COLOR);
+      rect.setAttribute("stroke", DRAW_RECT_STROKE_COLOR);
+      rect.setAttribute("stroke-width", "2");
+      rect.setAttribute("filter", "url(#subtleDropShadow)");
+
+      svg.appendChild(rect);
+      tempRectRef.current = rect;
+
+      window.addEventListener("mousemove", handleDrawMove);
+      window.addEventListener("mouseup", handleDrawEnd);
+    }
+  };
+
+  const handleMouseMove = (event: MouseEvent) => {
+    if (!svgRef.current) return;
+
+    const currentPoint = transformScreenCoordsToSvgCoords(event);
+
+    const dx = currentPoint.x - panStartPosition.current.x;
+    const dy = currentPoint.y - panStartPosition.current.y;
+
+    svgRef.current.setAttribute(
+      "viewBox",
+      `${viewBoxStartOnPanStart.current.x - dx} ${
+        viewBoxStartOnPanStart.current.y - dy
+      } ${viewBox.width} ${viewBox.height}`
+    );
+  };
+
+  const handleMouseUp = () => {
+    window.removeEventListener("mousemove", handleMouseMove);
+    window.removeEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleZoom = (direction: "in" | "out") => {
+    const delta = direction === "in" ? ZOOM_DELTA : -ZOOM_DELTA;
+    const newZoom = Math.max(MIN_ZOOM, Math.min(zoom + delta, MAX_ZOOM));
+
+    const scalingFactor = zoom / newZoom;
+    setZoom(newZoom);
+
+    setViewBox((prevViewBox) => {
+      const newWidth = prevViewBox.width * scalingFactor;
+      const newHeight = prevViewBox.height * scalingFactor;
+
+      const newX = prevViewBox.x + (prevViewBox.width - newWidth) / 2;
+      const newY = prevViewBox.y + (prevViewBox.height - newHeight) / 2;
+
+      return {
+        x: newX,
+        y: newY,
+        width: newWidth,
+        height: newHeight,
+      };
+    });
+  };
 
   function zoomIn() {
-    setZoom((prevZoom) => Math.max(MIN_ZOOM, prevZoom + ZOOM_DELTA));
+    handleZoom("in");
   }
 
   function zoomOut() {
-    setZoom((prevZoom) => Math.max(MIN_ZOOM, prevZoom - ZOOM_DELTA));
+    handleZoom("out");
   }
 
-  function handleMouseDownOnCanvas(event: React.MouseEvent<HTMLCanvasElement>) {
-    if (showPaneCursor) {
-      isPanningRef.current = true;
-      startPanningRef.current = { x: event.clientX, y: event.clientY };
-      window.addEventListener("mousemove", handlePanningOnMouseMove);
-      window.addEventListener("mouseup", handleStopPanningOnMouseUp);
+  function showPaneCursor(event: KeyboardEvent) {
+    if (!isPanning && event.code === "Space") {
+      setIsPanning(true);
+      setIsDrawing(false);
+    }
+  }
+
+  function hidePaneCursor(event: KeyboardEvent) {
+    if (event.code === "Space") {
+      setIsPanning(false);
+    }
+  }
+
+  const handleDrawMove = (event: MouseEvent) => {
+    if (!tempRectRef.current || !drawStartPos.current || !isDrawing) return;
+
+    const currentPos = transformScreenCoordsToSvgCoords(event);
+
+    const width = currentPos.x - drawStartPos.current.x;
+    const height = currentPos.y - drawStartPos.current.y;
+
+    if (width < 0) {
+      tempRectRef.current.setAttribute("x", currentPos.x.toString());
+      tempRectRef.current.setAttribute("width", (-width).toString());
+    } else {
+      tempRectRef.current.setAttribute("width", width.toString());
     }
 
-    if (!showPaneCursor && !isDrawing) {
-      const canvas = ref.current;
+    if (height < 0) {
+      tempRectRef.current.setAttribute("y", currentPos.y.toString());
+      tempRectRef.current.setAttribute("height", (-height).toString());
+    } else {
+      tempRectRef.current.setAttribute("height", height.toString());
+    }
+  };
 
-      if (!canvas) return;
+  const handleDrawEnd = (event: MouseEvent) => {
+    if (tempRectRef.current && drawStartPos.current) {
+      const currentPos = transformScreenCoordsToSvgCoords(event);
 
-      const rect = canvas.getBoundingClientRect();
+      const width = Math.abs(currentPos.x - drawStartPos.current.x);
+      const height = Math.abs(currentPos.y - drawStartPos.current.y);
 
-      const mouseX = (event.clientX - rect.left) / zoom - panOffset.current.x;
-      const mouseY = (event.clientY - rect.top) / zoom - panOffset.current.y;
+      const x = Math.min(currentPos.x, drawStartPos.current.x);
+      const y = Math.min(currentPos.y, drawStartPos.current.y);
 
-      const canvasMiddle = { x: rect.width / 2, y: rect.height / 2 };
-      const clickedCanvasCoordinates = {
-        x: mouseX - canvasMiddle.x,
-        y: mouseY - canvasMiddle.y,
+      if (width > 5 && height > 5) {
+        onDrawed({
+          id: crypto.randomUUID(),
+          x: parseInt(x.toFixed(0)),
+          y: parseInt(y.toFixed(0)),
+          width: parseInt(width.toFixed(0)),
+          height: parseInt(height.toFixed(0)),
+          color: DRAW_RECT_FILL_COLOR,
+          title: "New Rectangle",
+          onClick: onElementClick,
+        });
+      }
+
+      // delete temporary rect
+      tempRectRef.current.remove();
+      tempRectRef.current = null;
+      drawStartPos.current = null;
+      setIsDrawing(false);
+    }
+
+    window.removeEventListener("mousemove", handleDrawMove);
+    window.removeEventListener("mouseup", handleDrawEnd);
+  };
+
+  const handlePlayerDragStart = (
+    event: React.MouseEvent<SVGImageElement>,
+    player: Player
+  ) => {
+    if (isDrawing || isPanning) return;
+
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    const CTM = svg.getScreenCTM();
+    if (!CTM) return;
+    initialCTM.current = CTM;
+
+    // @ts-ignore
+    const coords = transformScreenCoordsToSvgCoords(event);
+
+    dragStartPos.current = {
+      x: coords.x - player.coordinates.x,
+      y: coords.y - player.coordinates.y,
+    };
+    draggedPlayer.current = player;
+
+    window.addEventListener("mousemove", handlePlayerDragMove);
+    window.addEventListener("mouseup", handlePlayerDragEnd);
+  };
+
+  const handlePlayerDragMove = (event: MouseEvent) => {
+    if (!draggedPlayer.current || !dragStartPos.current || !initialCTM.current)
+      return;
+
+    const currentPos = transformScreenCoordsToSvgCoords(event);
+
+    const newPosition = {
+      x: currentPos.x - dragStartPos.current.x,
+      y: currentPos.y - dragStartPos.current.y,
+    };
+
+    temporaryPlayerPosition.current = {
+      playerId: draggedPlayer.current.id,
+      coordinates: newPosition,
+    };
+
+    forceUpdate({});
+  };
+
+  const handlePlayerDragEnd = () => {
+    console.log("Drag End", {
+      draggedPlayer: draggedPlayer.current,
+      tempPosition: temporaryPlayerPosition.current,
+    });
+
+    if (draggedPlayer.current && temporaryPlayerPosition.current) {
+      const updatedPlayer = {
+        ...draggedPlayer.current,
+        coordinates: temporaryPlayerPosition.current.coordinates,
       };
-
-      const clickedElement = elements
-        .map((el) => el)
-        .reverse() // to get the element which is on the top
-        .find(
-          (element) =>
-            clickedCanvasCoordinates.x >= element.x &&
-            clickedCanvasCoordinates.x <= element.x + element.width &&
-            clickedCanvasCoordinates.y >= element.y &&
-            clickedCanvasCoordinates.y <= element.y + element.height
-        );
-
-      if (clickedElement) onElementClick(clickedElement);
+      onPlayerMove(updatedPlayer);
     }
 
-    if (isDrawing && !showPaneCursor) {
-      const canvas = ref.current;
+    // Cleanup
+    draggedPlayer.current = null;
+    dragStartPos.current = null;
+    temporaryPlayerPosition.current = null;
 
-      if (canvas) {
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = (event.clientX - rect.left) / zoom - panOffset.current.x;
-        const mouseY = (event.clientY - rect.top) / zoom - panOffset.current.y;
-        const canvasMiddle = {
-          x: rect.width / (2 * zoom),
-          y: rect.height / (2 * zoom),
-        };
+    // Force final update
+    forceUpdate({});
 
-        startDrawingRef.current = {
-          x: mouseX - canvasMiddle.x,
-          y: mouseY - canvasMiddle.y,
-        };
+    window.removeEventListener("mousemove", handlePlayerDragMove);
+    window.removeEventListener("mouseup", handlePlayerDragEnd);
+  };
 
-        window.addEventListener("mousemove", handleStartDrawing);
-        window.addEventListener("mouseup", handleStopDrawing);
-      }
-    }
-  }
+  useEffect(() => {
+    console.log("Temporary position updated:", temporaryPlayerPosition);
+  }, [temporaryPlayerPosition]);
 
-  function handlePanningOnMouseMove(e: MouseEvent) {
-    if (!isPanningRef.current) return;
+  useEffect(() => {
+    window.addEventListener("keydown", showPaneCursor);
+    window.addEventListener("keyup", hidePaneCursor);
 
-    const deltaX = (e.clientX - startPanningRef.current.x) / zoom;
-    const deltaY = (e.clientY - startPanningRef.current.y) / zoom;
-    panOffset.current.x += deltaX;
-    panOffset.current.y += deltaY;
-    startPanningRef.current = { x: e.clientX, y: e.clientY };
-
-    const canvas = ref.current;
-    const ctx = canvas?.getContext("2d");
-
-    if (ctx) drawElements(elements);
-  }
-
-  function handleStopPanningOnMouseUp() {
-    isPanningRef.current = false;
-    window.removeEventListener("mousemove", handlePanningOnMouseMove);
-    window.removeEventListener("mouseup", handleStopPanningOnMouseUp);
-  }
-
-  function drawElements(elements: CanvasElement[]) {
-    const canvas = ref.current;
-    const ctx = canvas?.getContext("2d");
-
-    if (canvas && ctx) {
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.save();
-      ctx.scale(zoom, zoom);
-
-      ctx.translate(
-        panOffset.current.x + canvas.width / (2 * zoom),
-        panOffset.current.y + canvas.height / (2 * zoom)
-      );
-
-      if (background) {
-        const { height, width } = background;
-        ctx.drawImage(background, -width / 2, -height / 2, width, height);
-      }
-
-      elements.forEach((element) => {
-        const { x, y, width, height, type } = element;
-
-        if (type === "rect" && element.color) {
-          ctx.fillStyle = element.color;
-          ctx.fillRect(x + OFFSET.x, y + OFFSET.y, width || 100, height || 100);
-        }
-      });
-
-      ctx.restore();
-    }
-  }
-
-  function showGrabCursor(event: KeyboardEvent) {
-    if (!showPaneCursor && event.code === "Space") {
-      setShowPaneCursor(true);
-    }
-  }
-
-  function hideGrabCursor(event: KeyboardEvent) {
-    if (showPaneCursor && event.code === "Space") {
-      setShowPaneCursor(false);
-    }
-  }
-
-  function isCursorOnCanvas(
-    canvas: HTMLCanvasElement,
-    mousePosition: { x: number; y: number }
-  ) {
-    const canvasBoundingRect = canvas.getBoundingClientRect();
-    const x = {
-      start: canvasBoundingRect.left,
-      end: canvasBoundingRect.left + canvasBoundingRect.width,
+    return () => {
+      window.removeEventListener("keydown", showPaneCursor);
+      window.removeEventListener("keyup", hidePaneCursor);
     };
-    const y = {
-      start: canvasBoundingRect.top,
-      end: canvasBoundingRect.top + canvasBoundingRect.height,
-    };
+  }, []);
 
-    return (
-      mousePosition.x >= x.start &&
-      mousePosition.x <= x.end &&
-      mousePosition.y >= y.start &&
-      mousePosition.y <= y.end
+  function togglePlayerToken(player: Player) {
+    const update = [...playersTokenState];
+    const playerStateIndex = update.findIndex(
+      (playerState) => playerState.id === player.id
     );
+
+    update[playerStateIndex].visible = !update[playerStateIndex].visible;
+
+    setPlayersTokenState(update);
   }
-
-  function handleStopDrawing() {
-    setIsDrawing(false);
-    window.removeEventListener("mousemove", handleStartDrawing);
-    window.removeEventListener("mouseup", handleStopDrawing);
-
-    if (newDrawnElement.current) {
-      onDrawed(newDrawnElement.current);
-      newDrawnElement.current = undefined;
-    }
-  }
-
-  function handleStartDrawing(event: MouseEvent) {
-    const canvas = ref.current;
-    const ctx = canvas?.getContext("2d");
-
-    if (
-      canvas &&
-      ctx &&
-      isDrawing &&
-      isCursorOnCanvas(canvas, { x: event.clientX, y: event.clientY }) &&
-      event.button === 0 &&
-      startDrawingRef.current
-    ) {
-      const rect = canvas.getBoundingClientRect();
-      const start = startDrawingRef.current;
-      const updatedElements = [...elements];
-
-      const mouseX = (event.clientX - rect.left) / zoom - panOffset.current.x;
-      const mouseY = (event.clientY - rect.top) / zoom - panOffset.current.y;
-
-      const canvasMiddle = {
-        x: rect.width / (2 * zoom),
-        y: rect.height / (2 * zoom),
-      };
-
-      const end = {
-        x: mouseX - canvasMiddle.x,
-        y: mouseY - canvasMiddle.y,
-      };
-
-      if (start.x !== end.x && start.y !== end.y) {
-        const newElement: CanvasElement = {
-          id: new Date().getTime().toString(),
-          type: "rect",
-          height: end.y - start.y,
-          width: end.x - start.x,
-          x: start.x,
-          y: start.y,
-          color: "yellow",
-        };
-
-        updatedElements.push(newElement);
-        drawElements(updatedElements);
-        newDrawnElement.current = newElement;
-      }
-    }
-  }
-
-  useEffect(() => {
-    const canvas = ref.current;
-    const ctx = canvas?.getContext("2d");
-
-    if (canvas && ctx) {
-      setDrawingSizeToCanvasSize();
-      drawElements(elements);
-    }
-
-    window.addEventListener("resize", setDrawingSizeToCanvasSize);
-
-    window.addEventListener("keypress", showGrabCursor);
-    window.addEventListener("keyup", hideGrabCursor);
-
-    return () => {
-      window.removeEventListener("resize", setDrawingSizeToCanvasSize);
-      window.removeEventListener("keypress", showGrabCursor);
-      window.removeEventListener("keyup", hideGrabCursor);
-    };
-  }, [showGrabCursor, hideGrabCursor]);
-
-  useEffect(() => {
-    setDrawingSizeToCanvasSize();
-    window.addEventListener("resize", setDrawingSizeToCanvasSize);
-
-    return () => {
-      window.removeEventListener("resize", setDrawingSizeToCanvasSize);
-    };
-  }, [zoom, panOffset.current]);
 
   return (
     <div className="relative w-full h-full">
-      <canvas
-        ref={ref}
+      <svg
+        ref={svgRef}
+        viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
         className={cn(
           "bg-center bg-contain bg-no-repeat w-full h-full border-2 bg-neutral-50 border-neutral-50 rounded-md shadow-md",
-          showPaneCursor && isPanningRef.current && "cursor-grabbing",
-          showPaneCursor && !isPanningRef.current && "cursor-grab "
+          isPanning && "cursor-grab"
         )}
-        onMouseDown={handleMouseDownOnCanvas}
-      />
+        onMouseDown={handleMouseDown}>
+        <filter id="subtleDropShadow">
+          <feDropShadow
+            dx="1"
+            dy="1"
+            stdDeviation="2"
+            floodColor="rgba(0,0,0,0.4)"
+          />
+        </filter>
 
-      <div className="flex flex-col gap-4 absolute right-4 top-1/2 p-2 border rounded-full shadow-md bg-white/20 border-white/80 backdrop-blur">
+        {background && (
+          <defs>
+            <mask id="roundedImageMask">
+              <rect
+                x={-background.naturalWidth / 2}
+                y={-background.naturalHeight / 2}
+                width={background.naturalWidth}
+                height={background.naturalHeight}
+                rx={8}
+                ry={8}
+                fill="white"
+              />
+            </mask>
+          </defs>
+        )}
+
+        {background && (
+          <image
+            href={background.src}
+            width={background.naturalWidth}
+            height={background.naturalHeight}
+            x={-background.naturalWidth / 2}
+            y={-background.naturalHeight / 2}
+            preserveAspectRatio="xMidYMid"
+            mask="url(#roundedImageMask)"
+          />
+        )}
+
+        {elements.map((element) => (
+          <g
+            className="hover:cursor-pointer"
+            key={element.id}
+            onClick={() => onElementClick(element.id)}>
+            <rect
+              x={element.x}
+              y={element.y}
+              width={element.width}
+              height={element.height}
+              fill={`rgba(${element.color}, 0.3)`}
+              stroke={`rgba(${element.color}, 0.8)`}
+              strokeWidth={4}
+              rx={4}
+              ry={4}
+              filter="url(#subtleDropShadow)"
+            />
+
+            <g transform={`translate(${element.x + 16}, ${element.y + 32})`}>
+              <text
+                className="font-bold fill-white shadow font-sans text-4xl select-none"
+                dominantBaseline="middle">
+                {element.icon}
+              </text>
+            </g>
+          </g>
+        ))}
+
+        {players.map((player) => (
+          <image
+            className={cn(
+              Boolean(
+                playersTokenState.find(
+                  (playerToken) => playerToken.id === player.id
+                )?.visible
+              )
+                ? "visible"
+                : "hidden",
+              selectedPlayer &&
+                player.id === selectedPlayer.id &&
+                "border-2 border-red-500"
+            )}
+            key={"player-" + player.id}
+            href={player.img}
+            width={100}
+            height={100}
+            x={
+              temporaryPlayerPosition.current?.playerId === player.id
+                ? temporaryPlayerPosition.current.coordinates.x
+                : player.coordinates.x
+            }
+            y={
+              temporaryPlayerPosition.current?.playerId === player.id
+                ? temporaryPlayerPosition.current.coordinates.y
+                : player.coordinates.y
+            }
+            preserveAspectRatio="xMidYMid"
+            style={{ cursor: isDrawing || isPanning ? "default" : "move" }}
+            onMouseDown={(e) => handlePlayerDragStart(e, player)}
+            onClick={() => onPlayerSelect(player)}
+          />
+        ))}
+
+        {selectedPlayer && (
+          <g transform={`translate(${selectedPlayer.coordinates.x + 30}, 116)`}>
+            <text
+              className="font-bold fill-white shadow font-sans text-6xl"
+              dominantBaseline="middle">
+              👆
+            </text>
+          </g>
+        )}
+      </svg>
+
+      <div className="flex flex-col gap-4 absolute right-4 top-1/2 p-2 border rounded-full shadow-md bg-white/20 border-white/80 backdrop-blur -translate-y-1/2">
         <button
           onClick={() => setIsDrawing((c) => !c)}
           className="hover:bg-slate-100 hover:shadow-sm rounded-full bg-white border border-slate-700 h-10 w-10 flex justify-center items-center">
@@ -321,6 +537,27 @@ function Canvas({ background, elements, onElementClick, onDrawed }: Props) {
             <PaddingIcon className="h-4 w-4" />
           )}
         </button>
+
+        {players.map((player) => (
+          <button
+            key={`player-${player.id}-token-state`}
+            onClick={() => togglePlayerToken(player)}
+            className="hover:bg-slate-100 hover:shadow-sm rounded-full bg-white border border-slate-700 h-10 w-10 flex justify-center items-center">
+            <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
+              <img
+                className=" row-start-1 row-end-2 col-start-1 col-end-1"
+                src={player.img}
+                alt={`Picture of Player ${player.name}`}
+              />
+              {playersTokenState.find((state) => state.id === player.id)
+                ?.visible && (
+                <div className="h-6 w-6 bg-white/20 backdrop-blur flex justify-center items-center row-start-1 row-end-2 col-start-1 col-end-1 rounded-full">
+                  <EyeNoneIcon className="h-4 w-4 text-white " />
+                </div>
+              )}
+            </div>
+          </button>
+        ))}
       </div>
 
       <div className="flex gap-2 absolute right-4 bottom-4 p-1 border rounded-full shadow-md bg-white/20 border-white/80 backdrop-blur">
@@ -329,7 +566,6 @@ function Canvas({ background, elements, onElementClick, onDrawed }: Props) {
           className="hover:bg-slate-100 hover:shadow-sm border border-slate-700 rounded-full bg-white h-8 w-8 flex justify-center items-center">
           <ZoomInIcon className="h-4 w-4" />
         </button>
-
         <button
           onClick={zoomOut}
           className="hover:bg-slate-100 hover:shadow-sm rounded-full bg-white border border-slate-700 h-8 w-8 flex justify-center items-center">
