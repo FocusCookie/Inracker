@@ -37,6 +37,7 @@ function Welcome({ onLetUsRole }: Props) {
               .split("")
               .map((letter, index) => (
                 <motion.h1
+                  key={`title-${index}-${letter}`}
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.02 }}
