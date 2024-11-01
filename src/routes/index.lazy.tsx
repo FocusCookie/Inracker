@@ -8,5 +8,5 @@ export const Route = createLazyFileRoute("/")({
 function Index() {
   const navigate = useNavigate();
 
-  return <Welcome onLetUsRole={() => navigate({ to: "/about" })} />;
+  return <Welcome onLetUsRole={() => navigate({ to: "/partySelection" })} />;
 }
