@@ -13,21 +13,19 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as PartiesImport } from './routes/parties'
 
 // Create Virtual Routes
 
-const PartySelectionLazyImport = createFileRoute('/partySelection')()
 const IndexLazyImport = createFileRoute('/')()
 
 // Create/Update Routes
 
-const PartySelectionLazyRoute = PartySelectionLazyImport.update({
-  id: '/partySelection',
-  path: '/partySelection',
+const PartiesRoute = PartiesImport.update({
+  id: '/parties',
+  path: '/parties',
   getParentRoute: () => rootRoute,
-} as any).lazy(() =>
-  import('./routes/partySelection.lazy').then((d) => d.Route),
-)
+} as any)
 
 const IndexLazyRoute = IndexLazyImport.update({
   id: '/',
@@ -46,11 +44,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
-    '/partySelection': {
-      id: '/partySelection'
-      path: '/partySelection'
-      fullPath: '/partySelection'
-      preLoaderRoute: typeof PartySelectionLazyImport
+    '/parties': {
+      id: '/parties'
+      path: '/parties'
+      fullPath: '/parties'
+      preLoaderRoute: typeof PartiesImport
       parentRoute: typeof rootRoute
     }
   }
@@ -60,37 +58,37 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
-  '/partySelection': typeof PartySelectionLazyRoute
+  '/parties': typeof PartiesRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
-  '/partySelection': typeof PartySelectionLazyRoute
+  '/parties': typeof PartiesRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexLazyRoute
-  '/partySelection': typeof PartySelectionLazyRoute
+  '/parties': typeof PartiesRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/partySelection'
+  fullPaths: '/' | '/parties'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/partySelection'
-  id: '__root__' | '/' | '/partySelection'
+  to: '/' | '/parties'
+  id: '__root__' | '/' | '/parties'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
-  PartySelectionLazyRoute: typeof PartySelectionLazyRoute
+  PartiesRoute: typeof PartiesRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
-  PartySelectionLazyRoute: PartySelectionLazyRoute,
+  PartiesRoute: PartiesRoute,
 }
 
 export const routeTree = rootRoute
@@ -106,14 +104,14 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/partySelection"
+        "/parties"
       ]
     },
     "/": {
       "filePath": "index.lazy.tsx"
     },
-    "/partySelection": {
-      "filePath": "partySelection.lazy.tsx"
+    "/parties": {
+      "filePath": "parties.tsx"
     }
   }
 }
