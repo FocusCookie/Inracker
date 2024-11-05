@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "tauri": "tauri",
+    "dev": "VITE_ENV=dev vite",
+    "build": "VITE_ENV=prod tsc && vite build",
+    "preview": "VITE_ENV=dev vite preview",
+    "tauri": "VITE_ENV=dev tauri",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
@@ -18,6 +18,7 @@
     "@tanstack/react-router": "^1.74.4",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-shell": "^2",
+    "@tauri-apps/plugin-sql": "^2.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "framer-motion": "^11.11.11",
@@ -30,7 +31,8 @@
     "react-i18next": "^15.1.0",
     "react-icons": "^5.3.0",
     "tailwind-merge": "^2.5.4",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zustand": "^5.0.1"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^1.9.0",
