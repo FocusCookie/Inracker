@@ -27,7 +27,7 @@ interface IPartyRepository {
   create(party: Omit<Party, "id">): Promise<Party>;
 }
 
-// Databse sub reposetories
+// Database sub reposetories
 class PlayerRepository implements IPlayerRepository {
   constructor(private db: TauriDatabase) {}
 
