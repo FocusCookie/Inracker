@@ -20,8 +20,7 @@ pub fn run() {
                 name TEXT NOT NULL,
                 description TEXT,
                 icon TEXT NOT NULL,
-                players TEXT,
-                state TEXT
+                players TEXT
             )",
             kind: MigrationKind::Up,
         },
@@ -29,28 +28,95 @@ pub fn run() {
             version: 2,
             description: "create players table",
             sql: "CREATE TABLE IF NOT EXISTS players(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                icon TEXT NOT NULL,
-                image TEXT,
-                notes TEXT,
                 armor INTEGER,
-                classSg INTEGER,
-                movement TEXT, -- JSON string: Object air, ground, water, high_jump, wide_jump
-                immunities TEXT, -- JSON array ids
-                debuffs TEXT, -- JSON array ids
-                buffs TEXT, -- JSON array ids
-                harmful_effects TEXT, -- JSON array ids
+                attributes INTEGER, -- attributes id
+                class_sg INTEGER,
+                description TEXT,
+                effects STRING, -- JSON array ids
+                ep INTEGER,
                 health INTEGER,
+                icon TEXT NOT NULL,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                immunities TEXT, -- JSON array ids
                 level INTEGER,
-                saving_throws TEXT -- JSON string: reflex, will, thoughness
-                thoughness INTEGER,
-                shield -- JSON string: value, health,
-                skills -- JSON object,
-                attributes -- JSON object
+                movement TEXT, -- JSON string: Object air, ground, water, high_jump, wide_jump
+                name TEXT NOT NULL,
+                perception NUMBER,
+                role TEXT,
+                saving_throws TEXT, -- JSON string: reflex, will, thoughness
+                shield STRING, -- JSON string: value, health
+                skills INTEGER -- skills id
             )",
             kind: MigrationKind::Up,
-        }
+        },
+        Migration {
+            version: 3,
+            description: "create effects table",
+            sql: "CREATE TABLE IF NOT EXISTS effects(
+                description TEXT,
+                damage INTEGER, 
+                duration INTEGER, 
+                duration_type TEXT NOT NULL,
+                icon TEXT NOT NULL,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                type TEXT NOT NULL
+            )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 4 ,
+            description: "create immunities table",
+            sql: "CREATE TABLE IF NOT EXISTS immunities(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                description TEXT,
+                icon TEXT NOT NULL
+            )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 5,
+            description: "create attributes table",
+            sql: "CREATE TABLE IF NOT EXISTS attributes (
+                constitution INTEGER NOT NULL,
+                charisma INTEGER NOT NULL,
+                dexterity INTEGER NOT NULL,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                intelligence INTEGER NOT NULL,
+                player INTEGER,
+                strength INTEGER NOT NULL,
+                wisdom INTEGER NOT NULL
+            )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 6,
+            description: "create skills table",
+            sql: "CREATE TABLE IF NOT EXISTS skills (
+                acrobatics INTEGER NOT NULL,
+                arcane INTEGER NOT NULL,
+                athletics INTEGER NOT NULL,
+                craftmanship INTEGER NOT NULL,
+                custom_1 INTEGER NOT NULL,
+                custom_2 INTEGER NOT NULL,
+                deception INTEGER NOT NULL,
+                diplomacy INTEGER NOT NULL,
+                healing INTEGER NOT NULL,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                intimidation INTEGER NOT NULL,
+                nature INTEGER NOT NULL,
+                occultism INTEGER NOT NULL,
+                performance INTEGER NOT NULL,
+                player INTEGER NOT NULL,
+                religion INTEGER NOT NULL,
+                social INTEGER NOT NULL,
+                stealth INTEGER NOT NULL,
+                survival INTEGER NOT NULL,
+                thievery INTEGER NOT NULL
+            )",
+            kind: MigrationKind::Up,
+        },
     ];
     
     tauri::Builder::default()

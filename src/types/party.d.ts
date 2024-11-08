@@ -1,11 +1,16 @@
-export type Party = {
+import { Player } from "./player";
+
+export type DBParty = {
   readonly id: number;
   name: string;
   icon: string;
   description: string;
   /**
-   * Player IDs
+   * string of Array Player IDs
    */
-  players: number[];
-  state: "finished" | "ongoing" | "draft";
+  players: string;
+};
+
+export type Party = Omit<DBParty, "players"> & {
+  players: Player[];
 };

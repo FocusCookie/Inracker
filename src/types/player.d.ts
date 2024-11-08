@@ -1,7 +1,11 @@
+import { Attributes } from "./attributes";
+import { Buff, Debuff, Effect, HarmfulEffect } from "./effect";
+import { Skills } from "./skills";
+
 /**
  * Player movement in meter
  */
-type Movement = {
+export type Movement = {
   ground: number;
   air: number;
   water: number;
@@ -9,59 +13,23 @@ type Movement = {
   wideJump: number;
 };
 
-/**
- * Specify how a buff, debuff or harmful effect is done over time or rounds
- */
-type BuffAndHarmfulEffectDuration = {
-  type: "rounds" | "time";
-  /**
-   * value of rounds or time in seconds
-   */
-  value: number;
-};
-
-/**
- * This is an effect that causes positive or negative effects which cause no damage on the character. But they improve or decrause the character stats or attributes and others.
- */
-type Effect = {
-  type: "positive" | "negative";
-  icon: string;
-  name: string;
-  description: string;
-  duration: BuffAndHarmfulEffectDuration;
-  readonly id: number;
-};
-
-/**
- * A positive effect for the player. Increase strength for example for 3 rounds.
- */
-type Buff = Omit<Effect, "type"> & { type: "positive" };
-/**
- * A negative effect for the player. For example decrease perecption for a day.
- */
-type Debuff = Omit<Effect, "type"> & { type: "negative" };
-
-/**
- * This is an effect that causes damage over time on the player
- */
-type HarmfulEffect = {
-  name: string;
-  description: string;
-  duration: BuffAndHarmfulEffectDuration;
-  damage: number;
-  readonly id: number;
-};
-
-type SavingThrows = {
+export type SavingThrows = {
   reflex: number;
   will: number;
   toughness: number;
 };
 
+export type Immunity = {
+  readonly id: number;
+  name: string;
+  description: string;
+  icon: string;
+};
+
 /**
  * All the shiled related stats
  */
-type Shield = {
+export type Shield = {
   /**
    * value which is added against the attack throw
    */
@@ -69,26 +37,53 @@ type Shield = {
   health: number;
 };
 
-export type Player = {
+export type DBPlayer = {
   armor: number;
-  buffs: Array<Buff["id"]>;
-  /**
-   * Player character class such as rouque or mage for example.
-   */
-  class: string;
-  /**
-   * Difficulty to throw against a player.
-   */
-  classSg: number;
-  debuffs: Array<Buff["id"]>;
+  /** id to look up in the attributes table */
+  attributes: number;
+  class_sg: number;
   description: string;
-  harmfulEffects: HarmfulEffect[];
+  /** array of ids effects / which are buffs and debuffs */
+  effects: string;
+  ep: number;
+  health: number;
   icon: string;
   readonly id: number;
-  immunities: string[];
+  immunities: string;
+  level: number;
+  /** json string of type Movement */
+  movement: string;
   name: string;
-  movement: Movement;
   perception: number;
+  /** Character Class such as rouqe, mage, ... */
+  role: string;
+  /** json string of type Skills */
+  saving_throws: string;
+  /** json string  or null of type Skills */
+  shield: string;
+  /** id to look up in the skills table */
+  skills: number;
+};
+
+export type Player = Omit<
+  DBPlayer,
+  | "id"
+  | "movement"
+  | "effects"
+  | "saving_throws"
+  | "shield"
+  | "immunities"
+  | "attributes"
+  | "skills"
+  | "class_sg"
+> & {
+  id: DBPlayer["id"];
+  effects: Effect[];
+  immunities: Immunity[];
+  movement: Movement;
   savingThrows: SavingThrows;
-  shield: Shield;
+  shield: Shield | null;
+  attributes: Attributes;
+  skills: Skills;
+  classSg: number;
 };

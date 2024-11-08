@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import PartySelection from "./PartySelection";
+import PartyCreateDrawer from "@/components/PartyCreateDrawer/PartyCreateDrawer";
 // import { fn } from "@storybook/test";
 
 const meta = {
@@ -14,7 +15,10 @@ const meta = {
       <div className="h-[90vh] w-[90vw] bg-neutral-800 p-8">{Story()}</div>
     ),
   ],
-  args: {},
+  args: {
+    parties: [],
+    renderCreatePartyDrawer: <PartyCreateDrawer />,
+  },
 } satisfies Meta<typeof PartySelection>;
 
 export default meta;

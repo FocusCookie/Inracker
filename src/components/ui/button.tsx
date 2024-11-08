@@ -51,7 +51,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <Comp
         className={cn(
           buttonVariants({ variant, size, className }),
-          !block && "w-fit",
+          !block && "w-fit min-w-12",
         )}
         ref={ref}
         {...props}
