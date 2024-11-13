@@ -6,7 +6,8 @@ export function TypographyH3({ children, ...props }: Props) {
   return (
     <h3
       {...props}
-      className="scroll-m-20 text-2xl font-semibold tracking-tight">
+      className="scroll-m-20 text-2xl font-semibold tracking-tight"
+    >
       {children}
     </h3>
   );

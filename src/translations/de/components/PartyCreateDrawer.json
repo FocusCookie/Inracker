@@ -1,0 +1,11 @@
+{
+  "title": "Gruppe erstellen",
+  "createAParty": "Gruppe erstellen",
+  "titleDescription": "Hier kannst du eine neue Gruppe für deine Reise zusammenstellen. Gib ihr einen Namen, ein Symbol und eine Beschreibung, um dein Abenteuer zu beginnen!",
+  "create": "Erstellen",
+  "cancel": "Abbruch",
+  "icon": "Symbol",
+  "name": "Name",
+  "description": "Beschreibung",
+  "usernameMaxTwoChars": "Der Benutzername muss mindestens 2 Zeichen lang sein."
+}

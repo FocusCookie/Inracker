@@ -1,0 +1,11 @@
+{
+  "title": "Create a Party",
+  "createAParty": "Create a Party",
+  "titleDescription": "Here, you can assemble a new party for your journey. Give them a name, a icon and some description to get started on your adventure!",
+  "create": "Create",
+  "cancel": "Cancel",
+  "icon": "Icon",
+  "name": "Name",
+  "description": "Description",
+  "usernameMaxTwoChars": "Username must be at least 2 characters."
+}

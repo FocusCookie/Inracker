@@ -13,21 +13,23 @@ function Welcome({ onLetUsRole }: Props) {
   const { t } = useTranslation("PageWelcome");
 
   return (
-    <div className="h-full w-full bg-white flex  justify-center items-center rounded-md">
-      <div className="flex gap-4 flex-col items-center max-w-xl text-center">
+    <div className="flex h-full w-full items-center justify-center rounded-md bg-white">
+      <div className="flex max-w-xl flex-col items-center gap-4 text-center">
         <div className="flex gap-4">
           <motion.div
             initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}>
+            animate={{ opacity: 1, x: 0 }}
+          >
             <motion.div
               className="origin-bottom-right"
               initial={{ rotate: 0 }}
               animate={{ rotate: 15 }}
               transition={{
                 duration: 0.5,
-                repeat: Infinity,
+                repeat: 3,
                 repeatType: "reverse",
-              }}>
+              }}
+            >
               <TypographyH1>👋</TypographyH1>
             </motion.div>
           </motion.div>
@@ -41,7 +43,8 @@ function Welcome({ onLetUsRole }: Props) {
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.02 }}
-                  className="scroll-m-20 min-w-2 text-4xl font-extrabold tracking-tight lg:text-5xl">
+                  className="min-w-2 scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl"
+                >
                   {letter}
                 </motion.h1>
               ))}
@@ -51,15 +54,26 @@ function Welcome({ onLetUsRole }: Props) {
         <motion.div
           initial={{ opacity: 0, y: "2rem" }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}>
+          transition={{ delay: 0.5 }}
+        >
           <TypographyP>{t("description")}</TypographyP>
           <Button onClick={() => onLetUsRole()} size="lg" className="mt-4">
-            {t("letsRole")} <FaDiceD20 />
+            {t("letsRole")}{" "}
+            <motion.span
+              animate={{ rotate: 360 }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                delay: 1,
+              }}
+            >
+              <FaDiceD20 />
+            </motion.span>
           </Button>
         </motion.div>
       </div>
     </div>
   );
 }
-
+<FaDiceD20 />;
 export default Welcome;
