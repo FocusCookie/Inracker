@@ -165,7 +165,7 @@ const getPartyById = async (
   return result[0];
 };
 
-const getPartyDetailsById = async (
+const getPartyDetailedById = async (
   db: TauriDatabase,
   id: number,
 ): Promise<Party> => {
@@ -200,6 +200,17 @@ const createParty = async (
     [name, icon, description, JSON.stringify(players)],
   );
   return getPartyById(db, result.lastInsertId);
+};
+
+const updateParty = async (db: TauriDatabase, party: Party): Promise<Party> => {
+  const { id, name, icon, description } = party;
+
+  await db.execute(
+    "UPDATE parties SET id = $1, name = $2, icon = $3, description = $4 WHERE id = $1",
+    [id, name, icon, description],
+  );
+
+  return getPartyDetailedById(db, party.id);
 };
 
 //* Player
@@ -356,6 +367,15 @@ const createPlayer = async (
   return getPlayerById(db, result.lastInsertId);
 };
 
+const deletePartyById = async (
+  db: TauriDatabase,
+  id: number,
+): Promise<boolean> => {
+  const res = await db.execute("DELETE FROM parties WHERE id = $1", [id]);
+
+  return Boolean(res.rowsAffected);
+};
+
 //* Skills
 const getSkillsById = async (
   db: TauriDatabase,
@@ -471,10 +491,22 @@ export const Database = {
     },
   },
 
-  party: {
+  parties: {
     getAll: async () => {
       const db = await connect();
       return getAllParties(db);
+    },
+    getAllDetailed: async () => {
+      const db = await connect();
+      const dbParties = await getAllParties(db);
+      const parties: Party[] = [];
+
+      for (const dbParty of dbParties) {
+        const party = await getPartyDetailedById(db, dbParty.id);
+        parties.push(party);
+      }
+
+      return parties;
     },
     getById: async (id: number) => {
       const db = await connect();
@@ -482,11 +514,20 @@ export const Database = {
     },
     getDetailedById: async (id: number) => {
       const db = await connect();
-      return getPartyDetailsById(db, id);
+      return getPartyDetailedById(db, id);
     },
     create: async (party: Omit<Party, "id">) => {
       const db = await connect();
       return createParty(db, party);
+    },
+    deleteById: async (id: Party["id"]) => {
+      const db = await connect();
+      console.log("DB DELETE");
+      return deletePartyById(db, id);
+    },
+    updateByParty: async (party: Party) => {
+      const db = await connect();
+      return updateParty(db, party);
     },
   },
 

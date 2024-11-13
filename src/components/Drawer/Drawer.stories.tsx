@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-// import { fn } from "@storybook/test";
+import { fn } from "@storybook/test";
 import Drawer from "./Drawer";
 import { Button } from "../ui/button";
 
@@ -10,7 +10,10 @@ const meta = {
     layout: "centered",
   },
   args: {
-    trigger: <Button>Trigger Drawer</Button>,
+    open: true,
+    onOpenChange: fn(),
+    createTrigger: <Button>Trigger Drawer</Button>,
+    cancelTrigger: <Button>Cancel</Button>,
     title: "Title",
     description:
       "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Minima labore molestias magni, exxxx sequi suscipit! Minus sunt nam unde dolorum cupiditate? Qui laboriosam alias neque asperiores beatae odio veniam at!",

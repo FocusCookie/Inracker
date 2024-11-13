@@ -1,3 +1,5 @@
+import { Prettify } from "./utils";
+
 export type DBEffect = {
   description: string;
   duration: number;
@@ -15,6 +17,8 @@ export type DBEffect = {
 /**
  * This is an effect that causes positive or negative  or harmful. Positive means a buff, negative is a debuff and harmful is negative and makes damage on the player.
  */
-export type Effect = Omit<DBEffect, "duration_type"> & {
-  durationType: "rounds" | "time";
-};
+export type Effect = Prettify<
+  Omit<DBEffect, "duration_type"> & {
+    durationType: "rounds" | "time";
+  }
+>;

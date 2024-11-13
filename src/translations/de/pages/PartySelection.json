@@ -1,4 +1,5 @@
 {
   "headline": "Gruppenauswahl",
-  "description": "Hallo Abenteurer! Bist du bereit, deine nächste Reise anzutreten? Du kannst eine bestehende Gruppe auswählen oder eine brandneue Gruppe gründen und dich ins Abenteuer stürzen!"
+  "description": "Hallo Abenteurer! Bist du bereit, deine nächste Reise anzutreten? Du kannst eine bestehende Gruppe auswählen oder eine brandneue Gruppe gründen und dich ins Abenteuer stürzen!",
+  "loading": "Lade Gruppen..."
 }

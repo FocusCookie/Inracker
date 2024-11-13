@@ -1,6 +1,7 @@
 import { Attributes } from "./attributes";
 import { Buff, Debuff, Effect, HarmfulEffect } from "./effect";
 import { Skills } from "./skills";
+import { Prettify } from "./utils";
 
 /**
  * Player movement in meter
@@ -65,25 +66,27 @@ export type DBPlayer = {
   skills: number;
 };
 
-export type Player = Omit<
-  DBPlayer,
-  | "id"
-  | "movement"
-  | "effects"
-  | "saving_throws"
-  | "shield"
-  | "immunities"
-  | "attributes"
-  | "skills"
-  | "class_sg"
-> & {
-  id: DBPlayer["id"];
-  effects: Effect[];
-  immunities: Immunity[];
-  movement: Movement;
-  savingThrows: SavingThrows;
-  shield: Shield | null;
-  attributes: Attributes;
-  skills: Skills;
-  classSg: number;
-};
+export type Player = Prettify<
+  Omit<
+    DBPlayer,
+    | "id"
+    | "movement"
+    | "effects"
+    | "saving_throws"
+    | "shield"
+    | "immunities"
+    | "attributes"
+    | "skills"
+    | "class_sg"
+  > & {
+    id: DBPlayer["id"];
+    effects: Effect[];
+    immunities: Immunity[];
+    movement: Movement;
+    savingThrows: SavingThrows;
+    shield: Shield | null;
+    attributes: Attributes;
+    skills: Skills;
+    classSg: number;
+  }
+>;

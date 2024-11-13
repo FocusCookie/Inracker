@@ -1,31 +1,45 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
 import { Button } from "../ui/button";
 import { TypographyH1 } from "../ui/typographyH1";
 import { TypographyMuted } from "../ui/typographyhMuted";
 import { useTranslation } from "react-i18next";
 import { ScrollArea } from "../ui/scroll-area";
+import { useEffect, useRef } from "react";
 
 type Props = {
+  open: boolean;
+  onOpenChange: (state: boolean) => void;
   title: string;
   description?: string;
   children: React.ReactNode;
   actions?: React.ReactNode;
-  trigger: React.ReactNode;
+  createTrigger?: React.ReactNode;
+  cancelTrigger: React.ReactNode;
 };
 
-function Drawer({ title, description, children, actions, trigger }: Props) {
-  const { t } = useTranslation("ComponentDrawer");
-  const [isOpen, setIsOpen] = useState(false);
-
+function Drawer({
+  open,
+  onOpenChange,
+  title,
+  description,
+  children,
+  actions,
+  createTrigger,
+  cancelTrigger,
+}: Props) {
   return (
-    <Dialog.Root modal open={isOpen} onOpenChange={setIsOpen}>
-      <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>
+    <Dialog.Root modal open={open} onOpenChange={onOpenChange}>
+      {createTrigger && (
+        <Dialog.Trigger asChild>{createTrigger}</Dialog.Trigger>
+      )}
 
       <AnimatePresence>
-        {isOpen && (
-          <Dialog.Portal forceMount>
+        {open && (
+          <Dialog.Portal
+            container={document.getElementById("drawer-portal")}
+            forceMount
+          >
             <Dialog.Overlay asChild>
               <motion.div
                 onClick={undefined}
@@ -36,7 +50,7 @@ function Drawer({ title, description, children, actions, trigger }: Props) {
               />
             </Dialog.Overlay>
 
-            <Dialog.Content asChild onInteractOutside={undefined}>
+            <Dialog.Content asChild>
               <motion.div
                 initial={{ opacity: 0, x: "100%" }}
                 animate={{ opacity: 1, x: 0 }}
@@ -62,9 +76,7 @@ function Drawer({ title, description, children, actions, trigger }: Props) {
 
                 <div className="flex gap-4">
                   {actions}
-                  <Dialog.Close asChild>
-                    <Button variant="ghost">{t("cancel")}</Button>
-                  </Dialog.Close>
+                  <Dialog.Close asChild>{cancelTrigger}</Dialog.Close>
                 </div>
               </motion.div>
             </Dialog.Content>

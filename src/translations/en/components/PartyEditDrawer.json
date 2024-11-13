@@ -1,0 +1,15 @@
+{
+  "title": "Edit the Party",
+  "edit": "Edit",
+  "titleDescription": "Here, you can update your party's name, description, and icon. Personalize your group to make it truly your own!",
+  "cancel": "Cancel",
+  "icon": "Icon",
+  "name": "Name",
+  "description": "Description",
+  "save": "Save",
+  "usernameMaxTwoChars": "Username must be at least 2 characters.",
+  "delete": "Delete",
+  "areYouSure": "Are you absolutely sure?",
+  "deleteNote": "This action cannot be undone. This will permanently delete the group.",
+  "yesDelete": "Yes Delete"
+}

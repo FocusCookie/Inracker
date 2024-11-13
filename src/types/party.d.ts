@@ -1,4 +1,5 @@
 import { Player } from "./player";
+import { Prettify } from "./utils";
 
 export type DBParty = {
   readonly id: number;
@@ -11,6 +12,8 @@ export type DBParty = {
   players: string;
 };
 
-export type Party = Omit<DBParty, "players"> & {
-  players: Player[];
-};
+export type Party = Prettify<
+  Omit<DBParty, "players"> & {
+    players: Player[];
+  }
+>;

@@ -1,0 +1,15 @@
+{
+  "title": "Gruppe editieren",
+  "edit": "Editieren",
+  "titleDescription": "Hier kannst du den Namen, die Beschreibung und das Symbol deiner Gruppe aktualisieren. Mach deine Gruppe einzigartig!",
+  "cancel": "Abbruch",
+  "icon": "Symbol",
+  "name": "Name",
+  "description": "Beschreibung",
+  "save": "Speichern",
+  "usernameMaxTwoChars": "Der Benutzername muss mindestens 2 Zeichen lang sein.",
+  "delete": "Löschen",
+  "areYouSure": "Bist du dir absolute sicher?",
+  "deleteNote": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird die Gruppe dauerhaft gelöscht.",
+  "yesDelete": "Ja Löschen"
+}

@@ -15,46 +15,78 @@ import Drawer from "../Drawer/Drawer";
 import IconPicker from "../IconPicker/IconPicker";
 import { Button } from "../ui/button";
 import { useTranslation } from "react-i18next";
+import { Party } from "@/types/party";
+import { Prettify } from "@/types/utils";
 
-type Props = {};
+type Props = {
+  onCreate: (party: Prettify<Omit<Party, "id">>) => void;
+  /**
+   * disabels the inputs and sets the create button to loading and disables other buttons
+   */
+  isCreating: boolean;
+  open: boolean;
+  onOpenChange: (state: boolean) => void;
+};
 
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-  description: z.string(),
-  icon: z.string().emoji(),
-});
-
-function PartyCreateDrawer({}: Props) {
+function PartyCreateDrawer({
+  onCreate,
+  isCreating,
+  open,
+  onOpenChange,
+}: Props) {
   const { t } = useTranslation("ComponentPartyCreateDrawer");
+
+  const formSchema = z.object({
+    name: z.string().min(2, {
+      message: "Username must be at least 2 characters.",
+    }),
+    description: z.string(),
+    icon: z.string().emoji(),
+  });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       description: "",
-      icon: "",
+      icon: "🧙",
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+    const { name, description, icon } = values;
+
+    onCreate({
+      name,
+      icon,
+      description,
+      players: [],
+    });
   }
 
   function handleIconSelect(icon: string) {
     form.setValue("icon", icon);
   }
 
-  //TODO: refactor to use drawer in order to have a good accesibility!!!
-
   return (
     <Drawer
-      title={t("createAParty")}
-      trigger={<Button>{t("createAParty")}</Button>}
+      description={t("titleDescription")}
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("title")}
+      createTrigger={<Button>{t("createAParty")}</Button>}
       actions={
-        <Button onClick={form.handleSubmit(onSubmit)}>{t("create")}</Button>
+        <Button
+          loading={isCreating}
+          disabled={isCreating}
+          onClick={form.handleSubmit(onSubmit)}
+        >
+          {t("create")}
+        </Button>
+      }
+      cancelTrigger={
+        <Button disabled={isCreating} variant="ghost">
+          {t("cancel")}
+        </Button>
       }
     >
       <Form {...form}>
@@ -62,7 +94,11 @@ function PartyCreateDrawer({}: Props) {
           <div className="flex items-start gap-2">
             <div className="flex flex-col gap-3 pl-0.5 pt-1.5">
               <FormLabel>{t("icon")}</FormLabel>
-              <IconPicker onIconClick={handleIconSelect} />
+              <IconPicker
+                initialIcon={form.getValues("icon")}
+                disabled={isCreating}
+                onIconClick={handleIconSelect}
+              />
               <FormMessage />
             </div>
 
@@ -73,7 +109,11 @@ function PartyCreateDrawer({}: Props) {
                 <FormItem className="w-full px-0.5">
                   <FormLabel>{t("name")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="The greedy Adventurer" {...field} />
+                    <Input
+                      disabled={isCreating}
+                      placeholder="The greedy Adventurer"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -89,7 +129,7 @@ function PartyCreateDrawer({}: Props) {
                 <FormLabel>{t("description")}</FormLabel>
 
                 <FormControl>
-                  <Textarea placeholder="" {...field} />
+                  <Textarea disabled={isCreating} placeholder="" {...field} />
                 </FormControl>
 
                 <FormMessage />

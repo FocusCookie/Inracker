@@ -4,7 +4,7 @@ import db from "@/lib/database";
 
 type PartyStore = {
   parties: Party[];
-  addParty: (party: Party) => Promise<void>;
+  createParty: (party: Omit<Party, "id">) => Promise<void>;
   deleteParty: (party: Party) => Promise<void>;
   getParties: () => Promise<void>;
   updateParty: (party: Party) => Promise<void>;
@@ -12,10 +12,10 @@ type PartyStore = {
 
 const usePartyStore = create<PartyStore>((set) => ({
   parties: [],
-  addParty: async (party: Omit<Party, "id">) => {
+  createParty: async (party: Omit<Party, "id">) => {
     try {
-      const createdParty = await db.party.create(party);
-      const detailedParty = await db.party.getDetailedById(createdParty.id);
+      const createdParty = await db.parties.create(party);
+      const detailedParty = await db.parties.getDetailedById(createdParty.id);
 
       set((state) => ({
         parties: [...state.parties, detailedParty],
@@ -30,11 +30,11 @@ const usePartyStore = create<PartyStore>((set) => ({
       parties: state.parties.filter((pa) => pa.id !== party.id),
     })),
   getParties: async () => {
-    const dbParties = await db.party.getAll();
+    const dbParties = await db.parties.getAll();
     const parties: Party[] = [];
 
     for (const dbParty of dbParties) {
-      const party = await db.party.getDetailedById(dbParty.id);
+      const party = await db.parties.getDetailedById(dbParty.id);
       parties.push(party);
     }
 

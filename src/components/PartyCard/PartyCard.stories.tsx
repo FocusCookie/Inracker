@@ -55,7 +55,7 @@ const meta = {
           shield: null,
         },
         {
-          id: 3,
+          id: 2,
           armor: 12,
           role: "rouqe",
           classSg: 22,

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-// import { fn } from "@storybook/test";
+import { fn } from "@storybook/test";
 
 import PartyCreateDrawer from "./PartyCreateDrawer";
 
@@ -9,7 +9,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  args: {},
+  args: { isCreating: false, onCreate: fn(), onOpenChange: fn(), open: true },
 } satisfies Meta<typeof PartyCreateDrawer>;
 
 export default meta;

@@ -1,3 +1,5 @@
+import { Prettify } from "./utils";
+
 export type DBImmunity = {
   readonly id: number;
   name: string;
@@ -5,4 +7,4 @@ export type DBImmunity = {
   description: string;
 };
 
-export type Immunity = Omit<DBImmunity, "id">;
+export type Immunity = Prettify<Omit<DBImmunity, "id">>;
