@@ -4,7 +4,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { TypographyH1 } from "@/components/ui/typographyH1";
 import { TypographyP } from "@/components/ui/typographyP";
 import { Party } from "@/types/party";
-import { AnimatePresence, motion } from "framer-motion";
+import { useNavigate } from "@tanstack/react-router";
+import { AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
 type Props = {
@@ -21,6 +22,13 @@ function PartySelection({
   onEditParty,
 }: Props) {
   const { t } = useTranslation("PagePartySelection");
+  const navigate = useNavigate();
+
+  function handlePartySelect(id: Party["id"]) {
+    navigate({
+      to: `/chapters/${id}`,
+    });
+  }
 
   return (
     <div className="flex h-full w-full flex-col items-center gap-8 rounded-md bg-white p-2">
@@ -46,7 +54,7 @@ function PartySelection({
                   animationDelay={index * 0.05}
                   party={party}
                   onEdit={onEditParty}
-                  onOpen={() => {}}
+                  onOpen={handlePartySelect}
                   onPlayerClick={() => {}}
                 />
               ))}

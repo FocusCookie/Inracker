@@ -14,6 +14,7 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as PartiesImport } from './routes/parties'
+import { Route as ChaptersChapterIdImport } from './routes/chapters.$chapterId'
 
 // Create Virtual Routes
 
@@ -33,6 +34,12 @@ const IndexLazyRoute = IndexLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
 
+const ChaptersChapterIdRoute = ChaptersChapterIdImport.update({
+  id: '/chapters/$chapterId',
+  path: '/chapters/$chapterId',
+  getParentRoute: () => rootRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -51,6 +58,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PartiesImport
       parentRoute: typeof rootRoute
     }
+    '/chapters/$chapterId': {
+      id: '/chapters/$chapterId'
+      path: '/chapters/$chapterId'
+      fullPath: '/chapters/$chapterId'
+      preLoaderRoute: typeof ChaptersChapterIdImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -59,36 +73,41 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/parties': typeof PartiesRoute
+  '/chapters/$chapterId': typeof ChaptersChapterIdRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
   '/parties': typeof PartiesRoute
+  '/chapters/$chapterId': typeof ChaptersChapterIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexLazyRoute
   '/parties': typeof PartiesRoute
+  '/chapters/$chapterId': typeof ChaptersChapterIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/parties'
+  fullPaths: '/' | '/parties' | '/chapters/$chapterId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/parties'
-  id: '__root__' | '/' | '/parties'
+  to: '/' | '/parties' | '/chapters/$chapterId'
+  id: '__root__' | '/' | '/parties' | '/chapters/$chapterId'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   PartiesRoute: typeof PartiesRoute
+  ChaptersChapterIdRoute: typeof ChaptersChapterIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   PartiesRoute: PartiesRoute,
+  ChaptersChapterIdRoute: ChaptersChapterIdRoute,
 }
 
 export const routeTree = rootRoute
@@ -102,7 +121,8 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/parties"
+        "/parties",
+        "/chapters/$chapterId"
       ]
     },
     "/": {
@@ -110,6 +130,9 @@ export const routeTree = rootRoute
     },
     "/parties": {
       "filePath": "parties.tsx"
+    },
+    "/chapters/$chapterId": {
+      "filePath": "chapters.$chapterId.tsx"
     }
   }
 }

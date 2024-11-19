@@ -17,7 +17,7 @@ import { motion } from "framer-motion";
 type Props = {
   party: Party;
   onEdit: (party: Party) => void;
-  onOpen: () => void;
+  onOpen: (id: Party["id"]) => void;
   onPlayerClick: (id: Player["id"]) => void;
   animationDelay?: number;
 };
@@ -37,7 +37,7 @@ function PartyCard({
   }
 
   function handleOpenClick() {
-    if (onOpen) onOpen();
+    if (onOpen) onOpen(party.id);
   }
 
   function handlePlayerClick(playerId: Player["id"]) {
