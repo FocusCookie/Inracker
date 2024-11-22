@@ -35,6 +35,7 @@ pub fn run() {
                 effects STRING, -- JSON array ids
                 ep INTEGER,
                 health INTEGER,
+                max_health INTEGER,
                 icon TEXT NOT NULL,
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 immunities TEXT, -- JSON array ids

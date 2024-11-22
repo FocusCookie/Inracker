@@ -52,6 +52,7 @@ export type DBPlayer = {
   readonly id: number;
   immunities: string;
   level: number;
+  max_health: number;
   /** json string of type Movement */
   movement: string;
   name: string;
@@ -78,6 +79,7 @@ export type Player = Prettify<
     | "attributes"
     | "skills"
     | "class_sg"
+    | "max_health"
   > & {
     id: DBPlayer["id"];
     effects: Effect[];
@@ -88,5 +90,6 @@ export type Player = Prettify<
     attributes: Attributes;
     skills: Skills;
     classSg: number;
+    maxHealth: number;
   }
 >;

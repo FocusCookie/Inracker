@@ -227,7 +227,6 @@ const getDetailedPlayerById = async (
     immunities: dbImmunities,
     skills: dbSkills,
     attributes: dbAttributes,
-
     armor,
     class_sg,
     description,
@@ -237,6 +236,7 @@ const getDetailedPlayerById = async (
     id,
     level,
     name,
+    max_health,
     perception,
     role,
   } = dbPlayer;
@@ -291,6 +291,7 @@ const getDetailedPlayerById = async (
     id,
     level,
     name,
+    maxHealth: max_health,
     perception,
     role,
   };
@@ -334,6 +335,7 @@ const createPlayer = async (
     level,
     movement,
     name,
+    maxHealth,
     perception,
     role,
     savingThrows,
@@ -342,7 +344,7 @@ const createPlayer = async (
   } = player;
 
   const result = await db.execute(
-    "INSERT INTO players (armor, attributes, class_sg, description, ep, effects, health, icon, immunities, level, movement, name, perception, role, saving_throws, shield, skills) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)  RETURNING *",
+    "INSERT INTO players (armor, attributes, class_sg, description, ep, effects, health, icon, immunities, level, movement, name, perception, role, saving_throws, shield, skills) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)  RETURNING *",
     [
       armor,
       attributes.id,
@@ -361,6 +363,7 @@ const createPlayer = async (
       JSON.stringify(savingThrows),
       JSON.stringify(shield),
       skills.id,
+      maxHealth,
     ],
   );
 
