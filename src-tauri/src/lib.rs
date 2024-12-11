@@ -43,6 +43,7 @@ pub fn run() {
                 movement TEXT, -- JSON string: Object air, ground, water, high_jump, wide_jump
                 name TEXT NOT NULL,
                 perception NUMBER,
+                resistances TEXT, --JSON array ids
                 role TEXT,
                 saving_throws TEXT, -- JSON string: reflex, will, thoughness
                 shield STRING, -- JSON string: value, health
@@ -115,6 +116,65 @@ pub fn run() {
                 stealth INTEGER NOT NULL,
                 survival INTEGER NOT NULL,
                 thievery INTEGER NOT NULL
+            )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 7 ,
+            description: "create resistances table",
+            sql: "CREATE TABLE IF NOT EXISTS resistances (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                description TEXT,
+                icon TEXT NOT NULL
+            )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 8 ,
+            description: "create chapters table",
+            sql: "CREATE TABLE IF NOT EXISTS chapters (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                description TEXT,
+                icon TEXT NOT NULL,
+                experience INTEGER,
+                state TEXT NOT NULL,
+                battlemap TEXT, -- url to img
+                tokens TEXT, -- JSON array of player tokens and opponent tokens
+                encounter TEXT -- JSON array of id of encounter
+            )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 9 ,
+            description: "create encounter table",
+            sql: "CREATE TABLE IF NOT EXISTS encounter (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                description TEXT,
+                icon TEXT NOT NULL,
+                color TEXT NOT NULL,
+                type TEXT NOT NULL, -- roll / fight / note
+                experience INTEGER,
+                state TEXT NOT NULL,
+                dice INTEGER,
+                skill INTEGER,
+                difficulty INTEGER,
+                opponents TEXT -- JSON array of ids of opponents
+            )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 10,
+            description: "create opponents table",
+            sql: "CREATE TABLE IF NOT EXISTS opponents (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                description TEXT,
+                icon TEXT NOT NULL,
+                level INTEGER,
+                labels STRING -- JSON ARRAY of strings
             )",
             kind: MigrationKind::Up,
         },
