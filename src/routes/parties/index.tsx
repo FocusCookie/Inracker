@@ -9,7 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
-export const Route = createFileRoute("/parties")({
+export const Route = createFileRoute("/parties/")({
   component: Parties,
 });
 
@@ -43,6 +43,7 @@ function Parties() {
       }, 350);
     },
   });
+
   const deletePartyMutation = useMutation({
     mutationFn: (id: Party["id"]) => {
       return db.parties.deleteById(id);
@@ -52,6 +53,7 @@ function Parties() {
       setIsEditDrawerOpen(false);
     },
   });
+
   const updatePartyMutation = useMutationWithErrorToast({
     mutationFn: (party: Party) => {
       return db.parties.updateByParty(party);
