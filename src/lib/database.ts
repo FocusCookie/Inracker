@@ -1,4 +1,5 @@
 import { Attributes } from "@/types/attributes";
+import { Chapter, DBChapter } from "@/types/chapters";
 import { DBEffect, Effect } from "@/types/effect";
 import { DBParty, Party } from "@/types/party";
 import {
@@ -9,6 +10,7 @@ import {
   SavingThrows,
   Shield,
 } from "@/types/player";
+import { Resistance } from "@/types/resistances";
 import { Skills } from "@/types/skills";
 import TauriDatabase from "@tauri-apps/plugin-sql";
 
@@ -28,6 +30,7 @@ const connect = async (): Promise<TauriDatabase> => {
         `sqlite:${environment ?? "dev"}.db`,
       );
     }
+
     return dbInstance;
   } catch (error) {
     throw createDatabaseError("Error establishing database connection", error);
@@ -238,6 +241,7 @@ const getDetailedPlayerById = async (
     name,
     max_health,
     perception,
+    resistances: dbResistances,
     role,
   } = dbPlayer;
 
@@ -249,6 +253,7 @@ const getDetailedPlayerById = async (
   const effectsIds = JSON.parse(dbEffects) as number[];
   const immunitiesIds = JSON.parse(dbImmunities) as number[];
   const skills = await getSkillsById(db, dbSkills);
+  const resistances = JSON.parse(dbResistances) as Resistance[];
 
   let effects: Effect[] = [];
   let immunities: Immunity[] = [];
@@ -293,6 +298,7 @@ const getDetailedPlayerById = async (
     name,
     maxHealth: max_health,
     perception,
+    resistances,
     role,
   };
 
@@ -449,6 +455,32 @@ const createSkills = async (
   return getSkillsById(db, result.lastInsertId);
 };
 
+//* Chapters
+const getAllChaptersForParty = async (
+  db: TauriDatabase,
+  partyId: Party["id"],
+): Promise<Chapter[]> => {
+  const dbChapters = await db.select<DBChapter[]>(
+    "SELECT * FROM chapters WHERE id = $1",
+    [partyId],
+  );
+  const prettyfiedChapters: Chapter[] = [];
+
+  for (const dbChapter of dbChapters) {
+    const prettyChapter = {
+      ...dbChapter,
+      token: dbChapter.tokens ? JSON.parse(dbChapter.tokens) : null,
+      encounters: dbChapter.encounters
+        ? JSON.parse(dbChapter.encounters)
+        : null,
+    } as Chapter;
+
+    prettyfiedChapters.push(prettyChapter);
+  }
+
+  return prettyfiedChapters;
+};
+
 export const Database = {
   connect,
   disconnect,
@@ -547,6 +579,18 @@ export const Database = {
       const db = await connect();
       return getDetailedPlayerById(db, id);
     },
+    getAllDetailed: async () => {
+      const db = await connect();
+      const playersRaw = await getAllPlayers(db);
+      const detailedPlayers: Player[] = [];
+
+      for (const player of playersRaw) {
+        const detailedPlayer = await getDetailedPlayerById(db, player.id);
+        detailedPlayers.push(detailedPlayer);
+      }
+
+      return detailedPlayers;
+    },
     create: async (player: Omit<Player, "id">) => {
       const db = await connect();
       return createPlayer(db, player);
@@ -561,6 +605,13 @@ export const Database = {
     create: async (skills: Omit<Skills, "id">) => {
       const db = await connect();
       return createSkills(db, skills);
+    },
+  },
+
+  chapters: {
+    getChaptersByPartyId: async (partyId: Party["id"]) => {
+      const db = await connect();
+      return getAllChaptersForParty(db, partyId);
     },
   },
 };
