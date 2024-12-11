@@ -16,7 +16,7 @@ export function useQueryWithToast<TQueryFnData, TError, TData = TQueryFnData>(
   const { toast } = useToast();
   const { t } = useTranslation("HookUseMutationWithErrorTaost");
 
-  const query = useQuery(queryOptions);
+  const query = useQuery<TQueryFnData, TError, TData>(queryOptions);
 
   useEffect(() => {
     if (query.isError) {
