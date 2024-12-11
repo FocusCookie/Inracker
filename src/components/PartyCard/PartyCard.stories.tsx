@@ -121,7 +121,6 @@ const meta = {
           shield: null,
         },
       ],
-      state: "draft",
     },
   },
 } satisfies Meta<typeof PartyCard>;
