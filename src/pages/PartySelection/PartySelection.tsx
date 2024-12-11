@@ -26,7 +26,8 @@ function PartySelection({
 
   function handlePartySelect(id: Party["id"]) {
     navigate({
-      to: `/chapters/${id}`,
+      to: `/chapters`,
+      search: { partyId: id },
     });
   }
 

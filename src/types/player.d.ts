@@ -1,5 +1,6 @@
 import { Attributes } from "./attributes";
 import { Buff, Debuff, Effect, HarmfulEffect } from "./effect";
+import { Resistance } from "./resistances";
 import { Skills } from "./skills";
 import { Prettify } from "./utils";
 
@@ -59,6 +60,8 @@ export type DBPlayer = {
   perception: number;
   /** Character Class such as rouqe, mage, ... */
   role: string;
+  /** character resistances */
+  resistances: string;
   /** json string of type Skills */
   saving_throws: string;
   /** json string  or null of type Skills */
@@ -80,6 +83,7 @@ export type Player = Prettify<
     | "skills"
     | "class_sg"
     | "max_health"
+    | "resistances"
   > & {
     id: DBPlayer["id"];
     effects: Effect[];
@@ -91,5 +95,6 @@ export type Player = Prettify<
     skills: Skills;
     classSg: number;
     maxHealth: number;
+    resistances: Resistance[];
   }
 >;
