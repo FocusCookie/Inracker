@@ -17,6 +17,8 @@ import ComponentPartyCardEN from "@/translations/en/components/PartyCard.json";
 import ComponentPartyCardDE from "@/translations/de/components/PartyCard.json";
 import ComponentResistanceCardEN from "@/translations/en/components/ResistanceCard.json";
 import ComponentResistanceCardDE from "@/translations/de/components/ResistanceCard.json";
+import ComponentCreateImmunityDrawerEN from "@/translations/en/components/CreateImmunityDrawer.json";
+import ComponentCreateImmunityDrawerDE from "@/translations/de/components/CreateImmunityDrawer.json";
 import HookUseMutationWithErrorTaostEN from "@/translations/en/hooks/useMutationWithErrorTaost.json";
 import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutationWithErrorTaost.json";
 
@@ -27,6 +29,7 @@ const resources = {
     ComponentDrawer: ComponentDrawerEN,
     ComponentPartyCard: ComponentPartyCardEN,
     ComponentResistanceCard: ComponentResistanceCardEN,
+    ComponentCreateImmunityDrawer: ComponentCreateImmunityDrawerEN,
     HookUseMutationWithErrorTaost: HookUseMutationWithErrorTaostEN,
     PageWelcome: PageWelcomeEN,
     PagePartySelection: PagePartySelectionEN,
@@ -38,6 +41,7 @@ const resources = {
     ComponentDrawer: ComponentDrawerDE,
     ComponentResistanceCard: ComponentResistanceCardDE,
     ComponentPartyCard: ComponentPartyCardDE,
+    ComponentCreateImmunityDrawer: ComponentCreateImmunityDrawerDE,
     HookUseMutationWithErrorTaost: HookUseMutationWithErrorTaostDE,
     PageWelcome: PageWelcomeDE,
     PagePartySelection: PagePartySelectionDE,
