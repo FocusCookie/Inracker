@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryFn, StoryObj } from "@storybook/react";
 
 import ChapterSelection from "./ChapterSelection";
 // import { fn } from "@storybook/test";
@@ -10,11 +10,29 @@ const meta = {
     layout: "centered",
   },
   decorators: [
-    (Story) => (
+    (Story: StoryFn) => (
       <div className="h-[90vh] w-[90vw] bg-neutral-800 p-8">{Story()}</div>
     ),
   ],
   args: {
+    immunities: [
+      {
+        id: 1,
+        description: `
+    - 4 damage over time decreased
+    - ignores water damage`,
+        name: "Feuerimunität",
+        icon: "🔥",
+      },
+      {
+        id: 2,
+        description: `
+    - no **splash damage**,
+    - ignores water damage`,
+        name: "Water Splash ",
+        icon: "💧",
+      },
+    ],
     playersCatalog: [
       {
         id: 1,

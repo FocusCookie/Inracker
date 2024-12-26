@@ -1,12 +1,15 @@
 import ChapterCard from "@/components/Chapter/ChapterCard";
 import ChapterLayout from "@/components/ChapterLayout/ChapterLayout";
+import CreatePlayerDrawer from "@/components/CreatePlayerDrawer/CreatePlayerDrawer";
 import Drawer from "@/components/Drawer/Drawer";
 import Loader from "@/components/Loader/Loader";
 import PlayerCard from "@/components/PlayerCard/PlayerCard";
 import { Button } from "@/components/ui/button";
 import { TypographyH1 } from "@/components/ui/typographyH1";
 import { TypographyP } from "@/components/ui/typographyP";
+import { ImageFolder } from "@/lib/utils";
 import { Chapter } from "@/types/chapters";
+import { DBImmunity } from "@/types/immunitiy";
 import { Player } from "@/types/player";
 import {
   ChevronLeftIcon,
@@ -26,17 +29,27 @@ type Props = {
    * players from the given party that are playing the chapter
    */
   players: Player[];
+  immunities: DBImmunity[];
   /**
    * all available players in the players database
    */
   playersCatalog: Player[];
+  /**
+   * A function to store a player image, which takes a picture and a folder and returns the saved file path.
+   */
+  onStorePlayerImage: (
+    picture: File | string,
+    folder: ImageFolder,
+  ) => Promise<string | undefined>;
 };
 
 function ChapterSelection({
   chapters,
   loading,
   players,
+  immunities,
   playersCatalog,
+  onStorePlayerImage,
 }: Props) {
   const { t } = useTranslation("PageChapterSelection");
   const [isAsideOpen, setIsAsideOpen] = useState<boolean>(false);
@@ -127,13 +140,15 @@ function ChapterSelection({
                   }}
                   className="flex flex-col gap-2 pl-2"
                 >
-                  <Button
-                    onClick={handleAddPlayerDrawerToggle}
-                    variant="ghost"
-                    size="iconLarge"
-                  >
-                    <RiUserAddFill />
-                  </Button>
+                  <CreatePlayerDrawer
+                    open={isAddPlayerDrawerOpen}
+                    immunities={immunities}
+                    isCreating={false}
+                    onStorePlayerImage={onStorePlayerImage}
+                    onOpenChange={setIsAddPlayerDrawerOpen}
+                    onCreate={() => console.log("create player")}
+                  />
+
                   {/* //TODO: Settings Modal für player add */}
                   <Button variant="ghost" size="iconLarge">
                     <GearIcon />
@@ -146,24 +161,6 @@ function ChapterSelection({
                     {isAsideOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                   </Button>
                 </motion.div>
-
-                <Drawer
-                  open={isAddPlayerDrawerOpen}
-                  onOpenChange={handleAddPlayerDrawerToggle}
-                  title={"Add player to Party"}
-                  cancelTrigger={<Button>Cancel</Button>}
-                >
-                  {playersCatalog
-                    .filter(
-                      (catPlayer) =>
-                        !players.some((player) => player.id === catPlayer.id),
-                    )
-                    .map((player) => (
-                      <span key={`players-catalaog-${player.id}`}>
-                        {player.name} - {player.id}
-                      </span>
-                    ))}
-                </Drawer>
               </>
             )
           }
