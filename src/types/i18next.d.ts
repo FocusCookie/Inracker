@@ -7,6 +7,7 @@ import ComponentPartyEditDrawer from "@/translations/en/components/PartyEditDraw
 import ComponentDrawer from "@/translations/en/components/Drawer.json";
 import ComponentPartyCard from "@/translations/en/components/PartyCard.json";
 import ComponentResistanceCard from "@/translations/en/components/ResistanceCard.json";
+import ComponentCreateImmunityDrawer from "@/translations/en/components/CreateImmunityDrawer.json";
 import HookUseMutationWithErrorTaost from "@/translations/en/hooks/useMutationWithErrorTaost.json";
 
 declare module "i18next" {
@@ -17,6 +18,7 @@ declare module "i18next" {
       ComponentPartyEditDrawer: typeof ComponentPartyEditDrawer;
       ComponentPartyCard: typeof ComponentPartyCard;
       ComponentResistanceCard: typeof ComponentResistanceCard;
+      ComponentCreateImmunityDrawer: typeof ComponentCreateImmunityDrawer;
       HookUseMutationWithErrorTaost: typeof HookUseMutationWithErrorTaost;
       PageWelcome: typeof PageWelcome;
       PagePartySelection: typeof PagePartySelection;

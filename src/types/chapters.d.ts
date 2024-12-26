@@ -10,6 +10,7 @@ export type ChapterCharacterToken = {
 export type DBChapter = {
   readonly id: number;
   name: string;
+  image: string | null;
   icon: string;
   description: string | null;
   experience: number | null;

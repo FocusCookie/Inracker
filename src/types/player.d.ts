@@ -1,5 +1,6 @@
 import { Attributes } from "./attributes";
 import { Buff, Debuff, Effect, HarmfulEffect } from "./effect";
+import { DBImmunity } from "./immunitiy";
 import { Resistance } from "./resistances";
 import { Skills } from "./skills";
 import { Prettify } from "./utils";
@@ -19,13 +20,6 @@ export type SavingThrows = {
   reflex: number;
   will: number;
   toughness: number;
-};
-
-export type Immunity = {
-  readonly id: number;
-  name: string;
-  description: string;
-  icon: string;
 };
 
 /**
@@ -49,6 +43,7 @@ export type DBPlayer = {
   effects: string;
   ep: number;
   health: number;
+  image: string | null;
   icon: string;
   readonly id: number;
   immunities: string;
@@ -87,7 +82,7 @@ export type Player = Prettify<
   > & {
     id: DBPlayer["id"];
     effects: Effect[];
-    immunities: Immunity[];
+    immunities: DBImmunity[];
     movement: Movement;
     savingThrows: SavingThrows;
     shield: Shield | null;

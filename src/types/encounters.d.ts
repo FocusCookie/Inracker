@@ -3,6 +3,7 @@ import { Prettify } from "./utils";
 export type DBEncounter = {
   readonly id: number;
   name: string;
+  image: string | null;
   icon: string;
   description: string | null;
   color: string;
