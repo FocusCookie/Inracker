@@ -7,23 +7,26 @@ import { Button } from "../ui/button";
 
 type Props = {
   children: React.ReactNode;
-  titleChildren: React.ReactNode;
+  title: React.ReactNode;
+  actions?: React.ReactNode;
 };
 
-function Collapsible({ children, titleChildren }: Props) {
+function Collapsible({ actions, children, title }: Props) {
   const [open, setOpen] = useState<boolean>(false);
   const [ref, { height }] = useMeasure();
 
   return (
     <RadixCollapsible.Root open={open} onOpenChange={setOpen}>
       <div className="flex w-full items-center justify-between gap-2 rounded-md">
-        <div>{titleChildren}</div>
-        <div>
+        <div>{title}</div>
+        <div className="flex items-center gap-2">
           <RadixCollapsible.Trigger asChild>
             <Button size="icon" variant="ghost">
               {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
             </Button>
           </RadixCollapsible.Trigger>
+
+          {actions}
         </div>
       </div>
 
