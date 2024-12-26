@@ -1,5 +1,5 @@
+use std::env;
 use tauri_plugin_sql::{Migration, MigrationKind};
-use std::env; 
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -36,6 +36,7 @@ pub fn run() {
                 ep INTEGER,
                 health INTEGER,
                 max_health INTEGER,
+                image TEXT,
                 icon TEXT NOT NULL,
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 immunities TEXT, -- JSON array ids
@@ -67,7 +68,7 @@ pub fn run() {
             kind: MigrationKind::Up,
         },
         Migration {
-            version: 4 ,
+            version: 4,
             description: "create immunities table",
             sql: "CREATE TABLE IF NOT EXISTS immunities(
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -120,7 +121,7 @@ pub fn run() {
             kind: MigrationKind::Up,
         },
         Migration {
-            version: 7 ,
+            version: 7,
             description: "create resistances table",
             sql: "CREATE TABLE IF NOT EXISTS resistances (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -131,12 +132,13 @@ pub fn run() {
             kind: MigrationKind::Up,
         },
         Migration {
-            version: 8 ,
+            version: 8,
             description: "create chapters table",
             sql: "CREATE TABLE IF NOT EXISTS chapters (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
                 description TEXT,
+                image TEXT,
                 icon TEXT NOT NULL,
                 experience INTEGER,
                 state TEXT NOT NULL,
@@ -147,12 +149,13 @@ pub fn run() {
             kind: MigrationKind::Up,
         },
         Migration {
-            version: 9 ,
+            version: 9,
             description: "create encounter table",
             sql: "CREATE TABLE IF NOT EXISTS encounter (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 description TEXT,
+                image TEXT,
                 icon TEXT NOT NULL,
                 color TEXT NOT NULL,
                 type TEXT NOT NULL, -- roll / fight / note
@@ -172,6 +175,7 @@ pub fn run() {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 description TEXT,
+                image TEXT,
                 icon TEXT NOT NULL,
                 level INTEGER,
                 labels STRING -- JSON ARRAY of strings
@@ -179,12 +183,13 @@ pub fn run() {
             kind: MigrationKind::Up,
         },
     ];
-    
+
     tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
         .plugin(
             tauri_plugin_sql::Builder::default()
-                .add_migrations(&db_name, migrations)  
-                .build()
+                .add_migrations(&db_name, migrations)
+                .build(),
         )
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![greet])
