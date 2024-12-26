@@ -1,16 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 
-import PartyCreateDrawer from "./PartyCreateDrawer";
+import CreatePartyDrawer from "./CreatePartyDrawer";
 
 const meta = {
-  title: "Components/PartyCreateDrawer",
-  component: PartyCreateDrawer,
+  title: "Components/CreatePartyDrawer",
+  component: CreatePartyDrawer,
   parameters: {
     layout: "centered",
   },
   args: { isCreating: false, onCreate: fn(), onOpenChange: fn(), open: true },
-} satisfies Meta<typeof PartyCreateDrawer>;
+} satisfies Meta<typeof CreatePartyDrawer>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

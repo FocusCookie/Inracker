@@ -28,7 +28,7 @@ type Props = {
   onOpenChange: (state: boolean) => void;
 };
 
-function PartyCreateDrawer({
+function CreatePartyDrawer({
   onCreate,
   isCreating,
   open,
@@ -142,4 +142,4 @@ function PartyCreateDrawer({
   );
 }
 
-export default PartyCreateDrawer;
+export default CreatePartyDrawer;

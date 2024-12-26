@@ -1,7 +1,7 @@
 import type { Meta, StoryFn, StoryObj } from "@storybook/react";
 
 import PartySelection from "./PartySelection";
-import PartyCreateDrawer from "@/components/PartyCreateDrawer/PartyCreateDrawer";
+import PartyCreateDrawer from "@/components/CreatePartyDrawer/PartyCreateDrawer";
 import { fn } from "@storybook/test";
 
 const meta = {

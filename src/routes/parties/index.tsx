@@ -1,4 +1,4 @@
-import PartyCreateDrawer from "@/components/PartyCreateDrawer/PartyCreateDrawer";
+import CreatePartyDrawer from "@/components/CreatePartyDrawer/CreatePartyDrawer";
 import PartyEditDrawer from "@/components/PartyEditDrawer/PartyEditDrawer";
 import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
@@ -76,7 +76,7 @@ function Parties() {
         loading={partiesQuery.isPending}
         parties={partiesQuery.data || []}
         renderCreatePartyDrawer={
-          <PartyCreateDrawer
+          <CreatePartyDrawer
             key={`parties-${createdParties}`}
             open={isCreatDrawerOpen}
             onOpenChange={setIsCreatDrawerOpen}

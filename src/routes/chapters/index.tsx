@@ -55,6 +55,7 @@ function RouteComponent() {
 
   return (
     <ChapterSelection
+      immunities={[]}
       onStorePlayerImage={storeImage}
       loading={chaptersQuery.isLoading || partyQuery.isLoading}
       players={partyQuery?.data?.players || []}
