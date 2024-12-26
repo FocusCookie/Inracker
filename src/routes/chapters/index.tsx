@@ -2,6 +2,7 @@ import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
 import ChapterSelection from "@/pages/ChapterSelection/ChapterSelection";
+import { storeImage } from "@/lib/utils";
 
 type ChapterSearch = {
   partyId: number | null;
@@ -54,6 +55,7 @@ function RouteComponent() {
 
   return (
     <ChapterSelection
+      onStorePlayerImage={storeImage}
       loading={chaptersQuery.isLoading || partyQuery.isLoading}
       players={partyQuery?.data?.players || []}
       chapters={chaptersQuery.data || []}
