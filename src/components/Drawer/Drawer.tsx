@@ -1,11 +1,8 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { AnimatePresence, motion } from "framer-motion";
-import { Button } from "../ui/button";
+import { ScrollArea } from "../ui/scroll-area";
 import { TypographyH1 } from "../ui/typographyH1";
 import { TypographyMuted } from "../ui/typographyhMuted";
-import { useTranslation } from "react-i18next";
-import { ScrollArea } from "../ui/scroll-area";
-import { useEffect, useRef } from "react";
 
 type Props = {
   open: boolean;
@@ -13,7 +10,13 @@ type Props = {
   title: string;
   description?: string;
   children: React.ReactNode;
+  /**
+   * Actions shown in the drawer bottom
+   */
   actions?: React.ReactNode;
+  /**
+   * Element that is shown which triggers to open the drawer
+   */
   createTrigger?: React.ReactNode;
   cancelTrigger: React.ReactNode;
 };
