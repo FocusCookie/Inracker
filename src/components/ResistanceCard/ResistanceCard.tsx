@@ -24,7 +24,7 @@ function ResistanceCard({ resistances }: Props) {
   return (
     <div className="rounded-md border border-border p-2">
       <Collapsible
-        titleChildren={
+        title={
           <div className="flex items-center gap-2">
             <Badge>{resistances.length}</Badge>
             <span className="text-lg font-bold">{t("resistances")}</span>
@@ -33,7 +33,7 @@ function ResistanceCard({ resistances }: Props) {
       >
         {resistances.map((resistance) => (
           <Collapsible
-            titleChildren={
+            title={
               <div className="flex items-center gap-2">
                 <span>{resistance.icon}</span>
                 <span className="font-semibold">{resistance.name}</span>
