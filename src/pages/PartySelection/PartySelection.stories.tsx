@@ -1,8 +1,7 @@
 import type { Meta, StoryFn, StoryObj } from "@storybook/react";
-
 import PartySelection from "./PartySelection";
-import PartyCreateDrawer from "@/components/CreatePartyDrawer/PartyCreateDrawer";
 import { fn } from "@storybook/test";
+import CreatePartyDrawer from "@/components/CreatePartyDrawer/CreatePartyDrawer";
 
 const meta = {
   title: "Pages/PartySelection",
@@ -18,7 +17,7 @@ const meta = {
   args: {
     parties: [],
     renderCreatePartyDrawer: (
-      <PartyCreateDrawer
+      <CreatePartyDrawer
         isCreating={false}
         onCreate={fn()}
         onOpenChange={fn()}
