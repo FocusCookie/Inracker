@@ -616,34 +616,36 @@ function CreatePlayerDrawer({
                     onCreate={onCreatImmunity}
                   />
 
-                  <Catalog
-                    disabled={isCreatingImmunity}
-                    triggerName="add"
-                    title={"Immunities"}
-                    description={
-                      "Select some existing immunities for the character."
-                    }
-                    onSearchChange={setImmunitySearchTerm}
-                    children={
-                      <ScrollArea className="h-full">
-                        <div className="flex h-full flex-col gap-4 pr-4">
-                          {immunities
-                            .filter((immunity) =>
-                              immunity.name
-                                .toLowerCase()
-                                .includes(immunitySearchTerm.toLowerCase()),
-                            )
-                            .map((immunity) => (
-                              <ImmunityCard
-                                key={immunity.id}
-                                immunity={immunity}
-                                onAdd={handleAddImmunity}
-                              />
-                            ))}
-                        </div>
-                      </ScrollArea>
-                    }
-                  />
+                  {immunities.length > 0 && (
+                    <Catalog
+                      disabled={isCreatingImmunity}
+                      triggerName="add"
+                      title={"Immunities"}
+                      description={
+                        "Select some existing immunities for the character."
+                      }
+                      onSearchChange={setImmunitySearchTerm}
+                      children={
+                        <ScrollArea className="h-full">
+                          <div className="flex h-full flex-col gap-4 pr-4">
+                            {immunities
+                              .filter((immunity) =>
+                                immunity.name
+                                  .toLowerCase()
+                                  .includes(immunitySearchTerm.toLowerCase()),
+                              )
+                              .map((immunity) => (
+                                <ImmunityCard
+                                  key={immunity.id}
+                                  immunity={immunity}
+                                  onAdd={handleAddImmunity}
+                                />
+                              ))}
+                          </div>
+                        </ScrollArea>
+                      }
+                    />
+                  )}
                 </div>
               </div>
             </div>
