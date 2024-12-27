@@ -19,6 +19,7 @@ import {
   toolbarPlugin,
   UndoRedo,
 } from "@mdxeditor/editor";
+import "@mdxeditor/editor/style.css";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Drawer from "../Drawer/Drawer";
