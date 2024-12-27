@@ -59,7 +59,7 @@ function Drawer({
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: "100%" }}
                 transition={{ type: "tween", duration: 0.2 }}
-                className="fixed bottom-0 right-0 top-0 flex w-full max-w-[640px] flex-col items-start gap-2 rounded-l-md bg-white p-4 pr-0.5 shadow-xl"
+                className="fixed bottom-2 right-0 top-2 flex w-full max-w-[640px] flex-col items-start gap-2 rounded-l-md bg-white p-4 pr-0.5 shadow-xl"
               >
                 <Dialog.Title asChild>
                   <TypographyH1>{title}</TypographyH1>
