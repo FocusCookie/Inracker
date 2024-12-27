@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { Input } from "../ui/input";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   /**
@@ -31,6 +32,8 @@ function Catalog({
   children,
   onSearchChange,
 }: Props) {
+  const { t } = useTranslation("ComponentCatalog");
+
   function handleSearchTerm(event: React.ChangeEvent<HTMLInputElement>) {
     onSearchChange(event.target.value);
   }
@@ -49,7 +52,11 @@ function Catalog({
             <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
 
-          <Input placeholder="search" onChange={handleSearchTerm} />
+          <Input
+            className="mt-4"
+            placeholder={t("search")}
+            onChange={handleSearchTerm}
+          />
         </div>
 
         <div className="max-h-[500px] overflow-hidden">{children}</div>

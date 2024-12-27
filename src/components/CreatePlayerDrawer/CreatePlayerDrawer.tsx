@@ -24,9 +24,10 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { ScrollArea } from "../ui/scroll-area";
 import { Textarea } from "../ui/textarea";
 import { TypographyH2 } from "../ui/typographyh2";
+import { ScrollArea } from "../ui/scroll-area";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   /**
@@ -44,7 +45,7 @@ type Props = {
   ) => Promise<string | undefined>;
   onCreate: (player: Prettify<Omit<Player, "id">>) => void;
   onOpenChange: (state: boolean) => void;
-  onCreatImmunity: (immunity: Immunity) => void;
+  onCreateImmunity: (immunity: Immunity) => void;
   isCreatingImmunity: boolean;
 };
 
@@ -53,11 +54,12 @@ function CreatePlayerDrawer({
   open,
   immunities,
   isCreatingImmunity,
-  onCreatImmunity,
+  onCreateImmunity,
   onStorePlayerImage,
   onCreate,
   onOpenChange,
 }: Props) {
+  const { t } = useTranslation("ComponentCreatePlayerDrawer");
   const [picturePreview, setPicturePreview] = useState<string>("");
   const [refreshKey, setRefreshKey] = useState<number>(0); // to reset the input type file path after a reset
   const [isCreateImmunityDrawerOpen, setIsCreateImmunityDrawerOpen] =
@@ -187,23 +189,27 @@ function CreatePlayerDrawer({
 
   return (
     <Drawer
-      description="Create a new player and add the player to the group."
+      description={t("descriptionText")}
       open={open}
       onOpenChange={onOpenChange}
-      title={"Add player to Party"}
+      title={t("title")}
       createTrigger={
         <Button onClick={handleOpen} variant="ghost" size="iconLarge">
           <RiUserAddFill />
         </Button>
       }
-      cancelTrigger={<Button variant="ghost">Cancel</Button>}
+      cancelTrigger={
+        <Button disabled={isCreating || isCreatingImmunity} variant="ghost">
+          {t("cancel")}
+        </Button>
+      }
       actions={
         <Button
           loading={isCreating}
-          disabled={isCreating}
+          disabled={isCreatingImmunity}
           onClick={form.handleSubmit(onSubmit)}
         >
-          create player
+          {t("create")}
         </Button>
       }
     >
@@ -214,7 +220,7 @@ function CreatePlayerDrawer({
               <TypographyH2>Overview</TypographyH2>
               <div className="flex items-start gap-2">
                 <div className="flex flex-col gap-3 pl-0.5 pt-1.5">
-                  <FormLabel>Icon</FormLabel>
+                  <FormLabel>{t("icon")}</FormLabel>
                   <IconPicker
                     initialIcon={form.getValues("icon")}
                     disabled={isCreating}
@@ -222,12 +228,13 @@ function CreatePlayerDrawer({
                   />
                   <FormMessage />
                 </div>
+
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>{t("name")}</FormLabel>
                       <FormControl>
                         <Input disabled={isCreating} {...field} />
                       </FormControl>
@@ -235,12 +242,13 @@ function CreatePlayerDrawer({
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="role"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Role/Class</FormLabel>
+                      <FormLabel>{t("role")}</FormLabel>
                       <FormControl>
                         <Input type="text" disabled={isCreating} {...field} />
                       </FormControl>
@@ -254,14 +262,14 @@ function CreatePlayerDrawer({
                 <Avatar className="mt-6">
                   <AvatarImage
                     src={picturePreview}
-                    alt="Profile picture of the player"
+                    alt={t("profilePictureAlt")}
                   />
                   <AvatarFallback>
                     {form.watch("name").slice(0, 2)}
                   </AvatarFallback>
                 </Avatar>
                 <FormItem className="mb-1.5 w-full px-0.5">
-                  <FormLabel>Player Picture</FormLabel>
+                  <FormLabel>{t("playerPicture")}</FormLabel>
                   <FormControl>
                     <div className="flex w-full gap-2">
                       <Input
@@ -270,7 +278,7 @@ function CreatePlayerDrawer({
                         onChange={handleFileChange}
                         type="file"
                         disabled={isCreating}
-                        placeholder="Upload picture"
+                        placeholder={t("picturePlaceholder")}
                         accept="image/*"
                       />
                       {!!picturePreview && (
@@ -288,12 +296,13 @@ function CreatePlayerDrawer({
                   <FormMessage />
                 </FormItem>
               </div>
+
               <FormField
                 control={form.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem className="w-full px-0.5">
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>{t("description")}</FormLabel>
                     <FormControl>
                       <Textarea disabled={isCreating} {...field} />
                     </FormControl>
@@ -304,13 +313,14 @@ function CreatePlayerDrawer({
             </div>
 
             <div className="flex flex-col gap-4">
-              <TypographyH2>Attributes</TypographyH2>
+              <TypographyH2>{t("attributes")}</TypographyH2>
+
               <FormField
                 control={form.control}
                 name="attributes.charisma"
                 render={({ field }) => (
                   <FormItem className="w-full px-0.5">
-                    <FormLabel>Charisma</FormLabel>
+                    <FormLabel>{t("charisma")}</FormLabel>
                     <FormControl>
                       <Input type="number" disabled={isCreating} {...field} />
                     </FormControl>
@@ -324,7 +334,7 @@ function CreatePlayerDrawer({
                 name="attributes.constitution"
                 render={({ field }) => (
                   <FormItem className="w-full px-0.5">
-                    <FormLabel>Constitution</FormLabel>
+                    <FormLabel>{t("constitution")}</FormLabel>
                     <FormControl>
                       <Input type="number" disabled={isCreating} {...field} />
                     </FormControl>
@@ -338,7 +348,7 @@ function CreatePlayerDrawer({
                 name="attributes.dexterity"
                 render={({ field }) => (
                   <FormItem className="w-full px-0.5">
-                    <FormLabel>Dexterity</FormLabel>
+                    <FormLabel>{t("dexterity")}</FormLabel>
                     <FormControl>
                       <Input type="number" disabled={isCreating} {...field} />
                     </FormControl>
@@ -351,7 +361,7 @@ function CreatePlayerDrawer({
                 name="attributes.intelligence"
                 render={({ field }) => (
                   <FormItem className="w-full px-0.5">
-                    <FormLabel>Intelligence</FormLabel>
+                    <FormLabel>{t("intelligence")}</FormLabel>
                     <FormControl>
                       <Input type="number" disabled={isCreating} {...field} />
                     </FormControl>
@@ -364,7 +374,7 @@ function CreatePlayerDrawer({
                 name="attributes.strength"
                 render={({ field }) => (
                   <FormItem className="w-full px-0.5">
-                    <FormLabel>Strenght</FormLabel>
+                    <FormLabel>{t("strenght")}</FormLabel>
                     <FormControl>
                       <Input type="number" disabled={isCreating} {...field} />
                     </FormControl>
@@ -378,7 +388,7 @@ function CreatePlayerDrawer({
                 name="attributes.wisdom"
                 render={({ field }) => (
                   <FormItem className="w-full px-0.5">
-                    <FormLabel>Wisdom</FormLabel>
+                    <FormLabel>{t("wisdom")}</FormLabel>
                     <FormControl>
                       <Input type="number" disabled={isCreating} {...field} />
                     </FormControl>
@@ -396,7 +406,7 @@ function CreatePlayerDrawer({
                   name="armor"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Armor</FormLabel>
+                      <FormLabel>{t("armor")}</FormLabel>
                       <FormControl>
                         <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
@@ -409,7 +419,7 @@ function CreatePlayerDrawer({
                   name="classSg"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Class SG</FormLabel>
+                      <FormLabel>{t("classSg")}</FormLabel>
                       <FormControl>
                         <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
@@ -422,7 +432,7 @@ function CreatePlayerDrawer({
                   name="ep"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Experience</FormLabel>
+                      <FormLabel>{t("experience")}</FormLabel>
                       <FormControl>
                         <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
@@ -435,7 +445,7 @@ function CreatePlayerDrawer({
                   name="level"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Level</FormLabel>
+                      <FormLabel>{t("level")}</FormLabel>
                       <FormControl>
                         <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
@@ -448,7 +458,7 @@ function CreatePlayerDrawer({
                   name="maxHealth"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Max. Health</FormLabel>
+                      <FormLabel>{t("maxHealth")}</FormLabel>
                       <FormControl>
                         <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
@@ -461,7 +471,7 @@ function CreatePlayerDrawer({
                   name="perception"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Perception</FormLabel>
+                      <FormLabel>{t("perception")}</FormLabel>
                       <FormControl>
                         <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
@@ -474,7 +484,7 @@ function CreatePlayerDrawer({
                   name="movement.air"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Air Movement</FormLabel>
+                      <FormLabel>{t("airMovement")}</FormLabel>
                       <FormControl>
                         <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
@@ -487,7 +497,7 @@ function CreatePlayerDrawer({
                   name="movement.ground"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Ground Movement</FormLabel>
+                      <FormLabel>{t("groundMovement")}</FormLabel>
                       <FormControl>
                         <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
@@ -500,7 +510,7 @@ function CreatePlayerDrawer({
                   name="movement.water"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Water Movement</FormLabel>
+                      <FormLabel>{t("waterMovement")}</FormLabel>
                       <FormControl>
                         <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
@@ -513,7 +523,7 @@ function CreatePlayerDrawer({
                   name="movement.highJump"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>High Jump Range</FormLabel>
+                      <FormLabel>{t("highJump")}</FormLabel>
                       <FormControl>
                         <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
@@ -526,7 +536,7 @@ function CreatePlayerDrawer({
                   name="movement.wideJump"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Wide Jump Range</FormLabel>
+                      <FormLabel>{t("wideJump")}</FormLabel>
                       <FormControl>
                         <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
@@ -540,7 +550,7 @@ function CreatePlayerDrawer({
                   name="savingThrows.reflex"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Reflex Saving</FormLabel>
+                      <FormLabel>{t("reflexSaving")}</FormLabel>
                       <FormControl>
                         <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
@@ -553,7 +563,7 @@ function CreatePlayerDrawer({
                   name="savingThrows.thoughness"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Reflex Thoughness</FormLabel>
+                      <FormLabel>{t("reflexThoughness")}</FormLabel>
                       <FormControl>
                         <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
@@ -566,7 +576,7 @@ function CreatePlayerDrawer({
                   name="savingThrows.will"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Reflex Will</FormLabel>
+                      <FormLabel>{t("reflexWill")}</FormLabel>
                       <FormControl>
                         <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
@@ -579,7 +589,7 @@ function CreatePlayerDrawer({
                   name="shield.health"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Shield Max. Health</FormLabel>
+                      <FormLabel>{t("shieldMaxHealth")}</FormLabel>
                       <FormControl>
                         <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
@@ -592,7 +602,7 @@ function CreatePlayerDrawer({
                   name="shield.value"
                   render={({ field }) => (
                     <FormItem className="w-full px-0.5">
-                      <FormLabel>Shield Health</FormLabel>
+                      <FormLabel>{t("shieldHealth")}</FormLabel>
                       <FormControl>
                         <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
@@ -605,30 +615,29 @@ function CreatePlayerDrawer({
 
             <div className="flex flex-col gap-4">
               <div className="flex justify-between gap-2">
-                <TypographyH2>Immunities</TypographyH2>
+                <TypographyH2>{t("immunities")}</TypographyH2>
                 <div className="flex gap-2">
                   <Button
-                    disabled={isCreatingImmunity}
+                    disabled={isCreating || isCreatingImmunity}
+                    loading={isCreatingImmunity}
                     onClick={() => setIsCreateImmunityDrawerOpen((c) => !c)}
                   >
-                    Create
+                    {t("create")}
                   </Button>
 
                   <CreateImmunityDrawer
                     open={isCreateImmunityDrawerOpen}
                     onOpenChange={setIsCreateImmunityDrawerOpen}
                     isCreating={isCreatingImmunity}
-                    onCreate={onCreatImmunity}
+                    onCreate={onCreateImmunity}
                   />
 
                   {immunities.length > 0 && (
                     <Catalog
                       disabled={isCreatingImmunity}
-                      triggerName="add"
-                      title={"Immunities"}
-                      description={
-                        "Select some existing immunities for the character."
-                      }
+                      triggerName={t("add")}
+                      title={t("immunityCatalog.title")}
+                      description={t("immunityCatalog.descriptionText")}
                       onSearchChange={setImmunitySearchTerm}
                       children={
                         <ScrollArea className="h-full">
@@ -685,12 +694,12 @@ function CreatePlayerDrawer({
             </div>
 
             <div className="flex flex-col gap-4">
-              <TypographyH2>Resistances</TypographyH2>
+              <TypographyH2>{t("resictances")}</TypographyH2>
               to enter
             </div>
 
             <div className="flex flex-col gap-4">
-              <TypographyH2>Skills</TypographyH2>
+              <TypographyH2>{t("skills")}</TypographyH2>
               to enter
             </div>
           </form>

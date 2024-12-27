@@ -19,6 +19,10 @@ import ComponentResistanceCardEN from "@/translations/en/components/ResistanceCa
 import ComponentResistanceCardDE from "@/translations/de/components/ResistanceCard.json";
 import ComponentCreateImmunityDrawerEN from "@/translations/en/components/CreateImmunityDrawer.json";
 import ComponentCreateImmunityDrawerDE from "@/translations/de/components/CreateImmunityDrawer.json";
+import ComponentCreatePlayerDrawerEN from "@/translations/en/components/CreatePlayerDrawer.json";
+import ComponentCreatePlayerDrawerDE from "@/translations/de/components/CreatePlayerDrawer.json";
+import ComponentCatalogEN from "@/translations/en/components/Catalog.json";
+import ComponentCatalogDE from "@/translations/de/components/Catalog.json";
 import HookUseMutationWithErrorTaostEN from "@/translations/en/hooks/useMutationWithErrorTaost.json";
 import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutationWithErrorTaost.json";
 
@@ -30,6 +34,8 @@ const resources = {
     ComponentPartyCard: ComponentPartyCardEN,
     ComponentResistanceCard: ComponentResistanceCardEN,
     ComponentCreateImmunityDrawer: ComponentCreateImmunityDrawerEN,
+    ComponentCreatePlayerDrawer: ComponentCreatePlayerDrawerEN,
+    ComponentCatalog: ComponentCatalogEN,
     HookUseMutationWithErrorTaost: HookUseMutationWithErrorTaostEN,
     PageWelcome: PageWelcomeEN,
     PagePartySelection: PagePartySelectionEN,
@@ -42,6 +48,8 @@ const resources = {
     ComponentResistanceCard: ComponentResistanceCardDE,
     ComponentPartyCard: ComponentPartyCardDE,
     ComponentCreateImmunityDrawer: ComponentCreateImmunityDrawerDE,
+    ComponentCreatePlayerDrawer: ComponentCreatePlayerDrawerDE,
+    ComponentCatalog: ComponentCatalogDE,
     HookUseMutationWithErrorTaost: HookUseMutationWithErrorTaostDE,
     PageWelcome: PageWelcomeDE,
     PagePartySelection: PagePartySelectionDE,

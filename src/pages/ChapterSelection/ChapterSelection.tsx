@@ -9,7 +9,7 @@ import { TypographyH1 } from "@/components/ui/typographyH1";
 import { TypographyP } from "@/components/ui/typographyP";
 import { ImageFolder } from "@/lib/utils";
 import { Chapter } from "@/types/chapters";
-import { DBImmunity } from "@/types/immunitiy";
+import { DBImmunity, Immunity } from "@/types/immunitiy";
 import { Player } from "@/types/player";
 import {
   ChevronLeftIcon,
@@ -29,6 +29,8 @@ type Props = {
    * players from the given party that are playing the chapter
    */
   players: Player[];
+  onCreateImmunity: (immunity: Immunity) => void;
+  isCreatingImmunity: boolean;
   immunities: DBImmunity[];
   /**
    * all available players in the players database
@@ -48,6 +50,8 @@ function ChapterSelection({
   loading,
   players,
   immunities,
+  isCreatingImmunity,
+  onCreateImmunity,
   playersCatalog,
   onStorePlayerImage,
 }: Props) {
@@ -141,6 +145,8 @@ function ChapterSelection({
                   className="flex flex-col gap-2 pl-2"
                 >
                   <CreatePlayerDrawer
+                    isCreatingImmunity={isCreatingImmunity}
+                    onCreateImmunity={onCreateImmunity}
                     open={isAddPlayerDrawerOpen}
                     immunities={immunities}
                     isCreating={false}

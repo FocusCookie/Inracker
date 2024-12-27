@@ -1,7 +1,5 @@
 import { DBImmunity } from "@/types/immunitiy";
 import Collapsible from "../Collapsible/Collapsible";
-import { Button } from "../ui/button";
-import { PlusCircledIcon } from "@radix-ui/react-icons";
 import {
   headingsPlugin,
   imagePlugin,
