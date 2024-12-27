@@ -1,10 +1,10 @@
 import { Attributes } from "@/types/attributes";
 import { Chapter, DBChapter } from "@/types/chapters";
 import { DBEffect, Effect } from "@/types/effect";
+import { DBImmunity, Immunity } from "@/types/immunitiy";
 import { DBParty, Party } from "@/types/party";
 import {
   DBPlayer,
-  Immunity,
   Movement,
   Player,
   SavingThrows,
@@ -116,14 +116,14 @@ const createEffect = async (
 };
 
 //* Immunities
-const getAllImmunities = async (db: TauriDatabase): Promise<Immunity[]> =>
-  await db.select<Immunity[]>("SELECT * FROM immunities");
+const getAllImmunities = async (db: TauriDatabase): Promise<DBImmunity[]> =>
+  await db.select<DBImmunity[]>("SELECT * FROM immunities");
 
 const getImmunityById = async (
   db: TauriDatabase,
   id: number,
-): Promise<Immunity> => {
-  const result = await db.select<Immunity[]>(
+): Promise<DBImmunity> => {
+  const result = await db.select<DBImmunity[]>(
     "SELECT * FROM immunitites WHERE id = $1",
     [id],
   );
@@ -257,7 +257,7 @@ const getDetailedPlayerById = async (
   const resistances = JSON.parse(dbResistances) as Resistance[];
 
   let effects: Effect[] = [];
-  let immunities: Immunity[] = [];
+  let immunities: DBImmunity[] = [];
 
   for (const effectId of effectsIds) {
     const buff = await getEffectById(db, effectId);
