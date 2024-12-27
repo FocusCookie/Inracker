@@ -15,6 +15,7 @@ import HookUseMutationWithErrorTaost from "@/translations/en/hooks/useMutationWi
 declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
+      // hygen-components - DO NOT DELETE THIS LINE
       ComponentPartyCreateDrawer: typeof ComponentPartyCreateDrawer;
       ComponentDrawer: typeof ComponentDrawer;
       ComponentPartyEditDrawer: typeof ComponentPartyEditDrawer;
@@ -23,7 +24,11 @@ declare module "i18next" {
       ComponentCreateImmunityDrawer: typeof ComponentCreateImmunityDrawer;
       ComponentCreatePlayerDrawer: typeof ComponentCreatePlayerDrawer;
       ComponentCatalog: typeof ComponentCatalog;
+
+      // hygen-hooks - DO NOT DELETE THIS LINE
       HookUseMutationWithErrorTaost: typeof HookUseMutationWithErrorTaost;
+
+      // hygen-pages - DO NOT DELETE THIS LINE
       PageWelcome: typeof PageWelcome;
       PagePartySelection: typeof PagePartySelection;
       PageChapterSelection: typeof PageChapterSelection;

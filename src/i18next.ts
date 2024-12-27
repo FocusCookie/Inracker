@@ -28,6 +28,7 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 
 const resources = {
   en: {
+    // hygen-en-components - DO NOT DELETE THIS LINE
     ComponentPartyCreateDrawer: ComponentPartyCreateDrawerEN,
     ComponentPartyEditDrawer: ComponentPartyEditDrawerEN,
     ComponentDrawer: ComponentDrawerEN,
@@ -36,12 +37,17 @@ const resources = {
     ComponentCreateImmunityDrawer: ComponentCreateImmunityDrawerEN,
     ComponentCreatePlayerDrawer: ComponentCreatePlayerDrawerEN,
     ComponentCatalog: ComponentCatalogEN,
+
+    // hygen-en-hooks - DO NOT DELETE THIS LINE
     HookUseMutationWithErrorTaost: HookUseMutationWithErrorTaostEN,
+
+    // hygen-en-pages - DO NOT DELETE THIS LINE
     PageWelcome: PageWelcomeEN,
     PagePartySelection: PagePartySelectionEN,
     PageChapterSelection: PageChapterSelectionEN,
   },
   de: {
+    // hygen-de-components - DO NOT DELETE THIS LINE
     ComponentPartyCreateDrawer: ComponentPartyCreateDrawerDE,
     ComponentPartyEditDrawer: ComponentPartyEditDrawerDE,
     ComponentDrawer: ComponentDrawerDE,
@@ -50,7 +56,11 @@ const resources = {
     ComponentCreateImmunityDrawer: ComponentCreateImmunityDrawerDE,
     ComponentCreatePlayerDrawer: ComponentCreatePlayerDrawerDE,
     ComponentCatalog: ComponentCatalogDE,
+
+    // hygen-de-hooks - DO NOT DELETE THIS LINE
     HookUseMutationWithErrorTaost: HookUseMutationWithErrorTaostDE,
+
+    // hygen-de-pages - DO NOT DELETE THIS LINE
     PageWelcome: PageWelcomeDE,
     PagePartySelection: PagePartySelectionDE,
     PageChapterSelection: PageChapterSelectionDE,
