@@ -176,17 +176,19 @@ function ChapterSelection({
             </Drawer>
           }
         >
-          <div className="flex items-center justify-between gap-2">
-            <TypographyH1>{t("chapters")}</TypographyH1>
+          {!loading && (
+            <div className="flex items-center justify-between gap-2">
+              <TypographyH1>{t("chapters")}</TypographyH1>
 
-            <Button
-              onClick={handleFilterDrawerToggle}
-              size="icon"
-              variant="ghost"
-            >
-              <RiFilterLine />
-            </Button>
-          </div>
+              <Button
+                onClick={handleFilterDrawerToggle}
+                size="icon"
+                variant="ghost"
+              >
+                <RiFilterLine />
+              </Button>
+            </div>
+          )}
 
           {loading ? (
             <Loader

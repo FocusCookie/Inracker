@@ -1,14 +1,18 @@
 import { ImageFolder } from "@/lib/utils";
+import { DBImmunity, Immunity } from "@/types/immunitiy";
 import { Player } from "@/types/player";
 import { Prettify } from "@/types/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TrashIcon } from "@radix-ui/react-icons";
+import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { RiUserAddFill } from "react-icons/ri";
 import { z } from "zod";
+import Catalog from "../Catalog/Catalog";
+import CreateImmunityDrawer from "../CreateImmunityDrawer/CreateImmunityDrawer";
 import Drawer from "../Drawer/Drawer";
 import IconPicker from "../IconPicker/IconPicker";
+import ImmunityCard from "../ImmunityCard/ImmunityCard";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import {
@@ -20,13 +24,9 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
+import { ScrollArea } from "../ui/scroll-area";
 import { Textarea } from "../ui/textarea";
 import { TypographyH2 } from "../ui/typographyh2";
-import Catalog from "../Catalog/Catalog";
-import { DBImmunity, Immunity } from "@/types/immunitiy";
-import ImmunityCard from "../ImmunityCard/ImmunityCard";
-import { ScrollArea } from "../ui/scroll-area";
-import CreateImmunityDrawer from "../CreateImmunityDrawer/CreateImmunityDrawer";
 
 type Props = {
   /**
@@ -63,6 +63,7 @@ function CreatePlayerDrawer({
   const [isCreateImmunityDrawerOpen, setIsCreateImmunityDrawerOpen] =
     useState<boolean>(false);
   const [immunitySearchTerm, setImmunitySearchTerm] = useState<string>("");
+  const [selectedImmunites, setSelectedImmunites] = useState<DBImmunity[]>([]);
 
   const formSchema = z.object({
     armor: z.number(),
@@ -80,6 +81,7 @@ function CreatePlayerDrawer({
     health: z.number(),
     maxHealth: z.number(),
     icon: z.string().emoji(),
+    immunities: z.array(z.number()),
     level: z.number(),
     movement: z.object({
       air: z.number(),
@@ -106,6 +108,7 @@ function CreatePlayerDrawer({
     }),
     picture: z.instanceof(File).or(z.string()),
   });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -127,6 +130,7 @@ function CreatePlayerDrawer({
       movement: { air: 0, ground: 8, highJump: 1.5, water: 6, wideJump: 1.5 },
       name: "",
       icon: "🧙",
+      immunities: [],
       perception: 10,
       picture: "",
       role: "",
@@ -154,7 +158,7 @@ function CreatePlayerDrawer({
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { name, description, icon, picture } = values;
+    const { picture } = values;
     let pictureFilePath: undefined | string = undefined;
 
     if (!!picture) {
@@ -164,8 +168,7 @@ function CreatePlayerDrawer({
     console.log({ values });
     console.log({ pictureFilePath });
 
-    // @ts-expect-error
-    onCreate("player object");
+    onCreate(values);
   }
 
   function handleResetPicture() {
@@ -174,9 +177,12 @@ function CreatePlayerDrawer({
     setPicturePreview("");
   }
 
-  function handleAddImmunity(id: DBImmunity["id"]) {
-    //TODO: define the immunity array in the z schema and add push each immunity to the array here
-    // form.setValue("picture", file);
+  function handleAddImmunity(immunity: DBImmunity) {
+    setSelectedImmunites((c) => [...c, immunity]);
+  }
+
+  function handleRemoveImmunity(id: DBImmunity["id"]) {
+    setSelectedImmunites((c) => c.filter((immunity) => immunity.id !== id));
   }
 
   return (
@@ -600,7 +606,6 @@ function CreatePlayerDrawer({
             <div className="flex flex-col gap-4">
               <div className="flex justify-between gap-2">
                 <TypographyH2>Immunities</TypographyH2>
-
                 <div className="flex gap-2">
                   <Button
                     disabled={isCreatingImmunity}
@@ -627,18 +632,33 @@ function CreatePlayerDrawer({
                       onSearchChange={setImmunitySearchTerm}
                       children={
                         <ScrollArea className="h-full">
-                          <div className="flex h-full flex-col gap-4 pr-4">
+                          <div className="flex h-full flex-col gap-4 p-0.5 pr-4">
                             {immunities
                               .filter((immunity) =>
                                 immunity.name
                                   .toLowerCase()
                                   .includes(immunitySearchTerm.toLowerCase()),
                               )
+                              .filter(
+                                (immunity) =>
+                                  !selectedImmunites.some(
+                                    (selected) => selected.id === immunity.id,
+                                  ),
+                              )
                               .map((immunity) => (
                                 <ImmunityCard
                                   key={immunity.id}
                                   immunity={immunity}
-                                  onAdd={handleAddImmunity}
+                                  actions={
+                                    <Button
+                                      size="icon"
+                                      onClick={() =>
+                                        handleAddImmunity(immunity)
+                                      }
+                                    >
+                                      <PlusIcon />
+                                    </Button>
+                                  }
                                 />
                               ))}
                           </div>
@@ -648,6 +668,20 @@ function CreatePlayerDrawer({
                   )}
                 </div>
               </div>
+              {selectedImmunites.map((immunity) => (
+                <ImmunityCard
+                  key={immunity.id}
+                  immunity={immunity}
+                  actions={
+                    <Button
+                      size="icon"
+                      onClick={() => handleRemoveImmunity(immunity.id)}
+                    >
+                      <TrashIcon />
+                    </Button>
+                  }
+                />
+              ))}
             </div>
 
             <div className="flex flex-col gap-4">

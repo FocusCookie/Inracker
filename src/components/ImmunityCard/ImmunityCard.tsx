@@ -17,18 +17,12 @@ import "@mdxeditor/editor/style.css";
 type Props = {
   immunity: DBImmunity;
   /**
-   * If functions is provided, the add button will appear next to the chevron
+   * react element rendered behind the chevron
    */
-  onAdd?: (id: DBImmunity["id"]) => void;
+  actions?: React.ReactNode;
 };
 
-function ImmunityCard({ immunity, onAdd }: Props) {
-  function handleAdd() {
-    if (onAdd) {
-      onAdd(immunity.id);
-    }
-  }
-
+function ImmunityCard({ immunity, actions }: Props) {
   return (
     <Collapsible
       title={
@@ -37,13 +31,7 @@ function ImmunityCard({ immunity, onAdd }: Props) {
           <span className="font-semibold">{immunity.name}</span>
         </div>
       }
-      actions={
-        onAdd && (
-          <Button onClick={handleAdd}>
-            <PlusCircledIcon />
-          </Button>
-        )
-      }
+      actions={actions}
     >
       <MDXEditor
         readOnly
