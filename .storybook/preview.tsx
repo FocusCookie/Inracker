@@ -65,9 +65,7 @@ const preview: Preview = {
   decorators: [
     withI18next,
     withRouter,
-    (Story: StoryFn) => (
-      <div className="h-full w-full bg-black p-4">{Story()}</div>
-    ),
+    (Story) => <div className="h-full w-full bg-black p-4">{Story()}</div>,
   ],
   parameters: {
     controls: {
