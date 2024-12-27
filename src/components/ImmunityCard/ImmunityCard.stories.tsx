@@ -1,7 +1,8 @@
-import type { Meta, StoryFn, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 
 import Collapsible from "./ImmunityCard";
+import { Button } from "../ui/button";
 
 const meta = {
   title: "Components/ImmunityCard",
@@ -20,7 +21,7 @@ const meta = {
     },
   },
   decorators: [
-    (Story: StoryFn) => (
+    (Story) => (
       <div className="h-fit w-full rounded-md bg-white p-2">{Story()}</div>
     ),
   ],
@@ -33,8 +34,8 @@ export const Primary: Story = {
   // args: {},
 };
 
-export const WithOnAdd: Story = {
+export const WithActions: Story = {
   args: {
-    onAdd: fn(),
+    actions: <Button>Add</Button>,
   },
 };

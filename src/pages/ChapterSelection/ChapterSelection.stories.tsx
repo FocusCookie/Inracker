@@ -1,7 +1,7 @@
-import type { Meta, StoryFn, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import ChapterSelection from "./ChapterSelection";
-// import { fn } from "@storybook/test";
+import { fn } from "@storybook/test";
 
 const meta = {
   title: "Pages/ChapterSelection",
@@ -10,11 +10,13 @@ const meta = {
     layout: "centered",
   },
   decorators: [
-    (Story: StoryFn) => (
+    (Story) => (
       <div className="h-[90vh] w-[90vw] bg-neutral-800 p-8">{Story()}</div>
     ),
   ],
   args: {
+    onStorePlayerImage: fn(),
+    loading: false,
     immunities: [
       {
         id: 1,
@@ -35,6 +37,7 @@ const meta = {
     ],
     playersCatalog: [
       {
+        image: null,
         id: 1,
         armor: 12,
         role: "mage",
@@ -104,6 +107,7 @@ const meta = {
         shield: null,
       },
       {
+        image: null,
         id: 2,
         armor: 12,
         role: "mage",
@@ -175,6 +179,7 @@ const meta = {
     ],
     chapters: [
       {
+        image: null,
         description: "lorem ipsum",
         icon: "⚔️",
         id: 1,
@@ -186,9 +191,9 @@ const meta = {
         tokens: null,
       },
     ],
-    loading: false,
     players: [
       {
+        image: null,
         id: 1,
         armor: 12,
         role: "mage",
@@ -258,6 +263,7 @@ const meta = {
         shield: null,
       },
       {
+        image: null,
         id: 3,
         armor: 12,
         role: "mage",
@@ -334,5 +340,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
-  // args: {},
+  // args: {
+  // },
 };

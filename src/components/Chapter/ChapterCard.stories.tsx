@@ -12,6 +12,7 @@ const meta = {
   args: {
     onEdit: fn(),
     chapter: {
+      image: null,
       battlemap: null,
       description:
         "Lorem ipsum dolor sit amet consectetur adipisicing elit. Culpa sequi, minus iure quidem temporibus saepe fugit dolore? Quaerat repudiandae culpa eius, sint voluptatum laudantium voluptas quod ratione sapiente, laboriosam hic! Lorem ipsum dolor sit amet consectetur adipisicing elit. Culpa sequi, minus iure quidem temporibus saepe fugit dolore? Quaerat repudiandae culpa eius, sint voluptatum laudantium voluptas quod ratione sapiente, laboriosam hic!",

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj, StoryFn } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 
 import Collapsible from "./CreateImmunityDrawer";
@@ -8,11 +8,13 @@ const meta = {
   component: Collapsible,
   parameters: {},
   args: {
+    open: true,
+    onOpenChange: fn(),
     isCreating: false,
     onCreate: fn(),
   },
   decorators: [
-    (Story: StoryFn) => (
+    (Story) => (
       <div className="h-fit w-full rounded-md bg-white p-2">{Story()}</div>
     ),
   ],

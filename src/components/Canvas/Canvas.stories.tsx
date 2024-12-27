@@ -1,4 +1,4 @@
-import type { Meta, StoryFn, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 import testBackground from "./test_assets/HB_Festplatz.jpg";
 import player1 from "./test_assets/player_1.webp";
@@ -18,7 +18,7 @@ const meta = {
     layout: "centered",
   },
   decorators: [
-    (Story: StoryFn) => (
+    (Story) => (
       <div className="h-[90vh] w-[90vw] bg-neutral-800 p-8">{Story()}</div>
     ),
   ],

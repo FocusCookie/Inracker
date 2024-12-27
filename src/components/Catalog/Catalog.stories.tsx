@@ -1,4 +1,4 @@
-import type { Meta, StoryFn, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 
 import Catalog from "./Catalog";
@@ -60,13 +60,13 @@ const meta = {
     children: (
       <div className="flex flex-col gap-2">
         {immunities.map((immunity) => (
-          <ImmunityCard key={immunity.id} immunity={immunity} onAdd={fn()} />
+          <ImmunityCard key={immunity.id} immunity={immunity} onAction={fn()} />
         ))}
       </div>
     ),
   },
   decorators: [
-    (Story: StoryFn) => (
+    (Story) => (
       <div className="h-fit w-full rounded-md bg-white p-2">{Story()}</div>
     ),
   ],

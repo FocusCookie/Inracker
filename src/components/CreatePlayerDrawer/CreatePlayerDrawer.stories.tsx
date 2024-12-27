@@ -1,4 +1,4 @@
-import type { Meta, StoryFn, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 
 import Collapsible from "./CreatePlayerDrawer";
@@ -28,7 +28,7 @@ const meta = {
     - no **splash damage**,
     - ignores water damage`,
         name: "Water Splash ",
-        icon: "💧",
+        icon: "🟢",
       },
       {
         id: 3,
@@ -36,7 +36,7 @@ const meta = {
     - no **splash damage**,
     - ignores water damage`,
         name: "Water Splash ",
-        icon: "💧",
+        icon: "🔴",
       },
       {
         id: 4,
@@ -44,7 +44,7 @@ const meta = {
     - no **splash damage**,
     - ignores water damage`,
         name: "Water Splash ",
-        icon: "💧",
+        icon: "🎅",
       },
       {
         id: 5,
@@ -52,14 +52,14 @@ const meta = {
     - no **splash damage**,
     - ignores water damage`,
         name: "Water Splash ",
-        icon: "💧",
+        icon: "💶",
       },
     ],
     isCreatingImmunity: false,
     onCreatImmunity: fn(),
   },
   decorators: [
-    (Story: StoryFn) => (
+    (Story) => (
       <div className="h-fit w-full rounded-md bg-white p-2">{Story()}</div>
     ),
   ],

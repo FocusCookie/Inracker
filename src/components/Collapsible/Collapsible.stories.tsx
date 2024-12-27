@@ -1,4 +1,4 @@
-import type { Meta, StoryFn, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 // import { fn } from "@storybook/test";
 
 import Collapsible from "./Collapsible";
@@ -13,7 +13,7 @@ const meta = {
     title: <Badge>title childs</Badge>,
   },
   decorators: [
-    (Story: StoryFn) => (
+    (Story) => (
       <div className="h-fit w-full rounded-md bg-white p-2">{Story()}</div>
     ),
   ],

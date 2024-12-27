@@ -1,4 +1,4 @@
-import type { Meta, StoryFn, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import PartySelection from "./PartySelection";
 import { fn } from "@storybook/test";
 import CreatePartyDrawer from "@/components/CreatePartyDrawer/CreatePartyDrawer";
@@ -10,7 +10,7 @@ const meta = {
     layout: "centered",
   },
   decorators: [
-    (Story: StoryFn) => (
+    (Story) => (
       <div className="h-[90vh] w-[90vw] bg-neutral-800 p-8">{Story()}</div>
     ),
   ],
