@@ -1,0 +1,27 @@
+/** Standard default values for a new player */
+export const DEFAULT_PLAYER_VALUES = {
+  armor: 10,
+  attributes: {
+    charisma: 10,
+    constitution: 10,
+    dexterity: 10,
+    intelligence: 10,
+    strength: 10,
+    wisdom: 10,
+  },
+  classSg: 10,
+  description: "",
+  ep: 0,
+  health: 10,
+  level: 1,
+  maxHealth: 10,
+  movement: { air: 0, ground: 8, highJump: 1.5, water: 6, wideJump: 1.5 },
+  name: "",
+  icon: "🧙",
+  immunities: [],
+  perception: 10,
+  picture: "",
+  role: "",
+  savingThrows: { reflex: 10, thoughness: 10, will: 10 },
+  shield: { health: 0, value: 0 },
+};

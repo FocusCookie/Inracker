@@ -28,6 +28,9 @@ import { Textarea } from "../ui/textarea";
 import { TypographyH2 } from "../ui/typographyh2";
 import { ScrollArea } from "../ui/scroll-area";
 import { useTranslation } from "react-i18next";
+import { DEFAULT_PLAYER_VALUES } from "@/constants/player";
+import { createPlayerSchema } from "@/schemas/createPlayer";
+import { useCreatePlayer } from "@/hooks/useCreatePlayer";
 
 type Props = {
   /**
@@ -60,86 +63,20 @@ function CreatePlayerDrawer({
   onOpenChange,
 }: Props) {
   const { t } = useTranslation("ComponentCreatePlayerDrawer");
-  const [picturePreview, setPicturePreview] = useState<string>("");
-  const [refreshKey, setRefreshKey] = useState<number>(0); // to reset the input type file path after a reset
+  const {
+    form,
+    picturePreview,
+    refreshKey,
+    handleFileChange,
+    handleResetPicture,
+    selectedImmunities,
+    immunitySearch,
+    handleAddImmunity,
+    handleRemoveImmunity,
+    setImmunitySearch,
+  } = useCreatePlayer();
   const [isCreateImmunityDrawerOpen, setIsCreateImmunityDrawerOpen] =
     useState<boolean>(false);
-  const [immunitySearchTerm, setImmunitySearchTerm] = useState<string>("");
-  const [selectedImmunites, setSelectedImmunites] = useState<DBImmunity[]>([]);
-
-  const formSchema = z.object({
-    armor: z.number(),
-    attributes: z.object({
-      constitution: z.number(),
-      charisma: z.number(),
-      dexterity: z.number(),
-      intelligence: z.number(),
-      strength: z.number(),
-      wisdom: z.number(),
-    }),
-    classSg: z.number(),
-    ep: z.number(),
-    description: z.string(),
-    health: z.number(),
-    maxHealth: z.number(),
-    icon: z.string().emoji(),
-    immunities: z.array(z.number()),
-    level: z.number(),
-    movement: z.object({
-      air: z.number(),
-      ground: z.number(),
-      highJump: z.number(),
-      water: z.number(),
-      wideJump: z.number(),
-    }),
-    name: z.string().min(2, {
-      message: "Username must be at least 2 characters.",
-    }),
-    perception: z.number(),
-    role: z.string().min(3, {
-      message: "The role or class must be at least 3 characters.",
-    }),
-    savingThrows: z.object({
-      reflex: z.number(),
-      will: z.number(),
-      thoughness: z.number(),
-    }),
-    shield: z.object({
-      value: z.number(),
-      health: z.number(),
-    }),
-    picture: z.instanceof(File).or(z.string()),
-  });
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      armor: 10,
-      attributes: {
-        charisma: 10,
-        constitution: 10,
-        dexterity: 10,
-        intelligence: 10,
-        strength: 10,
-        wisdom: 10,
-      },
-      classSg: 10,
-      description: "",
-      ep: 0,
-      health: 10,
-      level: 1,
-      maxHealth: 10,
-      movement: { air: 0, ground: 8, highJump: 1.5, water: 6, wideJump: 1.5 },
-      name: "",
-      icon: "🧙",
-      immunities: [],
-      perception: 10,
-      picture: "",
-      role: "",
-      savingThrows: { reflex: 10, thoughness: 10, will: 10 },
-      shield: { health: 0, value: 0 },
-    },
-  });
 
   function handleIconSelect(icon: string) {
     form.setValue("icon", icon);
@@ -149,17 +86,7 @@ function CreatePlayerDrawer({
     onOpenChange(true);
   }
 
-  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    if (!event.target.files) return;
-    const file = event.target.files[0];
-
-    if (file) {
-      setPicturePreview(URL.createObjectURL(file));
-      form.setValue("picture", file);
-    }
-  }
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof createPlayerSchema>) {
     const { picture } = values;
     let pictureFilePath: undefined | string = undefined;
 
@@ -170,21 +97,8 @@ function CreatePlayerDrawer({
     console.log({ values });
     console.log({ pictureFilePath });
 
+    // @ts-ignore
     onCreate(values);
-  }
-
-  function handleResetPicture() {
-    form.setValue("picture", "");
-    setRefreshKey((c) => c + 1);
-    setPicturePreview("");
-  }
-
-  function handleAddImmunity(immunity: DBImmunity) {
-    setSelectedImmunites((c) => [...c, immunity]);
-  }
-
-  function handleRemoveImmunity(id: DBImmunity["id"]) {
-    setSelectedImmunites((c) => c.filter((immunity) => immunity.id !== id));
   }
 
   return (
@@ -638,7 +552,7 @@ function CreatePlayerDrawer({
                       triggerName={t("add")}
                       title={t("immunityCatalog.title")}
                       description={t("immunityCatalog.descriptionText")}
-                      onSearchChange={setImmunitySearchTerm}
+                      onSearchChange={setImmunitySearch}
                       children={
                         <ScrollArea className="h-full">
                           <div className="flex h-full flex-col gap-4 p-0.5 pr-4">
@@ -646,11 +560,11 @@ function CreatePlayerDrawer({
                               .filter((immunity) =>
                                 immunity.name
                                   .toLowerCase()
-                                  .includes(immunitySearchTerm.toLowerCase()),
+                                  .includes(immunitySearch.toLowerCase()),
                               )
                               .filter(
                                 (immunity) =>
-                                  !selectedImmunites.some(
+                                  !selectedImmunities.some(
                                     (selected) => selected.id === immunity.id,
                                   ),
                               )
@@ -677,7 +591,7 @@ function CreatePlayerDrawer({
                   )}
                 </div>
               </div>
-              {selectedImmunites.map((immunity) => (
+              {selectedImmunities.map((immunity) => (
                 <ImmunityCard
                   key={immunity.id}
                   immunity={immunity}
