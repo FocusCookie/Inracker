@@ -35,10 +35,23 @@ Planned Features 🌟
 - RadixUI
 - Tanstack Router
 - Tanstack Query
+- hygen templates
 
 ## Notes
 
 - **Remove** in `index.html` the ` <script src="http://localhost:8097"></script>` in the build process.
+
+## Templates
+
+With hygen you can create components and translations.
+
+```bash
+hygen component new
+```
+
+```bash
+hygen translation new
+```
 
 ## React Dev Tools
 
@@ -52,6 +65,14 @@ This project uses react-i18next for handlin the internationalization and localiz
 
 - The `resources` in the`/src/i18next.ts` file.
 - Add the namespace and translation to the `/src/@types/i18next.d.ts` file.
+
+### Translation Templates
+
+You can use the hygen templates in order to create new translations files.
+
+```bash
+hygen translation new
+```
 
 ## Recommended IDE Setup
 
