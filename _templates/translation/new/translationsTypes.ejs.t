@@ -3,4 +3,4 @@ inject: true
 to: src/types/i18next.d.ts
 after: // hygen-<%= type %>
 ---
-      <%= h.capitalize(type) %><%= name %>: typeof <%= name %>;
+      <%= h.capitalize(type) %><%= name %>: typeof <%= h.capitalize(type) %><%= name %>;
