@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 
-import Collapsible from "./ImmunityCatalog";
+import Collapsible from "./ImmunitiesCatalog";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DBImmunity } from "@/types/immunitiy";
 
@@ -10,7 +10,7 @@ const queryClient = new QueryClient({
 });
 
 const meta = {
-  title: "Components/ImmunityCatalog",
+  title: "Components/ImmunitiesCatalog",
   component: Collapsible,
   parameters: {},
   args: {

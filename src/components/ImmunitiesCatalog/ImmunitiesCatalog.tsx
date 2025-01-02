@@ -15,8 +15,8 @@ type Props = {
   onAddImmunity: (immunity: DBImmunity) => void;
 };
 
-function ImmunityCatalog({ query, selection, onAddImmunity }: Props) {
-  const { t } = useTranslation("ComponentImmunityCatalog");
+function ImmunitiesCatalog({ query, selection, onAddImmunity }: Props) {
+  const { t } = useTranslation("ComponentImmunitiesCatalog");
   const [searchTerm, setSearchTerm] = useState("");
 
   function handleSearchTerm(search: string) {
@@ -78,4 +78,4 @@ function ImmunityCatalog({ query, selection, onAddImmunity }: Props) {
   );
 }
 
-export default ImmunityCatalog;
+export default ImmunitiesCatalog;

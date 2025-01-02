@@ -1,9 +1,9 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import ComponentImmunityCatalogEN from "@/translations/en/components/ImmunityCatalog.json";
-import ComponentImmunityCatalogDE from "@/translations/de/components/ImmunityCatalog.json"; 
+import ComponentImmunitiesCatalogEN from "@/translations/en/components/ImmunitiesCatalog.json";
+import ComponentImmunitiesCatalogDE from "@/translations/de/components/ImmunitiesCatalog.json";
 import ComponentResistanceCatalogEN from "@/translations/en/components/ResistanceCatalog.json";
-import ComponentResistanceCatalogDE from "@/translations/de/components/ResistanceCatalog.json"; 
+import ComponentResistanceCatalogDE from "@/translations/de/components/ResistanceCatalog.json";
 import ComponentCatalogEN from "@/translations/en/components/Catalog.json";
 import ComponentCatalogDE from "@/translations/de/components/Catalog.json";
 import LanguageDetector from "i18next-browser-languagedetector";
@@ -33,7 +33,7 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
-    ComponentImmunityCatalog: ComponentImmunityCatalogEN,
+    ComponentImmunitiesCatalog: ComponentImmunitiesCatalogEN,
     ComponentResistanceCatalog: ComponentResistanceCatalogEN,
     ComponentPartyCreateDrawer: ComponentPartyCreateDrawerEN,
     ComponentPartyEditDrawer: ComponentPartyEditDrawerEN,
@@ -54,7 +54,7 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
-    ComponentImmunityCatalog: ComponentImmunityCatalogDE,
+    ComponentImmunityCatalog: ComponentImmunitiesCatalogDE,
     ComponentResistanceCatalog: ComponentResistanceCatalogDE,
     ComponentPartyCreateDrawer: ComponentPartyCreateDrawerDE,
     ComponentPartyEditDrawer: ComponentPartyEditDrawerDE,
