@@ -11,68 +11,41 @@ import {
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
 import Collapsible from "../Collapsible/Collapsible";
-import { Badge } from "../ui/badge";
-import { useTranslation } from "react-i18next";
 
 type Props = {
-  resistances: DBResistance[];
+  resistance: DBResistance;
+  /**
+   * react element rendered behind the chevron
+   */
+  actions?: React.ReactNode;
 };
 
-function ResistanceCard({ resistances }: Props) {
-  const { t } = useTranslation("ComponentResistanceCard");
-
+function ResistanceCard({ resistance, actions }: Props) {
   return (
-    <div className="rounded-md border border-border p-2">
-      <Collapsible
-        title={
-          <div className="flex items-center gap-2">
-            <Badge>{resistances.length}</Badge>
-            <span className="text-lg font-bold">{t("resistances")}</span>
-          </div>
-        }
-      >
-        {resistances.map((resistance) => (
-          <Collapsible
-            title={
-              <div className="flex items-center gap-2">
-                <span>{resistance.icon}</span>
-                <span className="font-semibold">{resistance.name}</span>
-              </div>
-            }
-            key={resistance.id}
-          >
-            <MDXEditor
-              readOnly
-              contentEditableClassName="prose"
-              markdown={resistance.description}
-              plugins={[
-                linkPlugin(),
-                linkDialogPlugin(),
-                imagePlugin(),
-                listsPlugin(),
-                thematicBreakPlugin(),
-                headingsPlugin(),
-                tablePlugin(),
-                // toolbarPlugin({
-                //   toolbarContents: () => (
-                //     <>
-                //       <UndoRedo />
-                //       <BlockTypeSelect />
-                //       <BoldItalicUnderlineToggles />
-                //       <CreateLink />
-                //       <InsertImage />
-                //       <ListsToggle />
-                //       <InsertThematicBreak />
-                //       <InsertTable />
-                //     </>
-                //   ),
-                // }),
-              ]}
-            />
-          </Collapsible>
-        ))}
-      </Collapsible>
-    </div>
+    <Collapsible
+      title={
+        <div className="flex items-center gap-4">
+          <span>{resistance.icon}</span>
+          <span className="font-semibold">{resistance.name}</span>
+        </div>
+      }
+      actions={actions}
+    >
+      <MDXEditor
+        readOnly
+        contentEditableClassName="prose"
+        markdown={resistance.description}
+        plugins={[
+          linkPlugin(),
+          linkDialogPlugin(),
+          imagePlugin(),
+          listsPlugin(),
+          thematicBreakPlugin(),
+          headingsPlugin(),
+          tablePlugin(),
+        ]}
+      />
+    </Collapsible>
   );
 }
 

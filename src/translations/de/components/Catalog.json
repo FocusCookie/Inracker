@@ -1,1 +1,3 @@
-{ "search": "Suche nach einer Immunität..." }
+{
+  "searchPlaceholder": "Durchsuche den Katalog..."
+}

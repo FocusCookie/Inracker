@@ -1,4 +1,6 @@
 import "i18next";
+import ComponentImmunityCatalog from "@/translations/en/component/ImmunityCatalog.json";
+import ComponentResistanceCatalog from "@/translations/en/component/ResistanceCatalog.json";
 import PageWelcome from "@/translations/en/pages/Welcome.json";
 import PagePartySelection from "@/translations/en/pages/PartySelection.json";
 import PageChapterSelection from "@/translations/en/pages/ChapterSelection.json";
@@ -16,6 +18,8 @@ declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
       // hygen-components - DO NOT DELETE THIS LINE
+      ComponentImmunityCatalog: typeof ImmunityCatalog;
+      ComponentResistanceCatalog: typeof ResistanceCatalog;
       ComponentPartyCreateDrawer: typeof ComponentPartyCreateDrawer;
       ComponentDrawer: typeof ComponentDrawer;
       ComponentPartyEditDrawer: typeof ComponentPartyEditDrawer;

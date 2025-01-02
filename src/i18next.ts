@@ -1,5 +1,11 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentImmunityCatalogEN from "@/translations/en/components/ImmunityCatalog.json";
+import ComponentImmunityCatalogDE from "@/translations/de/components/ImmunityCatalog.json"; 
+import ComponentResistanceCatalogEN from "@/translations/en/components/ResistanceCatalog.json";
+import ComponentResistanceCatalogDE from "@/translations/de/components/ResistanceCatalog.json"; 
+import ComponentCatalogEN from "@/translations/en/components/Catalog.json";
+import ComponentCatalogDE from "@/translations/de/components/Catalog.json";
 import LanguageDetector from "i18next-browser-languagedetector";
 import PageWelcomeEN from "@/translations/en/pages/welcome.json";
 import PageWelcomeDE from "@/translations/de/pages/welcome.json";
@@ -21,14 +27,14 @@ import ComponentCreateImmunityDrawerEN from "@/translations/en/components/Create
 import ComponentCreateImmunityDrawerDE from "@/translations/de/components/CreateImmunityDrawer.json";
 import ComponentCreatePlayerDrawerEN from "@/translations/en/components/CreatePlayerDrawer.json";
 import ComponentCreatePlayerDrawerDE from "@/translations/de/components/CreatePlayerDrawer.json";
-import ComponentCatalogEN from "@/translations/en/components/Catalog.json";
-import ComponentCatalogDE from "@/translations/de/components/Catalog.json";
 import HookUseMutationWithErrorTaostEN from "@/translations/en/hooks/useMutationWithErrorTaost.json";
 import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutationWithErrorTaost.json";
 
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentImmunityCatalog: ComponentImmunityCatalogEN,
+    ComponentResistanceCatalog: ComponentResistanceCatalogEN,
     ComponentPartyCreateDrawer: ComponentPartyCreateDrawerEN,
     ComponentPartyEditDrawer: ComponentPartyEditDrawerEN,
     ComponentDrawer: ComponentDrawerEN,
@@ -48,6 +54,8 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentImmunityCatalog: ComponentImmunityCatalogDE,
+    ComponentResistanceCatalog: ComponentResistanceCatalogDE,
     ComponentPartyCreateDrawer: ComponentPartyCreateDrawerDE,
     ComponentPartyEditDrawer: ComponentPartyEditDrawerDE,
     ComponentDrawer: ComponentDrawerDE,

@@ -1,1 +1,3 @@
-{ "search": "search for an immunity..." }
+{
+  "searchPlaceholder": "Search the catalog..."
+}

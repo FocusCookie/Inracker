@@ -54,7 +54,7 @@ function Catalog({
 
           <Input
             className="mt-4"
-            placeholder={t("search")}
+            placeholder={t("searchPlaceholder")}
             onChange={handleSearchTerm}
           />
         </div>
