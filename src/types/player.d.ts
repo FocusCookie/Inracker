@@ -63,6 +63,8 @@ export type DBPlayer = {
   shield: string;
   /** id to look up in the skills table */
   skills: number;
+  custom_skill_1_name: string;
+  custom_skill_2_name: string;
 };
 
 export type Player = Prettify<

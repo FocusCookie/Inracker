@@ -1,5 +1,9 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentEffectsCatalogEN from "@/translations/en/components/EffectsCatalog.json";
+import ComponentEffectsCatalogDE from "@/translations/de/components/EffectsCatalog.json";
+import ComponentCreateResistanceDrawerEN from "@/translations/en/components/CreateResistanceDrawer.json";
+import ComponentCreateResistanceDrawerDE from "@/translations/de/components/CreateResistanceDrawer.json";
 import ComponentImmunitiesCatalogEN from "@/translations/en/components/ImmunitiesCatalog.json";
 import ComponentImmunitiesCatalogDE from "@/translations/de/components/ImmunitiesCatalog.json";
 import ComponentResistanceCatalogEN from "@/translations/en/components/ResistanceCatalog.json";
@@ -33,6 +37,8 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentEffectsCatalog: ComponentEffectsCatalogEN,
+    ComponentCreateResistanceDrawer: ComponentCreateResistanceDrawerEN,
     ComponentImmunitiesCatalog: ComponentImmunitiesCatalogEN,
     ComponentResistanceCatalog: ComponentResistanceCatalogEN,
     ComponentPartyCreateDrawer: ComponentPartyCreateDrawerEN,
@@ -54,7 +60,9 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
-    ComponentImmunityCatalog: ComponentImmunitiesCatalogDE,
+    ComponentEffectsCatalog: ComponentEffectsCatalogDE,
+    ComponentCreateResistanceDrawer: ComponentCreateResistanceDrawerDE,
+    ComponentImmunitiesCatalog: ComponentImmunitiesCatalogDE,
     ComponentResistanceCatalog: ComponentResistanceCatalogDE,
     ComponentPartyCreateDrawer: ComponentPartyCreateDrawerDE,
     ComponentPartyEditDrawer: ComponentPartyEditDrawerDE,

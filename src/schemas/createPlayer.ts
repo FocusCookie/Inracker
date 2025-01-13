@@ -1,5 +1,5 @@
+import i18next from "i18next";
 import { z } from "zod";
-// import i18next from "./i18n";
 //TODO: Use the  i18next.t('my.key') for translating the messages
 
 export const createPlayerSchema = z.object({
@@ -28,11 +28,11 @@ export const createPlayerSchema = z.object({
     wideJump: z.coerce.number(),
   }),
   name: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+    message: i18next.t("ComponentCreatePlayerDrawer.minName"),
   }),
   perception: z.coerce.number(),
-  role: z.string().min(3, {
-    message: "The role or class must be at least 3 characters.",
+  role: z.string().min(2, {
+    message: i18next.t("ComponentCreatePlayerDrawer.minRole"),
   }),
   savingThrows: z.object({
     reflex: z.coerce.number(),
@@ -44,4 +44,27 @@ export const createPlayerSchema = z.object({
     health: z.coerce.number(),
   }),
   picture: z.instanceof(File).or(z.string()),
+  custom_skill_1_name: z.string(),
+  custom_skill_2_name: z.string(),
+  skills: z.object({
+    acrobatics: z.coerce.number(),
+    arcane: z.coerce.number(),
+    athletics: z.coerce.number(),
+    craftmanship: z.coerce.number(),
+    deception: z.coerce.number(),
+    diplomacy: z.coerce.number(),
+    healing: z.coerce.number(),
+    intimidation: z.coerce.number(),
+    nature: z.coerce.number(),
+    occultism: z.coerce.number(),
+    performance: z.coerce.number(),
+    player: z.coerce.number(),
+    religion: z.coerce.number(),
+    social: z.coerce.number(),
+    stealth: z.coerce.number(),
+    thievery: z.coerce.number(),
+    survival: z.coerce.number(),
+    custom_1: z.coerce.number(),
+    custom_2: z.coerce.number(),
+  }),
 });

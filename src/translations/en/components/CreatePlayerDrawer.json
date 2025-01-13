@@ -39,8 +39,30 @@
     "descriptionText": "Choose from a list of existing immunities to customize your character."
   },
   "add": "Add",
-  "resictances": "Resictances",
+  "resistances": "resistances",
   "skills": "Skills",
   "attributes": "Attributes",
-  "level": "Level"
+  "level": "Level",
+  "skillKeys": {
+    "acrobatics": "Acrobatics",
+    "arcane": "Arcane",
+    "athletics": "Athletics",
+    "craftmanship": "Craftmanship",
+    "deception": "Deception",
+    "diplomacy": "Diplomacy",
+    "healing": "Healing",
+    "intimidation": "Intimidation",
+    "nature": "Nature",
+    "occultism": "Occultism",
+    "performance": "Performance",
+    "religion": "Religion",
+    "social": "Social",
+    "stealth": "Stealth",
+    "thievery": "Thievery",
+    "survival": "Survival"
+  },
+  "customName": "Custom Name",
+  "customValue": "Custom Value",
+  "minName": "The name must be at least two characters long.",
+  "minRole": "The role must be at least two characters long."
 }

@@ -1,0 +1,6 @@
+{
+  "effects": "Effekte",
+  "description": "Wähle einen Effekt, der entweder positiv oder negativ für den Charakter ist, und beeinflusse damit seine Fähigkeiten, Schwächen oder sein Verhalten.",
+  "nothingFound": "Keine Effekte gefunden. Erstelle einen!",
+  "loading": "Lade Effekte..."
+}

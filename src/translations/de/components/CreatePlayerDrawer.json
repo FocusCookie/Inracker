@@ -39,8 +39,30 @@
     "descriptionText": "Wähle aus einer Liste bestehender Immunitäten, um deinen Charakter anzupassen."
   },
   "add": "Hinzufügen",
-  "resictances": "Widerstände",
+  "resistances": "Widerstände",
   "skills": "Fähigkeiten",
   "attributes": "Attribute",
-  "level": "Stufe"
+  "level": "Stufe",
+  "skillKeys": {
+    "acrobatics": "Akrobatik",
+    "arcane": "Arkane",
+    "athletics": "Athletik",
+    "craftmanship": "Handwerk",
+    "deception": "Täuschung",
+    "diplomacy": "Diplomatie",
+    "healing": "Heilung",
+    "intimidation": "Einschüchterung",
+    "nature": "Natur",
+    "occultism": "Okkultismus",
+    "performance": "Performance",
+    "religion": "Religion",
+    "social": "Soziales",
+    "stealth": "Heimlichkeit",
+    "thievery": "Diebstahl",
+    "survival": "Überleben"
+  },
+  "customName": "Benutzerdefinierter Name",
+  "customValue": "Benutzerdefinierter Wert",
+  "minName": "Der Name muss mindestens zwei Zeichen lang sein.",
+  "minRole": "Die Rolle muss mindestens zwei Zeichen lang sein."
 }

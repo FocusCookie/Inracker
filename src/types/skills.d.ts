@@ -3,8 +3,8 @@ export type Skills = {
   arcane: number;
   athletics: number;
   craftmanship: number;
-  custom_1: number;
-  custom_2: number;
+  custom_skill_1: number;
+  custom_skill_2: number;
   deception: number;
   diplomacy: number;
   healing: number;

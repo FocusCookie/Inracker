@@ -48,7 +48,9 @@ pub fn run() {
                 role TEXT,
                 saving_throws TEXT, -- JSON string: reflex, will, thoughness
                 shield STRING, -- JSON string: value, health
-                skills INTEGER -- skills id
+                skills INTEGER -- skills id,
+                custom_skill_1_name TEXT,
+                custim_skill_2_name TEXT,
             )",
             kind: MigrationKind::Up,
         },

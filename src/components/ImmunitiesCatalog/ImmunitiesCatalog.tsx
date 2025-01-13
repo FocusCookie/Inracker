@@ -27,50 +27,49 @@ function ImmunitiesCatalog({ query, selection, onAddImmunity }: Props) {
     <>
       {!query.isLoading && query?.data && (
         <Catalog
-          disabled={false}
+          disabled={query.isLoading}
           triggerName={t("immunities")}
           title={t("immunities")}
           description={t("description")}
           onSearchChange={handleSearchTerm}
-          children={
-            <ScrollArea className="h-full">
-              <div className="flex h-full flex-col gap-4 p-0.5 pr-4">
-                {query.data
-                  .filter((immunity) =>
-                    immunity.name
-                      .toLowerCase()
-                      .includes(searchTerm.toLowerCase()),
-                  )
-                  .filter(
-                    (immunity) =>
-                      !selection.some((item) => item.id === immunity.id),
-                  )
-                  .map((immunity) => (
-                    <ImmunityCard
-                      key={immunity.id}
-                      immunity={immunity}
-                      actions={
-                        <Button
-                          size="icon"
-                          onClick={() => onAddImmunity(immunity)}
-                        >
-                          <PlusIcon />
-                        </Button>
-                      }
-                    />
-                  ))}
-              </div>
-            </ScrollArea>
-          }
-        />
+        >
+          <ScrollArea className="h-full">
+            <div className="flex h-full flex-col gap-4 p-0.5 pr-4">
+              {query.data
+                .filter((immunity) =>
+                  immunity.name
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()),
+                )
+                .filter(
+                  (immunity) =>
+                    !selection.some((item) => item.id === immunity.id),
+                )
+                .map((immunity) => (
+                  <ImmunityCard
+                    key={immunity.id}
+                    immunity={immunity}
+                    actions={
+                      <Button
+                        size="icon"
+                        onClick={() => onAddImmunity(immunity)}
+                      >
+                        <PlusIcon />
+                      </Button>
+                    }
+                  />
+                ))}
+            </div>
+          </ScrollArea>
+        </Catalog>
       )}
 
-      {!query.isLoading && !query?.data && "nothing found create one"}
+      {!query.isLoading && !query?.data && t("nothingFound")}
 
       {query.isLoading && (
         <Loader
           size="large"
-          title="Loading Immunities..."
+          title={t("loading")}
           key="loader-immunity-catalog"
         />
       )}

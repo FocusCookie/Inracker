@@ -1,4 +1,6 @@
 {
   "immunities": "Immunitäten",
-  "description": "Wähle eine Immunität, die du dem Charakter hinzufügen möchtest, um ihm Schutz vor bestimmten Gefahren zu gewähren."
+  "description": "Wähle eine Immunität, die du dem Charakter hinzufügen möchtest, um ihm Schutz vor bestimmten Gefahren zu gewähren.",
+  "nothingFound": "Keine Immunität gefunden. Erstelle eine!",
+  "loading": "Lade Immunitäten..."
 }
