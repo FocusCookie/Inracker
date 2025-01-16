@@ -13,6 +13,7 @@ import {
   linkPlugin,
   listsPlugin,
   ListsToggle,
+  markdownShortcutPlugin,
   MDXEditor,
   tablePlugin,
   thematicBreakPlugin,
@@ -172,6 +173,7 @@ function CreateResistanceDrawer({
                             </>
                           ),
                         }),
+                        markdownShortcutPlugin(),
                       ]}
                     />
                   </FormControl>

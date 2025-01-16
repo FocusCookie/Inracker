@@ -38,11 +38,16 @@
     "title": "Immunities",
     "descriptionText": "Choose from a list of existing immunities to customize your character."
   },
+  "resistanceCatalog": {
+    "title": "Resistances",
+    "descriptionText": "Choose from a list of existing resistances to customize your character."
+  },
   "add": "Add",
-  "resistances": "resistances",
+  "resistances": "Resistances",
   "skills": "Skills",
   "attributes": "Attributes",
   "level": "Level",
+  "health": "Health",
   "skillKeys": {
     "acrobatics": "Acrobatics",
     "arcane": "Arcane",
@@ -64,5 +69,8 @@
   "customName": "Custom Name",
   "customValue": "Custom Value",
   "minName": "The name must be at least two characters long.",
-  "minRole": "The role must be at least two characters long."
+  "minRole": "The role must be at least two characters long.",
+  "overviewDescription": "This is where you can jot down permanent notes about the character. They are the first information to open on a player, allowing for easy reference during your sessions.",
+  "detailsDescription": "This section is for all the essential skills and additional important information about the character. Expand it when you need to access specific details during your adventures!",
+  "details": "Details"
 }

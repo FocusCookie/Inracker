@@ -13,6 +13,7 @@ import {
   linkPlugin,
   listsPlugin,
   ListsToggle,
+  markdownShortcutPlugin,
   MDXEditor,
   tablePlugin,
   thematicBreakPlugin,
@@ -169,6 +170,7 @@ function CreateImmunityDrawer({
                             </>
                           ),
                         }),
+                        markdownShortcutPlugin(),
                       ]}
                     />
                   </FormControl>

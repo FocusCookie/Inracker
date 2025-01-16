@@ -16,7 +16,7 @@ const meta = {
       armor: 12,
       role: "mage",
       classSg: 22,
-      description: "Hex hex!",
+      details: "Hex hex!",
       effects: [],
       icon: "🧙",
       attributes: {

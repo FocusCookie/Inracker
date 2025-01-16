@@ -1,23 +1,46 @@
-import { DEFAULT_PLAYER_VALUES } from "@/constants/player";
 import { createPlayerSchema } from "@/schemas/createPlayer";
 import { DBImmunity } from "@/types/immunitiy";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import overviewTemplate from "@/translations/templates/overview";
+import detailsTemplate from "@/translations/templates/details";
+import i18n from "@/i18next";
+import { DBResistance } from "@/types/resistances";
 
 export const useCreatePlayer = () => {
+  const language = i18n.language as "en" | "de";
   const [picturePreview, setPicturePreview] = useState<string>("");
   const [refreshKey, setRefreshKey] = useState<number>(0); // to reset the input type file path after a reset
   const [selectedImmunities, setSelectedImmunities] = useState<DBImmunity[]>(
     [],
   );
+  const [selectedResistances, setSelectedResistances] = useState<
+    DBResistance[]
+  >([]);
   const [immunitySearch, setImmunitySearch] = useState<string>("");
+  const [resistanceSearch, setResistanceSearch] = useState<string>("");
+  const [details, setDetails] = useState<string>(detailsTemplate[language]);
+  const [overview, setOverview] = useState<string>(overviewTemplate[language]);
 
   const formSchema = createPlayerSchema;
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: DEFAULT_PLAYER_VALUES,
+    defaultValues: {
+      details: detailsTemplate[language],
+      ep: 0,
+      health: 10,
+      level: 1,
+      maxHealth: 10,
+      name: "",
+      overview: overviewTemplate[language],
+      icon: "🧙",
+      immunities: [],
+      picture: "",
+      role: "",
+      resistances: [],
+    },
   });
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -42,20 +65,51 @@ export const useCreatePlayer = () => {
     form.setValue("immunities", [...currentImmunities, immunity.id]);
   }
 
+  function handleAddResistance(resistance: DBResistance) {
+    setSelectedResistances((c) => [...c, resistance]);
+    const currentResistances = form.getValues("resistances");
+    form.setValue("resistances", [...currentResistances, resistance.id]);
+  }
+
   function handleRemoveImmunity(id: DBImmunity["id"]) {
     setSelectedImmunities((c) => c.filter((immunity) => immunity.id !== id));
   }
 
+  function handleRemoveResistance(id: DBResistance["id"]) {
+    setSelectedResistances((c) =>
+      c.filter((resistance) => resistance.id !== id),
+    );
+  }
+
+  function handleDetailsChange(update: string) {
+    setDetails(update);
+    form.setValue("details", update);
+  }
+
+  function handleOverviewChange(update: string) {
+    setOverview(update);
+    form.setValue("overview", update);
+  }
+
   return {
     form,
+    details,
+    overview,
     picturePreview,
     refreshKey,
-    handleFileChange,
-    handleResetPicture,
     selectedImmunities,
     immunitySearch,
+    resistanceSearch,
+    selectedResistances,
+    handleRemoveResistance,
+    handleAddResistance,
+    handleFileChange,
+    handleResetPicture,
+    setResistanceSearch,
     handleAddImmunity,
     handleRemoveImmunity,
     setImmunitySearch,
+    handleDetailsChange,
+    handleOverviewChange,
   };
 };

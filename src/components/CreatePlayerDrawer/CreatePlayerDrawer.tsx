@@ -1,7 +1,6 @@
 import { ImageFolder } from "@/lib/utils";
 import { DBImmunity, Immunity } from "@/types/immunitiy";
-import { Player } from "@/types/player";
-import { Prettify } from "@/types/utils";
+import { TCreatePlayer } from "@/types/player";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
 import { RiUserAddFill } from "react-icons/ri";
@@ -16,19 +15,42 @@ import { Button } from "../ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
 import { TypographyH2 } from "../ui/typographyh2";
 import { ScrollArea } from "../ui/scroll-area";
 import { useTranslation } from "react-i18next";
 import { createPlayerSchema } from "@/schemas/createPlayer";
 import { useCreatePlayer } from "@/hooks/useCreatePlayer";
-import { Skills } from "@/types/skills";
+import {
+  BlockTypeSelect,
+  BoldItalicUnderlineToggles,
+  CreateLink,
+  headingsPlugin,
+  imagePlugin,
+  InsertImage,
+  InsertTable,
+  InsertThematicBreak,
+  linkDialogPlugin,
+  linkPlugin,
+  listsPlugin,
+  ListsToggle,
+  markdownShortcutPlugin,
+  MDXEditor,
+  tablePlugin,
+  thematicBreakPlugin,
+  toolbarPlugin,
+  UndoRedo,
+} from "@mdxeditor/editor";
+import "@mdxeditor/editor/style.css";
+import { DBResistance, Resistance } from "@/types/resistances";
+import ResistanceCard from "../ResistanceCard/ResistanceCard";
+import CreateResistanceDrawer from "../CreateResistanceDrawer/CreateResistanceDrawer";
 
 type Props = {
   /**
@@ -37,6 +59,9 @@ type Props = {
   isCreating: boolean;
   open: boolean;
   immunities: DBImmunity[];
+  resistances: DBResistance[];
+  isCreatingImmunity: boolean;
+  isCreatingResistance: boolean;
   /**
    * A function to store a player image, which takes a picture and a folder and returns the saved file path.
    */
@@ -44,36 +69,20 @@ type Props = {
     picture: File | string,
     folder: ImageFolder,
   ) => Promise<string | undefined>;
-  onCreate: (player: Prettify<Omit<Player, "id">>) => void;
+  onCreate: (player: TCreatePlayer) => void;
   onOpenChange: (state: boolean) => void;
   onCreateImmunity: (immunity: Immunity) => void;
-  isCreatingImmunity: boolean;
+  onCreateResistance: (resistance: Resistance) => void;
 };
-
-const SKILL_KEYS: (keyof Skills)[] = [
-  "acrobatics",
-  "arcane",
-  "athletics",
-  "craftmanship",
-  "deception",
-  "diplomacy",
-  "healing",
-  "intimidation",
-  "nature",
-  "occultism",
-  "performance",
-  "religion",
-  "social",
-  "stealth",
-  "thievery",
-  "survival",
-].sort();
 
 function CreatePlayerDrawer({
   isCreating,
   open,
   immunities,
   isCreatingImmunity,
+  resistances,
+  isCreatingResistance,
+  onCreateResistance,
   onCreateImmunity,
   onStorePlayerImage,
   onCreate,
@@ -84,15 +93,26 @@ function CreatePlayerDrawer({
     form,
     picturePreview,
     refreshKey,
+    immunitySearch,
+    selectedImmunities,
+    details,
+    overview,
+    resistanceSearch,
+    selectedResistances,
+    handleRemoveResistance,
+    handleAddResistance,
+    setResistanceSearch,
+    handleDetailsChange,
+    handleOverviewChange,
     handleFileChange,
     handleResetPicture,
-    selectedImmunities,
-    immunitySearch,
     handleAddImmunity,
     handleRemoveImmunity,
     setImmunitySearch,
   } = useCreatePlayer();
   const [isCreateImmunityDrawerOpen, setIsCreateImmunityDrawerOpen] =
+    useState<boolean>(false);
+  const [isCreateResistanceDrawerOpen, setIsCreateResistanceDrawerOpen] =
     useState<boolean>(false);
 
   function handleIconSelect(icon: string) {
@@ -104,18 +124,19 @@ function CreatePlayerDrawer({
   }
 
   async function onSubmit(values: z.infer<typeof createPlayerSchema>) {
-    const { picture } = values;
+    const { picture, health } = values;
     let pictureFilePath: undefined | string = undefined;
 
     if (!!picture) {
       pictureFilePath = await onStorePlayerImage(picture, "players");
     }
 
-    console.log({ values });
-    console.log({ pictureFilePath });
-
-    // @ts-ignore
-    onCreate(values);
+    onCreate({
+      ...values,
+      maxHealth: health,
+      effects: [],
+      image: pictureFilePath || null,
+    });
   }
 
   return (
@@ -149,6 +170,7 @@ function CreatePlayerDrawer({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex flex-col gap-4">
               <TypographyH2>Overview</TypographyH2>
+
               <div className="flex items-start gap-2">
                 <div className="flex flex-col gap-3 pl-0.5 pt-1.5">
                   <FormLabel>{t("icon")}</FormLabel>
@@ -182,6 +204,36 @@ function CreatePlayerDrawer({
                       <FormLabel>{t("role")}</FormLabel>
                       <FormControl>
                         <Input type="text" disabled={isCreating} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="flex items-start gap-2 pl-1">
+                <FormField
+                  control={form.control}
+                  name="level"
+                  render={({ field }) => (
+                    <FormItem className="w-full px-0.5">
+                      <FormLabel>{t("level")}</FormLabel>
+                      <FormControl>
+                        <Input type="number" disabled={isCreating} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="maxHealth"
+                  render={({ field }) => (
+                    <FormItem className="w-full px-0.5">
+                      <FormLabel>{t("health")}</FormLabel>
+                      <FormControl>
+                        <Input type="number" disabled={isCreating} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -230,85 +282,48 @@ function CreatePlayerDrawer({
 
               <FormField
                 control={form.control}
-                name="description"
+                name="overview"
                 render={({ field }) => (
-                  <FormItem className="w-full px-0.5">
-                    <FormLabel>{t("description")}</FormLabel>
-                    <FormControl>
-                      <Textarea disabled={isCreating} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                  <FormItem className="px-0.5">
+                    <FormLabel>{t("overview")}</FormLabel>
+                    <FormDescription>
+                      {t("overviewDescription")}
+                    </FormDescription>
 
-            <div className="flex flex-col gap-4">
-              <TypographyH2>{t("attributes")}</TypographyH2>
+                    <FormControl className="rounded-md border">
+                      <MDXEditor
+                        disabled={isCreating}
+                        {...field}
+                        contentEditableClassName="prose"
+                        markdown={overview}
+                        onChange={handleOverviewChange}
+                        plugins={[
+                          linkPlugin(),
+                          linkDialogPlugin(),
+                          imagePlugin(),
+                          listsPlugin(),
+                          thematicBreakPlugin(),
+                          headingsPlugin(),
+                          tablePlugin(),
+                          toolbarPlugin({
+                            toolbarContents: () => (
+                              <>
+                                <UndoRedo />
+                                <BlockTypeSelect />
+                                <BoldItalicUnderlineToggles />
+                                <CreateLink />
+                                <InsertImage />
+                                <ListsToggle />
+                                <InsertThematicBreak />
+                                <InsertTable />
+                              </>
+                            ),
+                          }),
+                          markdownShortcutPlugin(),
+                        ]}
+                      />
+                    </FormControl>
 
-              <FormField
-                control={form.control}
-                name="attributes.charisma"
-                render={({ field }) => (
-                  <FormItem className="w-full px-0.5">
-                    <FormLabel>{t("charisma")}</FormLabel>
-                    <FormControl>
-                      <Input type="number" disabled={isCreating} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="attributes.constitution"
-                render={({ field }) => (
-                  <FormItem className="w-full px-0.5">
-                    <FormLabel>{t("constitution")}</FormLabel>
-                    <FormControl>
-                      <Input type="number" disabled={isCreating} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="attributes.dexterity"
-                render={({ field }) => (
-                  <FormItem className="w-full px-0.5">
-                    <FormLabel>{t("dexterity")}</FormLabel>
-                    <FormControl>
-                      <Input type="number" disabled={isCreating} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="attributes.intelligence"
-                render={({ field }) => (
-                  <FormItem className="w-full px-0.5">
-                    <FormLabel>{t("intelligence")}</FormLabel>
-                    <FormControl>
-                      <Input type="number" disabled={isCreating} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="attributes.strength"
-                render={({ field }) => (
-                  <FormItem className="w-full px-0.5">
-                    <FormLabel>{t("strenght")}</FormLabel>
-                    <FormControl>
-                      <Input type="number" disabled={isCreating} {...field} />
-                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -316,232 +331,52 @@ function CreatePlayerDrawer({
 
               <FormField
                 control={form.control}
-                name="attributes.wisdom"
+                name="details"
                 render={({ field }) => (
-                  <FormItem className="w-full px-0.5">
-                    <FormLabel>{t("wisdom")}</FormLabel>
-                    <FormControl>
-                      <Input type="number" disabled={isCreating} {...field} />
+                  <FormItem className="px-0.5">
+                    <FormLabel>Details</FormLabel>
+                    <FormDescription>
+                      {t("overviewDescription")}
+                    </FormDescription>
+
+                    <FormControl className="rounded-md border">
+                      <MDXEditor
+                        disabled={isCreating}
+                        {...field}
+                        contentEditableClassName="prose"
+                        markdown={details}
+                        onChange={handleDetailsChange}
+                        plugins={[
+                          linkPlugin(),
+                          linkDialogPlugin(),
+                          imagePlugin(),
+                          listsPlugin(),
+                          thematicBreakPlugin(),
+                          headingsPlugin(),
+                          tablePlugin(),
+                          toolbarPlugin({
+                            toolbarContents: () => (
+                              <>
+                                <UndoRedo />
+                                <BlockTypeSelect />
+                                <BoldItalicUnderlineToggles />
+                                <CreateLink />
+                                <InsertImage />
+                                <ListsToggle />
+                                <InsertThematicBreak />
+                                <InsertTable />
+                              </>
+                            ),
+                          }),
+                          markdownShortcutPlugin(),
+                        ]}
+                      />
                     </FormControl>
+
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <TypographyH2>Charakterwerte/Stats</TypographyH2>
-              <div className="grid grid-cols-3 gap-x-2 gap-y-4">
-                <FormField
-                  control={form.control}
-                  name="armor"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("armor")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="classSg"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("classSg")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="ep"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("experience")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="level"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("level")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="maxHealth"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("maxHealth")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="perception"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("perception")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="movement.air"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("airMovement")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="movement.ground"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("groundMovement")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="movement.water"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("waterMovement")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="movement.highJump"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("highJump")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="movement.wideJump"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("wideJump")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <span></span>
-                <FormField
-                  control={form.control}
-                  name="savingThrows.reflex"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("reflexSaving")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="savingThrows.thoughness"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("reflexThoughness")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="savingThrows.will"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("reflexWill")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="shield.health"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("shieldMaxHealth")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="shield.value"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("shieldHealth")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
             </div>
 
             <div className="flex flex-col gap-4">
@@ -630,51 +465,51 @@ function CreatePlayerDrawer({
                 <TypographyH2>{t("resistances")}</TypographyH2>
                 <div className="flex gap-2">
                   <Button
-                    disabled={isCreating || isCreatingImmunity}
-                    loading={isCreatingImmunity}
-                    onClick={() => setIsCreateImmunityDrawerOpen((c) => !c)}
+                    disabled={isCreating || isCreatingResistance}
+                    loading={isCreatingResistance}
+                    onClick={() => setIsCreateResistanceDrawerOpen((c) => !c)}
                   >
                     {t("create")}
                   </Button>
 
-                  <CreateImmunityDrawer
-                    open={isCreateImmunityDrawerOpen}
-                    onOpenChange={setIsCreateImmunityDrawerOpen}
-                    isCreating={isCreatingImmunity}
-                    onCreate={onCreateImmunity}
+                  <CreateResistanceDrawer
+                    open={isCreateResistanceDrawerOpen}
+                    onOpenChange={setIsCreateResistanceDrawerOpen}
+                    isCreating={isCreatingResistance}
+                    onCreate={onCreateResistance}
                   />
 
-                  {immunities.length > 0 && (
+                  {resistances.length > 0 && (
                     <Catalog
-                      disabled={isCreatingImmunity}
+                      disabled={isCreatingResistance}
                       triggerName={t("add")}
-                      title={t("immunityCatalog.title")}
-                      description={t("immunityCatalog.descriptionText")}
-                      onSearchChange={setImmunitySearch}
+                      title={t("resistanceCatalog.title")}
+                      description={t("resistanceCatalog.descriptionText")}
+                      onSearchChange={setResistanceSearch}
                       children={
                         <ScrollArea className="h-full">
                           <div className="flex h-full flex-col gap-4 p-0.5 pr-4">
-                            {immunities
-                              .filter((immunity) =>
-                                immunity.name
+                            {resistances
+                              .filter((resistance) =>
+                                resistance.name
                                   .toLowerCase()
-                                  .includes(immunitySearch.toLowerCase()),
+                                  .includes(resistanceSearch.toLowerCase()),
                               )
                               .filter(
-                                (immunity) =>
-                                  !selectedImmunities.some(
-                                    (selected) => selected.id === immunity.id,
+                                (resistance) =>
+                                  !selectedResistances.some(
+                                    (selected) => selected.id === resistance.id,
                                   ),
                               )
-                              .map((immunity) => (
-                                <ImmunityCard
-                                  key={immunity.id}
-                                  immunity={immunity}
+                              .map((resistance) => (
+                                <ResistanceCard
+                                  key={resistance.id}
+                                  resistance={resistance}
                                   actions={
                                     <Button
                                       size="icon"
                                       onClick={() =>
-                                        handleAddImmunity(immunity)
+                                        handleAddResistance(resistance)
                                       }
                                     >
                                       <PlusIcon />
@@ -690,147 +525,20 @@ function CreatePlayerDrawer({
                 </div>
               </div>
 
-              {selectedImmunities.map((immunity) => (
-                <ImmunityCard
-                  key={immunity.id}
-                  immunity={immunity}
+              {selectedResistances.map((resistance) => (
+                <ResistanceCard
+                  key={resistance.id}
+                  resistance={resistance}
                   actions={
                     <Button
                       size="icon"
-                      onClick={() => handleRemoveImmunity(immunity.id)}
+                      onClick={() => handleRemoveResistance(resistance.id)}
                     >
                       <TrashIcon />
                     </Button>
                   }
                 />
               ))}
-            </div>
-
-            <div className="flex flex-col pb-1">
-              <TypographyH2>{t("skills")}</TypographyH2>
-
-              <div className="flex flex-col gap-2">
-                {SKILL_KEYS.map((skill, index) => (
-                  <FormField
-                    key={`skill-${skill}-${index}`}
-                    control={form.control}
-                    // @ts-expect-error
-                    name={`skills.${skill}`}
-                    render={({ field }) => (
-                      <FormItem className="flex w-full items-center justify-start gap-4 space-y-0 px-0.5">
-                        <FormControl>
-                          {/*  @ts-expect-error  */}
-                          <Input
-                            className="w-20"
-                            type="number"
-                            disabled={isCreating}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormLabel className="mt-0 text-base">
-                          {/* @ts-expect-error */}
-                          {t(`skillKeys.${skill}`)}
-                        </FormLabel>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                ))}
-
-                <div className="mt-4 flex gap-4">
-                  <FormField
-                    control={form.control}
-                    name="custom_skill_1_name"
-                    render={({ field }) => (
-                      <FormItem className="flex w-full flex-col px-0.5">
-                        <FormLabel className="mt-0 text-base">
-                          {t("customName")}
-                        </FormLabel>
-
-                        <FormControl>
-                          <Input
-                            placeholder="Custom"
-                            type="text"
-                            disabled={isCreating}
-                            {...field}
-                          />
-                        </FormControl>
-
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="skills.custom_1"
-                    render={({ field }) => (
-                      <FormItem className="flex w-full flex-col px-0.5">
-                        <FormLabel className="mt-0 text-base">
-                          {t("customValue")}
-                        </FormLabel>
-
-                        <FormControl>
-                          <Input
-                            type="number"
-                            disabled={isCreating}
-                            {...field}
-                          />
-                        </FormControl>
-
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="mt-4 flex gap-4">
-                  <FormField
-                    control={form.control}
-                    name="custom_skill_2_name"
-                    render={({ field }) => (
-                      <FormItem className="flex w-full flex-col px-0.5">
-                        <FormLabel className="mt-0 text-base">
-                          {t("customName")}
-                        </FormLabel>
-
-                        <FormControl>
-                          <Input
-                            placeholder="Custom"
-                            type="text"
-                            disabled={isCreating}
-                            {...field}
-                          />
-                        </FormControl>
-
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="skills.custom_2"
-                    render={({ field }) => (
-                      <FormItem className="flex w-full flex-col px-0.5">
-                        <FormLabel className="mt-0 text-base">
-                          {t("customValue")}
-                        </FormLabel>
-
-                        <FormControl>
-                          <Input
-                            type="number"
-                            disabled={isCreating}
-                            {...field}
-                          />
-                        </FormControl>
-
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
             </div>
           </form>
         </Form>

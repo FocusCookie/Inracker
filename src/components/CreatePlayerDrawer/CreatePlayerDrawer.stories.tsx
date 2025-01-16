@@ -57,6 +57,9 @@ const meta = {
     ],
     isCreatingImmunity: false,
     onCreateImmunity: fn(),
+    isCreatingResistance: false,
+    onCreateResistance: fn(),
+    resistances: [{ description: "lorem", icon: "😍", id: 1, name: "love it" }],
   },
   decorators: [
     (Story) => (

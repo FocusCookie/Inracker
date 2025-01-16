@@ -20,7 +20,7 @@ pub fn run() {
                 name TEXT NOT NULL,
                 description TEXT,
                 icon TEXT NOT NULL,
-                players TEXT
+                players TEXT -- JSON array ids
             )",
             kind: MigrationKind::Up,
         },
@@ -28,11 +28,8 @@ pub fn run() {
             version: 2,
             description: "create players table",
             sql: "CREATE TABLE IF NOT EXISTS players(
-                armor INTEGER,
-                attributes INTEGER, -- attributes id
-                class_sg INTEGER,
-                description TEXT,
-                effects STRING, -- JSON array ids
+                details TEXT,
+                effects TEXT, -- JSON array ids
                 ep INTEGER,
                 health INTEGER,
                 max_health INTEGER,
@@ -41,16 +38,10 @@ pub fn run() {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 immunities TEXT, -- JSON array ids
                 level INTEGER,
-                movement TEXT, -- JSON string: Object air, ground, water, high_jump, wide_jump
                 name TEXT NOT NULL,
-                perception NUMBER,
+                overview TEXT,
                 resistances TEXT, --JSON array ids
-                role TEXT,
-                saving_throws TEXT, -- JSON string: reflex, will, thoughness
-                shield STRING, -- JSON string: value, health
-                skills INTEGER -- skills id,
-                custom_skill_1_name TEXT,
-                custim_skill_2_name TEXT,
+                role TEXT
             )",
             kind: MigrationKind::Up,
         },
@@ -82,48 +73,6 @@ pub fn run() {
         },
         Migration {
             version: 5,
-            description: "create attributes table",
-            sql: "CREATE TABLE IF NOT EXISTS attributes (
-                constitution INTEGER NOT NULL,
-                charisma INTEGER NOT NULL,
-                dexterity INTEGER NOT NULL,
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                intelligence INTEGER NOT NULL,
-                player INTEGER,
-                strength INTEGER NOT NULL,
-                wisdom INTEGER NOT NULL
-            )",
-            kind: MigrationKind::Up,
-        },
-        Migration {
-            version: 6,
-            description: "create skills table",
-            sql: "CREATE TABLE IF NOT EXISTS skills (
-                acrobatics INTEGER NOT NULL,
-                arcane INTEGER NOT NULL,
-                athletics INTEGER NOT NULL,
-                craftmanship INTEGER NOT NULL,
-                custom_1 INTEGER NOT NULL,
-                custom_2 INTEGER NOT NULL,
-                deception INTEGER NOT NULL,
-                diplomacy INTEGER NOT NULL,
-                healing INTEGER NOT NULL,
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                intimidation INTEGER NOT NULL,
-                nature INTEGER NOT NULL,
-                occultism INTEGER NOT NULL,
-                performance INTEGER NOT NULL,
-                player INTEGER NOT NULL,
-                religion INTEGER NOT NULL,
-                social INTEGER NOT NULL,
-                stealth INTEGER NOT NULL,
-                survival INTEGER NOT NULL,
-                thievery INTEGER NOT NULL
-            )",
-            kind: MigrationKind::Up,
-        },
-        Migration {
-            version: 7,
             description: "create resistances table",
             sql: "CREATE TABLE IF NOT EXISTS resistances (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -134,12 +83,12 @@ pub fn run() {
             kind: MigrationKind::Up,
         },
         Migration {
-            version: 8,
+            version: 6,
             description: "create chapters table",
             sql: "CREATE TABLE IF NOT EXISTS chapters (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
-                description TEXT,
+                details TEXT,
                 image TEXT,
                 icon TEXT NOT NULL,
                 experience INTEGER,
@@ -151,7 +100,7 @@ pub fn run() {
             kind: MigrationKind::Up,
         },
         Migration {
-            version: 9,
+            version: 7,
             description: "create encounter table",
             sql: "CREATE TABLE IF NOT EXISTS encounter (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -171,7 +120,7 @@ pub fn run() {
             kind: MigrationKind::Up,
         },
         Migration {
-            version: 10,
+            version: 8,
             description: "create opponents table",
             sql: "CREATE TABLE IF NOT EXISTS opponents (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -180,7 +129,7 @@ pub fn run() {
                 image TEXT,
                 icon TEXT NOT NULL,
                 level INTEGER,
-                labels STRING -- JSON ARRAY of strings
+                labels TEXT -- JSON ARRAY of strings
             )",
             kind: MigrationKind::Up,
         },

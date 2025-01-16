@@ -1,44 +1,13 @@
 import { Attributes } from "./attributes";
-import { Buff, Debuff, Effect, HarmfulEffect } from "./effect";
+import { Buff, DBEffect, Debuff, Effect, HarmfulEffect } from "./effect";
 import { DBImmunity } from "./immunitiy";
-import { Resistance } from "./resistances";
+import { DBResistance, Resistance } from "./resistances";
 import { Skills } from "./skills";
 import { Prettify } from "./utils";
 
-/**
- * Player movement in meter
- */
-export type Movement = {
-  ground: number;
-  air: number;
-  water: number;
-  highJump: number;
-  wideJump: number;
-};
-
-export type SavingThrows = {
-  reflex: number;
-  will: number;
-  toughness: number;
-};
-
-/**
- * All the shiled related stats
- */
-export type Shield = {
-  /**
-   * value which is added against the attack throw
-   */
-  value: number;
-  health: number;
-};
-
 export type DBPlayer = {
-  armor: number;
-  /** id to look up in the attributes table */
-  attributes: number;
-  class_sg: number;
-  description: string;
+  /** markdown notes */
+  details: string;
   /** array of ids effects / which are buffs and debuffs */
   effects: string;
   ep: number;
@@ -46,52 +15,35 @@ export type DBPlayer = {
   image: string | null;
   icon: string;
   readonly id: number;
+  /** array of ids immunities */
   immunities: string;
   level: number;
   max_health: number;
-  /** json string of type Movement */
-  movement: string;
+  /** array of ids resistances */
   name: string;
-  perception: number;
-  /** Character Class such as rouqe, mage, ... */
-  role: string;
-  /** character resistances */
+  /** markdown notes that are shown first on player info */
+  overview: string;
   resistances: string;
-  /** json string of type Skills */
-  saving_throws: string;
-  /** json string  or null of type Skills */
-  shield: string;
-  /** id to look up in the skills table */
-  skills: number;
-  custom_skill_1_name: string;
-  custom_skill_2_name: string;
+  role: string;
 };
 
 export type Player = Prettify<
+  Omit<DBPlayer, "effects" | "immunities" | "max_health" | "resistances"> & {
+    effects: DBEffect[];
+    immunities: DBImmunity[];
+    maxHealth: number;
+    resistances: DBResistance[];
+  }
+>;
+
+export type TCreatePlayer = Prettify<
   Omit<
     DBPlayer,
-    | "id"
-    | "movement"
-    | "effects"
-    | "saving_throws"
-    | "shield"
-    | "immunities"
-    | "attributes"
-    | "skills"
-    | "class_sg"
-    | "max_health"
-    | "resistances"
+    "effects" | "immunities" | "id" | "max_health" | "resistances"
   > & {
-    id: DBPlayer["id"];
-    effects: Effect[];
-    immunities: DBImmunity[];
-    movement: Movement;
-    savingThrows: SavingThrows;
-    shield: Shield | null;
-    attributes: Attributes;
-    skills: Skills;
-    classSg: number;
+    effects: Array<Effect["id"]>;
+    immunities: Array<DBImmunity["id"]>;
     maxHealth: number;
-    resistances: Resistance[];
+    resistances: Array<Resistance["id"]>;
   }
 >;

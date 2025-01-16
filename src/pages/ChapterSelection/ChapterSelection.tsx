@@ -10,7 +10,9 @@ import { TypographyP } from "@/components/ui/typographyP";
 import { ImageFolder } from "@/lib/utils";
 import { Chapter } from "@/types/chapters";
 import { DBImmunity, Immunity } from "@/types/immunitiy";
-import { Player } from "@/types/player";
+import { Player, TCreatePlayer } from "@/types/player";
+import { DBResistance, Resistance } from "@/types/resistances";
+import { Prettify } from "@/types/utils";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -20,7 +22,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { RiFilterLine, RiUserAddFill } from "react-icons/ri";
+import { RiFilterLine } from "react-icons/ri";
 
 type Props = {
   chapters: Chapter[];
@@ -29,9 +31,11 @@ type Props = {
    * players from the given party that are playing the chapter
    */
   players: Player[];
-  onCreateImmunity: (immunity: Immunity) => void;
   isCreatingImmunity: boolean;
+  isCreatingResistance: boolean;
+  isCreatingPlayer: boolean;
   immunities: DBImmunity[];
+  resistances: DBResistance[];
   /**
    * all available players in the players database
    */
@@ -43,6 +47,9 @@ type Props = {
     picture: File | string,
     folder: ImageFolder,
   ) => Promise<string | undefined>;
+  onCreateImmunity: (immunity: Immunity) => void;
+  onCreateResistance: (resistance: Resistance) => void;
+  onCreatePlayer: (player: TCreatePlayer) => void;
 };
 
 function ChapterSelection({
@@ -50,9 +57,14 @@ function ChapterSelection({
   loading,
   players,
   immunities,
+  resistances,
   isCreatingImmunity,
-  onCreateImmunity,
   playersCatalog,
+  isCreatingPlayer,
+  isCreatingResistance,
+  onCreateResistance,
+  onCreateImmunity,
+  onCreatePlayer,
   onStorePlayerImage,
 }: Props) {
   const { t } = useTranslation("PageChapterSelection");
@@ -145,14 +157,17 @@ function ChapterSelection({
                   className="flex flex-col gap-2 pl-2"
                 >
                   <CreatePlayerDrawer
+                    isCreatingResistance={isCreatingResistance}
+                    onCreateResistance={onCreateResistance}
+                    resistances={resistances}
                     isCreatingImmunity={isCreatingImmunity}
                     onCreateImmunity={onCreateImmunity}
                     open={isAddPlayerDrawerOpen}
                     immunities={immunities}
-                    isCreating={false}
+                    isCreating={isCreatingPlayer}
                     onStorePlayerImage={onStorePlayerImage}
                     onOpenChange={setIsAddPlayerDrawerOpen}
-                    onCreate={() => console.log("create player")}
+                    onCreate={onCreatePlayer}
                   />
 
                   {/* //TODO: Settings Modal für player add */}

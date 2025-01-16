@@ -1,17 +1,9 @@
-import { Attributes } from "@/types/attributes";
 import { Chapter, DBChapter } from "@/types/chapters";
 import { DBEffect, Effect } from "@/types/effect";
 import { DBImmunity, Immunity } from "@/types/immunitiy";
 import { DBParty, Party } from "@/types/party";
-import {
-  DBPlayer,
-  Movement,
-  Player,
-  SavingThrows,
-  Shield,
-} from "@/types/player";
-import { Resistance } from "@/types/resistances";
-import { Skills } from "@/types/skills";
+import { DBPlayer, Player, TCreatePlayer } from "@/types/player";
+import { DBResistance, Resistance } from "@/types/resistances";
 import TauriDatabase from "@tauri-apps/plugin-sql";
 
 const environment = import.meta.env.VITE_ENV;
@@ -42,44 +34,6 @@ const disconnect = async (): Promise<void> => {
     await dbInstance.close?.();
     dbInstance = null;
   }
-};
-
-//* Attributes
-const getAttributesById = async (
-  db: TauriDatabase,
-  id: number,
-): Promise<Attributes> => {
-  const result = await db.select<Attributes[]>(
-    "SELECT * FROM attributes WHERE id = $1",
-    [id],
-  );
-
-  if (!result.length) {
-    throw createDatabaseError(`Attributes with ID ${id} not found`);
-  }
-
-  return result[0];
-};
-
-const createAttributes = async (
-  db: TauriDatabase,
-  attributes: Omit<Attributes, "id">,
-): Promise<Attributes> => {
-  const {
-    charisma,
-    constitution,
-    dexterity,
-    intelligence,
-    player,
-    strength,
-    wisdom,
-  } = attributes;
-  const result = await db.execute(
-    "INSERT INTO attributes (charisma, constitution, dexterity, intelligence, player, strength, wisdom) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
-    [charisma, constitution, dexterity, intelligence, player, strength, wisdom],
-  );
-
-  return getAttributesById(db, result.lastInsertId);
 };
 
 //* Effects
@@ -124,7 +78,7 @@ const getImmunityById = async (
   id: number,
 ): Promise<DBImmunity> => {
   const result = await db.select<DBImmunity[]>(
-    "SELECT * FROM immunitites WHERE id = $1",
+    "SELECT * FROM immunities WHERE id = $1",
     [id],
   );
 
@@ -138,14 +92,47 @@ const getImmunityById = async (
 const createImmunitiy = async (
   db: TauriDatabase,
   immunity: Omit<Immunity, "id">,
-): Promise<Immunity> => {
+): Promise<DBImmunity> => {
   const { description, icon, name } = immunity;
   const result = await db.execute(
-    "INSERT INTO immunities (description, icon, name) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+    "INSERT INTO immunities (description, icon, name) VALUES ($1, $2, $3) RETURNING *",
     [description, icon, name],
   );
 
   return getImmunityById(db, result.lastInsertId);
+};
+
+//* Resistances
+const getAllResistances = async (db: TauriDatabase): Promise<DBResistance[]> =>
+  await db.select<DBResistance[]>("SELECT * FROM resistances");
+
+const getResistanceById = async (
+  db: TauriDatabase,
+  id: number,
+): Promise<DBResistance> => {
+  const result = await db.select<DBResistance[]>(
+    "SELECT * FROM resistances WHERE id = $1",
+    [id],
+  );
+
+  if (!result.length) {
+    throw createDatabaseError(`Resistance with ID ${id} not found`);
+  }
+
+  return result[0];
+};
+
+const createResistance = async (
+  db: TauriDatabase,
+  immunity: Omit<Resistance, "id">,
+): Promise<DBResistance> => {
+  const { description, icon, name } = immunity;
+  const result = await db.execute(
+    "INSERT INTO resistances (description, icon, name) VALUES ($1, $2, $3) RETURNING *",
+    [description, icon, name],
+  );
+
+  return getResistanceById(db, result.lastInsertId);
 };
 
 //* Party
@@ -223,17 +210,10 @@ const getDetailedPlayerById = async (
 ) => {
   const dbPlayer = await getPlayerById(db, playerId);
   const {
-    movement: dbMovement,
     effects: dbEffects,
-    saving_throws: dbSavingThrows,
-    shield: dbShield,
     image,
     immunities: dbImmunities,
-    skills: dbSkills,
-    attributes: dbAttributes,
-    armor,
-    class_sg,
-    description,
+    details,
     ep,
     health,
     icon,
@@ -241,22 +221,17 @@ const getDetailedPlayerById = async (
     level,
     name,
     max_health,
-    perception,
     resistances: dbResistances,
     role,
+    overview,
   } = dbPlayer;
 
-  const movement = JSON.parse(dbMovement) as Movement;
-  const shield = JSON.parse(dbShield) as Shield;
-  const savingThrows = JSON.parse(dbSavingThrows) as SavingThrows;
-
-  const attributes = await getAttributesById(db, dbAttributes);
   const effectsIds = JSON.parse(dbEffects) as number[];
   const immunitiesIds = JSON.parse(dbImmunities) as number[];
-  const skills = await getSkillsById(db, dbSkills);
   const resistances = JSON.parse(dbResistances) as Resistance[];
+  const maxHealth = max_health;
 
-  let effects: Effect[] = [];
+  let effects: DBEffect[] = [];
   let immunities: DBImmunity[] = [];
 
   for (const effectId of effectsIds) {
@@ -267,7 +242,7 @@ const getDetailedPlayerById = async (
     effects.push({
       description,
       duration,
-      durationType: duration_type === "rounds" ? "rounds" : "time",
+      duration_type,
       icon,
       id,
       name,
@@ -281,25 +256,18 @@ const getDetailedPlayerById = async (
   }
 
   const player: Player = {
-    movement,
-    shield,
-    savingThrows,
-    attributes,
+    details,
     effects,
-    image,
-    immunities,
-    skills,
-    armor,
-    classSg: class_sg,
-    description,
     ep,
     health,
-    icon,
+    maxHealth,
     id,
+    image,
+    icon,
+    immunities,
     level,
     name,
-    maxHealth: max_health,
-    perception,
+    overview,
     resistances,
     role,
   };
@@ -328,50 +296,40 @@ const getPlayerById = async (
 
 const createPlayer = async (
   db: TauriDatabase,
-  player: Omit<Player, "id">,
+  player: TCreatePlayer,
 ): Promise<DBPlayer> => {
   const {
-    armor,
-    attributes,
-    classSg,
-    description,
-    ep,
+    details,
     effects,
+    ep,
     health,
+    maxHealth,
+    image,
     icon,
     immunities,
     level,
-    movement,
     name,
-    maxHealth,
-    perception,
+    overview,
+    resistances,
     role,
-    savingThrows,
-    shield,
-    skills,
   } = player;
 
   const result = await db.execute(
-    "INSERT INTO players (armor, attributes, class_sg, description, ep, effects, health, icon, immunities, level, movement, name, perception, role, saving_throws, shield, skills) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)  RETURNING *",
+    "INSERT INTO players (details, effects, ep, health, max_health, image, icon,immunities, level, name, overview, resistances, role) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)  RETURNING *",
     [
-      armor,
-      attributes.id,
-      classSg,
-      description,
+      details,
+      JSON.stringify(effects.map((id) => id).join(", ")),
       ep,
-      JSON.stringify(effects.map((effect) => effect.id).join(", ")),
       health,
-      icon,
-      JSON.stringify(immunities.map((immunity) => immunity.id).join(", ")),
-      level,
-      JSON.stringify(movement),
-      name,
-      perception,
-      role,
-      JSON.stringify(savingThrows),
-      JSON.stringify(shield),
-      skills.id,
       maxHealth,
+      image,
+      icon,
+      JSON.stringify(immunities.map((id) => id).join(", ")),
+      level,
+      name,
+      overview,
+      JSON.stringify(resistances.map((id) => id).join(", ")),
+      role,
     ],
   );
 
@@ -385,76 +343,6 @@ const deletePartyById = async (
   const res = await db.execute("DELETE FROM parties WHERE id = $1", [id]);
 
   return Boolean(res.rowsAffected);
-};
-
-//* Skills
-const getSkillsById = async (
-  db: TauriDatabase,
-  id: number,
-): Promise<Skills> => {
-  const result = await db.select<Skills[]>(
-    "SELECT * FROM skills WHERE id = $1",
-    [id],
-  );
-
-  if (!result.length) {
-    throw createDatabaseError(`Skills with ID ${id} not found`);
-  }
-
-  return result[0];
-};
-
-const createSkills = async (
-  db: TauriDatabase,
-  skills: Omit<Skills, "id">,
-): Promise<Skills> => {
-  const {
-    acrobatics,
-    arcane,
-    athletics,
-    craftmanship,
-    custom_1,
-    custom_2,
-    deception,
-    diplomacy,
-    healing,
-    intimidation,
-    nature,
-    occultism,
-    performance,
-    player,
-    religion,
-    social,
-    stealth,
-    survival,
-    thievery,
-  } = skills;
-  const result = await db.execute(
-    "INSERT INTO skills (acrobatics, arcane, athletics, craftmanship, custom_1, custom_2, deception, diplomacy, healing, intimidation, nature, occultism, performance, player, religion, social, stealth, survival, thievery) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING *",
-    [
-      acrobatics,
-      arcane,
-      athletics,
-      craftmanship,
-      custom_1,
-      custom_2,
-      deception,
-      diplomacy,
-      healing,
-      intimidation,
-      nature,
-      occultism,
-      performance,
-      player,
-      religion,
-      social,
-      stealth,
-      survival,
-      thievery,
-    ],
-  );
-
-  return getSkillsById(db, result.lastInsertId);
 };
 
 //* Chapters
@@ -487,17 +375,6 @@ export const Database = {
   connect,
   disconnect,
 
-  attributes: {
-    getById: async (id: number) => {
-      const db = await connect();
-      return getAttributesById(db, id);
-    },
-    create: async (attributes: Omit<Attributes, "id">) => {
-      const db = await connect();
-      return createAttributes(db, attributes);
-    },
-  },
-
   effects: {
     getAll: async () => {
       const db = await connect();
@@ -522,9 +399,24 @@ export const Database = {
       const db = await connect();
       return getImmunityById(db, id);
     },
-    create: async (immunity: Omit<Immunity, "id">) => {
+    create: async (immunity: Omit<DBResistance, "id">) => {
       const db = await connect();
       return createImmunitiy(db, immunity);
+    },
+  },
+
+  resistances: {
+    getAll: async () => {
+      const db = await connect();
+      return getAllResistances(db);
+    },
+    getById: async (id: number) => {
+      const db = await connect();
+      return getResistanceById(db, id);
+    },
+    create: async (resistance: Omit<DBResistance, "id">) => {
+      const db = await connect();
+      return createResistance(db, resistance);
     },
   },
 
@@ -593,20 +485,9 @@ export const Database = {
 
       return detailedPlayers;
     },
-    create: async (player: Omit<Player, "id">) => {
+    create: async (player: TCreatePlayer) => {
       const db = await connect();
       return createPlayer(db, player);
-    },
-  },
-
-  skills: {
-    getById: async (id: number) => {
-      const db = await connect();
-      return getSkillsById(db, id);
-    },
-    create: async (skills: Omit<Skills, "id">) => {
-      const db = await connect();
-      return createSkills(db, skills);
     },
   },
 

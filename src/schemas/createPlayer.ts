@@ -1,70 +1,21 @@
 import i18next from "i18next";
 import { z } from "zod";
-//TODO: Use the  i18next.t('my.key') for translating the messages
 
 export const createPlayerSchema = z.object({
-  armor: z.coerce.number(),
-  attributes: z.object({
-    constitution: z.coerce.number(),
-    charisma: z.coerce.number(),
-    dexterity: z.coerce.number(),
-    intelligence: z.coerce.number(),
-    strength: z.coerce.number(),
-    wisdom: z.coerce.number(),
-  }),
-  classSg: z.coerce.number(),
   ep: z.coerce.number(),
-  description: z.string(),
+  details: z.string(),
+  overview: z.string(),
   health: z.coerce.number(),
   maxHealth: z.coerce.number(),
   icon: z.string().emoji(),
   immunities: z.array(z.coerce.number()),
   level: z.coerce.number(),
-  movement: z.object({
-    air: z.coerce.number(),
-    ground: z.coerce.number(),
-    highJump: z.coerce.number(),
-    water: z.coerce.number(),
-    wideJump: z.coerce.number(),
-  }),
   name: z.string().min(2, {
     message: i18next.t("ComponentCreatePlayerDrawer.minName"),
   }),
-  perception: z.coerce.number(),
   role: z.string().min(2, {
     message: i18next.t("ComponentCreatePlayerDrawer.minRole"),
   }),
-  savingThrows: z.object({
-    reflex: z.coerce.number(),
-    will: z.coerce.number(),
-    thoughness: z.coerce.number(),
-  }),
-  shield: z.object({
-    value: z.coerce.number(),
-    health: z.coerce.number(),
-  }),
   picture: z.instanceof(File).or(z.string()),
-  custom_skill_1_name: z.string(),
-  custom_skill_2_name: z.string(),
-  skills: z.object({
-    acrobatics: z.coerce.number(),
-    arcane: z.coerce.number(),
-    athletics: z.coerce.number(),
-    craftmanship: z.coerce.number(),
-    deception: z.coerce.number(),
-    diplomacy: z.coerce.number(),
-    healing: z.coerce.number(),
-    intimidation: z.coerce.number(),
-    nature: z.coerce.number(),
-    occultism: z.coerce.number(),
-    performance: z.coerce.number(),
-    player: z.coerce.number(),
-    religion: z.coerce.number(),
-    social: z.coerce.number(),
-    stealth: z.coerce.number(),
-    thievery: z.coerce.number(),
-    survival: z.coerce.number(),
-    custom_1: z.coerce.number(),
-    custom_2: z.coerce.number(),
-  }),
+  resistances: z.array(z.coerce.number()),
 });
