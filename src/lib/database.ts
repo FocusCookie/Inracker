@@ -66,7 +66,7 @@ const createEffect = async (
     [name, icon, description, duration, durationType, type],
   );
 
-  return getEffectById(db, result.lastInsertId);
+  return getEffectById(db, result!.lastInsertId as number);
 };
 
 //* Immunities
@@ -99,7 +99,7 @@ const createImmunitiy = async (
     [description, icon, name],
   );
 
-  return getImmunityById(db, result.lastInsertId);
+  return getImmunityById(db, result!.lastInsertId as number);
 };
 
 //* Resistances
@@ -132,7 +132,7 @@ const createResistance = async (
     [description, icon, name],
   );
 
-  return getResistanceById(db, result.lastInsertId);
+  return getResistanceById(db, result!.lastInsertId as number);
 };
 
 //* Party
@@ -189,7 +189,7 @@ const createParty = async (
     "INSERT INTO parties (name, icon, description, players ) VALUES ($1, $2, $3, $4) RETURNING *",
     [name, icon, description, JSON.stringify(players)],
   );
-  return getPartyById(db, result.lastInsertId);
+  return getPartyById(db, result!.lastInsertId as number);
 };
 
 const updateParty = async (db: TauriDatabase, party: Party): Promise<Party> => {
@@ -333,7 +333,7 @@ const createPlayer = async (
     ],
   );
 
-  return getPlayerById(db, result.lastInsertId);
+  return getPlayerById(db, result!.lastInsertId as number);
 };
 
 const deletePartyById = async (
