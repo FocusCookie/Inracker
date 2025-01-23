@@ -12,7 +12,6 @@ import { Chapter } from "@/types/chapters";
 import { DBImmunity, Immunity } from "@/types/immunitiy";
 import { Player, TCreatePlayer } from "@/types/player";
 import { DBResistance, Resistance } from "@/types/resistances";
-import { Prettify } from "@/types/utils";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -162,12 +161,8 @@ function ChapterSelection({
                     resistances={resistances}
                     isCreatingImmunity={isCreatingImmunity}
                     onCreateImmunity={onCreateImmunity}
-                    open={isAddPlayerDrawerOpen}
                     immunities={immunities}
-                    isCreating={isCreatingPlayer}
                     onStorePlayerImage={onStorePlayerImage}
-                    onOpenChange={setIsAddPlayerDrawerOpen}
-                    onCreate={onCreatePlayer}
                   />
 
                   {/* //TODO: Settings Modal für player add */}

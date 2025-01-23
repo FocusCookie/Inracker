@@ -1,6 +1,5 @@
 import { ImageFolder } from "@/lib/utils";
 import { DBImmunity, Immunity } from "@/types/immunitiy";
-import { TCreatePlayer } from "@/types/player";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
 import { RiUserAddFill } from "react-icons/ri";
@@ -51,13 +50,9 @@ import "@mdxeditor/editor/style.css";
 import { DBResistance, Resistance } from "@/types/resistances";
 import ResistanceCard from "../ResistanceCard/ResistanceCard";
 import CreateResistanceDrawer from "../CreateResistanceDrawer/CreateResistanceDrawer";
+import { usePlayerStore } from "@/stores/PlayerState";
 
 type Props = {
-  /**
-   * disabels the inputs and sets the create button to loading and disables other buttons
-   */
-  isCreating: boolean;
-  open: boolean;
   immunities: DBImmunity[];
   resistances: DBResistance[];
   isCreatingImmunity: boolean;
@@ -69,15 +64,11 @@ type Props = {
     picture: File | string,
     folder: ImageFolder,
   ) => Promise<string | undefined>;
-  onCreate: (player: TCreatePlayer) => void;
-  onOpenChange: (state: boolean) => void;
   onCreateImmunity: (immunity: Immunity) => void;
   onCreateResistance: (resistance: Resistance) => void;
 };
 
 function CreatePlayerDrawer({
-  isCreating,
-  open,
   immunities,
   isCreatingImmunity,
   resistances,
@@ -85,10 +76,15 @@ function CreatePlayerDrawer({
   onCreateResistance,
   onCreateImmunity,
   onStorePlayerImage,
-  onCreate,
-  onOpenChange,
 }: Props) {
   const { t } = useTranslation("ComponentCreatePlayerDrawer");
+  const {
+    createPlayer,
+    isCreateDrawerOpen,
+    isCreating,
+    setIsCreateDrawerOpen,
+  } = usePlayerStore();
+
   const {
     form,
     picturePreview,
@@ -120,7 +116,7 @@ function CreatePlayerDrawer({
   }
 
   function handleOpen() {
-    onOpenChange(true);
+    setIsCreateDrawerOpen(true);
   }
 
   async function onSubmit(values: z.infer<typeof createPlayerSchema>) {
@@ -131,7 +127,7 @@ function CreatePlayerDrawer({
       pictureFilePath = await onStorePlayerImage(picture, "players");
     }
 
-    onCreate({
+    createPlayer({
       ...values,
       maxHealth: health,
       effects: [],
@@ -142,8 +138,8 @@ function CreatePlayerDrawer({
   return (
     <Drawer
       description={t("descriptionText")}
-      open={open}
-      onOpenChange={onOpenChange}
+      open={isCreateDrawerOpen}
+      onOpenChange={setIsCreateDrawerOpen}
       title={t("title")}
       createTrigger={
         <Button onClick={handleOpen} variant="ghost" size="iconLarge">
@@ -172,7 +168,7 @@ function CreatePlayerDrawer({
               <TypographyH2>Overview</TypographyH2>
 
               <div className="flex items-start gap-2">
-                <div className="flex flex-col gap-3 pl-0.5 pt-1.5">
+                <div className="flex flex-col gap-3 pt-1.5 pl-0.5">
                   <FormLabel>{t("icon")}</FormLabel>
                   <IconPicker
                     initialIcon={form.getValues("icon")}
@@ -185,7 +181,7 @@ function CreatePlayerDrawer({
                 <FormField
                   control={form.control}
                   name="name"
-                  render={({ field }) => (
+                  render={({ field }: { field: any }) => (
                     <FormItem className="w-full px-0.5">
                       <FormLabel>{t("name")}</FormLabel>
                       <FormControl>
@@ -199,7 +195,7 @@ function CreatePlayerDrawer({
                 <FormField
                   control={form.control}
                   name="role"
-                  render={({ field }) => (
+                  render={({ field }: { field: any }) => (
                     <FormItem className="w-full px-0.5">
                       <FormLabel>{t("role")}</FormLabel>
                       <FormControl>
@@ -215,7 +211,7 @@ function CreatePlayerDrawer({
                 <FormField
                   control={form.control}
                   name="level"
-                  render={({ field }) => (
+                  render={({ field }: { field: any }) => (
                     <FormItem className="w-full px-0.5">
                       <FormLabel>{t("level")}</FormLabel>
                       <FormControl>
@@ -229,7 +225,7 @@ function CreatePlayerDrawer({
                 <FormField
                   control={form.control}
                   name="maxHealth"
-                  render={({ field }) => (
+                  render={({ field }: { field: any }) => (
                     <FormItem className="w-full px-0.5">
                       <FormLabel>{t("health")}</FormLabel>
                       <FormControl>
@@ -283,7 +279,7 @@ function CreatePlayerDrawer({
               <FormField
                 control={form.control}
                 name="overview"
-                render={({ field }) => (
+                render={({ field }: { field: any }) => (
                   <FormItem className="px-0.5">
                     <FormLabel>{t("overview")}</FormLabel>
                     <FormDescription>
@@ -332,7 +328,7 @@ function CreatePlayerDrawer({
               <FormField
                 control={form.control}
                 name="details"
-                render={({ field }) => (
+                render={({ field }: { field: any }) => (
                   <FormItem className="px-0.5">
                     <FormLabel>Details</FormLabel>
                     <FormDescription>
