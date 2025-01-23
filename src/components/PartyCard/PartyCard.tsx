@@ -60,7 +60,7 @@ function PartyCard({
               props.className,
             )}
           >
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <TypographyH3>{party.icon}</TypographyH3>
             </div>
             <TypographyH3>{party.name}</TypographyH3>

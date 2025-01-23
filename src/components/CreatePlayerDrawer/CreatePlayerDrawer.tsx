@@ -257,7 +257,7 @@ function CreatePlayerDrawer({
                     <div className="flex w-full gap-2">
                       <Input
                         key={`refresh-key-${refreshKey}`}
-                        className="flex-grow"
+                        className="grow"
                         onChange={handleFileChange}
                         type="file"
                         disabled={isCreating}

@@ -19,7 +19,7 @@ function IconAvatar({ icon, name, onClick, ...props }: Props) {
           <button
             {...props}
             onClick={handleClick}
-            className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-border bg-background hover:shadow"
+            className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-border bg-background hover:shadow-sm"
           >
             <span className="text-4xl">{icon}</span>
           </button>

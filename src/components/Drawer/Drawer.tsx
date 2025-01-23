@@ -49,7 +49,7 @@ function Drawer({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/50 backdrop-blur-xs"
               />
             </Dialog.Overlay>
 
@@ -65,7 +65,7 @@ function Drawer({
                   <TypographyH1>{title}</TypographyH1>
                 </Dialog.Title>
 
-                <ScrollArea className="w-full flex-grow pr-2">
+                <ScrollArea className="w-full grow pr-2">
                   <div className="flex flex-col gap-4">
                     {!!description && (
                       <Dialog.Description asChild>

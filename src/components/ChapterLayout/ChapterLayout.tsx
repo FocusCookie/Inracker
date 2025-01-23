@@ -28,7 +28,7 @@ function ChapterLayout({
       <div
         className={cn(
           "flex justify-center rounded-md bg-white",
-          isAsideFloating ? "absolute inset-0 left-28" : "flex-grow",
+          isAsideFloating ? "absolute inset-0 left-28" : "grow",
         )}
       >
         <main className="flex w-[608px] flex-col gap-2 pt-4">{children}</main>

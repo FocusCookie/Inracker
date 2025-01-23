@@ -47,7 +47,7 @@ function PlayerCard({ player, expanded, selected, onSelect }: Props) {
               <span className="text-4xl">{player.icon}</span>
             </motion.button>
 
-            <motion.div className="flex-grow overflow-hidden">
+            <motion.div className="grow overflow-hidden">
               <motion.div
                 initial={{ x: "-10%", opacity: 0 }}
                 animate={{
@@ -59,7 +59,7 @@ function PlayerCard({ player, expanded, selected, onSelect }: Props) {
                 className="flex flex-col py-1"
               >
                 <div className="flex items-center gap-2">
-                  <span className="flex-grow text-xl font-bold">
+                  <span className="grow text-xl font-bold">
                     {player.name}
                   </span>
 

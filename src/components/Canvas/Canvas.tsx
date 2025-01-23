@@ -473,7 +473,7 @@ function Canvas({
 
             <g transform={`translate(${element.x + 16}, ${element.y + 32})`}>
               <text
-                className="select-none fill-white font-sans text-4xl font-bold shadow"
+                className="select-none fill-white font-sans text-4xl font-bold shadow-sm"
                 dominantBaseline="middle"
               >
                 {element.icon}
@@ -520,7 +520,7 @@ function Canvas({
         {selectedPlayer && (
           <g transform={`translate(${selectedPlayer.coordinates.x + 30}, 116)`}>
             <text
-              className="fill-white font-sans text-6xl font-bold shadow"
+              className="fill-white font-sans text-6xl font-bold shadow-sm"
               dominantBaseline="middle"
             >
               👆
@@ -529,10 +529,10 @@ function Canvas({
         )}
       </svg>
 
-      <div className="absolute right-4 top-1/2 flex -translate-y-1/2 flex-col gap-4 rounded-full border border-white/80 bg-white/20 p-2 shadow-md backdrop-blur">
+      <div className="absolute right-4 top-1/2 flex -translate-y-1/2 flex-col gap-4 rounded-full border border-white/80 bg-white/20 p-2 shadow-md backdrop-blur-sm">
         <button
           onClick={() => setIsDrawing((c) => !c)}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-sm"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
         >
           {isDrawing ? (
             <Cross2Icon className="h-4 w-4" />
@@ -545,7 +545,7 @@ function Canvas({
           <button
             key={`player-${player.id}-token-state`}
             onClick={() => togglePlayerToken(player)}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-sm"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
           >
             <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
               <img
@@ -555,7 +555,7 @@ function Canvas({
               />
               {!playersTokenState.find((state) => state.id === player.id)
                 ?.visible && (
-                <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur">
+                <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
                   <EyeNoneIcon className="h-4 w-4 text-white" />
                 </div>
               )}
@@ -564,16 +564,16 @@ function Canvas({
         ))}
       </div>
 
-      <div className="absolute bottom-4 right-4 flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur">
+      <div className="absolute bottom-4 right-4 flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
         <button
           onClick={zoomIn}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-sm"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
         >
           <ZoomInIcon className="h-4 w-4" />
         </button>
         <button
           onClick={zoomOut}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-sm"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
         >
           <ZoomOutIcon className="h-4 w-4" />
         </button>
