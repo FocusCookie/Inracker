@@ -7,7 +7,7 @@ import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { Immunity } from "@/types/immunitiy";
 import { useQueryClient } from "@tanstack/react-query";
 import { Resistance } from "@/types/resistances";
-import { Player, TCreatePlayer } from "@/types/player";
+import { TCreatePlayer } from "@/types/player";
 import { toast } from "@/hooks/use-toast";
 
 type ChapterSearch = {
