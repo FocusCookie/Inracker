@@ -3,6 +3,7 @@ import PartyCard from "@/components/PartyCard/PartyCard";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TypographyH1 } from "@/components/ui/typographyH1";
 import { TypographyP } from "@/components/ui/typographyP";
+import { usePartiesStore } from "@/stores/PartiesStores";
 import { Party } from "@/types/party";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence } from "framer-motion";
@@ -23,8 +24,11 @@ function PartySelection({
 }: Props) {
   const { t } = useTranslation("PagePartySelection");
   const navigate = useNavigate();
+  const { setCurrentParty } = usePartiesStore();
 
   function handlePartySelect(id: Party["id"]) {
+    setCurrentParty(id);
+
     navigate({
       to: `/chapters`,
       search: { partyId: id },

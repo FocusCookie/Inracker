@@ -3,6 +3,7 @@ import { fn } from "@storybook/test";
 
 import Catalog from "./Catalog";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
+import { Button } from "../ui/button";
 
 const immunities = [
   {
@@ -45,6 +46,46 @@ const immunities = [
     name: "Water Splash ",
     icon: "💧",
   },
+  {
+    id: 7,
+    description: `
+- no **splash damage**,
+- ignores water damage`,
+    name: "Water Splash ",
+    icon: "💧",
+  },
+  {
+    id: 8,
+    description: `
+- no **splash damage**,
+- ignores water damage`,
+    name: "Water Splash ",
+    icon: "💧",
+  },
+  {
+    id: 9,
+    description: `
+- no **splash damage**,
+- ignores water damage`,
+    name: "Water Splash ",
+    icon: "💧",
+  },
+  {
+    id: 10,
+    description: `
+- no **splash damage**,
+- ignores water damage`,
+    name: "Water Splash ",
+    icon: "💧",
+  },
+  {
+    id: 11,
+    description: `
+- no **splash damage**,
+- ignores water damage`,
+    name: "Water Splash ",
+    icon: "💧",
+  },
 ];
 
 const meta = {
@@ -52,17 +93,21 @@ const meta = {
   component: Catalog,
   parameters: {},
   args: {
-    triggerName: "Immunities Catalog",
-    disabled: false,
+    placeholder: "search the catalog...",
+    trigger: <Button>Catalog</Button>,
     description: "Choose an immunity for your player.",
     title: "Immunity Catalog",
     onSearchChange: fn(),
     children: (
-      <div className="flex flex-col gap-2">
+      <>
         {immunities.map((immunity) => (
-          <ImmunityCard key={immunity.id} immunity={immunity} onAction={fn()} />
+          <ImmunityCard
+            key={immunity.id}
+            immunity={immunity}
+            actions={<Button>add</Button>}
+          />
         ))}
-      </div>
+      </>
     ),
   },
   decorators: [
@@ -77,4 +122,10 @@ type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
   // args: {},
+};
+
+export const WithAction: Story = {
+  args: {
+    action: <Button>Action</Button>,
+  },
 };

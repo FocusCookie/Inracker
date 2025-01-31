@@ -6,7 +6,6 @@ import {
   linkPlugin,
   listsPlugin,
   MDXEditor,
-  tablePlugin,
   thematicBreakPlugin,
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
@@ -51,7 +50,6 @@ function EffectCard({ actions, effect }: Props) {
           listsPlugin(),
           thematicBreakPlugin(),
           headingsPlugin(),
-          tablePlugin(),
         ]}
       />
     </Collapsible>

@@ -189,7 +189,10 @@ const createParty = async (
     "INSERT INTO parties (name, icon, description, players ) VALUES ($1, $2, $3, $4) RETURNING *",
     [name, icon, description, JSON.stringify(players)],
   );
-  return getPartyById(db, result!.lastInsertId as number);
+
+  const createdParty = await getPartyById(db, result!.lastInsertId as number);
+
+  return createdParty;
 };
 
 const updateParty = async (db: TauriDatabase, party: Party): Promise<Party> => {
@@ -200,7 +203,28 @@ const updateParty = async (db: TauriDatabase, party: Party): Promise<Party> => {
     [id, name, icon, description],
   );
 
-  return getPartyDetailedById(db, party.id);
+  const updatedParty = getPartyDetailedById(db, party.id);
+
+  return updatedParty;
+};
+
+const addPlayerToParty = async (
+  db: TauriDatabase,
+  partyId: number,
+  playerId: number,
+) => {
+  const dbParty = await getPartyById(db, partyId);
+  const players = JSON.parse(dbParty.players) as number[];
+  players.push(playerId);
+
+  await db.execute("UPDATE parties SET id = $1, players = $2 WHERE id = $1", [
+    partyId,
+    JSON.stringify(players),
+  ]);
+
+  const updatedParty = await getPartyDetailedById(db, partyId);
+
+  return updatedParty;
 };
 
 //* Player
@@ -229,7 +253,6 @@ const getDetailedPlayerById = async (
   const effectsIds = JSON.parse(dbEffects) as number[];
   const immunitiesIds = JSON.parse(dbImmunities) as number[];
   const resistances = JSON.parse(dbResistances) as Resistance[];
-  const maxHealth = max_health;
 
   let effects: DBEffect[] = [];
   let immunities: DBImmunity[] = [];
@@ -260,7 +283,7 @@ const getDetailedPlayerById = async (
     effects,
     ep,
     health,
-    maxHealth,
+    max_health,
     id,
     image,
     icon,
@@ -303,7 +326,7 @@ const createPlayer = async (
     effects,
     ep,
     health,
-    maxHealth,
+    max_health,
     image,
     icon,
     immunities,
@@ -321,7 +344,7 @@ const createPlayer = async (
       JSON.stringify(effects.map((id) => id).join(", ")),
       ep,
       health,
-      maxHealth,
+      max_health,
       image,
       icon,
       JSON.stringify(immunities.map((id) => id).join(", ")),
@@ -421,7 +444,7 @@ export const Database = {
   },
 
   parties: {
-    getAll: async () => {
+    etAll: async () => {
       const db = await connect();
       return getAllParties(db);
     },
@@ -457,6 +480,10 @@ export const Database = {
     updateByParty: async (party: Party) => {
       const db = await connect();
       return updateParty(db, party);
+    },
+    addPlayerToParty: async (partyId: Party["id"], playerId: Player["id"]) => {
+      const db = await connect();
+      return addPlayerToParty(db, partyId, playerId);
     },
   },
 

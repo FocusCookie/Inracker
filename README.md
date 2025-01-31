@@ -66,6 +66,16 @@ This project uses react-i18next for handlin the internationalization and localiz
 - The `resources` in the`/src/i18next.ts` file.
 - Add the namespace and translation to the `/src/@types/i18next.d.ts` file.
 
+### Translation with i18n.t
+
+If you need to translate somethinge outside of an React Component use the i18n.t function. Important is that you seperate the namespce with a douple point :
+
+```ts
+import i18next from "i18next";
+
+i18next.t("ComponentCreatePlayerDrawer:minName"),
+```
+
 ### Translation Templates
 
 You can use the hygen templates in order to create new translations files.

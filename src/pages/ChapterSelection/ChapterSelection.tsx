@@ -5,94 +5,73 @@ import Drawer from "@/components/Drawer/Drawer";
 import Loader from "@/components/Loader/Loader";
 import PlayerCard from "@/components/PlayerCard/PlayerCard";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { TypographyH1 } from "@/components/ui/typographyH1";
 import { TypographyP } from "@/components/ui/typographyP";
-import { ImageFolder } from "@/lib/utils";
 import { Chapter } from "@/types/chapters";
-import { DBImmunity, Immunity } from "@/types/immunitiy";
-import { Player, TCreatePlayer } from "@/types/player";
-import { DBResistance, Resistance } from "@/types/resistances";
+import { DBParty } from "@/types/party";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-  GearIcon,
   PlusCircledIcon,
 } from "@radix-ui/react-icons";
+import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { RiFilterLine } from "react-icons/ri";
+import {
+  RiArrowLeftBoxLine,
+  RiFilterLine,
+  RiUserAddFill,
+} from "react-icons/ri";
+import { usePlayerStore } from "@/stores/PlayersState";
+import { useChapterStore } from "@/stores/ChaptersState";
+import PlayerCatalog from "@/components/PlayerCatalog/PlayerCatalog";
+import { usePartiesStore } from "@/stores/PartiesStores";
+import { Player } from "@/types/player";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-type Props = {
-  chapters: Chapter[];
-  loading: boolean;
-  /**
-   * players from the given party that are playing the chapter
-   */
-  players: Player[];
-  isCreatingImmunity: boolean;
-  isCreatingResistance: boolean;
-  isCreatingPlayer: boolean;
-  immunities: DBImmunity[];
-  resistances: DBResistance[];
-  /**
-   * all available players in the players database
-   */
-  playersCatalog: Player[];
-  /**
-   * A function to store a player image, which takes a picture and a folder and returns the saved file path.
-   */
-  onStorePlayerImage: (
-    picture: File | string,
-    folder: ImageFolder,
-  ) => Promise<string | undefined>;
-  onCreateImmunity: (immunity: Immunity) => void;
-  onCreateResistance: (resistance: Resistance) => void;
-  onCreatePlayer: (player: TCreatePlayer) => void;
-};
+type Props = { partyId: DBParty["id"] };
 
-function ChapterSelection({
-  chapters,
-  loading,
-  players,
-  immunities,
-  resistances,
-  isCreatingImmunity,
-  playersCatalog,
-  isCreatingPlayer,
-  isCreatingResistance,
-  onCreateResistance,
-  onCreateImmunity,
-  onCreatePlayer,
-  onStorePlayerImage,
-}: Props) {
+function ChapterSelection({ partyId }: Props) {
   const { t } = useTranslation("PageChapterSelection");
-  const [isAsideOpen, setIsAsideOpen] = useState<boolean>(false);
-  const [selectedPlayer, setSelectedPlayer] = useState<Player["id"] | null>(
-    null,
+  const navigate = useNavigate();
+  const { chapters, getAllChapters, isLoading } = useChapterStore();
+  const currentParty = usePartiesStore((state) => state.currentParty);
+  console.log({ currentParty });
+  const { addPlayerToParty } = usePartiesStore();
+  const isCreateDrawerOpen = usePlayerStore(
+    (state) => state.isCreateDrawerOpen,
   );
+  const players = usePlayerStore((state) => state.players);
+  const { setIsCreateDrawerOpen, getAllPlayers } = usePlayerStore();
+  const [isAsideOpen, setIsAsideOpen] = useState<boolean>(false);
   const [isAddChapterDrawerOpen, setIsAddChapterDrawerOpen] =
     useState<boolean>(false);
-  const [isEditDrawerOpen, setIsEditDrawerOpen] = useState<boolean>(false);
-  const [selectedChapterId, setSelectedChapterId] = useState<
-    null | Chapter["id"]
-  >(null);
-  const [isAddPlayerDrawerOpen, setIsAddPlayerDrawerOpen] =
-    useState<boolean>(false);
+  const [openPlayersCatalog, setOpenPlayersCatalog] = useState<boolean>(false);
+
+  useEffect(() => {
+    getAllChapters(partyId);
+    getAllPlayers();
+  }, []);
 
   function handleAsideToggle() {
     if (isAsideOpen) {
-      setSelectedPlayer(null);
       setIsAsideOpen(false);
     } else {
       setIsAsideOpen(true);
     }
-  }
-
-  function handlePlayerSelect(id: Player["id"] | null) {
-    if (!isAsideOpen) setIsAsideOpen(true);
-
-    setSelectedPlayer(id);
   }
 
   function handleEditChapter(chapterId: Chapter["id"]) {
@@ -107,17 +86,25 @@ function ChapterSelection({
     console.log("filter drawer toggle");
   }
 
-  function handleAddPlayerDrawerToggle() {
-    setIsAddPlayerDrawerOpen((c) => !c);
+  function handleExitParty() {
+    navigate({
+      to: `/parties`,
+    });
   }
+
+  function handleAddPlayerToParty(playerId: Player["id"]) {
+    addPlayerToParty(partyId, playerId);
+  }
+
+  //TODO: Translations
 
   return (
     <AnimatePresence mode="wait">
       <div className="flex h-full w-full flex-col gap-4">
         <ChapterLayout
           isAsideOpen={isAsideOpen}
-          asideChildren={
-            loading ? (
+          players={
+            isLoading ? (
               <Loader size="large" key="loader-chapters-player" />
             ) : (
               <>
@@ -132,67 +119,146 @@ function ChapterSelection({
                     opacity: 0,
                   }}
                 >
-                  {players.map((player) => (
+                  {currentParty?.players.map((player) => (
                     <PlayerCard
+                      key={player.id}
                       player={player}
-                      key={`player-card-${player.id}-${player.name}`}
                       expanded={isAsideOpen}
-                      selected={player.id === selectedPlayer}
-                      onSelect={handlePlayerSelect}
                     />
                   ))}
                 </motion.div>
 
-                <motion.div
-                  initial={{
-                    opacity: 0,
-                  }}
-                  animate={{
-                    opacity: 1,
-                  }}
-                  exit={{
-                    opacity: 0,
-                  }}
-                  className="flex flex-col gap-2 pl-2"
-                >
-                  <CreatePlayerDrawer
-                    isCreatingResistance={isCreatingResistance}
-                    onCreateResistance={onCreateResistance}
-                    resistances={resistances}
-                    isCreatingImmunity={isCreatingImmunity}
-                    onCreateImmunity={onCreateImmunity}
-                    immunities={immunities}
-                    onStorePlayerImage={onStorePlayerImage}
-                  />
-
-                  {/* //TODO: Settings Modal für player add */}
-                  <Button variant="ghost" size="iconLarge">
-                    <GearIcon />
-                  </Button>
-                  <Button
-                    onClick={handleAsideToggle}
-                    variant="ghost"
-                    size="iconLarge"
-                  >
-                    {isAsideOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-                  </Button>
-                </motion.div>
+                {isAsideOpen && (
+                  <div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={handleAsideToggle}
+                            variant="ghost"
+                            size="iconLarge"
+                          >
+                            {isAsideOpen ? (
+                              <ChevronLeftIcon />
+                            ) : (
+                              <ChevronRightIcon />
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {isAsideOpen ? (
+                            <p>{t("closeDetails")}</p>
+                          ) : (
+                            <p>{t("openDetails")}</p>
+                          )}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                )}
               </>
             )
+          }
+          settings={
+            <motion.div
+              initial={{
+                opacity: 0,
+              }}
+              animate={{
+                opacity: 1,
+              }}
+              exit={{
+                opacity: 0,
+              }}
+              className="flex flex-col gap-2"
+            >
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="iconLarge" variant="ghost">
+                    <RiUserAddFill />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      onClick={() => setOpenPlayersCatalog(true)}
+                    >
+                      Add from catalog
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setIsCreateDrawerOpen(true)}
+                    >
+                      Create new Player
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <PlayerCatalog
+                open={openPlayersCatalog}
+                onOpenChange={setOpenPlayersCatalog}
+                onAdd={handleAddPlayerToParty}
+                excludedPlayers={currentParty?.players || []}
+                players={players}
+              />
+
+              <CreatePlayerDrawer
+                open={isCreateDrawerOpen}
+                onOpenChange={setIsCreateDrawerOpen}
+              />
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={handleExitParty}
+                      variant="ghost"
+                      size="iconLarge"
+                    >
+                      <RiArrowLeftBoxLine />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t("closeParty")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={handleAsideToggle}
+                      variant="ghost"
+                      size="iconLarge"
+                    >
+                      {isAsideOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {isAsideOpen ? (
+                      <p>{t("closeDetails")}</p>
+                    ) : (
+                      <p>{t("openDetails")}</p>
+                    )}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </motion.div>
           }
           drawers={
             <Drawer
               key="add-chapter-drawer"
               open={isAddChapterDrawerOpen}
               onOpenChange={handleToggleAddChapterDrawer}
-              title={"Add a new Chapter"}
+              title={t("addChapter")}
               cancelTrigger={<Button>Cancel</Button>}
             >
               neue chapter dinge
             </Drawer>
           }
         >
-          {!loading && (
+          {!isLoading && (
             <div className="flex items-center justify-between gap-2">
               <TypographyH1>{t("chapters")}</TypographyH1>
 
@@ -206,7 +272,7 @@ function ChapterSelection({
             </div>
           )}
 
-          {loading ? (
+          {isLoading ? (
             <Loader
               size="large"
               title={t("loadingChapters")}

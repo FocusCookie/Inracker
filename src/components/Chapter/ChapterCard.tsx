@@ -1,4 +1,4 @@
-import { Chapter } from "@/types/chapters";
+import { Chapter, DBChapter } from "@/types/chapters";
 import { motion } from "framer-motion";
 import { TypographyH2 } from "../ui/typographyh2";
 import { Button } from "../ui/button";
@@ -7,7 +7,7 @@ import { TypographyP } from "../ui/typographyP";
 import { RiEdit2Fill } from "react-icons/ri";
 
 type Props = {
-  chapter: Chapter;
+  chapter: DBChapter;
   onEdit: (chapterId: Chapter["id"]) => void;
 };
 

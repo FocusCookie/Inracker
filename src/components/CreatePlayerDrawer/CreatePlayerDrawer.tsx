@@ -1,14 +1,24 @@
+import { useCreatePlayer } from "@/hooks/useCreatePlayer";
 import { ImageFolder } from "@/lib/utils";
-import { DBImmunity, Immunity } from "@/types/immunitiy";
+import { createPlayerSchema } from "@/schemas/createPlayer";
+import { useImmunityStore } from "@/stores/ImmunitiesState";
+import { usePlayerStore } from "@/stores/PlayersState";
+import { useResistancesStore } from "@/stores/ResistancesState";
+import "@/styles/markdownEditor.css";
+import "@mdxeditor/editor/style.css";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
-import { useState } from "react";
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { RiUserAddFill } from "react-icons/ri";
 import { z } from "zod";
 import Catalog from "../Catalog/Catalog";
 import CreateImmunityDrawer from "../CreateImmunityDrawer/CreateImmunityDrawer";
+import CreateResistanceDrawer from "../CreateResistanceDrawer/CreateResistanceDrawer";
 import Drawer from "../Drawer/Drawer";
 import IconPicker from "../IconPicker/IconPicker";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
+import MarkdownEditor from "../MarkdownEditor/MarkdownEditor";
+import ResistanceCard from "../ResistanceCard/ResistanceCard";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import {
@@ -21,69 +31,36 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { TypographyH2 } from "../ui/typographyh2";
 import { ScrollArea } from "../ui/scroll-area";
-import { useTranslation } from "react-i18next";
-import { createPlayerSchema } from "@/schemas/createPlayer";
-import { useCreatePlayer } from "@/hooks/useCreatePlayer";
-import {
-  BlockTypeSelect,
-  BoldItalicUnderlineToggles,
-  CreateLink,
-  headingsPlugin,
-  imagePlugin,
-  InsertImage,
-  InsertTable,
-  InsertThematicBreak,
-  linkDialogPlugin,
-  linkPlugin,
-  listsPlugin,
-  ListsToggle,
-  markdownShortcutPlugin,
-  MDXEditor,
-  tablePlugin,
-  thematicBreakPlugin,
-  toolbarPlugin,
-  UndoRedo,
-} from "@mdxeditor/editor";
-import "@mdxeditor/editor/style.css";
-import { DBResistance, Resistance } from "@/types/resistances";
-import ResistanceCard from "../ResistanceCard/ResistanceCard";
-import CreateResistanceDrawer from "../CreateResistanceDrawer/CreateResistanceDrawer";
-import { usePlayerStore } from "@/stores/PlayerState";
+import { TypographyH2 } from "../ui/typographyh2";
 
 type Props = {
-  immunities: DBImmunity[];
-  resistances: DBResistance[];
-  isCreatingImmunity: boolean;
-  isCreatingResistance: boolean;
-  /**
-   * A function to store a player image, which takes a picture and a folder and returns the saved file path.
-   */
-  onStorePlayerImage: (
-    picture: File | string,
-    folder: ImageFolder,
-  ) => Promise<string | undefined>;
-  onCreateImmunity: (immunity: Immunity) => void;
-  onCreateResistance: (resistance: Resistance) => void;
+  open: boolean;
+  onOpenChange: (state: boolean) => void;
 };
 
-function CreatePlayerDrawer({
-  immunities,
-  isCreatingImmunity,
-  resistances,
-  isCreatingResistance,
-  onCreateResistance,
-  onCreateImmunity,
-  onStorePlayerImage,
-}: Props) {
+function CreatePlayerDrawer({ open, onOpenChange }: Props) {
   const { t } = useTranslation("ComponentCreatePlayerDrawer");
+  const { createPlayer, setIsCreateDrawerOpen, storePlayerImage } =
+    usePlayerStore();
+  const isCreating = usePlayerStore((state) => state.isCreating);
+  const isStoringImage = usePlayerStore((state) => state.isStoringImage);
+  //TODO: change to single selection with state.prop
   const {
-    createPlayer,
-    isCreateDrawerOpen,
-    isCreating,
-    setIsCreateDrawerOpen,
-  } = usePlayerStore();
+    immunities,
+    isCreating: isCreatingImmunity,
+    isCreateDrawerOpen: isCreateImmunityDrawerOpen,
+    setIsCreateDrawerOpen: setIsCreateImmunityDrawerOpen,
+    getAllImmunities,
+  } = useImmunityStore();
+
+  const {
+    resistances,
+    isCreating: isCreatingResistance,
+    isCreateDrawerOpen: isCreateResistanceDrawerOpen,
+    setIsCreateDrawerOpen: setIsCreateResistanceDrawerOpen,
+    getAllResistances,
+  } = useResistancesStore();
 
   const {
     form,
@@ -91,25 +68,23 @@ function CreatePlayerDrawer({
     refreshKey,
     immunitySearch,
     selectedImmunities,
-    details,
-    overview,
     resistanceSearch,
     selectedResistances,
+    templates,
     handleRemoveResistance,
     handleAddResistance,
     setResistanceSearch,
-    handleDetailsChange,
-    handleOverviewChange,
     handleFileChange,
     handleResetPicture,
     handleAddImmunity,
     handleRemoveImmunity,
     setImmunitySearch,
   } = useCreatePlayer();
-  const [isCreateImmunityDrawerOpen, setIsCreateImmunityDrawerOpen] =
-    useState<boolean>(false);
-  const [isCreateResistanceDrawerOpen, setIsCreateResistanceDrawerOpen] =
-    useState<boolean>(false);
+
+  useEffect(() => {
+    getAllImmunities();
+    getAllResistances();
+  }, []);
 
   function handleIconSelect(icon: string) {
     form.setValue("icon", icon);
@@ -124,12 +99,12 @@ function CreatePlayerDrawer({
     let pictureFilePath: undefined | string = undefined;
 
     if (!!picture) {
-      pictureFilePath = await onStorePlayerImage(picture, "players");
+      pictureFilePath = await storePlayerImage(picture, "players");
     }
 
     createPlayer({
       ...values,
-      maxHealth: health,
+      max_health: health,
       effects: [],
       image: pictureFilePath || null,
     });
@@ -138,14 +113,9 @@ function CreatePlayerDrawer({
   return (
     <Drawer
       description={t("descriptionText")}
-      open={isCreateDrawerOpen}
-      onOpenChange={setIsCreateDrawerOpen}
+      open={open}
+      onOpenChange={onOpenChange}
       title={t("title")}
-      createTrigger={
-        <Button onClick={handleOpen} variant="ghost" size="iconLarge">
-          <RiUserAddFill />
-        </Button>
-      }
       cancelTrigger={
         <Button disabled={isCreating || isCreatingImmunity} variant="ghost">
           {t("cancel")}
@@ -163,16 +133,19 @@ function CreatePlayerDrawer({
     >
       <ScrollArea>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-6"
+          >
             <div className="flex flex-col gap-4">
-              <TypographyH2>Overview</TypographyH2>
+              <TypographyH2>{t("overview")}</TypographyH2>
 
               <div className="flex items-start gap-2">
-                <div className="flex flex-col gap-3 pt-1.5 pl-0.5">
+                <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
                   <FormLabel>{t("icon")}</FormLabel>
                   <IconPicker
                     initialIcon={form.getValues("icon")}
-                    disabled={isCreating}
+                    disabled={isCreating || isStoringImage}
                     onIconClick={handleIconSelect}
                   />
                   <FormMessage />
@@ -185,7 +158,10 @@ function CreatePlayerDrawer({
                     <FormItem className="w-full px-0.5">
                       <FormLabel>{t("name")}</FormLabel>
                       <FormControl>
-                        <Input disabled={isCreating} {...field} />
+                        <Input
+                          disabled={isCreating || isStoringImage}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -199,7 +175,11 @@ function CreatePlayerDrawer({
                     <FormItem className="w-full px-0.5">
                       <FormLabel>{t("role")}</FormLabel>
                       <FormControl>
-                        <Input type="text" disabled={isCreating} {...field} />
+                        <Input
+                          type="text"
+                          disabled={isCreating || isStoringImage}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -215,7 +195,11 @@ function CreatePlayerDrawer({
                     <FormItem className="w-full px-0.5">
                       <FormLabel>{t("level")}</FormLabel>
                       <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
+                        <Input
+                          type="number"
+                          disabled={isCreating || isStoringImage}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -229,7 +213,11 @@ function CreatePlayerDrawer({
                     <FormItem className="w-full px-0.5">
                       <FormLabel>{t("health")}</FormLabel>
                       <FormControl>
-                        <Input type="number" disabled={isCreating} {...field} />
+                        <Input
+                          type="number"
+                          disabled={isCreating || isStoringImage}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -238,7 +226,7 @@ function CreatePlayerDrawer({
               </div>
 
               <div className="flex items-start gap-2 pl-1">
-                <Avatar className="mt-6">
+                <Avatar className="mt-5">
                   <AvatarImage
                     src={picturePreview}
                     alt={t("profilePictureAlt")}
@@ -247,6 +235,7 @@ function CreatePlayerDrawer({
                     {form.watch("name").slice(0, 2)}
                   </AvatarFallback>
                 </Avatar>
+
                 <FormItem className="mb-1.5 w-full px-0.5">
                   <FormLabel>{t("playerPicture")}</FormLabel>
                   <FormControl>
@@ -256,7 +245,7 @@ function CreatePlayerDrawer({
                         className="grow"
                         onChange={handleFileChange}
                         type="file"
-                        disabled={isCreating}
+                        disabled={isCreating || isStoringImage}
                         placeholder={t("picturePlaceholder")}
                         accept="image/*"
                       />
@@ -280,92 +269,17 @@ function CreatePlayerDrawer({
                 control={form.control}
                 name="overview"
                 render={({ field }: { field: any }) => (
-                  <FormItem className="px-0.5">
+                  <FormItem className="flex flex-col gap-1 px-0.5">
                     <FormLabel>{t("overview")}</FormLabel>
                     <FormDescription>
                       {t("overviewDescription")}
                     </FormDescription>
 
                     <FormControl className="rounded-md border">
-                      <MDXEditor
-                        disabled={isCreating}
+                      <MarkdownEditor
+                        readonly={isCreating}
                         {...field}
-                        contentEditableClassName="prose"
-                        markdown={overview}
-                        onChange={handleOverviewChange}
-                        plugins={[
-                          linkPlugin(),
-                          linkDialogPlugin(),
-                          imagePlugin(),
-                          listsPlugin(),
-                          thematicBreakPlugin(),
-                          headingsPlugin(),
-                          tablePlugin(),
-                          toolbarPlugin({
-                            toolbarContents: () => (
-                              <>
-                                <UndoRedo />
-                                <BlockTypeSelect />
-                                <BoldItalicUnderlineToggles />
-                                <CreateLink />
-                                <InsertImage />
-                                <ListsToggle />
-                                <InsertThematicBreak />
-                                <InsertTable />
-                              </>
-                            ),
-                          }),
-                          markdownShortcutPlugin(),
-                        ]}
-                      />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="details"
-                render={({ field }: { field: any }) => (
-                  <FormItem className="px-0.5">
-                    <FormLabel>Details</FormLabel>
-                    <FormDescription>
-                      {t("overviewDescription")}
-                    </FormDescription>
-
-                    <FormControl className="rounded-md border">
-                      <MDXEditor
-                        disabled={isCreating}
-                        {...field}
-                        contentEditableClassName="prose"
-                        markdown={details}
-                        onChange={handleDetailsChange}
-                        plugins={[
-                          linkPlugin(),
-                          linkDialogPlugin(),
-                          imagePlugin(),
-                          listsPlugin(),
-                          thematicBreakPlugin(),
-                          headingsPlugin(),
-                          tablePlugin(),
-                          toolbarPlugin({
-                            toolbarContents: () => (
-                              <>
-                                <UndoRedo />
-                                <BlockTypeSelect />
-                                <BoldItalicUnderlineToggles />
-                                <CreateLink />
-                                <InsertImage />
-                                <ListsToggle />
-                                <InsertThematicBreak />
-                                <InsertTable />
-                              </>
-                            ),
-                          }),
-                          markdownShortcutPlugin(),
-                        ]}
+                        markdown={templates.overview}
                       />
                     </FormControl>
 
@@ -380,62 +294,53 @@ function CreatePlayerDrawer({
                 <TypographyH2>{t("immunities")}</TypographyH2>
                 <div className="flex gap-2">
                   <Button
+                    variant="secondary"
                     disabled={isCreating || isCreatingImmunity}
                     loading={isCreatingImmunity}
-                    onClick={() => setIsCreateImmunityDrawerOpen((c) => !c)}
+                    onClick={() =>
+                      setIsCreateImmunityDrawerOpen(!isCreateImmunityDrawerOpen)
+                    }
                   >
                     {t("create")}
                   </Button>
 
-                  <CreateImmunityDrawer
-                    open={isCreateImmunityDrawerOpen}
-                    onOpenChange={setIsCreateImmunityDrawerOpen}
-                    isCreating={isCreatingImmunity}
-                    onCreate={onCreateImmunity}
-                  />
+                  <CreateImmunityDrawer />
 
                   {immunities.length > 0 && (
                     <Catalog
-                      disabled={isCreatingImmunity}
-                      triggerName={t("add")}
+                      placeholder={t("immunityCatalog.placeholder")}
+                      trigger={<Button>{t("select")}</Button>}
                       title={t("immunityCatalog.title")}
                       description={t("immunityCatalog.descriptionText")}
                       onSearchChange={setImmunitySearch}
-                      children={
-                        <ScrollArea className="h-full">
-                          <div className="flex h-full flex-col gap-4 p-0.5 pr-4">
-                            {immunities
-                              .filter((immunity) =>
-                                immunity.name
-                                  .toLowerCase()
-                                  .includes(immunitySearch.toLowerCase()),
-                              )
-                              .filter(
-                                (immunity) =>
-                                  !selectedImmunities.some(
-                                    (selected) => selected.id === immunity.id,
-                                  ),
-                              )
-                              .map((immunity) => (
-                                <ImmunityCard
-                                  key={immunity.id}
-                                  immunity={immunity}
-                                  actions={
-                                    <Button
-                                      size="icon"
-                                      onClick={() =>
-                                        handleAddImmunity(immunity)
-                                      }
-                                    >
-                                      <PlusIcon />
-                                    </Button>
-                                  }
-                                />
-                              ))}
-                          </div>
-                        </ScrollArea>
-                      }
-                    />
+                    >
+                      {immunities
+                        .filter((immunity) =>
+                          immunity.name
+                            .toLowerCase()
+                            .includes(immunitySearch.toLowerCase()),
+                        )
+                        .filter(
+                          (immunity) =>
+                            !selectedImmunities.some(
+                              (selected) => selected.id === immunity.id,
+                            ),
+                        )
+                        .map((immunity) => (
+                          <ImmunityCard
+                            key={immunity.id}
+                            immunity={immunity}
+                            actions={
+                              <Button
+                                size="icon"
+                                onClick={() => handleAddImmunity(immunity)}
+                              >
+                                <PlusIcon />
+                              </Button>
+                            }
+                          />
+                        ))}
+                    </Catalog>
                   )}
                 </div>
               </div>
@@ -446,6 +351,7 @@ function CreatePlayerDrawer({
                   immunity={immunity}
                   actions={
                     <Button
+                      variant="ghost"
                       size="icon"
                       onClick={() => handleRemoveImmunity(immunity.id)}
                     >
@@ -461,62 +367,55 @@ function CreatePlayerDrawer({
                 <TypographyH2>{t("resistances")}</TypographyH2>
                 <div className="flex gap-2">
                   <Button
+                    variant="secondary"
                     disabled={isCreating || isCreatingResistance}
                     loading={isCreatingResistance}
-                    onClick={() => setIsCreateResistanceDrawerOpen((c) => !c)}
+                    onClick={() =>
+                      setIsCreateResistanceDrawerOpen(
+                        !isCreateResistanceDrawerOpen,
+                      )
+                    }
                   >
                     {t("create")}
                   </Button>
 
-                  <CreateResistanceDrawer
-                    open={isCreateResistanceDrawerOpen}
-                    onOpenChange={setIsCreateResistanceDrawerOpen}
-                    isCreating={isCreatingResistance}
-                    onCreate={onCreateResistance}
-                  />
+                  <CreateResistanceDrawer />
 
                   {resistances.length > 0 && (
                     <Catalog
-                      disabled={isCreatingResistance}
-                      triggerName={t("add")}
+                      placeholder={t("resistanceCatalog.placeholder")}
+                      trigger={<Button>{t("select")}</Button>}
                       title={t("resistanceCatalog.title")}
                       description={t("resistanceCatalog.descriptionText")}
                       onSearchChange={setResistanceSearch}
-                      children={
-                        <ScrollArea className="h-full">
-                          <div className="flex h-full flex-col gap-4 p-0.5 pr-4">
-                            {resistances
-                              .filter((resistance) =>
-                                resistance.name
-                                  .toLowerCase()
-                                  .includes(resistanceSearch.toLowerCase()),
-                              )
-                              .filter(
-                                (resistance) =>
-                                  !selectedResistances.some(
-                                    (selected) => selected.id === resistance.id,
-                                  ),
-                              )
-                              .map((resistance) => (
-                                <ResistanceCard
-                                  key={resistance.id}
-                                  resistance={resistance}
-                                  actions={
-                                    <Button
-                                      size="icon"
-                                      onClick={() =>
-                                        handleAddResistance(resistance)
-                                      }
-                                    >
-                                      <PlusIcon />
-                                    </Button>
-                                  }
-                                />
-                              ))}
-                          </div>
-                        </ScrollArea>
-                      }
-                    />
+                    >
+                      {resistances
+                        .filter((resistance) =>
+                          resistance.name
+                            .toLowerCase()
+                            .includes(resistanceSearch.toLowerCase()),
+                        )
+                        .filter(
+                          (resistance) =>
+                            !selectedResistances.some(
+                              (selected) => selected.id === resistance.id,
+                            ),
+                        )
+                        .map((resistance) => (
+                          <ResistanceCard
+                            key={resistance.id}
+                            resistance={resistance}
+                            actions={
+                              <Button
+                                size="icon"
+                                onClick={() => handleAddResistance(resistance)}
+                              >
+                                <PlusIcon />
+                              </Button>
+                            }
+                          />
+                        ))}
+                    </Catalog>
                   )}
                 </div>
               </div>

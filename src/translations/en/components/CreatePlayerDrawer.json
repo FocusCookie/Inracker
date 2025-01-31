@@ -36,11 +36,13 @@
   "immunities": "Immunities",
   "immunityCatalog": {
     "title": "Immunities",
-    "descriptionText": "Choose from a list of existing immunities to customize your character."
+    "descriptionText": "Choose from a list of existing immunities to customize your character.",
+    "placeholder": "Search..."
   },
   "resistanceCatalog": {
     "title": "Resistances",
-    "descriptionText": "Choose from a list of existing resistances to customize your character."
+    "descriptionText": "Choose from a list of existing resistances to customize your character.",
+    "placeholder": "Search..."
   },
   "add": "Add",
   "resistances": "Resistances",
@@ -72,5 +74,6 @@
   "minRole": "The role must be at least two characters long.",
   "overviewDescription": "This is where you can jot down permanent notes about the character. They are the first information to open on a player, allowing for easy reference during your sessions.",
   "detailsDescription": "This section is for all the essential skills and additional important information about the character. Expand it when you need to access specific details during your adventures!",
-  "details": "Details"
+  "details": "Details",
+  "select": "Select"
 }

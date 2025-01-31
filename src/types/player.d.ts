@@ -28,22 +28,17 @@ export type DBPlayer = {
 };
 
 export type Player = Prettify<
-  Omit<DBPlayer, "effects" | "immunities" | "max_health" | "resistances"> & {
+  Omit<DBPlayer, "effects" | "immunities" | "resistances"> & {
     effects: DBEffect[];
     immunities: DBImmunity[];
-    maxHealth: number;
     resistances: DBResistance[];
   }
 >;
 
 export type TCreatePlayer = Prettify<
-  Omit<
-    DBPlayer,
-    "effects" | "immunities" | "id" | "max_health" | "resistances"
-  > & {
+  Omit<DBPlayer, "effects" | "immunities" | "id" | "resistances"> & {
     effects: Array<Effect["id"]>;
     immunities: Array<DBImmunity["id"]>;
-    maxHealth: number;
     resistances: Array<Resistance["id"]>;
   }
 >;

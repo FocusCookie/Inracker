@@ -7,10 +7,10 @@ import {
   linkPlugin,
   listsPlugin,
   MDXEditor,
-  tablePlugin,
   thematicBreakPlugin,
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
+import MarkdownEditor from "../MarkdownEditor/MarkdownEditor";
 
 type Props = {
   immunity: DBImmunity;
@@ -31,20 +31,7 @@ function ImmunityCard({ immunity, actions }: Props) {
       }
       actions={actions}
     >
-      <MDXEditor
-        readOnly
-        contentEditableClassName="prose"
-        markdown={immunity.description}
-        plugins={[
-          linkPlugin(),
-          linkDialogPlugin(),
-          imagePlugin(),
-          listsPlugin(),
-          thematicBreakPlugin(),
-          headingsPlugin(),
-          tablePlugin(),
-        ]}
-      />
+      <MarkdownEditor readonly={true} markdown={immunity.description} />
     </Collapsible>
   );
 }

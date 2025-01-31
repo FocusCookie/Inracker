@@ -7,7 +7,6 @@ const de = `
   }
   td {
     vertical-align: top;
-    padding: 10px;
   }
 </style>
 
@@ -60,15 +59,14 @@ const de = `
 </table>
 
 ## Attribute
-| Attribut       | Modifikator |
-|----------------|-------------|
-| Stärke         | +1          |
-| Geschicklichkeit| +2         |
-| Konstitution   | +0          |
-| Intelligenz    | +3          |
-| Weisheit       | +1          |
-| Charisma       | -1          |
+- **Stärke:** +1  
+- **Geschicklichkeit:** +2  
+- **Konstitution:** +0  
+- **Intelligenz:** +3  
+- **Weisheit:** +1  
+- **Charisma:** -1  
 `;
+
 const en = `
 <style>
   table {
@@ -78,7 +76,6 @@ const en = `
   }
   td {
     vertical-align: top;
-    padding: 10px;
   }
 </style>
 
@@ -131,14 +128,12 @@ const en = `
 </table>
 
 ## Attributes
-| Attribute     | Modifier |
-|---------------|----------|
-| Strength      | +1       |
-| Dexterity     | +2       |
-| Constitution  | +0       |
-| Intelligence  | +3       |
-| Wisdom        | +1       |
-| Charisma      | -1       |
+- **Strength:** +1  
+- **Dexterity:** +2  
+- **Constitution:** +0  
+- **Intelligence:** +3  
+- **Wisdom:** +1  
+- **Charisma:** -1  
 `;
 
 export default { en, de };

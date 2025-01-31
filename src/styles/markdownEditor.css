@@ -1,0 +1,17 @@
+.mdxeditor-root-contenteditable > * > * > * > * > * > h2 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.mdxeditor-root-contenteditable > * > * > h2 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.mdxeditor-root-contenteditable > * > * > table {
+  margin: 0;
+}
+
+.mdxeditor-root-contenteditable > div > div {
+  padding: 0.5rem;
+}

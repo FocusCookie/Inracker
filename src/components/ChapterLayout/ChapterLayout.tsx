@@ -3,14 +3,16 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  asideChildren: React.ReactNode;
+  players: React.ReactNode;
+  settings: React.ReactNode;
   drawers: React.ReactNode;
   children: React.ReactNode;
   isAsideOpen: boolean;
 };
 
 function ChapterLayout({
-  asideChildren,
+  players,
+  settings,
   drawers,
   children,
   isAsideOpen,
@@ -34,17 +36,24 @@ function ChapterLayout({
         <main className="flex w-[608px] flex-col gap-2 pt-4">{children}</main>
       </div>
 
-      <div className={cn(isAsideFloating ? "absolute h-full" : "")}>
+      <div
+        className={cn(
+          isAsideFloating ? "absolute h-full" : "",
+          "flex flex-col gap-4",
+        )}
+      >
         <motion.aside
           initial={{ width: 96 }}
           animate={{ width: isAsideOpen ? 608 : 96 }}
           transition={{ type: "tween", ease: "linear" }}
           className={cn(
-            "flex h-full flex-col justify-between gap-4 rounded-md bg-white p-4",
+            "flex h-full grow flex-col justify-between gap-4 rounded-md bg-white p-4",
             isAsideFloating && "absolute shadow-2xl",
           )}
         >
-          {asideChildren}
+          <div className="flex h-full flex-col justify-between">{players}</div>
+
+          {!isAsideOpen && settings}
         </motion.aside>
       </div>
       {drawers}

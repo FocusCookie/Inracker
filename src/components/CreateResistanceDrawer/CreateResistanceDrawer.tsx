@@ -1,25 +1,5 @@
 import { Resistance } from "@/types/resistances";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  BlockTypeSelect,
-  BoldItalicUnderlineToggles,
-  CreateLink,
-  headingsPlugin,
-  imagePlugin,
-  InsertImage,
-  InsertTable,
-  InsertThematicBreak,
-  linkDialogPlugin,
-  linkPlugin,
-  listsPlugin,
-  ListsToggle,
-  markdownShortcutPlugin,
-  MDXEditor,
-  tablePlugin,
-  thematicBreakPlugin,
-  toolbarPlugin,
-  UndoRedo,
-} from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -36,21 +16,19 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
+import MarkdownEditor from "../MarkdownEditor/MarkdownEditor";
+import { useResistancesStore } from "@/stores/ResistancesState";
 
-type Props = {
-  open: boolean;
-  onOpenChange: (state: boolean) => void;
-  isCreating: boolean;
-  onCreate: (resistance: Resistance) => void;
-};
+type Props = {};
 
-function CreateResistanceDrawer({
-  open,
-  onOpenChange,
-  isCreating,
-  onCreate,
-}: Props) {
+function CreateResistanceDrawer({}: Props) {
   const { t } = useTranslation("ComponentCreateResistanceDrawer");
+  const {
+    createResistance,
+    isCreateDrawerOpen,
+    isCreating,
+    setIsCreateDrawerOpen,
+  } = useResistancesStore();
 
   const formSchema = z.object({
     name: z.string().min(3, {
@@ -71,7 +49,7 @@ function CreateResistanceDrawer({
   function onSubmit(values: z.infer<typeof formSchema>) {
     const { name, description, icon } = values;
 
-    onCreate({
+    createResistance({
       name,
       icon,
       description,
@@ -85,8 +63,8 @@ function CreateResistanceDrawer({
   return (
     <Drawer
       description={t("descriptionText")}
-      open={open}
-      onOpenChange={onOpenChange}
+      open={isCreateDrawerOpen}
+      onOpenChange={setIsCreateDrawerOpen}
       title={t("title")}
       actions={
         <Button
@@ -146,35 +124,10 @@ function CreateResistanceDrawer({
                   <FormLabel>{t("description")}</FormLabel>
 
                   <FormControl className="rounded-md border">
-                    <MDXEditor
-                      disabled={isCreating}
+                    <MarkdownEditor
+                      readonly={isCreating}
                       {...field}
-                      contentEditableClassName="prose"
                       markdown={""}
-                      plugins={[
-                        linkPlugin(),
-                        linkDialogPlugin(),
-                        imagePlugin(),
-                        listsPlugin(),
-                        thematicBreakPlugin(),
-                        headingsPlugin(),
-                        tablePlugin(),
-                        toolbarPlugin({
-                          toolbarContents: () => (
-                            <>
-                              <UndoRedo />
-                              <BlockTypeSelect />
-                              <BoldItalicUnderlineToggles />
-                              <CreateLink />
-                              <InsertImage />
-                              <ListsToggle />
-                              <InsertThematicBreak />
-                              <InsertTable />
-                            </>
-                          ),
-                        }),
-                        markdownShortcutPlugin(),
-                      ]}
                     />
                   </FormControl>
 

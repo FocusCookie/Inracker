@@ -11,10 +11,10 @@ export const createPlayerSchema = z.object({
   immunities: z.array(z.coerce.number()),
   level: z.coerce.number(),
   name: z.string().min(2, {
-    message: i18next.t("ComponentCreatePlayerDrawer.minName"),
+    message: i18next.t("ComponentCreatePlayerDrawer:minName"),
   }),
   role: z.string().min(2, {
-    message: i18next.t("ComponentCreatePlayerDrawer.minRole"),
+    message: i18next.t("ComponentCreatePlayerDrawer:minRole"),
   }),
   picture: z.instanceof(File).or(z.string()),
   resistances: z.array(z.coerce.number()),

@@ -1,16 +1,7 @@
 import { DBResistance } from "@/types/resistances";
-import {
-  headingsPlugin,
-  imagePlugin,
-  linkDialogPlugin,
-  linkPlugin,
-  listsPlugin,
-  MDXEditor,
-  tablePlugin,
-  thematicBreakPlugin,
-} from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
 import Collapsible from "../Collapsible/Collapsible";
+import MarkdownEditor from "../MarkdownEditor/MarkdownEditor";
 
 type Props = {
   resistance: DBResistance;
@@ -31,20 +22,7 @@ function ResistanceCard({ resistance, actions }: Props) {
       }
       actions={actions}
     >
-      <MDXEditor
-        readOnly
-        contentEditableClassName="prose"
-        markdown={resistance.description}
-        plugins={[
-          linkPlugin(),
-          linkDialogPlugin(),
-          imagePlugin(),
-          listsPlugin(),
-          thematicBreakPlugin(),
-          headingsPlugin(),
-          tablePlugin(),
-        ]}
-      />
+      <MarkdownEditor readonly markdown={resistance.description} />
     </Collapsible>
   );
 }

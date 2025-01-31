@@ -8,7 +8,8 @@ const meta = {
   component: ChapterLayout,
   parameters: {},
   args: {
-    asideChildren: "aside content",
+    players: "aside content",
+    settings: "settings",
     children: "chapters",
     isAsideOpen: false,
     drawers: <div className="drawers"></div>,

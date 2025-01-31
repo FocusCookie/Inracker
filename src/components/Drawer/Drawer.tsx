@@ -37,7 +37,7 @@ function Drawer({
         <Dialog.Trigger asChild>{createTrigger}</Dialog.Trigger>
       )}
 
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {open && (
           <Dialog.Portal
             container={document.getElementById("drawer-portal")}
@@ -45,7 +45,6 @@ function Drawer({
           >
             <Dialog.Overlay asChild>
               <motion.div
-                onClick={undefined}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -59,7 +58,7 @@ function Drawer({
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: "100%" }}
                 transition={{ type: "tween", duration: 0.2 }}
-                className="fixed bottom-2 right-0 top-2 flex w-full max-w-[640px] flex-col items-start gap-2 rounded-l-md bg-white p-4 pr-0.5 shadow-xl"
+                className="fixed top-2 right-0 bottom-2 flex w-full max-w-[640px] flex-col items-start gap-2 rounded-l-md bg-white p-4 pr-0.5 shadow-xl"
               >
                 <Dialog.Title asChild>
                   <TypographyH1>{title}</TypographyH1>

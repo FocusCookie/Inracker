@@ -21,8 +21,10 @@ export const useCreatePlayer = () => {
   >([]);
   const [immunitySearch, setImmunitySearch] = useState<string>("");
   const [resistanceSearch, setResistanceSearch] = useState<string>("");
-  const [details, setDetails] = useState<string>(detailsTemplate[language]);
-  const [overview, setOverview] = useState<string>(overviewTemplate[language]);
+  const templates = {
+    details: detailsTemplate[language],
+    overview: overviewTemplate[language],
+  };
 
   const formSchema = createPlayerSchema;
   const form = useForm<z.infer<typeof formSchema>>({
@@ -82,19 +84,16 @@ export const useCreatePlayer = () => {
   }
 
   function handleDetailsChange(update: string) {
-    setDetails(update);
     form.setValue("details", update);
   }
 
   function handleOverviewChange(update: string) {
-    setOverview(update);
     form.setValue("overview", update);
   }
 
   return {
     form,
-    details,
-    overview,
+    templates,
     picturePreview,
     refreshKey,
     selectedImmunities,

@@ -1,67 +1,95 @@
-import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Button } from "../ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
 import { Input } from "../ui/input";
-import { useTranslation } from "react-i18next";
+import { ScrollArea } from "../ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
 type Props = {
   /**
-   * Name for the button which opens the catalog dialog
+   * button which opens the catalog dialog
    */
-  triggerName: string;
+  trigger: React.ReactElement<HTMLButtonElement>;
+  /** optional tooltip, for trigger */
+  tooltip?: string;
+  /** optional action */
+  action?: React.ReactElement<HTMLButtonElement>;
   title: string;
   description: string;
-  /** Disables the catalog open trigger */
-  disabled?: boolean;
   children: React.ReactNode;
+  placeholder: string;
   onSearchChange: (search: string) => void;
 };
 
 function Catalog({
-  triggerName,
+  trigger,
+  tooltip,
+  action,
   title,
   description,
-  disabled,
+  placeholder,
   children,
   onSearchChange,
 }: Props) {
-  const { t } = useTranslation("ComponentCatalog");
-
   function handleSearchTerm(event: React.ChangeEvent<HTMLInputElement>) {
     onSearchChange(event.target.value);
   }
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button disabled={disabled}>{triggerName}</Button>
-      </DialogTrigger>
+    <>
+      <Dialog>
+        {tooltip ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DialogTrigger asChild>{trigger}</DialogTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{tooltip} </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+          <DialogTrigger asChild>{trigger}</DialogTrigger>
+        )}
 
-      <DialogContent className="p-4 pr-0">
-        <div className="pr-4">
-          <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
+        <DialogContent className="m-4 p-4 pr-0">
+          <div className="pr-4">
+            <DialogHeader>
+              <DialogTitle>{title}</DialogTitle>
 
-            <DialogDescription>{description}</DialogDescription>
-          </DialogHeader>
+              <DialogDescription>{description}</DialogDescription>
+            </DialogHeader>
 
-          <Input
-            className="mt-4"
-            placeholder={t("searchPlaceholder")}
-            onChange={handleSearchTerm}
-          />
-        </div>
+            <Input
+              className="mt-4"
+              placeholder={placeholder}
+              onChange={handleSearchTerm}
+            />
+          </div>
 
-        <div className="max-h-[500px] overflow-hidden">{children}</div>
-      </DialogContent>
-    </Dialog>
+          <div className="max-h-[200px] overflow-hidden">
+            <ScrollArea className="h-full pr-4">
+              <div className="flex h-full flex-col gap-4 p-1">{children}</div>
+            </ScrollArea>
+          </div>
+
+          {action && <DialogFooter className="pr-4">{action}</DialogFooter>}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

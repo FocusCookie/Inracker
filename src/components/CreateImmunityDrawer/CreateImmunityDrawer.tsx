@@ -1,27 +1,7 @@
-import { Immunity } from "@/types/immunitiy";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  BlockTypeSelect,
-  BoldItalicUnderlineToggles,
-  CreateLink,
-  headingsPlugin,
-  imagePlugin,
-  InsertImage,
-  InsertTable,
-  InsertThematicBreak,
-  linkDialogPlugin,
-  linkPlugin,
-  listsPlugin,
-  ListsToggle,
-  markdownShortcutPlugin,
-  MDXEditor,
-  tablePlugin,
-  thematicBreakPlugin,
-  toolbarPlugin,
-  UndoRedo,
-} from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import Drawer from "../Drawer/Drawer";
 import IconPicker from "../IconPicker/IconPicker";
@@ -35,22 +15,19 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { useTranslation } from "react-i18next";
+import MarkdownEditor from "../MarkdownEditor/MarkdownEditor";
+import { useImmunityStore } from "@/stores/ImmunitiesState";
 
-type Props = {
-  open: boolean;
-  onOpenChange: (state: boolean) => void;
-  isCreating: boolean;
-  onCreate: (immunity: Immunity) => void;
-};
+type Props = {};
 
-function CreateImmunityDrawer({
-  open,
-  onOpenChange,
-  isCreating,
-  onCreate,
-}: Props) {
+function CreateImmunityDrawer({}: Props) {
   const { t } = useTranslation("ComponentCreateImmunityDrawer");
+  const {
+    createImmunity,
+    isCreateDrawerOpen,
+    isCreating,
+    setIsCreateDrawerOpen,
+  } = useImmunityStore();
 
   const formSchema = z.object({
     name: z.string().min(2, {
@@ -71,7 +48,7 @@ function CreateImmunityDrawer({
   function onSubmit(values: z.infer<typeof formSchema>) {
     const { name, description, icon } = values;
 
-    onCreate({
+    createImmunity({
       name,
       icon,
       description,
@@ -85,8 +62,8 @@ function CreateImmunityDrawer({
   return (
     <Drawer
       description={t("descriptionText")}
-      open={open}
-      onOpenChange={onOpenChange}
+      open={isCreateDrawerOpen}
+      onOpenChange={setIsCreateDrawerOpen}
       title={t("title")}
       actions={
         <Button
@@ -104,10 +81,14 @@ function CreateImmunityDrawer({
       }
       children={
         <Form {...form}>
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+          <form
+            onSubmit={(e) => e.preventDefault()}
+            className="flex flex-col gap-4"
+          >
             <div className="flex items-start gap-2">
-              <div className="flex flex-col gap-3 pl-0.5 pt-1.5">
+              <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
                 <FormLabel>{t("icon")}</FormLabel>
+
                 <IconPicker
                   initialIcon={form.getValues("icon")}
                   disabled={isCreating}
@@ -143,35 +124,10 @@ function CreateImmunityDrawer({
                   <FormLabel>{t("description")}</FormLabel>
 
                   <FormControl className="rounded-md border">
-                    <MDXEditor
-                      disabled={isCreating}
+                    <MarkdownEditor
+                      readonly={isCreating}
                       {...field}
-                      contentEditableClassName="prose"
                       markdown={""}
-                      plugins={[
-                        linkPlugin(),
-                        linkDialogPlugin(),
-                        imagePlugin(),
-                        listsPlugin(),
-                        thematicBreakPlugin(),
-                        headingsPlugin(),
-                        tablePlugin(),
-                        toolbarPlugin({
-                          toolbarContents: () => (
-                            <>
-                              <UndoRedo />
-                              <BlockTypeSelect />
-                              <BoldItalicUnderlineToggles />
-                              <CreateLink />
-                              <InsertImage />
-                              <ListsToggle />
-                              <InsertThematicBreak />
-                              <InsertTable />
-                            </>
-                          ),
-                        }),
-                        markdownShortcutPlugin(),
-                      ]}
                     />
                   </FormControl>
 
