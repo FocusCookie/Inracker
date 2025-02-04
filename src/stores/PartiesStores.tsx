@@ -19,7 +19,7 @@ interface PartyState {
   ) => Promise<void>;
 }
 
-export const usePartiesStore = create<PartyState>((set) => ({
+export const usePartiesStore = create<PartyState>((set, get) => ({
   parties: [],
   isLoading: false,
   currentParty: null,

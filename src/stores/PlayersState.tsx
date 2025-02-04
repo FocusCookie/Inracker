@@ -21,7 +21,7 @@ interface PlayerState {
   storePlayerImage: (
     picture: File | string,
     folder: ImageFolder,
-  ) => Promise<string | undefined>;
+  ) => Promise<string | null>;
 }
 
 export const usePlayerStore = create<PlayerState>((set) => ({
@@ -90,6 +90,8 @@ export const usePlayerStore = create<PlayerState>((set) => ({
       });
 
       set({ isStoringImage: false });
+    } finally {
+      return null;
     }
   },
 }));

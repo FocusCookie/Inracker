@@ -1,16 +1,6 @@
 import { DBImmunity } from "@/types/immunitiy";
 import Collapsible from "../Collapsible/Collapsible";
-import {
-  headingsPlugin,
-  imagePlugin,
-  linkDialogPlugin,
-  linkPlugin,
-  listsPlugin,
-  MDXEditor,
-  thematicBreakPlugin,
-} from "@mdxeditor/editor";
-import "@mdxeditor/editor/style.css";
-import MarkdownEditor from "../MarkdownEditor/MarkdownEditor";
+import MarkdownReader from "../MarkdownReader/MarkdownReader";
 
 type Props = {
   immunity: DBImmunity;
@@ -31,7 +21,7 @@ function ImmunityCard({ immunity, actions }: Props) {
       }
       actions={actions}
     >
-      <MarkdownEditor readonly={true} markdown={immunity.description} />
+      <MarkdownReader markdown={immunity.description} />
     </Collapsible>
   );
 }

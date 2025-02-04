@@ -61,9 +61,7 @@ function PlayerCatalog({
                 .filter((player) =>
                   player.name.toLowerCase().includes(search.toLowerCase()),
                 )
-                .filter((player) =>
-                  excludedPlayers.some((excluded) => excluded.id === player.id),
-                )
+
                 .map((player) => (
                   <button
                     key={player.id}
@@ -93,22 +91,6 @@ function PlayerCatalog({
         </div>
       </DialogContent>
     </Dialog>
-
-    /* <Catalog
-      description="Recruit a hero from our catalog of adventure companions to join your team!"
-      placeholder="Search for a specific hero..."
-      title="Add a player to your group"
-      onSearchChange={setSearch}
-      tooltip="Add Player"
-      trigger={
-        <Button variant="ghost" size="iconLarge">
-          <HiOutlineUserGroup />
-        </Button>
-      }
-    > 
-      
-    </Catalog>
-    */
   );
 }
 

@@ -1,5 +1,5 @@
+import { Immunity } from "@/types/immunitiy";
 import { zodResolver } from "@hookform/resolvers/zod";
-import "@mdxeditor/editor/style.css";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -15,19 +15,22 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import MarkdownEditor from "../MarkdownEditor/MarkdownEditor";
-import { useImmunityStore } from "@/stores/ImmunitiesState";
+import { Textarea } from "../ui/textarea";
 
-type Props = {};
+type Props = {
+  isLoading: boolean;
+  open: boolean;
+  onOpenChange: (state: boolean) => void;
+  onCreate: (Immunity: Omit<Immunity, "id">) => void;
+};
 
-function CreateImmunityDrawer({}: Props) {
+function CreateImmunityDrawer({
+  isLoading,
+  open,
+  onCreate,
+  onOpenChange,
+}: Props) {
   const { t } = useTranslation("ComponentCreateImmunityDrawer");
-  const {
-    createImmunity,
-    isCreateDrawerOpen,
-    isCreating,
-    setIsCreateDrawerOpen,
-  } = useImmunityStore();
 
   const formSchema = z.object({
     name: z.string().min(2, {
@@ -36,6 +39,7 @@ function CreateImmunityDrawer({}: Props) {
     description: z.string(),
     icon: z.string().emoji(),
   });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,7 +52,7 @@ function CreateImmunityDrawer({}: Props) {
   function onSubmit(values: z.infer<typeof formSchema>) {
     const { name, description, icon } = values;
 
-    createImmunity({
+    onCreate({
       name,
       icon,
       description,
@@ -62,20 +66,25 @@ function CreateImmunityDrawer({}: Props) {
   return (
     <Drawer
       description={t("descriptionText")}
-      open={isCreateDrawerOpen}
-      onOpenChange={setIsCreateDrawerOpen}
+      open={open}
+      onOpenChange={onOpenChange}
       title={t("title")}
+      createTrigger={
+        <Button variant="secondary" loading={isLoading} disabled={isLoading}>
+          Create
+        </Button>
+      }
       actions={
         <Button
-          loading={isCreating}
-          disabled={isCreating}
+          loading={isLoading}
+          disabled={isLoading}
           onClick={form.handleSubmit(onSubmit)}
         >
           {t("create")}
         </Button>
       }
       cancelTrigger={
-        <Button disabled={isCreating} variant="ghost">
+        <Button disabled={isLoading} variant="ghost">
           {t("cancel")}
         </Button>
       }
@@ -91,7 +100,7 @@ function CreateImmunityDrawer({}: Props) {
 
                 <IconPicker
                   initialIcon={form.getValues("icon")}
-                  disabled={isCreating}
+                  disabled={isLoading}
                   onIconClick={handleIconSelect}
                 />
                 <FormMessage />
@@ -105,7 +114,7 @@ function CreateImmunityDrawer({}: Props) {
                     <FormLabel>{t("name")}</FormLabel>
                     <FormControl>
                       <Input
-                        disabled={isCreating}
+                        disabled={isLoading}
                         placeholder={t("namePlaceholder")}
                         {...field}
                       />
@@ -124,10 +133,10 @@ function CreateImmunityDrawer({}: Props) {
                   <FormLabel>{t("description")}</FormLabel>
 
                   <FormControl className="rounded-md border">
-                    <MarkdownEditor
-                      readonly={isCreating}
+                    <Textarea
+                      readOnly={isLoading}
                       {...field}
-                      markdown={""}
+                      placeholder="Type your message here."
                     />
                   </FormControl>
 

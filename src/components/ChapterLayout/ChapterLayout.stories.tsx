@@ -8,7 +8,72 @@ const meta = {
   component: ChapterLayout,
   parameters: {},
   args: {
-    players: "aside content",
+    players: (
+      <>
+        <p>
+          Loremmmmaklsjfwjelfkjwlekjfölakwjeglökjeölrkgjlökej33rglökejröglkjseölrjglöek
+          ipsum dolor sit amet consectetur, adipisicing elit. Eos, incidunt
+          laudantium! Sed, maxime! Dolorum reprehenderit optio esse omnis labore
+          modi debitis laudantium, velit obcaecati minus delectus ipsa qui,
+          veritatis aliquam!
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
+          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
+          omnis labore modi debitis laudantium, velit obcaecati minus delectus
+          ipsa qui, veritatis aliquam!
+        </p>{" "}
+        <p>
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
+          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
+          omnis labore modi debitis laudantium, velit obcaecati minus delectus
+          ipsa qui, veritatis aliquam!
+        </p>{" "}
+        <p>
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
+          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
+          omnis labore modi debitis laudantium, velit obcaecati minus delectus
+          ipsa qui, veritatis aliquam!
+        </p>{" "}
+        <p>
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
+          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
+          omnis labore modi debitis laudantium, velit obcaecati minus delectus
+          ipsa qui, veritatis aliquam!
+        </p>{" "}
+        <p>
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
+          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
+          omnis labore modi debitis laudantium, velit obcaecati minus delectus
+          ipsa qui, veritatis aliquam!
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
+          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
+          omnis labore modi debitis laudantium, velit obcaecati minus delectus
+          ipsa qui, veritatis aliquam!
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
+          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
+          omnis labore modi debitis laudantium, velit obcaecati minus delectus
+          ipsa qui, veritatis aliquam!
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
+          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
+          omnis labore modi debitis laudantium, velit obcaecati minus delectus
+          ipsa qui, veritatis aliquam!
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
+          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
+          omnis labore modi debitis laudantium, velit obcaecati minus delectus
+          ipsa qui, veritatis aliquam!
+        </p>
+      </>
+    ),
+
     settings: "settings",
     children: "chapters",
     isAsideOpen: false,

@@ -16,7 +16,7 @@
     "fs:allow-appdata-write-recursive",
     {
       "identifier": "fs:allow-mkdir",
-      "allow": [{ "path": "$APPDATA/*" }]
+      "allow": [{ "path": "$APPDATA/*/*/*" }]
     }
   ]
 }

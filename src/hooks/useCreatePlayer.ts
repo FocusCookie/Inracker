@@ -19,8 +19,6 @@ export const useCreatePlayer = () => {
   const [selectedResistances, setSelectedResistances] = useState<
     DBResistance[]
   >([]);
-  const [immunitySearch, setImmunitySearch] = useState<string>("");
-  const [resistanceSearch, setResistanceSearch] = useState<string>("");
   const templates = {
     details: detailsTemplate[language],
     overview: overviewTemplate[language],
@@ -63,6 +61,8 @@ export const useCreatePlayer = () => {
 
   function handleAddImmunity(immunity: DBImmunity) {
     setSelectedImmunities((c) => [...c, immunity]);
+
+    console.log("Added immunity ", immunity);
     const currentImmunities = form.getValues("immunities");
     form.setValue("immunities", [...currentImmunities, immunity.id]);
   }
@@ -97,17 +97,13 @@ export const useCreatePlayer = () => {
     picturePreview,
     refreshKey,
     selectedImmunities,
-    immunitySearch,
-    resistanceSearch,
     selectedResistances,
     handleRemoveResistance,
     handleAddResistance,
     handleFileChange,
     handleResetPicture,
-    setResistanceSearch,
     handleAddImmunity,
     handleRemoveImmunity,
-    setImmunitySearch,
     handleDetailsChange,
     handleOverviewChange,
   };

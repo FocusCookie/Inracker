@@ -64,7 +64,7 @@ function Drawer({
                   <TypographyH1>{title}</TypographyH1>
                 </Dialog.Title>
 
-                <ScrollArea className="w-full grow pr-2">
+                <ScrollArea className="w-full grow pr-3">
                   <div className="flex flex-col gap-4">
                     {!!description && (
                       <Dialog.Description asChild>

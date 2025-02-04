@@ -1,15 +1,5 @@
 import { Player } from "@/types/player";
 import { HeartFilledIcon } from "@radix-ui/react-icons";
-import { useMeasure } from "@uidotdev/usehooks";
-import { AnimatePresence, motion } from "framer-motion";
-import { FaThumbsDown, FaThumbsUp } from "react-icons/fa";
-import {
-  GiBrickWall,
-  GiInspiration,
-  GiMagnifyingGlass,
-  GiShield,
-  GiWalk,
-} from "react-icons/gi";
 import { Badge } from "../ui/badge";
 import {
   Tooltip,
@@ -17,7 +7,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
-import { TypographySmall } from "../ui/typographyhSmall";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { motion } from "framer-motion";
+import MarkdownReader from "../MarkdownReader/MarkdownReader";
+import Collapsible from "../Collapsible/Collapsible";
 
 type Props = {
   player: Player;
@@ -25,54 +18,42 @@ type Props = {
 };
 
 function PlayerCard({ player, expanded }: Props) {
-  const [ref, { height }] = useMeasure();
+  // const [ref, { height }] = useMeasure();
 
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           {expanded ? (
-            <div className="min-h-[98px] w-[576px]">
-              <div className="flex w-full gap-2">
+            <div className="flex h-full w-[576px]">
+              <div className="w-16">
                 <button className="grid h-16 w-16 place-content-center rounded-md hover:cursor-pointer hover:bg-neutral-50">
-                  <motion.span
-                    layoutId={`player-${player.id}-icon`}
-                    className="text-4xl"
-                  >
-                    {player.icon}
-                  </motion.span>
+                  <Avatar>
+                    <AvatarImage
+                      src={player.image || undefined}
+                      alt={player.name}
+                    />
+                    <AvatarFallback>{player.icon}</AvatarFallback>
+                  </Avatar>
                 </button>
+              </div>
 
-                <div className="grow overflow-hidden">
+              <div className="flex w-full flex-col gap-2 pt-0.5">
+                <motion.div
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{
+                    opacity: 1,
+                    x: 0,
+                    transition: { duration: 0.3, delay: 0.15 },
+                  }}
+                  className="grow"
+                >
                   <div className="flex flex-col py-1">
                     <div className="flex items-center gap-2">
                       <span className="grow text-xl font-bold">
                         {player.name}
                       </span>
-                      <Badge className="bg-emerald-500">
-                        <div className="flex items-center gap-1">
-                          <FaThumbsUp />
-                          <span>
-                            {
-                              player.effects.filter(
-                                (effect) => effect.type === "positive",
-                              ).length
-                            }
-                          </span>
-                        </div>
-                      </Badge>
-                      <Badge className="bg-red-500">
-                        <div className="flex items-center gap-1">
-                          <FaThumbsDown />
-                          <span>
-                            {
-                              player.effects.filter(
-                                (effect) => effect.type === "negative",
-                              ).length
-                            }
-                          </span>
-                        </div>
-                      </Badge>
+
                       <Badge>LVL {player.level}</Badge>
                       <Badge>
                         <div className="flex items-center gap-1">
@@ -84,68 +65,59 @@ function PlayerCard({ player, expanded }: Props) {
                       </Badge>
                     </div>
                     <span className="">{player.role}</span>
-                    <div className="pt-4">
-                      <div ref={ref} className="flex w-full flex-col gap-4">
-                        <div className="flex gap-4">
-                          <div className="flex w-full flex-col items-center gap-4 rounded-md border px-2 py-4">
-                            <GiShield className="h-8 w-8" />
-                            <div className="flex flex-col items-center">
-                              <span className="font-bold">23</span>
-                              <TypographySmall>Armor</TypographySmall>
-                            </div>
-                          </div>
-                          <div className="flex w-full flex-col items-center gap-4 rounded-md border px-2 py-4">
-                            <GiMagnifyingGlass className="h-8 w-8" />
-                            <div className="flex flex-col items-center">
-                              <span className="font-bold">20</span>
-                              <TypographySmall>Perception</TypographySmall>
-                            </div>
-                          </div>
-                          <div className="flex w-full flex-col items-center gap-4 rounded-md border px-2 py-4">
-                            <GiBrickWall className="h-8 w-8" />
-                            <div className="flex flex-col items-center">
-                              <span className="font-bold">22</span>
-                              <TypographySmall>Difficulty</TypographySmall>
-                            </div>
-                          </div>
-                          <div className="flex w-full flex-col items-center gap-4 rounded-md border px-2 py-4">
-                            <GiWalk className="h-8 w-8" />
-                            {/* <GiFeatheredWing /> */}
-                            {/* <GiWaves /> */}
-                            <div className="flex flex-col items-center">
-                              <span className="font-bold">7.5</span>
-                              <TypographySmall>Walk</TypographySmall>
-                            </div>
-                          </div>
-                          <div className="flex w-full flex-col items-center gap-4 rounded-md border px-2 py-4">
-                            <GiInspiration className="h-8 w-8" />
-                            <div className="flex flex-col items-center">
-                              <span className="font-bold">2</span>
-                              <TypographySmall>Inspiration</TypographySmall>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
                   </div>
+                </motion.div>
+
+                <div className="overflow-hidden p-0.5">
+                  <Collapsible title="Overview">
+                    <MarkdownReader markdown={player.overview} />
+                  </Collapsible>
                 </div>
               </div>
             </div>
           ) : (
-            <button className="focus-visible:ring-ring relative flex h-[98px] w-16 flex-col gap-0.5 overflow-hidden rounded-md ring-offset-1 hover:cursor-pointer hover:bg-neutral-50 focus-visible:ring-1 focus-visible:outline-hidden">
-              <div className="absolute top-1 left-1 grid h-4 w-2 rounded-full bg-emerald-500"></div>
-              <div className="absolute top-1 right-1 grid h-4 w-2 rounded-full bg-red-500"></div>
-              <div className="grid h-16 w-16 place-content-center rounded-md">
-                <motion.span
-                  layoutId={`player-${player.id}-icon`}
-                  className="text-4xl"
-                >
+            <button className="focus-visible:ring-ring relative flex w-16 flex-col gap-1 rounded-md ring-offset-1 hover:cursor-pointer hover:bg-neutral-50 focus-visible:ring-1 focus-visible:outline-hidden">
+              <div className="relative grid h-16 w-16 place-content-center rounded-md">
+                <Avatar>
+                  <AvatarImage
+                    src={player.image || undefined}
+                    alt={player.name}
+                  />
+                  <AvatarFallback>{player.icon}</AvatarFallback>
+                </Avatar>
+
+                <span className="absolute top-0 right-0 rounded-full bg-white p-0.5 shadow">
                   {player.icon}
-                </motion.span>
+                </span>
               </div>
-              <div className="flex w-full items-center justify-center gap-1 py-1">
-                <HeartFilledIcon />
-                <span>{player.health}</span>
+
+              <div className="flex items-center gap-[1px] rounded-md bg-gray-200 px-1 py-0.5 text-sm font-bold text-black">
+                <span>{player.health}1</span>
+                <span>/</span>
+                <span>{player.max_health}4</span>
+              </div>
+
+              <div className="flex w-full justify-between gap-2">
+                {player.effects.filter((effect) => effect.type === "positive")
+                  .length > 0 && (
+                  <div className="w-full rounded-md bg-emerald-500 px-1 py-0.5 text-sm font-bold text-white">
+                    {
+                      player.effects.filter(
+                        (effect) => effect.type === "positive",
+                      ).length
+                    }
+                  </div>
+                )}
+                {player.effects.filter((effect) => effect.type === "negative")
+                  .length > 0 && (
+                  <div className="w-full rounded-md bg-red-500 px-1 py-0.5 text-sm font-bold text-white">
+                    {
+                      player.effects.filter(
+                        (effect) => effect.type === "negative",
+                      ).length
+                    }
+                  </div>
+                )}
               </div>
             </button>
           )}

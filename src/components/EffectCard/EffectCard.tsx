@@ -1,17 +1,8 @@
 import { DBEffect } from "@/types/effect";
-import {
-  headingsPlugin,
-  imagePlugin,
-  linkDialogPlugin,
-  linkPlugin,
-  listsPlugin,
-  MDXEditor,
-  thematicBreakPlugin,
-} from "@mdxeditor/editor";
-import "@mdxeditor/editor/style.css";
 import React from "react";
 import Collapsible from "../Collapsible/Collapsible";
 import { cn } from "@/lib/utils";
+import MarkdownReader from "../MarkdownReader/MarkdownReader";
 
 type Props = {
   effect: DBEffect;
@@ -39,19 +30,7 @@ function EffectCard({ actions, effect }: Props) {
       }
       actions={actions}
     >
-      <MDXEditor
-        readOnly
-        contentEditableClassName="prose"
-        markdown={effect.description}
-        plugins={[
-          linkPlugin(),
-          linkDialogPlugin(),
-          imagePlugin(),
-          listsPlugin(),
-          thematicBreakPlugin(),
-          headingsPlugin(),
-        ]}
-      />
+      <MarkdownReader markdown={effect.description} />
     </Collapsible>
   );
 }

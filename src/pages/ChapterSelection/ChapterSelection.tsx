@@ -19,6 +19,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   PlusCircledIcon,
+  PlusIcon,
 } from "@radix-ui/react-icons";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
@@ -33,7 +34,7 @@ import { usePlayerStore } from "@/stores/PlayersState";
 import { useChapterStore } from "@/stores/ChaptersState";
 import PlayerCatalog from "@/components/PlayerCatalog/PlayerCatalog";
 import { usePartiesStore } from "@/stores/PartiesStores";
-import { Player } from "@/types/player";
+import { Player, TCreatePlayer } from "@/types/player";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,29 +42,77 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ImageFolder, storeImage } from "@/lib/utils";
+import { DBImmunity } from "@/types/immunitiy";
+import { DBResistance, Resistance } from "@/types/resistances";
+import Catalog from "@/components/Catalog/Catalog";
+import ImmunityCard from "@/components/ImmunityCard/ImmunityCard";
+import { useImmunityStore } from "@/stores/ImmunitiesState";
+import CreateImmunityDrawer from "@/components/CreateImmunityDrawer/CreateImmunityDrawer";
+import CreateResistanceDrawer from "@/components/CreateResistanceDrawer/CreateResistanceDrawer";
+import { useResistancesStore } from "@/stores/ResistancesState";
+import ResistanceCard from "@/components/ResistanceCard/ResistanceCard";
+import { create } from "domain";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type Props = { partyId: DBParty["id"] };
 
 function ChapterSelection({ partyId }: Props) {
   const { t } = useTranslation("PageChapterSelection");
   const navigate = useNavigate();
-  const { chapters, getAllChapters, isLoading } = useChapterStore();
-  const currentParty = usePartiesStore((state) => state.currentParty);
-  console.log({ currentParty });
-  const { addPlayerToParty } = usePartiesStore();
-  const isCreateDrawerOpen = usePlayerStore(
-    (state) => state.isCreateDrawerOpen,
-  );
-  const players = usePlayerStore((state) => state.players);
-  const { setIsCreateDrawerOpen, getAllPlayers } = usePlayerStore();
+  const [immunitySearch, setImmunitySearch] = useState<string>("");
+  const [resistanceSearch, setResistanceSearch] = useState<string>("");
   const [isAsideOpen, setIsAsideOpen] = useState<boolean>(false);
   const [isAddChapterDrawerOpen, setIsAddChapterDrawerOpen] =
     useState<boolean>(false);
   const [openPlayersCatalog, setOpenPlayersCatalog] = useState<boolean>(false);
 
+  const { chapters, getAllChapters, isLoading } = useChapterStore();
+
+  const currentParty = usePartiesStore((state) => state.currentParty);
+  const { addPlayerToParty, setCurrentParty } = usePartiesStore();
+
+  const isCreateDrawerOpen = usePlayerStore(
+    (state) => state.isCreateDrawerOpen,
+  );
+  const players = usePlayerStore((state) => state.players);
+  const isCreatingPlayer = usePlayerStore((state) => state.isCreating);
+  const isStoringImage = usePlayerStore((state) => state.isStoringImage);
+  const { setIsCreateDrawerOpen, getAllPlayers, createPlayer } =
+    usePlayerStore();
+  console.log({ players });
+
+  const {
+    setIsCreateDrawerOpen: setIsCreateImmunityDrawerOpen,
+    createImmunity,
+    getAllImmunities,
+  } = useImmunityStore();
+  const immunities = useImmunityStore((state) => state.immunities);
+  const isCreatingImmunity = useImmunityStore((state) => state.isCreating);
+  const isCreateImmunityDrawerOpen = useImmunityStore(
+    (state) => state.isCreateDrawerOpen,
+  );
+
+  const {
+    getAllResistances,
+    createResistance,
+    setIsCreateDrawerOpen: setIsCreateResistanceDrawerOpen,
+  } = useResistancesStore();
+  const resistances = useResistancesStore((state) => state.resistances);
+  const isCreateResistanceDrawerOpen = useResistancesStore(
+    (state) => state.isCreateDrawerOpen,
+  );
+  const isCreatingResistance = useResistancesStore((state) => state.isCreating);
+
   useEffect(() => {
     getAllChapters(partyId);
     getAllPlayers();
+    getAllImmunities();
+    getAllResistances();
+
+    if (!currentParty) {
+      setCurrentParty(partyId);
+    }
   }, []);
 
   function handleAsideToggle() {
@@ -107,56 +156,13 @@ function ChapterSelection({ partyId }: Props) {
             isLoading ? (
               <Loader size="large" key="loader-chapters-player" />
             ) : (
-              <>
-                <motion.div
-                  initial={{
-                    opacity: 0,
-                  }}
-                  animate={{
-                    opacity: 1,
-                  }}
-                  exit={{
-                    opacity: 0,
-                  }}
-                >
-                  {currentParty?.players.map((player) => (
-                    <PlayerCard
-                      key={player.id}
-                      player={player}
-                      expanded={isAsideOpen}
-                    />
-                  ))}
-                </motion.div>
-
-                {isAsideOpen && (
-                  <div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            onClick={handleAsideToggle}
-                            variant="ghost"
-                            size="iconLarge"
-                          >
-                            {isAsideOpen ? (
-                              <ChevronLeftIcon />
-                            ) : (
-                              <ChevronRightIcon />
-                            )}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {isAsideOpen ? (
-                            <p>{t("closeDetails")}</p>
-                          ) : (
-                            <p>{t("openDetails")}</p>
-                          )}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                )}
-              </>
+              currentParty?.players.map((player) => (
+                <PlayerCard
+                  key={player.id}
+                  player={player}
+                  expanded={isAsideOpen}
+                />
+              ))
             )
           }
           settings={
@@ -172,57 +178,173 @@ function ChapterSelection({ partyId }: Props) {
               }}
               className="flex flex-col gap-2"
             >
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="iconLarge" variant="ghost">
-                    <RiUserAddFill />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem
-                      onClick={() => setOpenPlayersCatalog(true)}
-                    >
-                      Add from catalog
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setIsCreateDrawerOpen(true)}
-                    >
-                      Create new Player
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {!isAsideOpen && (
+                <>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="iconLarge" variant="ghost">
+                        <RiUserAddFill />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem
+                          onClick={() => setOpenPlayersCatalog(true)}
+                        >
+                          Add from catalog
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setIsCreateDrawerOpen(true)}
+                        >
+                          Create new Player
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
-              <PlayerCatalog
-                open={openPlayersCatalog}
-                onOpenChange={setOpenPlayersCatalog}
-                onAdd={handleAddPlayerToParty}
-                excludedPlayers={currentParty?.players || []}
-                players={players}
-              />
+                  <PlayerCatalog
+                    open={openPlayersCatalog}
+                    onOpenChange={setOpenPlayersCatalog}
+                    onAdd={handleAddPlayerToParty}
+                    excludedPlayers={currentParty?.players || []}
+                    players={players}
+                  />
 
-              <CreatePlayerDrawer
-                open={isCreateDrawerOpen}
-                onOpenChange={setIsCreateDrawerOpen}
-              />
+                  <CreatePlayerDrawer
+                    open={isCreateDrawerOpen}
+                    onOpenChange={setIsCreateDrawerOpen}
+                    isCreating={isCreatingPlayer}
+                    isStoringImage={isStoringImage}
+                    renderImmunitiesCatalog={function (props: {
+                      selectedImmunities: DBImmunity[];
+                      isCreating: boolean;
+                      onAddImmunity: (immunity: DBImmunity) => void;
+                      onRemoveImmunity: (id: number) => void;
+                    }): React.ReactNode {
+                      return (
+                        <div className="flex gap-4">
+                          <CreateImmunityDrawer
+                            isLoading={isCreatingImmunity}
+                            open={isCreateImmunityDrawerOpen}
+                            onOpenChange={setIsCreateImmunityDrawerOpen}
+                            onCreate={createImmunity}
+                          />
 
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={handleExitParty}
-                      variant="ghost"
-                      size="iconLarge"
-                    >
-                      <RiArrowLeftBoxLine />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{t("closeParty")}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                          <Catalog
+                            placeholder={"placeholder"}
+                            trigger={<Button>Select</Button>}
+                            title={"select an immunity"}
+                            description={"description"}
+                            onSearchChange={setImmunitySearch}
+                          >
+                            {immunities
+                              .filter((immunity) =>
+                                immunity.name
+                                  .toLowerCase()
+                                  .includes(immunitySearch.toLowerCase()),
+                              )
+                              .filter(
+                                (immunity) =>
+                                  !props.selectedImmunities.some(
+                                    (selected) => selected.id === immunity.id,
+                                  ),
+                              )
+                              .map((immunity) => (
+                                <ImmunityCard
+                                  key={immunity.id}
+                                  immunity={immunity}
+                                  actions={
+                                    <Button
+                                      size="icon"
+                                      onClick={() =>
+                                        props.onAddImmunity(immunity)
+                                      }
+                                    >
+                                      <PlusIcon />
+                                    </Button>
+                                  }
+                                />
+                              ))}
+                          </Catalog>
+                        </div>
+                      );
+                    }}
+                    renderResistancesCatalog={function (props: {
+                      selectedResistances: DBResistance[];
+                      isCreating: boolean;
+                      onAddResistance: (resistance: DBResistance) => void;
+                      onRemoveResistance: (id: number) => void;
+                    }): React.ReactNode {
+                      return (
+                        <div className="flex gap-4">
+                          <CreateResistanceDrawer
+                            isLoading={isCreatingResistance}
+                            open={isCreateResistanceDrawerOpen}
+                            onOpenChange={setIsCreateResistanceDrawerOpen}
+                            onCreate={createResistance}
+                          />
+
+                          <Catalog
+                            placeholder={"placeholder"}
+                            trigger={<Button>Select</Button>}
+                            title={"select an resistance"}
+                            description={"description"}
+                            onSearchChange={setResistanceSearch}
+                          >
+                            {resistances
+                              .filter((resistance) =>
+                                resistance.name
+                                  .toLowerCase()
+                                  .includes(resistanceSearch.toLowerCase()),
+                              )
+                              .filter(
+                                (resistance) =>
+                                  !props.selectedResistances.some(
+                                    (selected) => selected.id === resistance.id,
+                                  ),
+                              )
+                              .map((resistance) => (
+                                <ResistanceCard
+                                  key={resistance.id}
+                                  resistance={resistance}
+                                  actions={
+                                    <Button
+                                      size="icon"
+                                      onClick={() =>
+                                        props.onAddResistance(resistance)
+                                      }
+                                    >
+                                      <PlusIcon />
+                                    </Button>
+                                  }
+                                />
+                              ))}
+                          </Catalog>
+                        </div>
+                      );
+                    }}
+                    onCreate={createPlayer}
+                    onStoringImage={storeImage}
+                  />
+
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          onClick={handleExitParty}
+                          variant="ghost"
+                          size="iconLarge"
+                        >
+                          <RiArrowLeftBoxLine />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{t("closeParty")}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </>
+              )}
 
               <TooltipProvider>
                 <Tooltip>

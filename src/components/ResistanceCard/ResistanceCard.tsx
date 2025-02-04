@@ -1,7 +1,6 @@
 import { DBResistance } from "@/types/resistances";
-import "@mdxeditor/editor/style.css";
 import Collapsible from "../Collapsible/Collapsible";
-import MarkdownEditor from "../MarkdownEditor/MarkdownEditor";
+import MarkdownReader from "../MarkdownReader/MarkdownReader";
 
 type Props = {
   resistance: DBResistance;
@@ -22,7 +21,7 @@ function ResistanceCard({ resistance, actions }: Props) {
       }
       actions={actions}
     >
-      <MarkdownEditor readonly markdown={resistance.description} />
+      <MarkdownReader markdown={resistance.description} />
     </Collapsible>
   );
 }

@@ -1,6 +1,5 @@
 import { Resistance } from "@/types/resistances";
 import { zodResolver } from "@hookform/resolvers/zod";
-import "@mdxeditor/editor/style.css";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -16,19 +15,22 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import MarkdownEditor from "../MarkdownEditor/MarkdownEditor";
-import { useResistancesStore } from "@/stores/ResistancesState";
+import { Textarea } from "../ui/textarea";
 
-type Props = {};
+type Props = {
+  isLoading: boolean;
+  open: boolean;
+  onOpenChange: (state: boolean) => void;
+  onCreate: (Immunity: Omit<Resistance, "id">) => void;
+};
 
-function CreateResistanceDrawer({}: Props) {
+function CreateResistanceDrawer({
+  isLoading,
+  onCreate,
+  onOpenChange,
+  open,
+}: Props) {
   const { t } = useTranslation("ComponentCreateResistanceDrawer");
-  const {
-    createResistance,
-    isCreateDrawerOpen,
-    isCreating,
-    setIsCreateDrawerOpen,
-  } = useResistancesStore();
 
   const formSchema = z.object({
     name: z.string().min(3, {
@@ -49,7 +51,7 @@ function CreateResistanceDrawer({}: Props) {
   function onSubmit(values: z.infer<typeof formSchema>) {
     const { name, description, icon } = values;
 
-    createResistance({
+    onCreate({
       name,
       icon,
       description,
@@ -63,20 +65,25 @@ function CreateResistanceDrawer({}: Props) {
   return (
     <Drawer
       description={t("descriptionText")}
-      open={isCreateDrawerOpen}
-      onOpenChange={setIsCreateDrawerOpen}
+      open={open}
+      onOpenChange={onOpenChange}
       title={t("title")}
+      createTrigger={
+        <Button variant="secondary" loading={isLoading} disabled={isLoading}>
+          Create
+        </Button>
+      }
       actions={
         <Button
-          loading={isCreating}
-          disabled={isCreating}
+          loading={isLoading}
+          disabled={isLoading}
           onClick={form.handleSubmit(onSubmit)}
         >
           {t("create")}
         </Button>
       }
       cancelTrigger={
-        <Button disabled={isCreating} variant="ghost">
+        <Button disabled={isLoading} variant="ghost">
           {t("cancel")}
         </Button>
       }
@@ -91,7 +98,7 @@ function CreateResistanceDrawer({}: Props) {
                 <FormLabel>{t("icon")}</FormLabel>
                 <IconPicker
                   initialIcon={form.getValues("icon")}
-                  disabled={isCreating}
+                  disabled={isLoading}
                   onIconClick={handleIconSelect}
                 />
                 <FormMessage />
@@ -105,7 +112,7 @@ function CreateResistanceDrawer({}: Props) {
                     <FormLabel>{t("name")}</FormLabel>
                     <FormControl>
                       <Input
-                        disabled={isCreating}
+                        disabled={isLoading}
                         placeholder={t("namePlaceholder")}
                         {...field}
                       />
@@ -124,10 +131,10 @@ function CreateResistanceDrawer({}: Props) {
                   <FormLabel>{t("description")}</FormLabel>
 
                   <FormControl className="rounded-md border">
-                    <MarkdownEditor
-                      readonly={isCreating}
+                    <Textarea
+                      readOnly={isLoading}
                       {...field}
-                      markdown={""}
+                      placeholder="enter a description"
                     />
                   </FormControl>
 

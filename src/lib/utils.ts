@@ -1,6 +1,8 @@
 import { BaseDirectory, mkdir, writeFile } from "@tauri-apps/plugin-fs";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { appDataDir, join } from "@tauri-apps/api/path";
+import { convertFileSrc } from "@tauri-apps/api/core";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -29,9 +31,17 @@ export async function storeImage(picture: File | string, folder: ImageFolder) {
         baseDir: BaseDirectory.AppData,
       });
 
-      return filePath;
+      const appDataDirPath = await appDataDir();
+      const appFilePath = await join(appDataDirPath, filePath);
+      const assetUrl = convertFileSrc(appFilePath);
+
+      console.log({ assetUrl });
+
+      return assetUrl;
     } catch (error) {
       console.error("Error saving file:", error);
     }
   }
+
+  return null;
 }
