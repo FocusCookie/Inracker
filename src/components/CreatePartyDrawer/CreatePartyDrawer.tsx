@@ -61,6 +61,8 @@ function CreatePartyDrawer({
       description,
       players: [],
     });
+
+    form.reset();
   }
 
   function handleIconSelect(icon: string) {
@@ -92,7 +94,7 @@ function CreatePartyDrawer({
       <Form {...form}>
         <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
           <div className="flex items-start gap-2">
-            <div className="pl-0.2 flex flex-col gap-1 pt-1.5">
+            <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
               <FormLabel>{t("icon")}</FormLabel>
               <IconPicker
                 initialIcon={form.getValues("icon")}
