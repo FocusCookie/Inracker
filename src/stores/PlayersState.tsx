@@ -36,6 +36,8 @@ export const usePlayerStore = create<PlayerState>((set) => ({
       set({ isCreating: true });
 
       await db.players.create(player);
+      const players = await db.players.getAllDetailed();
+      set({ players });
 
       toast({
         variant: "default",

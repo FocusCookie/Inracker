@@ -1,4 +1,5 @@
 import Markdown from "react-markdown";
+import "./styles.css";
 import remarkGfm from "remark-gfm";
 import { TypographyH1 } from "../ui/typographyH1";
 import { TypographyH3 } from "../ui/typographyH3";
@@ -16,6 +17,7 @@ type Headline = {
 function MarkdownReader({ markdown }: Props) {
   return (
     <Markdown
+      className="markdown-reader"
       components={{
         h1({ children, ...props }: Headline) {
           return <TypographyH1 children={children} {...props} />;

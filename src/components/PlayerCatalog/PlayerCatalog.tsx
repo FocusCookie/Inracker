@@ -61,7 +61,12 @@ function PlayerCatalog({
                 .filter((player) =>
                   player.name.toLowerCase().includes(search.toLowerCase()),
                 )
-
+                .filter(
+                  (player) =>
+                    !excludedPlayers.some(
+                      (exPlayer) => exPlayer.id === player.id,
+                    ),
+                )
                 .map((player) => (
                   <button
                     key={player.id}

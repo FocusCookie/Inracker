@@ -1,10 +1,24 @@
+import Catalog from "@/components/Catalog/Catalog";
 import ChapterCard from "@/components/Chapter/ChapterCard";
 import ChapterLayout from "@/components/ChapterLayout/ChapterLayout";
+import CreateImmunityDrawer from "@/components/CreateImmunityDrawer/CreateImmunityDrawer";
 import CreatePlayerDrawer from "@/components/CreatePlayerDrawer/CreatePlayerDrawer";
+import CreateResistanceDrawer from "@/components/CreateResistanceDrawer/CreateResistanceDrawer";
 import Drawer from "@/components/Drawer/Drawer";
+import EditPlayerDrawer from "@/components/EditPlayerDrawer/EditPlayerDrawer";
+import ImmunityCard from "@/components/ImmunityCard/ImmunityCard";
 import Loader from "@/components/Loader/Loader";
 import PlayerCard from "@/components/PlayerCard/PlayerCard";
+import PlayerCatalog from "@/components/PlayerCatalog/PlayerCatalog";
+import ResistanceCard from "@/components/ResistanceCard/ResistanceCard";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
@@ -13,8 +27,17 @@ import {
 } from "@/components/ui/tooltip";
 import { TypographyH1 } from "@/components/ui/typographyH1";
 import { TypographyP } from "@/components/ui/typographyP";
+import { storeImage } from "@/lib/utils";
+import { useChapterStore } from "@/stores/ChaptersState";
+import { useImmunityStore } from "@/stores/ImmunitiesState";
+import { usePartiesStore } from "@/stores/PartiesStores";
+import { usePlayerStore } from "@/stores/PlayersState";
+import { useResistancesStore } from "@/stores/ResistancesState";
 import { Chapter } from "@/types/chapters";
+import { DBImmunity } from "@/types/immunitiy";
 import { DBParty } from "@/types/party";
+import { Player } from "@/types/player";
+import { DBResistance } from "@/types/resistances";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -23,37 +46,13 @@ import {
 } from "@radix-ui/react-icons";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   RiArrowLeftBoxLine,
   RiFilterLine,
   RiUserAddFill,
 } from "react-icons/ri";
-import { usePlayerStore } from "@/stores/PlayersState";
-import { useChapterStore } from "@/stores/ChaptersState";
-import PlayerCatalog from "@/components/PlayerCatalog/PlayerCatalog";
-import { usePartiesStore } from "@/stores/PartiesStores";
-import { Player, TCreatePlayer } from "@/types/player";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ImageFolder, storeImage } from "@/lib/utils";
-import { DBImmunity } from "@/types/immunitiy";
-import { DBResistance, Resistance } from "@/types/resistances";
-import Catalog from "@/components/Catalog/Catalog";
-import ImmunityCard from "@/components/ImmunityCard/ImmunityCard";
-import { useImmunityStore } from "@/stores/ImmunitiesState";
-import CreateImmunityDrawer from "@/components/CreateImmunityDrawer/CreateImmunityDrawer";
-import CreateResistanceDrawer from "@/components/CreateResistanceDrawer/CreateResistanceDrawer";
-import { useResistancesStore } from "@/stores/ResistancesState";
-import ResistanceCard from "@/components/ResistanceCard/ResistanceCard";
-import { create } from "domain";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 type Props = { partyId: DBParty["id"] };
 
@@ -66,11 +65,15 @@ function ChapterSelection({ partyId }: Props) {
   const [isAddChapterDrawerOpen, setIsAddChapterDrawerOpen] =
     useState<boolean>(false);
   const [openPlayersCatalog, setOpenPlayersCatalog] = useState<boolean>(false);
+  const keysPressed = useRef<Record<string, boolean>>({});
+  const [isEditPlayerOpen, setIsEditPlayerOpen] = useState<boolean>(false);
+  const [editPlayer, setEditPlayer] = useState<Player | null>(null);
 
   const { chapters, getAllChapters, isLoading } = useChapterStore();
 
   const currentParty = usePartiesStore((state) => state.currentParty);
-  const { addPlayerToParty, setCurrentParty } = usePartiesStore();
+  const { addPlayerToParty, setCurrentParty, removePlayerFromParty } =
+    usePartiesStore();
 
   const isCreateDrawerOpen = usePlayerStore(
     (state) => state.isCreateDrawerOpen,
@@ -115,6 +118,29 @@ function ChapterSelection({ partyId }: Props) {
     }
   }, []);
 
+  useEffect(() => {
+    // To open the side menuu when the user presses Meta +  "s" key
+    const handleKeyDown = (event: KeyboardEvent) => {
+      keysPressed.current[event.key] = true;
+
+      if (keysPressed.current["Meta"] && event.key.toLowerCase() === "s") {
+        setIsAsideOpen((prev) => !prev);
+      }
+    };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      delete keysPressed.current[event.key];
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
+
   function handleAsideToggle() {
     if (isAsideOpen) {
       setIsAsideOpen(false);
@@ -145,6 +171,12 @@ function ChapterSelection({ partyId }: Props) {
     addPlayerToParty(partyId, playerId);
   }
 
+  function handleEditPlayer(playerId: Player["id"]) {
+    setEditPlayer(players.find((player) => player.id === playerId) || null);
+    console.log({ playerId });
+    setIsEditPlayerOpen(true);
+  }
+
   //TODO: Translations
 
   return (
@@ -161,6 +193,10 @@ function ChapterSelection({ partyId }: Props) {
                   key={player.id}
                   player={player}
                   expanded={isAsideOpen}
+                  onRemove={() => removePlayerFromParty(partyId, player.id)}
+                  onEdit={() => {
+                    handleEditPlayer(player.id);
+                  }}
                 />
               ))
             )
@@ -180,12 +216,14 @@ function ChapterSelection({ partyId }: Props) {
             >
               {!isAsideOpen && (
                 <>
+                  {/* //TODO: Tooltip does not work in combination with the DropdownMenu */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button size="iconLarge" variant="ghost">
                         <RiUserAddFill />
                       </Button>
                     </DropdownMenuTrigger>
+
                     <DropdownMenuContent className="w-56">
                       <DropdownMenuGroup>
                         <DropdownMenuItem
@@ -359,9 +397,10 @@ function ChapterSelection({ partyId }: Props) {
                   </TooltipTrigger>
                   <TooltipContent>
                     {isAsideOpen ? (
-                      <p>{t("closeDetails")}</p>
+                      //TODO: Shortcut for other OS
+                      <p>{t("closeDetails")} (⌘S)</p>
                     ) : (
-                      <p>{t("openDetails")}</p>
+                      <p>{t("openDetails")} (⌘S)</p>
                     )}
                   </TooltipContent>
                 </Tooltip>

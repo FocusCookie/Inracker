@@ -1,0 +1,9 @@
+.markdown-reader > table {
+  width: 100%;
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+.markdown-reader > table > thead > tr > th {
+  font-size: 1.5rem;
+}

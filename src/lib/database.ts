@@ -227,6 +227,21 @@ const addPlayerToParty = async (
   return updatedParty;
 };
 
+const removePlayerFromParty = async (
+  db: TauriDatabase,
+  partyId: number,
+  playerId: number,
+) => {
+  const dbParty = await getPartyById(db, partyId);
+  const players = JSON.parse(dbParty.players) as number[];
+  const newPlayers = players.filter((id) => id !== playerId);
+
+  await db.execute("UPDATE parties SET id = $1, players = $2 WHERE id = $1", [
+    partyId,
+    JSON.stringify(newPlayers),
+  ]);
+};
+
 //* Player
 const getDetailedPlayerById = async (
   db: TauriDatabase,
@@ -484,6 +499,13 @@ export const Database = {
     addPlayerToParty: async (partyId: Party["id"], playerId: Player["id"]) => {
       const db = await connect();
       return addPlayerToParty(db, partyId, playerId);
+    },
+    removePlayerFromParty: async (
+      partyId: Party["id"],
+      playerId: Player["id"],
+    ) => {
+      const db = await connect();
+      return removePlayerFromParty(db, partyId, playerId);
     },
   },
 

@@ -19,10 +19,6 @@ export const useCreatePlayer = () => {
   const [selectedResistances, setSelectedResistances] = useState<
     DBResistance[]
   >([]);
-  const templates = {
-    details: detailsTemplate[language],
-    overview: overviewTemplate[language],
-  };
 
   const formSchema = createPlayerSchema;
   const form = useForm<z.infer<typeof formSchema>>({
@@ -83,17 +79,8 @@ export const useCreatePlayer = () => {
     );
   }
 
-  function handleDetailsChange(update: string) {
-    form.setValue("details", update);
-  }
-
-  function handleOverviewChange(update: string) {
-    form.setValue("overview", update);
-  }
-
   return {
     form,
-    templates,
     picturePreview,
     refreshKey,
     selectedImmunities,
@@ -104,7 +91,5 @@ export const useCreatePlayer = () => {
     handleResetPicture,
     handleAddImmunity,
     handleRemoveImmunity,
-    handleDetailsChange,
-    handleOverviewChange,
   };
 };

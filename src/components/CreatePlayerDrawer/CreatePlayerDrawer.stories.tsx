@@ -10,56 +10,12 @@ const meta = {
   args: {
     onCreate: fn(),
     onOpenChange: fn(),
-    onStorePlayerImage: fn(),
     isCreating: false,
     open: true,
-    immunities: [
-      {
-        id: 1,
-        description: `
-    - 4 damage over time decreased
-    - ignores water damage`,
-        name: "Feuerimunität",
-        icon: "🔥",
-      },
-      {
-        id: 2,
-        description: `
-    - no **splash damage**,
-    - ignores water damage`,
-        name: "Water Splash ",
-        icon: "🟢",
-      },
-      {
-        id: 3,
-        description: `
-    - no **splash damage**,
-    - ignores water damage`,
-        name: "Water Splash ",
-        icon: "🔴",
-      },
-      {
-        id: 4,
-        description: `
-    - no **splash damage**,
-    - ignores water damage`,
-        name: "Water Splash ",
-        icon: "🎅",
-      },
-      {
-        id: 5,
-        description: `
-    - no **splash damage**,
-    - ignores water damage`,
-        name: "Water Splash ",
-        icon: "💶",
-      },
-    ],
-    isCreatingImmunity: false,
-    onCreateImmunity: fn(),
-    isCreatingResistance: false,
-    onCreateResistance: fn(),
-    resistances: [{ description: "lorem", icon: "😍", id: 1, name: "love it" }],
+    isStoringImage: false,
+    onStoringImage: fn(),
+    renderImmunitiesCatalog: () => <p>Immunities Renderer</p>,
+    renderResistancesCatalog: () => <p>Resistances Renderer</p>,
   },
   decorators: [
     (Story) => (
@@ -72,7 +28,5 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
-  args: {
-    isCreatingImmunity: false,
-  },
+  args: {},
 };

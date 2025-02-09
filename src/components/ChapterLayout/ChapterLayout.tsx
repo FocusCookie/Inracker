@@ -53,9 +53,11 @@ function ChapterLayout({
             isAsideFloating && "absolute shadow-2xl",
           )}
         >
-          <div className="flex grow flex-col gap-4 overflow-hidden pr-0.5">
-            <ScrollArea className="h-full pr-2">
-              <div className="flex h-full flex-col gap-4 p-1">{players}</div>
+          <div className="flex grow flex-col gap-4">
+            <ScrollArea className="h-full">
+              <div className="flex h-full flex-col gap-4 pt-0.5 pl-0.5">
+                {players}
+              </div>
             </ScrollArea>
           </div>
 

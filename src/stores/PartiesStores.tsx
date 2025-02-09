@@ -17,6 +17,10 @@ interface PartyState {
     partyId: Party["id"],
     playerId: DBPlayer["id"],
   ) => Promise<void>;
+  removePlayerFromParty: (
+    partyId: Party["id"],
+    playerId: DBPlayer["id"],
+  ) => Promise<void>;
 }
 
 export const usePartiesStore = create<PartyState>((set, get) => ({
@@ -114,6 +118,30 @@ export const usePartiesStore = create<PartyState>((set, get) => ({
       set({ currentParty: updatedParty });
     } catch (error) {
       console.error("PartyStore: add player to party error: ", error);
+      //TODO: add translation
+      toast({
+        variant: "destructive",
+        title: "Oopps something went wrong, please try again.",
+        // @ts-ignore
+        description: error?.message || undefined,
+      });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  removePlayerFromParty: async (
+    partyId: Party["id"],
+    playerId: DBPlayer["id"],
+  ) => {
+    try {
+      set({ isLoading: true });
+
+      await db.parties.removePlayerFromParty(partyId, playerId);
+      const updatedParty = await db.parties.getDetailedById(partyId);
+
+      set({ currentParty: updatedParty });
+    } catch (error) {
+      console.error("PartyStore: remove player from party error: ", error);
       //TODO: add translation
       toast({
         variant: "destructive",

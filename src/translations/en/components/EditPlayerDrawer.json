@@ -1,0 +1,21 @@
+{
+  "update": "Update",
+  "save": "Save",
+  "cancel": "Cancel",
+  "create": "Create",
+  "overview": "Overview",
+  "icon": "Icon",
+  "name": "Name",
+  "role": "Role/Class",
+  "picturePlaceholder": "Select a picture...",
+  "profilePictureAlt": "The profile picture for the player.",
+  "playerPicture": "Player Picture",
+  "description": "Description",
+  "add": "Add",
+  "level": "Level",
+  "health": "Health",
+  "overviewDescription": "This is where you can jot down permanent notes about the character. They are the first information to open on a player, allowing for easy reference during your sessions.",
+  "detailsDescription": "This section is for all the essential skills and additional important information about the character. Expand it when you need to access specific details during your adventures!",
+  "details": "Details",
+  "select": "Select"
+}

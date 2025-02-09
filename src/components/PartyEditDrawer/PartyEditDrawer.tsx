@@ -122,7 +122,7 @@ function PartyEditDrawer({
                       {t("deleteNote")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <AlertDialogFooter>
+                  <AlertDialogFooter className="flex gap-4">
                     <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                     <AlertDialogAction onClick={handleDeleteParty}>
                       {t("yesDelete")}
@@ -141,7 +141,7 @@ function PartyEditDrawer({
           <Form {...form}>
             <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
               <div className="flex items-start gap-2">
-                <div className="flex flex-col gap-3 pl-0.5 pt-1.5">
+                <div className="flex flex-col gap-3 pt-1.5 pl-0.5">
                   <FormLabel>{t("icon")}</FormLabel>
                   <IconPicker
                     initialIcon={form.getValues("icon")}

@@ -1,13 +1,14 @@
-import { useCreatePlayer } from "@/hooks/useCreatePlayer";
 import { ImageFolder } from "@/lib/utils";
-import { createPlayerSchema } from "@/schemas/createPlayer";
+import { editPlayerSchema } from "@/schemas/editPlayer";
+import { Player } from "@/types/player";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { TrashIcon } from "@radix-ui/react-icons";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import Drawer from "../Drawer/Drawer";
 import IconPicker from "../IconPicker/IconPicker";
-import ImmunityCard from "../ImmunityCard/ImmunityCard";
-import ResistanceCard from "../ResistanceCard/ResistanceCard";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import {
@@ -21,33 +22,14 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
-import { TypographyH2 } from "../ui/typographyh2";
-import { DBImmunity } from "@/types/immunitiy";
-import { DBResistance } from "@/types/resistances";
-import { TCreatePlayer } from "@/types/player";
 import { Textarea } from "../ui/textarea";
 
-type ImmunitiesRenderProps = {
-  selectedImmunities: DBImmunity[];
-  isCreating: boolean;
-  onAddImmunity: (immunity: DBImmunity) => void;
-  onRemoveImmunity: (id: number) => void;
-};
-
-type ResistanceRenderProps = {
-  selectedResistances: DBResistance[];
-  isCreating: boolean;
-  onAddResistance: (resistance: DBResistance) => void;
-  onRemoveResistance: (id: number) => void;
-};
-
 type Props = {
-  isCreating: boolean;
+  player: Player;
+  isUpdating: boolean;
   open: boolean;
   isStoringImage: boolean;
-  renderImmunitiesCatalog: (props: ImmunitiesRenderProps) => React.ReactNode;
-  renderResistancesCatalog: (props: ResistanceRenderProps) => React.ReactNode;
-  onCreate: (player: TCreatePlayer) => void;
+  onUpdate: (player: Player) => void;
   onOpenChange: (state: boolean) => void;
   onStoringImage: (
     picture: File | string,
@@ -55,70 +37,105 @@ type Props = {
   ) => Promise<string | null>;
 };
 
-function CreatePlayerDrawer({
+function EditPlayerDrawer({
+  player,
   open,
-  isCreating,
-  renderImmunitiesCatalog,
-  renderResistancesCatalog,
+  isUpdating,
   isStoringImage,
-  onCreate,
+  onUpdate,
   onStoringImage,
   onOpenChange,
 }: Props) {
-  const { t } = useTranslation("ComponentCreatePlayerDrawer");
+  const { t } = useTranslation("ComponentEditPlayerDrawer");
+  const [picturePreview, setPicturePreview] = useState<string>(
+    player?.image || "",
+  );
+  const [refreshKey, setRefreshKey] = useState<number>(0); // to reset the input type file path after a reset
 
-  const {
-    form,
-    picturePreview,
-    refreshKey,
-    selectedImmunities,
-    selectedResistances,
-    handleRemoveResistance: onRemoveResistance,
-    handleAddResistance: onAddResistance,
-    handleFileChange,
-    handleResetPicture,
-    handleAddImmunity: onAddImmunity,
-    handleRemoveImmunity: onRemoveImmunity,
-  } = useCreatePlayer();
+  const formSchema = editPlayerSchema;
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { ...player, maxHealth: player.max_health },
+  });
+
+  function handleResetPicture() {
+    form.setValue("picture", "");
+    setRefreshKey((c) => c + 1);
+    setPicturePreview("");
+  }
+
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    if (!event.target.files) return;
+    const file = event.target.files[0];
+
+    if (file) {
+      setPicturePreview(URL.createObjectURL(file));
+      form.setValue("picture", file);
+    }
+  }
 
   function handleIconSelect(icon: string) {
     form.setValue("icon", icon);
   }
 
-  async function onSubmit(values: z.infer<typeof createPlayerSchema>) {
-    const { picture, health } = values;
-    let pictureFilePath: null | string = null;
+  async function onSubmit(values: z.infer<typeof editPlayerSchema>) {
+    if (player) {
+      const {
+        picture,
+        health,
+        details,
+        ep,
+        icon,
+        id,
+        level,
+        name,
+        overview,
+        role,
+      } = values;
+      let pictureFilePath: null | string = null;
 
-    if (!!picture) {
-      pictureFilePath = await onStoringImage(picture, "players");
-      console.log({ pictureFilePath });
+      //TODO: Delete the old picture file if it exists
+
+      if (!!picture) {
+        pictureFilePath = await onStoringImage(picture, "players");
+        console.log({ pictureFilePath });
+      }
+
+      onUpdate({
+        ...player,
+        details,
+        ep,
+        icon,
+        id,
+        level,
+        name,
+        overview,
+        role,
+        max_health: health,
+        image: pictureFilePath,
+      });
     }
-
-    onCreate({
-      ...values,
-      max_health: health,
-      effects: [],
-      image: pictureFilePath,
-    });
   }
+
+  console.log({ player });
 
   return (
     <Drawer
-      description={t("descriptionText")}
+      description="Edit the player as you need."
       open={open}
       onOpenChange={onOpenChange}
-      title={t("title")}
+      title={`${t("update")} ${player?.name}`}
       cancelTrigger={
-        <Button disabled={isCreating || isStoringImage} variant="ghost">
+        <Button disabled={isUpdating || isStoringImage} variant="ghost">
           {t("cancel")}
         </Button>
       }
       actions={
         <Button
-          loading={isCreating || isStoringImage}
+          loading={isUpdating || isStoringImage}
           onClick={form.handleSubmit(onSubmit)}
         >
-          {t("create")}
+          {t("save")}
         </Button>
       }
     >
@@ -126,17 +143,15 @@ function CreatePlayerDrawer({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-6 pt-4"
           >
             <div className="flex flex-col gap-4">
-              <TypographyH2>{t("overview")}</TypographyH2>
-
               <div className="flex items-start gap-2">
                 <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
                   <FormLabel>{t("icon")}</FormLabel>
                   <IconPicker
                     initialIcon={form.getValues("icon")}
-                    disabled={isCreating || isStoringImage}
+                    disabled={isUpdating || isStoringImage}
                     onIconClick={handleIconSelect}
                   />
                   <FormMessage />
@@ -150,7 +165,7 @@ function CreatePlayerDrawer({
                       <FormLabel>{t("name")}</FormLabel>
                       <FormControl>
                         <Input
-                          disabled={isCreating || isStoringImage}
+                          disabled={isUpdating || isStoringImage}
                           {...field}
                         />
                       </FormControl>
@@ -168,7 +183,7 @@ function CreatePlayerDrawer({
                       <FormControl>
                         <Input
                           type="text"
-                          disabled={isCreating || isStoringImage}
+                          disabled={isUpdating || isStoringImage}
                           {...field}
                         />
                       </FormControl>
@@ -188,7 +203,7 @@ function CreatePlayerDrawer({
                       <FormControl>
                         <Input
                           type="number"
-                          disabled={isCreating || isStoringImage}
+                          disabled={isUpdating || isStoringImage}
                           {...field}
                         />
                       </FormControl>
@@ -206,7 +221,7 @@ function CreatePlayerDrawer({
                       <FormControl>
                         <Input
                           type="number"
-                          disabled={isCreating || isStoringImage}
+                          disabled={isUpdating || isStoringImage}
                           {...field}
                         />
                       </FormControl>
@@ -222,9 +237,7 @@ function CreatePlayerDrawer({
                     src={picturePreview}
                     alt={t("profilePictureAlt")}
                   />
-                  <AvatarFallback>
-                    {form.watch("name").slice(0, 2)}
-                  </AvatarFallback>
+                  <AvatarFallback>{form.watch("name")}</AvatarFallback>
                 </Avatar>
 
                 <FormItem className="mb-1.5 w-full px-0.5">
@@ -236,7 +249,7 @@ function CreatePlayerDrawer({
                         className="grow"
                         onChange={handleFileChange}
                         type="file"
-                        disabled={isCreating || isStoringImage}
+                        disabled={isUpdating || isStoringImage}
                         placeholder={t("picturePlaceholder")}
                         accept="image/*"
                       />
@@ -268,7 +281,7 @@ function CreatePlayerDrawer({
 
                     <FormControl className="rounded-md border">
                       <Textarea
-                        readOnly={isCreating}
+                        readOnly={isUpdating}
                         {...field}
                         placeholder="Enter some Overview"
                       />
@@ -289,7 +302,7 @@ function CreatePlayerDrawer({
 
                     <FormControl className="rounded-md border">
                       <Textarea
-                        readOnly={isCreating}
+                        readOnly={isUpdating}
                         {...field}
                         placeholder="Enter some description"
                       />
@@ -300,64 +313,6 @@ function CreatePlayerDrawer({
                 )}
               />
             </div>
-
-            <div className="flex flex-col gap-4">
-              <div className="flex justify-between gap-2">
-                <TypographyH2>{t("immunities")}</TypographyH2>
-                <div className="flex gap-2">
-                  {renderImmunitiesCatalog({
-                    selectedImmunities,
-                    isCreating,
-                    onAddImmunity,
-                    onRemoveImmunity,
-                  })}
-                </div>
-              </div>
-              {selectedImmunities.map((immunity) => (
-                <ImmunityCard
-                  key={immunity.id}
-                  immunity={immunity}
-                  actions={
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => onRemoveImmunity(immunity.id)}
-                    >
-                      <TrashIcon />
-                    </Button>
-                  }
-                />
-              ))}
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <div className="flex justify-between gap-2">
-                <TypographyH2>{t("resistances")}</TypographyH2>
-                <div className="flex gap-2">
-                  {renderResistancesCatalog({
-                    selectedResistances,
-                    isCreating,
-                    onAddResistance,
-                    onRemoveResistance,
-                  })}
-                </div>
-              </div>
-
-              {selectedResistances.map((resistance) => (
-                <ResistanceCard
-                  key={resistance.id}
-                  resistance={resistance}
-                  actions={
-                    <Button
-                      size="icon"
-                      onClick={() => onRemoveResistance(resistance.id)}
-                    >
-                      <TrashIcon />
-                    </Button>
-                  }
-                />
-              ))}
-            </div>
           </form>
         </Form>
       </ScrollArea>
@@ -365,4 +320,4 @@ function CreatePlayerDrawer({
   );
 }
 
-export default CreatePlayerDrawer;
+export default EditPlayerDrawer;

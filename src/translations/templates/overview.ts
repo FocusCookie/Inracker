@@ -1,64 +1,23 @@
 const de = `
-<style>
-  table {
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
-  }
-  td {
-    vertical-align: top;
-  }
-</style>
+| 📋 Allgemeine Informationen | 🛡️ Verteidigung |
+|-------------------------|---------------|
+| **Rasse:** Halbelf | **AC (Rüstungsklasse):** 15 |
+| **Ausrichtung:** Chaotisch Neutral | **Initiative:** +2 |
+| **Hintergrund:** Straßenkind | **Passive Wahrnehmung:** 13 |
+| **Klassen-SG:** 18 | **Reflex:** 18 |
+| **Bewegungsrate:** 8 | **Willen:** 12 |
+| | **Zähigkeit:** 20 |
 
-<table>
-<tr>
-<td style="width:50%;">
+| ⚔️ Rüstungsdetails | 🔰 Schild |
+|-----------------|--------|
+| **Rüstung:** 10 | **Schildwert:** 12 |
+| **Rüstungskompetenzen:** | **Härte:** 5 |
+| - Ungerüstet: Geübt | **Maximale HP:** 24 |
+| - Leicht: Experte | **Bewegungspenalty:** 10 |
+| - Mittelschwer: Experte | |
+| - Schwer: Meister | |
 
-## Allgemeine Informationen
-- **Rasse:** Halbelf  
-- **Ausrichtung:** Chaotisch Neutral  
-- **Hintergrund:** Straßenkind  
-- **Klassen-SG:** 18  
-- **Bewegungsrate:** 8  
-
-</td>
-<td style="width:50%;">
-
-## Verteidigung
-- **AC (Rüstungsklasse):** 15  
-- **Initiative:** +2  
-- **Passive Wahrnehmung:** 13  
-- **Reflex:** 18  
-- **Willen:** 12  
-- **Zähigkeit:** 20  
-
-</td>
-</tr>
-<tr>
-<td style="width:50%;">
-
-## Rüstungsdetails
-- **Rüstung:** 10  
-- **Rüstungskompetenzen:**  
-  - Ungerüstet: Geübt  
-  - Leicht: Experte  
-  - Mittelschwer: Experte  
-  - Schwer: Meister  
-
-</td>
-<td style="width:50%;">
-
-## Schild
-- **Schildwert:** 12  
-- **Härte:** 5  
-- **Maximale HP:** 24  
-- **Bewegungspenalty:** 10  
-
-</td>
-</tr>
-</table>
-
-## Attribute
+### 🕵️‍♂️ Attribute
 - **Stärke:** +1  
 - **Geschicklichkeit:** +2  
 - **Konstitution:** +0  
@@ -68,66 +27,25 @@ const de = `
 `;
 
 const en = `
-<style>
-  table {
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
-  }
-  td {
-    vertical-align: top;
-  }
-</style>
+| 📋 General Information | 🛡️ Defense |
+|--------------------|---------|
+| **Race:** Half-Elf | **AC (Armor Class):** 15 |
+| **Alignment:** Chaotic Neutral | **Initiative:** +2 |
+| **Background:** Street Urchin | **Passive Perception:** 13 |
+| **Class DC:** 18 | **Reflex:** 18 |
+| **Movement Speed:** 8 | **Will:** 12 |
+| | **Fortitude:** 20 |
 
-<table>
-<tr>
-<td style="width:50%;">
+| ⚔️ Armor Details | 🔰 Shield |
+|--------------|--------|
+| **Armor:** 10 | **Shield Value:** 12 |
+| **Armor Proficiencies:** | **Hardness:** 5 |
+| - Unarmored: Trained | **Max HP:** 24 |
+| - Light: Expert | **Speed Penalty:** 10 |
+| - Medium: Expert | |
+| - Heavy: Master | |
 
-## General Information
-- **Race:** Half-Elf  
-- **Alignment:** Chaotic Neutral  
-- **Background:** Street Urchin  
-- **Class DC:** 18  
-- **Movement Speed:** 8  
-
-</td>
-<td style="width:50%;">
-
-## Defense
-- **AC (Armor Class):** 15  
-- **Initiative:** +2  
-- **Passive Perception:** 13  
-- **Reflex:** 18  
-- **Will:** 12  
-- **Fortitude:** 20  
-
-</td>
-</tr>
-<tr>
-<td style="width:50%;">
-
-## Armor Details
-- **Armor:** 10  
-- **Armor Proficiencies:**  
-  - Unarmored: Trained  
-  - Light: Expert  
-  - Medium: Expert  
-  - Heavy: Master  
-
-</td>
-<td style="width:50%;">
-
-## Shield
-- **Shield Value:** 12  
-- **Hardness:** 5  
-- **Max HP:** 24  
-- **Speed Penalty:** 10  
-
-</td>
-</tr>
-</table>
-
-## Attributes
+### 🕵️‍♂️ Attributes
 - **Strength:** +1  
 - **Dexterity:** +2  
 - **Constitution:** +0  
