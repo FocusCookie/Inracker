@@ -4,7 +4,7 @@ import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
 import PartySelection from "@/pages/PartySelection/PartySelection";
-import { usePartyStore } from "@/stores/usePartySTore";
+import { usePartyStore } from "@/stores/usePartyStore";
 import { Party } from "@/types/party";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
