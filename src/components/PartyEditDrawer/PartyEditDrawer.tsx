@@ -27,9 +27,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
+import { useEffect } from "react";
 
 type Props = {
-  party: Party;
+  party: Party | null;
   onUpdate: (party: Party) => void;
   /**
    * disabels the inputs and sets the create button to loading and disables other buttons
@@ -57,25 +58,37 @@ function PartyEditDrawer({
     description: z.string(),
     icon: z.string().emoji(),
   });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: party.name,
-      description: party.description,
-      icon: party.icon,
+      name: party?.name ?? "",
+      description: party?.description ?? "",
+      icon: party?.icon ?? "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const { name, description, icon } = values;
+  useEffect(() => {
+    if (party) {
+      form.reset({
+        name: party.name,
+        description: party.description,
+        icon: party.icon,
+      });
+    }
+  }, [party, form]);
 
-    onUpdate({
-      id: party.id,
-      name,
-      icon,
-      description,
-      players: party.players,
-    });
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    if (party) {
+      const { name, description, icon } = values;
+
+      onUpdate({
+        ...party,
+        name,
+        icon,
+        description,
+      });
+    }
   }
 
   function handleIconSelect(icon: string) {
@@ -83,113 +96,107 @@ function PartyEditDrawer({
   }
 
   function handleDeleteParty() {
-    onDelete(party.id);
+    if (party) {
+      onDelete(party.id);
+    }
   }
 
   return (
-    <div className="flex gap-2">
-      <div>
-        <Drawer
-          description={t("titleDescription")}
-          open={open}
-          onOpenChange={onOpenChange}
-          title={t("title")}
-          actions={
-            <div className="flex gap-4">
+    <Drawer
+      description={t("titleDescription")}
+      open={open && !!party}
+      onOpenChange={onOpenChange}
+      title={t("title")}
+      actions={
+        <div className="flex gap-4">
+          <Button
+            loading={isUpdating}
+            disabled={isUpdating}
+            onClick={form.handleSubmit(onSubmit)}
+          >
+            {t("save")}
+          </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
               <Button
+                variant="destructive"
                 loading={isUpdating}
                 disabled={isUpdating}
-                onClick={form.handleSubmit(onSubmit)}
               >
-                {t("save")}
+                {t("delete")}
               </Button>
+            </AlertDialogTrigger>
 
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="destructive"
-                    loading={isUpdating}
-                    disabled={isUpdating}
-                  >
-                    {t("delete")}
-                  </Button>
-                </AlertDialogTrigger>
-
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t("areYouSure")}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t("deleteNote")}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter className="flex gap-4">
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDeleteParty}>
-                      {t("yesDelete")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          }
-          cancelTrigger={
-            <Button disabled={isUpdating} variant="ghost">
-              {t("cancel")}
-            </Button>
-          }
-        >
-          <Form {...form}>
-            <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
-              <div className="flex items-start gap-2">
-                <div className="flex flex-col gap-3 pt-1.5 pl-0.5">
-                  <FormLabel>{t("icon")}</FormLabel>
-                  <IconPicker
-                    initialIcon={form.getValues("icon")}
-                    disabled={isUpdating}
-                    onIconClick={handleIconSelect}
-                  />
-                  <FormMessage />
-                </div>
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("name")}</FormLabel>
-                      <FormControl>
-                        <Input
-                          disabled={isUpdating}
-                          placeholder="The greedy Adventurer"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem className="px-0.5">
-                    <FormLabel>{t("description")}</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        disabled={isUpdating}
-                        placeholder=""
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("areYouSure")}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("deleteNote")}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex gap-4">
+                <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteParty}>
+                  {t("yesDelete")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      }
+      cancelTrigger={
+        <Button disabled={isUpdating} variant="ghost">
+          {t("cancel")}
+        </Button>
+      }
+    >
+      <Form {...form} key={party?.id}>
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+          <div className="flex items-start gap-2">
+            <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
+              <FormLabel>{t("icon")}</FormLabel>
+              <IconPicker
+                initialIcon={form.getValues("icon")}
+                disabled={isUpdating}
+                onIconClick={handleIconSelect}
               />
-            </form>
-          </Form>
-        </Drawer>
-      </div>
-    </div>
+              <FormMessage />
+            </div>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="w-full px-0.5">
+                  <FormLabel>{t("name")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={isUpdating}
+                      placeholder="The greedy Adventurer"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem className="px-0.5">
+                <FormLabel>{t("description")}</FormLabel>
+                <FormControl>
+                  <Textarea disabled={isUpdating} placeholder="" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </form>
+      </Form>
+    </Drawer>
   );
 }
 

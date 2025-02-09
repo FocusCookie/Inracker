@@ -4,26 +4,37 @@ import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
 import PartySelection from "@/pages/PartySelection/PartySelection";
+import { usePartyStore } from "@/stores/usePartySTore";
 import { Party } from "@/types/party";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useShallow } from "zustand/shallow";
 
 export const Route = createFileRoute("/parties/")({
   component: Parties,
 });
 
 function Parties() {
-  const [isCreatDrawerOpen, setIsCreatDrawerOpen] = useState<boolean>(false);
-  const [isEditDrawerOpen, setIsEditDrawerOpen] = useState<boolean>(false);
-  const [createdParties, setCreatedCount] = useState<number>(0);
-  const [partyToEdit, setPartyToEdit] = useState<Party>({
-    id: -1,
-    description: "",
-    icon: "",
-    name: "",
-    players: [],
-  });
+  const navigate = useNavigate();
+  const {
+    isCreateDrawerOpen,
+    isEditDrawerOpen,
+    editingParty,
+    openCreateDrawer,
+    closeCreateDrawer,
+    openEditDrawer,
+    closeEditDrawer,
+  } = usePartyStore(
+    useShallow((state) => ({
+      isCreateDrawerOpen: state.isCreateDrawerOpen,
+      isEditDrawerOpen: state.isEditDrawerOpen,
+      editingParty: state.editingParty,
+      closeCreateDrawer: state.closeCreateDrawer,
+      openCreateDrawer: state.openCreateDrawer,
+      openEditDrawer: state.openEditDrawer,
+      closeEditDrawer: state.closeEditDrawer,
+    })),
+  );
 
   const queryClient = useQueryClient();
   const partiesQuery = useQueryWithToast({
@@ -37,10 +48,7 @@ function Parties() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["parties"] });
-      setIsCreatDrawerOpen(false);
-      setTimeout(() => {
-        setCreatedCount((c) => c + 1);
-      }, 350);
+      closeCreateDrawer();
     },
   });
 
@@ -50,7 +58,7 @@ function Parties() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["parties"] });
-      setIsEditDrawerOpen(false);
+      closeEditDrawer();
     },
   });
 
@@ -60,14 +68,28 @@ function Parties() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["parties"] });
-      setIsEditDrawerOpen(false);
+      closeEditDrawer();
     },
     onError: (error) => console.log(error),
   });
 
   function handleEditParty(party: Party) {
-    setPartyToEdit(party);
-    setIsEditDrawerOpen(true);
+    openEditDrawer(party);
+  }
+
+  function handleCreateDrawerChange(state: boolean) {
+    if (state) {
+      openCreateDrawer();
+    } else {
+      closeCreateDrawer();
+    }
+  }
+
+  function handlePartySelection(partyId: Party["id"]) {
+    navigate({
+      to: `/chapters`,
+      search: { partyId },
+    });
   }
 
   return (
@@ -75,24 +97,26 @@ function Parties() {
       <PartySelection
         loading={partiesQuery.isPending}
         parties={partiesQuery.data || []}
-        renderCreatePartyDrawer={
+        onEditParty={handleEditParty}
+        onPartySelect={handlePartySelection}
+      >
+        <PartySelection.CreateDrawer>
           <CreatePartyDrawer
-            key={`parties-${createdParties}`}
-            open={isCreatDrawerOpen}
-            onOpenChange={setIsCreatDrawerOpen}
+            open={isCreateDrawerOpen}
+            onOpenChange={handleCreateDrawerChange}
             isCreating={createPartyMutation.isPending}
             onCreate={createPartyMutation.mutate}
           />
-        }
-        onEditParty={handleEditParty}
-      />
+        </PartySelection.CreateDrawer>
+      </PartySelection>
 
       <PartyEditDrawer
-        key={`selected-party-${partyToEdit.id}`}
         open={isEditDrawerOpen}
-        onOpenChange={setIsEditDrawerOpen}
-        party={partyToEdit}
-        isUpdating={deletePartyMutation.isPending}
+        onOpenChange={closeEditDrawer}
+        party={editingParty}
+        isUpdating={
+          deletePartyMutation.isPending || deletePartyMutation.isPending
+        }
         onUpdate={updatePartyMutation.mutate}
         onDelete={deletePartyMutation.mutate}
       />

@@ -1,3 +1,4 @@
+import React from "react";
 import Loader from "@/components/Loader/Loader";
 import PartyCard from "@/components/PartyCard/PartyCard";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -9,42 +10,40 @@ import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
-type Props = {
+type PartySelectionProps = {
   parties: Party[];
-  renderCreatePartyDrawer: React.ReactElement;
   loading: boolean;
+  children?: React.ReactNode;
   onEditParty: (party: Party) => void;
+  onPartySelect: (id: Party["id"]) => void;
 };
 
-function PartySelection({
+const PartySelection = ({
   parties,
-  renderCreatePartyDrawer,
   loading,
+  children,
   onEditParty,
-}: Props) {
+  onPartySelect,
+}: PartySelectionProps) => {
   const { t } = useTranslation("PagePartySelection");
-  const navigate = useNavigate();
-  const { setCurrentParty } = usePartiesStore();
 
-  function handlePartySelect(id: Party["id"]) {
-    setCurrentParty(id);
+  const drawerChild = React.Children.toArray(children).find((child) => {
+    return (
+      React.isValidElement(child) &&
+      (child.type as any).displayName === "PartySelectionCreateDrawer"
+    );
+  });
 
-    navigate({
-      to: `/chapters`,
-      search: { partyId: id },
-    });
+  function handlePartySelect(partyId: Party["id"]) {
+    onPartySelect(partyId);
   }
 
   return (
     <div className="flex h-full w-full flex-col items-center gap-8 rounded-md bg-white p-2">
       <div className="flex max-w-xl flex-col gap-2">
         <TypographyH1>{t("headline")}</TypographyH1>
-
         <TypographyP>{t("description")}</TypographyP>
-
-        <div className="flex w-full justify-center">
-          {renderCreatePartyDrawer}
-        </div>
+        <div className="flex w-full justify-center">{drawerChild}</div>
       </div>
 
       <AnimatePresence mode="wait">
@@ -59,7 +58,7 @@ function PartySelection({
                   animationDelay={index * 0.05}
                   party={party}
                   onEdit={onEditParty}
-                  onOpen={handlePartySelect}
+                  onOpen={() => handlePartySelect(party.id)}
                   onPlayerClick={() => {}}
                 />
               ))}
@@ -69,6 +68,16 @@ function PartySelection({
       </AnimatePresence>
     </div>
   );
-}
+};
+
+type PartySelectionCreateDrawerProps = {
+  children: React.ReactNode;
+};
+
+const CreateDrawer = ({ children }: PartySelectionCreateDrawerProps) => {
+  return <>{children}</>;
+};
+CreateDrawer.displayName = "PartySelectionCreateDrawer";
+PartySelection.CreateDrawer = CreateDrawer;
 
 export default PartySelection;
