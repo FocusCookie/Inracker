@@ -1,6 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-// import { fn } from "@storybook/test";
-
 import ChapterLayout from "./ChapterLayout";
 
 const meta = {
@@ -8,82 +6,29 @@ const meta = {
   component: ChapterLayout,
   parameters: {},
   args: {
-    players: (
-      <>
-        <p>
-          Loremmmmaklsjfwjelfkjwlekjfölakwjeglökjeölrkgjlökej33rglökejröglkjseölrjglöek
-          ipsum dolor sit amet consectetur, adipisicing elit. Eos, incidunt
-          laudantium! Sed, maxime! Dolorum reprehenderit optio esse omnis labore
-          modi debitis laudantium, velit obcaecati minus delectus ipsa qui,
-          veritatis aliquam!
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
-          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
-          omnis labore modi debitis laudantium, velit obcaecati minus delectus
-          ipsa qui, veritatis aliquam!
-        </p>{" "}
-        <p>
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
-          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
-          omnis labore modi debitis laudantium, velit obcaecati minus delectus
-          ipsa qui, veritatis aliquam!
-        </p>{" "}
-        <p>
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
-          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
-          omnis labore modi debitis laudantium, velit obcaecati minus delectus
-          ipsa qui, veritatis aliquam!
-        </p>{" "}
-        <p>
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
-          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
-          omnis labore modi debitis laudantium, velit obcaecati minus delectus
-          ipsa qui, veritatis aliquam!
-        </p>{" "}
-        <p>
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
-          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
-          omnis labore modi debitis laudantium, velit obcaecati minus delectus
-          ipsa qui, veritatis aliquam!
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
-          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
-          omnis labore modi debitis laudantium, velit obcaecati minus delectus
-          ipsa qui, veritatis aliquam!
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
-          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
-          omnis labore modi debitis laudantium, velit obcaecati minus delectus
-          ipsa qui, veritatis aliquam!
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
-          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
-          omnis labore modi debitis laudantium, velit obcaecati minus delectus
-          ipsa qui, veritatis aliquam!
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos,
-          incidunt laudantium! Sed, maxime! Dolorum reprehenderit optio esse
-          omnis labore modi debitis laudantium, velit obcaecati minus delectus
-          ipsa qui, veritatis aliquam!
-        </p>
-      </>
-    ),
-
-    settings: "settings",
-    children: "chapters",
     isAsideOpen: false,
-    drawers: <div className="drawers"></div>,
+    children: <div>chapters</div>,
   },
+  render: ({ children, ...props }) => (
+    <ChapterLayout {...props}>
+      <ChapterLayout.Players>
+        <div>
+          <p className="py-64">player 1</p>
+          <p className="py-64">player 2</p>
+          <p className="py-64">player 3</p>
+          <p className="py-64">player 4</p>
+        </div>
+      </ChapterLayout.Players>
+
+      <ChapterLayout.Settings>
+        <div>settings</div>
+      </ChapterLayout.Settings>
+      {children}
+    </ChapterLayout>
+  ),
 } satisfies Meta<typeof ChapterLayout>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Primary: Story = {
-  // args: {},
-};
+export const Primary: Story = {};

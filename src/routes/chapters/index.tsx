@@ -1,7 +1,7 @@
+import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
+import db from "@/lib/database";
 import ChapterSelection from "@/pages/ChapterSelection/ChapterSelection";
-import { useChapterStore } from "@/stores/ChaptersState";
 import { createFileRoute, useSearch } from "@tanstack/react-router";
-import { useEffect } from "react";
 
 type ChapterSearch = {
   partyId: number | null;
@@ -17,20 +17,29 @@ export const Route = createFileRoute("/chapters/")({
 });
 
 function RouteComponent() {
-  const { getAllChapters } = useChapterStore();
   const partyId = useSearch({
     from: "/chapters/",
     select: (search) => search.partyId,
   });
 
-  useEffect(() => {
-    if (partyId) {
-      getAllChapters(partyId);
-    }
-  }, []);
+  const chapters = useQueryWithToast({
+    queryKey: ["chapters"],
+    queryFn: () => db.chapters.getChaptersByPartyId(partyId!),
+    enabled: !!partyId,
+  });
 
-  return partyId ? (
-    <ChapterSelection partyId={partyId} />
+  const party = useQueryWithToast({
+    queryKey: ["party"],
+    queryFn: () => db.parties.getDetailedById(partyId!),
+    enabled: !!partyId,
+  });
+
+  return !!party.data ? (
+    <ChapterSelection
+      loading={chapters.isLoading}
+      chapters={chapters.data || []}
+      party={party.data}
+    />
   ) : (
     <span>No Party ID set</span>
   );
