@@ -1,4 +1,3 @@
-import { Button } from "../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -18,10 +17,12 @@ import {
 } from "../ui/tooltip";
 
 type Props = {
+  open?: boolean;
+  onOpenChange?: (state: boolean) => void;
   /**
    * button which opens the catalog dialog
    */
-  trigger: React.ReactElement<HTMLButtonElement>;
+  trigger?: React.ReactElement<HTMLButtonElement>;
   /** optional tooltip, for trigger */
   tooltip?: string;
   /** optional action */
@@ -30,10 +31,12 @@ type Props = {
   description: string;
   children: React.ReactNode;
   placeholder: string;
+  search: string;
   onSearchChange: (search: string) => void;
 };
 
 function Catalog({
+  open,
   trigger,
   tooltip,
   action,
@@ -41,6 +44,8 @@ function Catalog({
   description,
   placeholder,
   children,
+  search,
+  onOpenChange,
   onSearchChange,
 }: Props) {
   function handleSearchTerm(event: React.ChangeEvent<HTMLInputElement>) {
@@ -49,8 +54,11 @@ function Catalog({
 
   return (
     <>
-      <Dialog>
-        {tooltip ? (
+      <Dialog
+        open={trigger ? undefined : open}
+        onOpenChange={trigger ? undefined : onOpenChange}
+      >
+        {trigger && tooltip && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -61,7 +69,9 @@ function Catalog({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-        ) : (
+        )}
+
+        {trigger && !tooltip && (
           <DialogTrigger asChild>{trigger}</DialogTrigger>
         )}
 
@@ -76,6 +86,7 @@ function Catalog({
             <Input
               className="mt-4"
               placeholder={placeholder}
+              defaultValue={search}
               onChange={handleSearchTerm}
             />
           </div>
