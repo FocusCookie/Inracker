@@ -1,5 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentCreateChapterDrawerEN from "@/translations/en/components/CreateChapterDrawer.json";
+import ComponentCreateChapterDrawerDE from "@/translations/de/components/CreateChapterDrawer.json"; 
 import ComponentPlayerCardEN from "@/translations/en/components/PlayerCard.json";
 import ComponentPlayerCardDE from "@/translations/de/components/PlayerCard.json";
 import ComponentSettingsDialogEN from "@/translations/en/components/SettingsDialog.json";
@@ -45,6 +47,7 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentCreateChapterDrawer: ComponentCreateChapterDrawerEN,
     ComponentPlayerCard: ComponentPlayerCardEN,
     ComponentSettingsDialog: ComponentSettingsDialogEN,
     ComponentPlayerCatalog: ComponentPlayerCatalogEN,
@@ -72,6 +75,7 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentCreateChapterDrawer: ComponentCreateChapterDrawerDE,
     ComponentPlayerCard: ComponentPlayerCardDE,
     ComponentSettingsDialog: ComponentSettingsDialogDE,
     ComponentPlayerCatalog: ComponentPlayerCatalogDE,

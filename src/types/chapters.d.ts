@@ -10,10 +10,8 @@ export type ChapterCharacterToken = {
 export type DBChapter = {
   readonly id: number;
   name: string;
-  image: string | null;
   icon: string;
   description: string | null;
-  experience: number | null;
   state: string;
   battlemap: string | null;
   /**
@@ -27,9 +25,9 @@ export type DBChapter = {
 };
 
 export type Chapter = Prettify<
-  Omit<DBChapter, "type" | "string" | "opponents"> & {
+  Omit<DBChapter, "state" | "opponents" | "tokens"> & {
     state: "completed" | "draft" | "ongoing" | "waiting";
-    tokens: ChapterCharacterToken | null;
+    tokens: Array<ChapterCharacterToken>;
     encounters: Array[Ecounter["id"]];
   }
 >;

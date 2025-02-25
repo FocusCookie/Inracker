@@ -1,0 +1,13 @@
+{
+  "title": "Create a Chapter",
+  "titleDescription": "Create a new adventures and fun chapter.",
+  "create": "Create",
+  "cancel": "Cancel",
+  "icon": "Icon",
+  "name": "Name",
+  "description": "Description",
+  "nameValidation": "Name must be at least 2 characters.",
+  "battlemap": "Battlemap",
+  "battlemapPlaceholder": "Select a battlemap picture",
+  "namePlaceholder": "The inner conflict"
+}

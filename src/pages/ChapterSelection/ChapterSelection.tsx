@@ -258,12 +258,7 @@ function ChapterSelection({
             </motion.div>
           </MainLayout.Settings>
 
-          <div className="flex flex-col gap-4">
-            players:
-            {players.map((player) => (
-              <span key={"player" + player.id}>{player.name}</span>
-            ))}
-          </div>
+          <div className="flex flex-col gap-4">Chapters</div>
         </MainLayout>
       )}
     </AnimatePresence>
