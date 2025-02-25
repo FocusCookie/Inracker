@@ -1,5 +1,9 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentSettingsDialogEN from "@/translations/en/components/SettingsDialog.json";
+import ComponentSettingsDialogDE from "@/translations/de/components/SettingsDialog.json"; 
+import ComponentPlayerCatalogEN from "@/translations/en/components/PlayerCatalog.json";
+import ComponentPlayerCatalogDE from "@/translations/de/components/PlayerCatalog.json"; 
 import ComponentEditPlayerDrawerEN from "@/translations/en/components/EditPlayerDrawer.json";
 import ComponentEditPlayerDrawerDE from "@/translations/de/components/EditPlayerDrawer.json";
 import ComponentEffectsCatalogEN from "@/translations/en/components/EffectsCatalog.json";
@@ -39,6 +43,8 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentSettingsDialog: ComponentSettingsDialogEN,
+    ComponentPlayerCatalog: ComponentPlayerCatalogEN,
     ComponentEditPlayerDrawer: ComponentEditPlayerDrawerEN,
     ComponentEffectsCatalog: ComponentEffectsCatalogEN,
     ComponentCreateResistanceDrawer: ComponentCreateResistanceDrawerEN,
@@ -63,6 +69,8 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentSettingsDialog: ComponentSettingsDialogDE,
+    ComponentPlayerCatalog: ComponentPlayerCatalogDE,
     ComponentEditPlayerDrawer: ComponentEditPlayerDrawerDE,
     ComponentEffectsCatalog: ComponentEffectsCatalogDE,
     ComponentCreateResistanceDrawer: ComponentCreateResistanceDrawerDE,
