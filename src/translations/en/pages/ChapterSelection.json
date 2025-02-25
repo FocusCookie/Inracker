@@ -7,5 +7,7 @@
   "closeParty": "Close Party",
   "closeDetails": "Close Details",
   "openDetails": "Open Details",
-  "addPlayer": "Add Player"
+  "addPlayer": "Add Player",
+  "addFromCatalog": "Add from catalog",
+  "createNewPlayer": "Create new Player"
 }

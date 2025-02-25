@@ -8,5 +8,7 @@
   "closeDetails": "Schließe Details",
   "openDetails": "Öffne Details",
   "addNewChapter": "Erstelle neues Kapitel",
-  "addPlayer": "Spieler hinzufügen"
+  "addPlayer": "Spieler hinzufügen",
+  "addFromCatalog": "Aus dem Katalog",
+  "createNewPlayer": "Neuen Character erstellen"
 }
