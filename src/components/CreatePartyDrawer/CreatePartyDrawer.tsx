@@ -8,21 +8,18 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Party } from "@/types/party";
+import { Prettify } from "@/types/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import Drawer from "../Drawer/Drawer";
 import IconPicker from "../IconPicker/IconPicker";
 import { Button } from "../ui/button";
-import { useTranslation } from "react-i18next";
-import { Party } from "@/types/party";
-import { Prettify } from "@/types/utils";
 
 type Props = {
   onCreate: (party: Prettify<Omit<Party, "id">>) => void;
-  /**
-   * disabels the inputs and sets the create button to loading and disables other buttons
-   */
   isCreating: boolean;
   open: boolean;
   onOpenChange: (state: boolean) => void;
@@ -38,7 +35,7 @@ function CreatePartyDrawer({
 
   const formSchema = z.object({
     name: z.string().min(2, {
-      message: "Username must be at least 2 characters.",
+      message: t("nameValidation"),
     }),
     description: z.string(),
     icon: z.string().emoji(),
@@ -75,7 +72,6 @@ function CreatePartyDrawer({
       open={open}
       onOpenChange={onOpenChange}
       title={t("title")}
-      createTrigger={<Button>{t("createAParty")}</Button>}
       actions={
         <Button
           loading={isCreating}
