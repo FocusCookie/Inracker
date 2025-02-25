@@ -18,7 +18,7 @@ export const editPlayerSchema = z.object({
   ),
   overview: z.string(),
   health: z.coerce.number(),
-  maxHealth: z.coerce.number(),
+  max_health: z.coerce.number(),
   icon: z.string().emoji(),
   immunities: z.array(
     z.object({
