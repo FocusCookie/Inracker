@@ -69,7 +69,6 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
     form.setValue("icon", icon);
   }
 
-  // TODO user form.set for setting immunities and resistances
   return (
     <Form {...form}>
       <form className="flex flex-col gap-6">
