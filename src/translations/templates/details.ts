@@ -1,5 +1,4 @@
-const en = `
-## Skills
+const en = `## Skills
 - **Acrobatics**: 10
 - **Arcane**: 10
 - **Athletics**: 10
@@ -20,8 +19,7 @@ const en = `
 - **...Skill**: 10
 `;
 
-const de = `
-## Fähigkeiten
+const de = `## Fähigkeiten
 - **Akrobatik**: 10
 - **Arkane Künste**: 10
 - **Athletik**: 10

@@ -5,7 +5,6 @@ import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
 import { useImmunityStore } from "@/stores/useImmunityStore";
-import { usePartyStore } from "@/stores/usePartyStore";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { useResistancesStore } from "@/stores/useResistanceStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
@@ -25,6 +24,7 @@ import PartyEditDrawer from "../PartyEditDrawer/PartyEditDrawer";
 import PlayerCatalog from "../PlayerCatalog/PlayerCatalog";
 import ResistancesCatalog from "../ResistancesCatalog/ResistancesCatalog";
 import SettingsDialog from "../SettingsDialog/SettingsDialog";
+import { usePartyStore } from "@/stores/usePartySTore";
 
 type Props = {};
 
@@ -360,6 +360,7 @@ function GlobalModals({}: Props) {
   }
 
   function handleAddImmunity(immunity: DBImmunity) {
+    console.log({ isCreatePlayerDrawerOpen });
     if (isCreatePlayerDrawerOpen) {
       const currentImmunities = createPlayerForm.getValues("immunities");
       const isAlreadyAdded = currentImmunities.some((id) => id === immunity.id);
@@ -372,12 +373,8 @@ function GlobalModals({}: Props) {
 
         toast({
           variant: "default",
-          title: `Added ${immunity.icon} ${immunity.name} to ${selectedPlayer!.name}`,
+          title: `Added ${immunity.icon} ${immunity.name} `,
         });
-
-        const updateSelectedPlayer = Object.assign({}, selectedPlayer);
-        updateSelectedPlayer.immunities.push(immunity);
-        setSelectedPlayer(updateSelectedPlayer);
       } else {
         toast({
           variant: "default",
@@ -429,12 +426,8 @@ function GlobalModals({}: Props) {
 
         toast({
           variant: "default",
-          title: `Added ${resistance.icon} ${resistance.name} to ${selectedPlayer!.name}`,
+          title: `Added ${resistance.icon} ${resistance.name} `,
         });
-
-        const updateSelectedPlayer = Object.assign({}, selectedPlayer);
-        updateSelectedPlayer.resistances.push(resistance);
-        setSelectedPlayer(updateSelectedPlayer);
       } else {
         toast({
           variant: "default",
