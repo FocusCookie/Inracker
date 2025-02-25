@@ -5,7 +5,6 @@ export const createPlayerSchema = z.object({
   ep: z.coerce.number(),
   details: z.string(),
   overview: z.string(),
-  health: z.coerce.number(),
   maxHealth: z.coerce.number(),
   icon: z.string().emoji(),
   immunities: z.array(z.coerce.number()),
