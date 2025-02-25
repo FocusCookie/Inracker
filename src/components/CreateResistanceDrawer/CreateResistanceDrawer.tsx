@@ -18,14 +18,14 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 
 type Props = {
-  isLoading: boolean;
+  isCreating: boolean;
   open: boolean;
   onOpenChange: (state: boolean) => void;
   onCreate: (Immunity: Omit<Resistance, "id">) => void;
 };
 
 function CreateResistanceDrawer({
-  isLoading,
+  isCreating,
   onCreate,
   onOpenChange,
   open,
@@ -68,22 +68,13 @@ function CreateResistanceDrawer({
       open={open}
       onOpenChange={onOpenChange}
       title={t("title")}
-      createTrigger={
-        <Button variant="secondary" loading={isLoading} disabled={isLoading}>
-          Create
-        </Button>
-      }
       actions={
-        <Button
-          loading={isLoading}
-          disabled={isLoading}
-          onClick={form.handleSubmit(onSubmit)}
-        >
+        <Button loading={isCreating} onClick={form.handleSubmit(onSubmit)}>
           {t("create")}
         </Button>
       }
       cancelTrigger={
-        <Button disabled={isLoading} variant="ghost">
+        <Button disabled={isCreating} variant="ghost">
           {t("cancel")}
         </Button>
       }
@@ -94,11 +85,11 @@ function CreateResistanceDrawer({
             className="space-y-4 p-0.5"
           >
             <div className="flex items-start gap-2">
-              <div className="flex flex-col gap-3 pt-1.5">
+              <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
                 <FormLabel>{t("icon")}</FormLabel>
                 <IconPicker
                   initialIcon={form.getValues("icon")}
-                  disabled={isLoading}
+                  disabled={isCreating}
                   onIconClick={handleIconSelect}
                 />
                 <FormMessage />
@@ -112,7 +103,7 @@ function CreateResistanceDrawer({
                     <FormLabel>{t("name")}</FormLabel>
                     <FormControl>
                       <Input
-                        disabled={isLoading}
+                        disabled={isCreating}
                         placeholder={t("namePlaceholder")}
                         {...field}
                       />
@@ -132,7 +123,7 @@ function CreateResistanceDrawer({
 
                   <FormControl className="rounded-md border">
                     <Textarea
-                      readOnly={isLoading}
+                      readOnly={isCreating}
                       {...field}
                       placeholder="enter a description"
                     />
