@@ -55,8 +55,10 @@ function ChapterCard({ chapter, onEdit, onPushDown, onPushUp }: Props) {
     >
       <div className="flex flex-col">
         <div className="flex items-center justify-between gap-2">
-          <div className="grow">
-            <TypographyH2>{chapter.name}</TypographyH2>
+          <div className="flex grow gap-2">
+            <TypographyH2>
+              {chapter.icon} {chapter.name}
+            </TypographyH2>
           </div>
 
           <div className="flex items-center gap-2">

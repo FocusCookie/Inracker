@@ -20,7 +20,7 @@ const meta = {
       experience: 200,
       icon: "⚔️",
       id: 1,
-      name: "1. a name of the chapter",
+      name: "a name of the chapter",
       state: "draft",
       tokens: [],
     },
