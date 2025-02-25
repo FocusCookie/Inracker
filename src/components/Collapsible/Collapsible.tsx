@@ -18,7 +18,7 @@ function Collapsible({ actions, children, title }: Props) {
   return (
     <RadixCollapsible.Root open={open} onOpenChange={setOpen}>
       <div className="flex w-full items-center justify-between gap-2 rounded-md">
-        <div className="text-xl font-bold">{title}</div>
+        <div className="grow text-xl font-bold">{title}</div>
         <div className="flex items-center gap-2">
           <RadixCollapsible.Trigger asChild>
             <Button size="icon" variant="ghost">
