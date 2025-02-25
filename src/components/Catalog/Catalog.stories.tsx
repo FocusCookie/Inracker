@@ -97,6 +97,7 @@ const meta = {
     trigger: <Button>Catalog</Button>,
     description: "Choose an immunity for your player.",
     title: "Immunity Catalog",
+    search: "",
     onSearchChange: fn(),
     children: (
       <>
@@ -121,11 +122,17 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
-  // args: {},
+  // Uses default args with a trigger and without tooltip.
 };
 
 export const WithAction: Story = {
   args: {
     action: <Button>Action</Button>,
+  },
+};
+
+export const WithTooltip: Story = {
+  args: {
+    tooltip: "Click here to open the catalog",
   },
 };
