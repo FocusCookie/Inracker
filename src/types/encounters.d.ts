@@ -8,7 +8,7 @@ export type DBEncounter = {
   description: string | null;
   color: string;
   type: string;
-  experience: number | null;
+  ep: number | null;
   state: string;
   dice: number | null;
   /**
