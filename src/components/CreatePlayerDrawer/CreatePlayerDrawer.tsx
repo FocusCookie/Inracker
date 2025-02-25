@@ -82,7 +82,7 @@ function CreatePlayerDrawer({
     <Drawer
       open={open}
       onOpenChange={onOpenChange}
-      description={"titleDescription"}
+      description={t("descriptionText")}
       title={t("title")}
       cancelTrigger={
         <Button disabled={loading} variant="ghost">
