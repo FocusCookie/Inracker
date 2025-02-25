@@ -18,14 +18,14 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 
 type Props = {
-  isLoading: boolean;
+  isCreating: boolean;
   open: boolean;
   onOpenChange: (state: boolean) => void;
   onCreate: (Immunity: Omit<Immunity, "id">) => void;
 };
 
 function CreateImmunityDrawer({
-  isLoading,
+  isCreating,
   open,
   onCreate,
   onOpenChange,
@@ -69,22 +69,13 @@ function CreateImmunityDrawer({
       open={open}
       onOpenChange={onOpenChange}
       title={t("title")}
-      createTrigger={
-        <Button variant="secondary" loading={isLoading} disabled={isLoading}>
-          Create
-        </Button>
-      }
       actions={
-        <Button
-          loading={isLoading}
-          disabled={isLoading}
-          onClick={form.handleSubmit(onSubmit)}
-        >
+        <Button loading={isCreating} onClick={form.handleSubmit(onSubmit)}>
           {t("create")}
         </Button>
       }
       cancelTrigger={
-        <Button disabled={isLoading} variant="ghost">
+        <Button disabled={isCreating} variant="ghost">
           {t("cancel")}
         </Button>
       }
@@ -100,7 +91,7 @@ function CreateImmunityDrawer({
 
                 <IconPicker
                   initialIcon={form.getValues("icon")}
-                  disabled={isLoading}
+                  disabled={isCreating}
                   onIconClick={handleIconSelect}
                 />
                 <FormMessage />
@@ -114,7 +105,7 @@ function CreateImmunityDrawer({
                     <FormLabel>{t("name")}</FormLabel>
                     <FormControl>
                       <Input
-                        disabled={isLoading}
+                        disabled={isCreating}
                         placeholder={t("namePlaceholder")}
                         {...field}
                       />
@@ -134,7 +125,7 @@ function CreateImmunityDrawer({
 
                   <FormControl className="rounded-md border">
                     <Textarea
-                      readOnly={isLoading}
+                      readOnly={isCreating}
                       {...field}
                       placeholder="Type your message here."
                     />
