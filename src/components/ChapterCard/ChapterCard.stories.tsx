@@ -12,8 +12,8 @@ const meta = {
   args: {
     onEdit: fn(),
     chapter: {
-      image: null,
-      battlemap: null,
+      battlemap:
+        "https://i.etsystatic.com/18388031/r/il/8b7a49/2796267092/il_fullxfull.2796267092_aezx.jpg",
       description:
         "Lorem ipsum dolor sit amet consectetur adipisicing elit. Culpa sequi, minus iure quidem temporibus saepe fugit dolore? Quaerat repudiandae culpa eius, sint voluptatum laudantium voluptas quod ratione sapiente, laboriosam hic! Lorem ipsum dolor sit amet consectetur adipisicing elit. Culpa sequi, minus iure quidem temporibus saepe fugit dolore? Quaerat repudiandae culpa eius, sint voluptatum laudantium voluptas quod ratione sapiente, laboriosam hic!",
       encounters: null,
@@ -22,7 +22,7 @@ const meta = {
       id: 1,
       name: "1. a name of the chapter",
       state: "draft",
-      tokens: null,
+      tokens: [],
     },
     onPushDown: fn(),
     onPushUp: fn(),

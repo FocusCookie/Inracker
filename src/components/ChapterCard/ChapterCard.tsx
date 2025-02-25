@@ -92,7 +92,15 @@ function ChapterCard({ chapter, onEdit, onPushDown, onPushUp }: Props) {
         )}
       </div>
 
-      <TypographyP className="mt-4 line-clamp-6">
+      {chapter.battlemap && (
+        <img
+          className="mt-3 max-h-96 w-full overflow-hidden rounded-md object-cover"
+          src={chapter.battlemap}
+          alt="battlemap"
+        />
+      )}
+
+      <TypographyP className="mt-3 line-clamp-6">
         {chapter.description}
       </TypographyP>
     </motion.div>
