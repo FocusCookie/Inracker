@@ -91,11 +91,10 @@ pub fn run() {
                 details TEXT,
                 image TEXT,
                 icon TEXT NOT NULL,
-                experience INTEGER,
                 state TEXT NOT NULL,
                 battlemap TEXT, -- url to img
                 tokens TEXT, -- JSON array of player tokens and opponent tokens
-                encounter TEXT -- JSON array of id of encounter
+                encounters TEXT -- JSON array of id of encounter
             )",
             kind: MigrationKind::Up,
         },
@@ -116,6 +115,7 @@ pub fn run() {
                 skill INTEGER,
                 difficulty INTEGER,
                 opponents TEXT -- JSON array of ids of opponents
+                ep INTEGER
             )",
             kind: MigrationKind::Up,
         },
@@ -130,6 +130,7 @@ pub fn run() {
                 icon TEXT NOT NULL,
                 level INTEGER,
                 labels TEXT -- JSON ARRAY of strings
+                ep INTEGER NOT NULL
             )",
             kind: MigrationKind::Up,
         },
