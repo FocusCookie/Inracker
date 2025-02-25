@@ -20,6 +20,7 @@ import ImmunityCard from "../ImmunityCard/ImmunityCard";
 import { Button } from "../ui/button";
 import ResistanceCard from "../ResistanceCard/ResistanceCard";
 import IconAvatar from "../IconAvatar/IconAvatar";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   player: Player;
@@ -48,6 +49,7 @@ function PlayerCard({
   onRemoveImmunity,
   onRemoveResistance,
 }: Props) {
+  const { t } = useTranslation("ComponentPlayerCard");
   function handleRemovePlayer() {
     onRemove(player.id);
   }
@@ -64,27 +66,26 @@ function PlayerCard({
     onRemoveResistance(player.id, resistanceId);
   }
 
-  //TODO: Translations
   const quickActions = () => (
     <DropdownMenuContent className="w-56">
       <DropdownMenuLabel>{player.name}</DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
-        <DropdownMenuItem>Add Effect</DropdownMenuItem>
+        <DropdownMenuItem>{t("addEffect")}</DropdownMenuItem>
         <DropdownMenuItem onClick={() => onAddImmunity(player)}>
-          Add Immunity
+          {t("addImmunity")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onAddResistance(player)}>
-          Add Resistance
+          {t("addResistance")}
         </DropdownMenuItem>
       </DropdownMenuGroup>
 
       <DropdownMenuSeparator />
       <DropdownMenuItem onClick={handleRemovePlayer}>
-        Remove from Group
+        {t("removeFromGroup")}
       </DropdownMenuItem>
       <DropdownMenuItem onClick={handleEditPlayer}>
-        Edit Player
+        {t("editPlayer")}
       </DropdownMenuItem>
     </DropdownMenuContent>
   );
@@ -118,7 +119,9 @@ function PlayerCard({
                 <div className="flex items-center gap-2">
                   <span className="grow text-xl font-bold">{player.name}</span>
 
-                  <Badge>LVL {player.level}</Badge>
+                  <Badge>
+                    {t("level")} {player.level}
+                  </Badge>
                   <Badge>
                     <div className="flex items-center gap-1">
                       <HeartFilledIcon />
@@ -128,15 +131,15 @@ function PlayerCard({
                     </div>
                   </Badge>
                 </div>
-                <span className="">{player.role}</span>
+                <span>{player.role}</span>
               </div>
             </div>
 
-            <Collapsible title="Overview">
+            <Collapsible title={t("overview")}>
               <MarkdownReader markdown={player.overview} />
             </Collapsible>
 
-            <Collapsible title="Details">
+            <Collapsible title={t("details")}>
               <MarkdownReader markdown={player.details} />
             </Collapsible>
 
@@ -144,7 +147,7 @@ function PlayerCard({
               <Collapsible
                 title={
                   <div className="items-cent flex justify-between gap-2">
-                    <span>Immunities</span>
+                    <span>{t("immunitites")}</span>
                     <span className="rounded-md bg-black px-2 py-1 text-sm text-white">
                       {player.immunities.length}
                     </span>
@@ -160,7 +163,7 @@ function PlayerCard({
                         <Button
                           onClick={() => handleRemoveImmunity(immunity.id)}
                         >
-                          Remove
+                          {t("remove")}
                         </Button>
                       }
                     />
@@ -173,7 +176,7 @@ function PlayerCard({
               <Collapsible
                 title={
                   <div className="items-cent flex justify-between gap-2">
-                    <span>Resistances</span>
+                    <span>{t("resistances")}</span>
                     <span className="rounded-md bg-black px-2 py-1 text-sm text-white">
                       {player.resistances.length}
                     </span>
@@ -189,7 +192,7 @@ function PlayerCard({
                         <Button
                           onClick={() => handleRemoveResistance(resistance.id)}
                         >
-                          Remove
+                          {t("remove")}
                         </Button>
                       }
                     />

@@ -1,4 +1,5 @@
 import "i18next";
+import ComponentPlayerCard from "@/translations/en/component/PlayerCard.json";
 import ComponentSettingsDialog from "@/translations/en/component/SettingsDialog.json";
 import ComponentPlayerCatalog from "@/translations/en/component/PlayerCatalog.json";
 import ComponentEditPlayerDrawer from "@/translations/en/component/EditPlayerDrawer.json";
@@ -24,6 +25,7 @@ declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
       // hygen-components - DO NOT DELETE THIS LINE
+      ComponentPlayerCard: typeof ComponentPlayerCard;
       ComponentSettingsDialog: typeof ComponentSettingsDialog;
       ComponentPlayerCatalog: typeof ComponentPlayerCatalog;
       ComponentEditPlayerDrawer: typeof ComponentEditPlayerDrawer;
