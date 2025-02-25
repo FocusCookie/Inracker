@@ -36,7 +36,9 @@ ReactDOM.createRoot(rootElement).render(
       </div>
     </QueryClientProvider>
     <div id="drawer-portal" />
-    <Toaster />
+    <div className="z-50">
+      <Toaster />
+    </div>
   </React.StrictMode>,
 );
 
