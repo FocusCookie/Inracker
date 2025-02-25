@@ -1,31 +1,35 @@
+import { Player } from "@/types/player";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
-type Props = { icon: string; name: string; onClick?: () => void };
+type Props = { player: Player };
 
-function IconAvatar({ icon, name, onClick, ...props }: Props) {
-  function handleClick() {
-    if (onClick) onClick();
-  }
-
+function IconAvatar({ player, ...props }: Props) {
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <button
+          <div
             {...props}
-            onClick={handleClick}
-            className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-border bg-background hover:shadow-sm"
+            className="hover:bg-accent relative grid h-16 w-16 place-content-center rounded-md"
           >
-            <span className="text-4xl">{icon}</span>
-          </button>
+            <Avatar>
+              <AvatarImage src={player.image || undefined} alt={player.name} />
+              <AvatarFallback>{player.icon}</AvatarFallback>
+            </Avatar>
+
+            <span className="absolute top-0 right-0 rounded-full bg-white p-0.5 shadow">
+              {player.icon}
+            </span>
+          </div>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{name}</p>
+          <p>{player.name}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
