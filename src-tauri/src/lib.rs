@@ -88,8 +88,7 @@ pub fn run() {
             sql: "CREATE TABLE IF NOT EXISTS chapters (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
-                details TEXT,
-                image TEXT,
+                description TEXT,
                 icon TEXT NOT NULL,
                 state TEXT NOT NULL,
                 battlemap TEXT, -- url to img
