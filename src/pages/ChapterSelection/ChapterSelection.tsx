@@ -151,8 +151,6 @@ function ChapterSelection({
     openResistancesCatalog();
   }
 
-  //TODO: Translations
-
   return (
     <AnimatePresence mode="wait">
       {isLoading && (

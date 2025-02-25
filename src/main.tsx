@@ -41,5 +41,3 @@ ReactDOM.createRoot(rootElement).render(
     </div>
   </React.StrictMode>,
 );
-
-//TODO: Error handling for the query with soner notifications.
