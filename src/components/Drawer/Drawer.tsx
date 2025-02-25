@@ -1,6 +1,5 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { AnimatePresence, motion } from "framer-motion";
-import { ScrollArea } from "../ui/scroll-area";
 import { TypographyH1 } from "../ui/typographyH1";
 import { TypographyMuted } from "../ui/typographyhMuted";
 
