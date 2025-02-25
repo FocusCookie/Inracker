@@ -24,6 +24,8 @@ const meta = {
       state: "draft",
       tokens: null,
     },
+    onPushDown: fn(),
+    onPushUp: fn(),
   },
   decorators: [(Story) => <div className="bg-white p-4">{Story()}</div>],
 } satisfies Meta<typeof ChapterCard>;
