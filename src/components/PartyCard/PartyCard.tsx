@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Party } from "@/types/party";
 import { Player } from "@/types/player";
+import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import IconAvatar from "../IconAvatar/IconAvatar";
 import { Button } from "../ui/button";
@@ -12,7 +13,6 @@ import {
   CardHeader,
 } from "../ui/card";
 import { TypographyH3 } from "../ui/typographyH3";
-import { motion } from "framer-motion";
 
 type Props = {
   party: Party;
@@ -38,10 +38,6 @@ function PartyCard({
 
   function handleOpenClick() {
     if (onOpen) onOpen(party.id);
-  }
-
-  function handlePlayerClick(playerId: Player["id"]) {
-    if (onPlayerClick) onPlayerClick(playerId);
   }
 
   return (
@@ -76,10 +72,8 @@ function PartyCard({
             <div className="flex gap-2">
               {party.players.map((player) => (
                 <IconAvatar
-                  key={`party-${party.id}-player-${player.id}`}
-                  name={player.name}
-                  icon={player.icon}
-                  onClick={() => handlePlayerClick(player.id)}
+                  player={player}
+                  key={`avatar-of-player-${player.id}-${player.name}`}
                 />
               ))}
             </div>
