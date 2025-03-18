@@ -1,4 +1,7 @@
 import "i18next";
+import ComponentChapterCard from "@/translations/en/component/ChapterCard.json";
+import Component from "@/translations/en/component/.json";
+import ComponentEditChapterDrawer from "@/translations/en/component/EditChapterDrawer.json";
 import ComponentCreateChapterDrawer from "@/translations/en/component/CreateChapterDrawer.json";
 import ComponentPlayerCard from "@/translations/en/component/PlayerCard.json";
 import ComponentSettingsDialog from "@/translations/en/component/SettingsDialog.json";
@@ -26,6 +29,8 @@ declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
       // hygen-components - DO NOT DELETE THIS LINE
+      ComponentChapterCard: typeof ComponentChapterCard;
+      ComponentEditChapterDrawer: typeof ComponentEditChapterDrawer;
       ComponentCreateChapterDrawer: typeof ComponentCreateChapterDrawer;
       ComponentPlayerCard: typeof ComponentPlayerCard;
       ComponentSettingsDialog: typeof ComponentSettingsDialog;

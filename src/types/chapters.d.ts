@@ -7,6 +7,8 @@ export type ChapterCharacterToken = {
   position: { x: number; y: number };
 };
 
+export type ChapterStatus = "completed" | "draft" | "ongoing" | "waiting";
+
 export type DBChapter = {
   readonly id: number;
   name: string;
@@ -22,11 +24,12 @@ export type DBChapter = {
    * array of encounter ids
    */
   encounters: string | null;
+  party: number;
 };
 
 export type Chapter = Prettify<
   Omit<DBChapter, "state" | "opponents" | "tokens"> & {
-    state: "completed" | "draft" | "ongoing" | "waiting";
+    state: ChapterStatus;
     tokens: Array<ChapterCharacterToken>;
     encounters: Array[Ecounter["id"]];
   }

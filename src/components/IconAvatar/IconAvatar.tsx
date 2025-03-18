@@ -1,11 +1,11 @@
 import { Player } from "@/types/player";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 type Props = { player: Player };
 
@@ -14,19 +14,21 @@ function IconAvatar({ player, ...props }: Props) {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div
+          <span
+            tabIndex={0}
+            aria-describedby={player.name}
             {...props}
-            className="hover:bg-accent relative grid h-16 w-16 place-content-center rounded-md"
+            className="relative grid h-12 w-12 place-content-center rounded-full outline-2 outline-transparent focus-within:outline-black hover:outline-black"
           >
             <Avatar>
               <AvatarImage src={player.image || undefined} alt={player.name} />
               <AvatarFallback>{player.icon}</AvatarFallback>
             </Avatar>
 
-            <span className="absolute top-0 right-0 rounded-full bg-white p-0.5 shadow">
+            <span className="absolute top-0 right-0 rounded-full bg-white p-0.5 text-sm shadow">
               {player.icon}
             </span>
-          </div>
+          </span>
         </TooltipTrigger>
         <TooltipContent>
           <p>{player.name}</p>

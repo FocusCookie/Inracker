@@ -1,7 +1,7 @@
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
 import PartySelection from "@/pages/PartySelection/PartySelection";
-import { usePartyStore } from "@/stores/usePartyStore";
+import { usePartyStore } from "@/stores/usePartySTore";
 import { Party } from "@/types/party";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useShallow } from "zustand/shallow";

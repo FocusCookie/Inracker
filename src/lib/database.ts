@@ -1,4 +1,9 @@
-import { Chapter, DBChapter } from "@/types/chapters";
+import {
+  Chapter,
+  ChapterCharacterToken,
+  ChapterStatus,
+  DBChapter,
+} from "@/types/chapters";
 import { DBEffect, Effect } from "@/types/effect";
 import { DBImmunity, Immunity } from "@/types/immunitiy";
 import { DBParty, Party } from "@/types/party";
@@ -559,29 +564,138 @@ const deletePlayerById = async (
 };
 
 //* Chapters
+const getChapterById = async (
+  db: TauriDatabase,
+  id: number,
+): Promise<DBChapter> => {
+  const result = await db.select<DBChapter[]>(
+    "SELECT * FROM chapters WHERE id = $1",
+    [id],
+  );
+
+  if (!result.length) {
+    throw createDatabaseError(`Chapter with ID ${id} not found`);
+  }
+
+  return result[0];
+};
+
+const getDetailedChapterById = async (
+  db: TauriDatabase,
+  id: number,
+): Promise<Chapter> => {
+  const dbChapters = await db.select<DBChapter[]>(
+    "SELECT * FROM chapters WHERE id = $1",
+    [id],
+  );
+
+  if (!dbChapters.length) {
+    throw createDatabaseError(`Chapter with ID ${id} not found`);
+  }
+
+  const dbChapter = dbChapters[0];
+  const encounters = dbChapter.encounters
+    ? (JSON.parse(dbChapter.encounters) as number[])
+    : [];
+  const tokens = dbChapter.tokens
+    ? (JSON.parse(dbChapter.tokens) as ChapterCharacterToken[])
+    : [];
+  const state = dbChapter.state as ChapterStatus;
+
+  return { ...dbChapter, encounters, tokens, state };
+};
+
+const createChapter = async (
+  db: TauriDatabase,
+  chapter: Omit<Chapter, "id">,
+): Promise<DBChapter> => {
+  const {
+    name,
+    icon,
+    description,
+    battlemap,
+    encounters,
+    state,
+    tokens,
+    party,
+  } = chapter;
+
+  const result = await db.execute(
+    "INSERT INTO chapters(name, icon, description, battlemap,encounters, state, tokens, party, position) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
+    [
+      name,
+      icon,
+      description,
+      battlemap,
+      JSON.stringify(encounters),
+      state,
+      JSON.stringify(tokens),
+      party,
+    ],
+  );
+
+  const createdChapter = await getChapterById(
+    db,
+    result!.lastInsertId as number,
+  );
+
+  return createdChapter;
+};
+
 const getAllChaptersForParty = async (
   db: TauriDatabase,
   partyId: Party["id"],
 ): Promise<Chapter[]> => {
   const dbChapters = await db.select<DBChapter[]>(
-    "SELECT * FROM chapters WHERE id = $1",
+    "SELECT * FROM chapters WHERE party = $1",
     [partyId],
   );
   const prettyfiedChapters: Chapter[] = [];
 
   for (const dbChapter of dbChapters) {
-    const prettyChapter = {
-      ...dbChapter,
-      token: dbChapter.tokens ? JSON.parse(dbChapter.tokens) : null,
-      encounters: dbChapter.encounters
-        ? JSON.parse(dbChapter.encounters)
-        : null,
-    } as Chapter;
-
+    const prettyChapter = await getDetailedChapterById(db, dbChapter.id);
     prettyfiedChapters.push(prettyChapter);
   }
 
+  console.log({ prettyfiedChapters });
+
   return prettyfiedChapters;
+};
+
+const updateChapter = async (
+  db: TauriDatabase,
+  chapter: Chapter,
+): Promise<Chapter> => {
+  const {
+    id,
+    battlemap,
+    description,
+    encounters,
+    icon,
+    name,
+    party,
+    state,
+    tokens,
+  } = chapter;
+
+  await db.execute(
+    "UPDATE chapters SET battlemap = $2, description = $3, encounters = $4, icon = $5, name = $6, party = $7, state = $8, tokens = $9 WHERE id = $1",
+    [
+      id,
+      battlemap,
+      description,
+      JSON.stringify(encounters.map((enc: any) => enc.id).join), // TODO: create encounter type
+      icon,
+      name,
+      party,
+      state,
+      JSON.stringify(
+        tokens.map((token: ChapterCharacterToken) => token.id).join,
+      ),
+    ],
+  );
+
+  return getDetailedChapterById(db, id);
 };
 
 export const Database = {
@@ -634,7 +748,7 @@ export const Database = {
   },
 
   parties: {
-    etAll: async () => {
+    getAll: async () => {
       const db = await connect();
       return getAllParties(db);
     },
@@ -757,9 +871,25 @@ export const Database = {
   },
 
   chapters: {
+    create: async (chapter: Omit<Chapter, "id">) => {
+      const db = await connect();
+      return createChapter(db, chapter);
+    },
+    getById: async (id: Chapter["id"]) => {
+      const db = await connect();
+      return getChapterById(db, id);
+    },
+    getByIdDetailed: async (id: Chapter["id"]) => {
+      const db = await connect();
+      return getDetailedChapterById(db, id);
+    },
     getChaptersByPartyId: async (partyId: Party["id"]) => {
       const db = await connect();
       return getAllChaptersForParty(db, partyId);
+    },
+    update: async (chapter: Chapter) => {
+      const db = await connect();
+      return updateChapter(db, chapter);
     },
   },
 };

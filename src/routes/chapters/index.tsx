@@ -41,11 +41,6 @@ function RouteComponent() {
     enabled: !!partyId,
   });
 
-  const players = useQueryWithToast({
-    queryKey: ["players"],
-    queryFn: () => db.players.getAllDetailed(),
-  });
-
   const removePlayerFromParty = useMutationWithErrorToast({
     mutationFn: (id: Player["id"]) => {
       return db.parties.removePlayerFromParty(partyId!, id);
@@ -102,7 +97,6 @@ function RouteComponent() {
       isLoading={chapters.isLoading || party.isLoading}
       chapters={chapters.data || []}
       party={party.data}
-      players={players.data || []}
       onRemovePlayerFromParty={removePlayerFromParty.mutate}
       onRemoveImmunityFromPlayer={(playerId, immunityId) =>
         removeImmunityFromPlayer.mutate({ playerId, immunityId })

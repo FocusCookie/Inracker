@@ -1,6 +1,5 @@
-import { cn } from "@/lib/utils";
 import { Party } from "@/types/party";
-import { Player } from "@/types/player";
+import { Pencil1Icon } from "@radix-ui/react-icons";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import IconAvatar from "../IconAvatar/IconAvatar";
@@ -18,18 +17,10 @@ type Props = {
   party: Party;
   onEdit: (party: Party) => void;
   onOpen: (id: Party["id"]) => void;
-  onPlayerClick: (id: Player["id"]) => void;
   animationDelay?: number;
 };
 
-function PartyCard({
-  party,
-  animationDelay = 0,
-  onEdit,
-  onOpen,
-  onPlayerClick,
-  ...props
-}: Props) {
+function PartyCard({ party, animationDelay = 0, onEdit, onOpen }: Props) {
   const { t } = useTranslation("ComponentPartyCard");
 
   function handleEditClick() {
@@ -47,43 +38,43 @@ function PartyCard({
       transition={{ delay: animationDelay }}
       exit={{ opacity: 0, x: "2rem" }}
     >
-      <Card>
-        <CardHeader>
-          <div
-            className={cn(
-              "flex flex-nowrap gap-2 text-2xl",
-              // @ts-ignore
-              props.className,
-            )}
-          >
-            <div className="shrink-0">
-              <TypographyH3>{party.icon}</TypographyH3>
-            </div>
-            <TypographyH3>{party.name}</TypographyH3>
+      <Card className="flex flex-col">
+        <CardHeader className="flex flex-row">
+          <div className="w-8 text-center">
+            <TypographyH3>{party.icon}</TypographyH3>
           </div>
-          {party.description && (
-            <CardDescription>
-              <div className="line-clamp-3">{party.description}</div>
-            </CardDescription>
-          )}
+
+          <TypographyH3>{party.name}</TypographyH3>
         </CardHeader>
-        {party.players.length > 0 && (
-          <CardContent>
-            <div className="flex gap-2">
-              {party.players.map((player) => (
-                <IconAvatar
-                  player={player}
-                  key={`avatar-of-player-${player.id}-${player.name}`}
-                />
-              ))}
-            </div>
-          </CardContent>
-        )}
+
+        <CardContent className="flex">
+          <div className="h-full w-8"></div>
+
+          <div className="flex grow flex-col gap-2">
+            {party.description && (
+              <CardDescription>
+                <div className="line-clamp-3">{party.description}</div>
+              </CardDescription>
+            )}
+
+            {party.players.length > 0 && (
+              <div className="flex gap-2">
+                {party.players.map((player) => (
+                  <IconAvatar
+                    player={player}
+                    key={`avatar-of-player-${player.id}-${player.name}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </CardContent>
+
         <CardFooter className="flex justify-end gap-4">
           <Button onClick={handleEditClick} variant="ghost">
-            {t("edit")}
+            <Pencil1Icon />
           </Button>
-          <Button onClick={handleOpenClick}> {t("select")}</Button>
+          <Button onClick={handleOpenClick}>{t("select")}</Button>
         </CardFooter>
       </Card>
     </motion.div>

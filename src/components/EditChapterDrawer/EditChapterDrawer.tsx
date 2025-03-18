@@ -1,10 +1,8 @@
 import { storeImage } from "@/lib/utils";
 import { Chapter } from "@/types/chapters";
-import { Party } from "@/types/party";
-import { Prettify } from "@/types/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TrashIcon } from "@radix-ui/react-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -23,23 +21,25 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 
 type Props = {
-  isCreating: boolean;
+  chapter: Chapter | null;
+  loading: boolean;
   open: boolean;
-  partyId: Party["id"];
   onOpenChange: (state: boolean) => void;
-  onCreate: (chapter: Prettify<Omit<Chapter, "id">>) => void;
+  onSave: (chapter: Chapter) => void;
 };
 
-function CreateChapterDrawer({
-  onCreate,
-  isCreating,
-  partyId,
+function EditChapterDrawer({
+  onSave,
+  chapter,
+  loading,
   open,
   onOpenChange,
 }: Props) {
-  const { t } = useTranslation("ComponentCreateChapterDrawer");
+  const { t } = useTranslation("ComponentEditChapterDrawer");
   const [refreshKey, setRefreshKey] = useState<number>(0); // to reset the input type file path after a reset
-  const [picturePreview, setPicturePreview] = useState<string>("");
+  const [picturePreview, setPicturePreview] = useState<string>(
+    chapter?.battlemap || "",
+  );
 
   const formSchema = z.object({
     name: z.string().min(2, {
@@ -60,26 +60,36 @@ function CreateChapterDrawer({
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { name, description, icon, battlemap } = values;
-    let battlemapFilePath: string | null = null;
-
-    if (!!battlemap) {
-      battlemapFilePath = await storeImage(battlemap, "battlemaps");
+  useEffect(() => {
+    if (chapter) {
+      form.reset({
+        name: chapter.name,
+        description: chapter.description || "",
+        icon: chapter.icon,
+        battlemap: chapter.battlemap || "",
+      });
     }
+  }, [chapter, form]);
 
-    onCreate({
-      name,
-      icon,
-      description,
-      battlemap: battlemapFilePath,
-      state: "draft",
-      tokens: [],
-      encounters: [],
-      party: partyId,
-    });
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (chapter) {
+      const { name, description, icon, battlemap } = values;
+      let battlemapFilePath: string | null = null;
 
-    form.reset();
+      if (!!battlemap) {
+        battlemapFilePath = await storeImage(battlemap, "battlemaps");
+      }
+
+      onSave({
+        ...chapter,
+        name,
+        description,
+        icon,
+        battlemap: battlemapFilePath || chapter.battlemap,
+      });
+
+      form.reset();
+    }
   }
 
   function handleResetPicture() {
@@ -109,16 +119,12 @@ function CreateChapterDrawer({
       onOpenChange={onOpenChange}
       title={t("title")}
       actions={
-        <Button
-          loading={isCreating}
-          disabled={isCreating}
-          onClick={form.handleSubmit(onSubmit)}
-        >
-          {t("create")}
+        <Button loading={loading} onClick={form.handleSubmit(onSubmit)}>
+          {t("save")}
         </Button>
       }
       cancelTrigger={
-        <Button disabled={isCreating} variant="ghost">
+        <Button disabled={loading} variant="ghost">
           {t("cancel")}
         </Button>
       }
@@ -129,8 +135,8 @@ function CreateChapterDrawer({
             <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
               <FormLabel>{t("icon")}</FormLabel>
               <IconPicker
-                initialIcon={form.getValues("icon")}
-                disabled={isCreating}
+                initialIcon={chapter?.icon}
+                disabled={loading}
                 onIconClick={handleIconSelect}
               />
               <FormMessage />
@@ -144,7 +150,7 @@ function CreateChapterDrawer({
                   <FormLabel>{t("name")}</FormLabel>
                   <FormControl>
                     <Input
-                      disabled={isCreating}
+                      disabled={loading}
                       placeholder={t("namePlaceholder")}
                       {...field}
                     />
@@ -163,7 +169,7 @@ function CreateChapterDrawer({
                 <FormLabel>{t("description")}</FormLabel>
 
                 <FormControl>
-                  <Textarea disabled={isCreating} placeholder="" {...field} />
+                  <Textarea disabled={loading} placeholder="" {...field} />
                 </FormControl>
 
                 <FormMessage />
@@ -213,4 +219,4 @@ function CreateChapterDrawer({
   );
 }
 
-export default CreateChapterDrawer;
+export default EditChapterDrawer;

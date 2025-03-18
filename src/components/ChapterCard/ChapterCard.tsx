@@ -1,30 +1,38 @@
 import { Chapter as TChapter } from "@/types/chapters";
-import { motion } from "framer-motion";
-import { TypographyH2 } from "../ui/typographyh2";
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
-import { TypographyP } from "../ui/typographyP";
-import { RiEdit2Fill } from "react-icons/ri";
+import { DBEncounter } from "@/types/encounters";
 import {
-  ArrowDownIcon,
-  ArrowUpIcon,
   CheckIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
   ClockIcon,
   DoubleArrowUpIcon,
   Pencil1Icon,
   PlayIcon,
 } from "@radix-ui/react-icons";
+import { useMeasure } from "@uidotdev/usehooks";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import MarkdownReader from "../MarkdownReader/MarkdownReader";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
+import { TypographyH3 } from "../ui/typographyH3";
 
 type Props = {
   chapter: TChapter;
-  onEdit: (chapterId: TChapter["id"]) => void;
-  onPushUp: (id: TChapter["id"]) => void;
-  onPushDown: (id: TChapter["id"]) => void;
+  animationDelay?: number;
+  onEdit: (chapter: TChapter) => void;
+  onPlay: (id: TChapter["id"]) => void;
 };
 
-function ChapterCard({ chapter, onEdit, onPushDown, onPushUp }: Props) {
+function ChapterCard({ chapter, onEdit, onPlay, animationDelay }: Props) {
+  const { t } = useTranslation("ComponentChapterCard");
+  const [ref, { height }] = useMeasure();
+  const [isDescriptionOpen, setIsDescriptionOpen] = useState<boolean>(false);
+
   function handleEdit() {
-    onEdit(chapter.id);
+    onEdit(chapter);
   }
 
   const chapterStateIcon =
@@ -38,12 +46,12 @@ function ChapterCard({ chapter, onEdit, onPushDown, onPushUp }: Props) {
       <CheckIcon className="h-3 w-3" />
     );
 
-  function handlePushDown() {
-    onPushDown(chapter.id);
+  function handleToggleDescription() {
+    setIsDescriptionOpen((c) => !c);
   }
 
-  function handlePushUp() {
-    onPushUp(chapter.id);
+  function handlePlay() {
+    onPlay(chapter.id);
   }
 
   return (
@@ -51,60 +59,73 @@ function ChapterCard({ chapter, onEdit, onPushDown, onPushUp }: Props) {
       className="flex w-full flex-col"
       initial={{ opacity: 0, x: "-2rem" }}
       animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: animationDelay }}
       exit={{ opacity: 0, x: "2rem" }}
     >
-      <div className="flex flex-col">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex grow gap-2">
-            <TypographyH2>
-              {chapter.icon} {chapter.name}
-            </TypographyH2>
+      <Card className="px-0">
+        <CardHeader className="px-4 pb-4">
+          <div className="flex items-start justify-between">
+            <div className="flex grow gap-2">
+              <span className="w-8 text-center text-2xl">{chapter.icon}</span>
+
+              <TypographyH3>{chapter.name}</TypographyH3>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" onClick={handleToggleDescription}>
+                {isDescriptionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+              </Button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button onClick={handlePushDown} variant="ghost" size="icon">
-              <ArrowDownIcon />
-            </Button>
+          <div className="mt-2 flex gap-2">
+            <div className="h-full w-8"></div>
 
-            <Button onClick={handlePushUp} variant="ghost" size="icon">
-              <ArrowUpIcon />
-            </Button>
+            <Badge className="flex gap-2 capitalize">
+              {chapterStateIcon} {chapter.state}
+            </Badge>
+            {chapter.encounters.length > 0 && (
+              <Badge className="flex gap-2 capitalize">
+                <DoubleArrowUpIcon className="h-3 w-3" />
+                {chapter.encounters.reduce(
+                  (acc: number, encounter: DBEncounter) => {
+                    return encounter.ep ? acc + encounter.ep : acc;
+                  },
+                  0,
+                )}
 
-            <Button
-              aria-label={`Edit chapter ${chapter.name}`}
-              onClick={handleEdit}
-              variant="ghost"
-              size="icon"
+                <span>{t("ep")}</span>
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+
+        <AnimatePresence mode="wait">
+          {isDescriptionOpen && chapter.description && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: height ? height + 8 : 0, opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
             >
-              <RiEdit2Fill />
-            </Button>
-          </div>
-        </div>
-      </div>
+              <CardContent
+                className="flex flex-col border-t border-b border-neutral-300 p-4"
+                ref={ref}
+              >
+                <MarkdownReader markdown={chapter.description} />
+              </CardContent>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      <div className="flex gap-2">
-        <Badge className="flex gap-1">
-          {chapterStateIcon} {chapter.state}
-        </Badge>
-        {chapter.experience && (
-          <Badge className="flex gap-2">
-            <DoubleArrowUpIcon className="h-3 w-3" />
-            {chapter.experience} EP
-          </Badge>
-        )}
-      </div>
+        <CardFooter className="flex justify-end gap-2 px-4 pt-2">
+          <Button onClick={handleEdit} variant="ghost">
+            <Pencil1Icon />
+          </Button>
 
-      {chapter.battlemap && (
-        <img
-          className="mt-3 max-h-96 w-full overflow-hidden rounded-md object-cover"
-          src={chapter.battlemap}
-          alt="battlemap"
-        />
-      )}
-
-      <TypographyP className="mt-3 line-clamp-6">
-        {chapter.description}
-      </TypographyP>
+          <Button onClick={handlePlay}>{t("select")}</Button>
+        </CardFooter>
+      </Card>
     </motion.div>
   );
 }

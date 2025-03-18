@@ -5,6 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+  --width-content: calc(38rem + 12px);
+
   --animate-caret-blink: caret-blink 1.25s ease-out infinite;
 
   --radius-lg: var(--radius);
@@ -94,7 +96,7 @@
     border-radius: 1rem;
   }
   .scrollable-y::-webkit-scrollbar-thumb:hover {
-    background: #e3e8ef;
+    background: #bdc1c7;
   }
 
   html,
@@ -103,6 +105,7 @@
   #storybook-root {
     height: 100%;
     width: 100%;
+    background: black;
   }
 
   /* 1. Use a more-intuitive box-sizing model */

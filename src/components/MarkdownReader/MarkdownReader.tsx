@@ -1,12 +1,14 @@
+import { cn } from "@/lib/utils";
 import Markdown from "react-markdown";
-import "./styles.css";
 import remarkGfm from "remark-gfm";
 import { TypographyH1 } from "../ui/typographyH1";
-import { TypographyH3 } from "../ui/typographyH3";
 import { TypographyH2 } from "../ui/typographyh2";
+import { TypographyH3 } from "../ui/typographyH3";
 import { TypographyH4 } from "../ui/typographyH4";
+import "./styles.css";
 
 type Props = {
+  className?: string;
   markdown: string;
 };
 
@@ -14,10 +16,10 @@ type Headline = {
   children?: React.ReactNode;
 };
 
-function MarkdownReader({ markdown }: Props) {
+function MarkdownReader({ markdown, className: classNames }: Props) {
   return (
     <Markdown
-      className="markdown-reader"
+      className={cn("markdown-reader", classNames)}
       components={{
         h1({ children, ...props }: Headline) {
           return <TypographyH1 children={children} {...props} />;

@@ -1,5 +1,6 @@
 {
   "chapters": "Kapitel",
+  "chapter": "Kapitel",
   "loadingChapters": "Lade Kapitel...",
   "description": "Hier kannst du die Kapitel für dein Abenteuer erstellen. Nutze diesen Bereich, um deine Geschichte zu strukturieren, wichtige Ereignisse zu planen und das Gerüst für die epische Reise zu entwickeln, auf die deine Spieler sich begeben werden. Jedes Kapitel ist ein entscheidender Teil der größeren Erzählung, von mysteriösen Anfängen bis hin zu dramatischen Höhepunkten..",
   "addChapter": "Kapitel hinzufügen",
@@ -10,5 +11,6 @@
   "addNewChapter": "Erstelle neues Kapitel",
   "addPlayer": "Spieler hinzufügen",
   "addFromCatalog": "Aus dem Katalog",
-  "createNewPlayer": "Neuen Character erstellen"
+  "createNewPlayer": "Neuen Character erstellen",
+  "createChapter": "Erstelle ein Kapitlel"
 }

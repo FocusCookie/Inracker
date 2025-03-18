@@ -8,14 +8,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Party } from "@/types/party";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import Drawer from "../Drawer/Drawer";
 import IconPicker from "../IconPicker/IconPicker";
-import { Button } from "../ui/button";
-import { useTranslation } from "react-i18next";
-import { Party } from "@/types/party";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,7 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
-import { useEffect } from "react";
+import { Button } from "../ui/button";
 
 type Props = {
   party: Party | null;
@@ -157,7 +157,7 @@ function PartyEditDrawer({
             <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
               <FormLabel>{t("icon")}</FormLabel>
               <IconPicker
-                initialIcon={form.getValues("icon")}
+                initialIcon={party?.icon}
                 disabled={isUpdating}
                 onIconClick={handleIconSelect}
               />

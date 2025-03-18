@@ -1,5 +1,6 @@
-import MainLayout from "@/components/MainLayout/MainLayout";
+import ChapterCard from "@/components/ChapterCard/ChapterCard";
 import Loader from "@/components/Loader/Loader";
+import MainLayout from "@/components/MainLayout/MainLayout";
 import PlayerCard from "@/components/PlayerCard/PlayerCard";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +16,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { TypographyH1 } from "@/components/ui/typographyH1";
+import { TypographyP } from "@/components/ui/typographyP";
 import { useChapterStore } from "@/stores/useChapterStore";
 import { useImmunityStore } from "@/stores/useImmunityStore";
 import { usePlayerStore } from "@/stores/usePlayerStore";
@@ -23,6 +26,7 @@ import { Chapter } from "@/types/chapters";
 import { DBImmunity } from "@/types/immunitiy";
 import { Party } from "@/types/party";
 import { Player } from "@/types/player";
+import { DBResistance } from "@/types/resistances";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
@@ -30,12 +34,10 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { RiArrowLeftBoxLine, RiUserAddFill } from "react-icons/ri";
 import { useShallow } from "zustand/shallow";
-import { DBResistance } from "@/types/resistances";
 
 type Props = {
   party: Party;
   chapters: Chapter[];
-  players: Player[];
   isLoading: boolean;
   onRemovePlayerFromParty: (id: Player["id"]) => void;
   onRemoveImmunityFromPlayer: (
@@ -52,7 +54,6 @@ function ChapterSelection({
   party,
   chapters,
   isLoading,
-  players,
   onRemovePlayerFromParty,
   onRemoveImmunityFromPlayer,
   onRemoveResistanceFromPlayer,
@@ -60,11 +61,21 @@ function ChapterSelection({
   const navigate = useNavigate();
   const { t } = useTranslation("PageChapterSelection");
   const keysPressed = useRef<Record<string, boolean>>({});
-  const { isAsideOpen, openAside, closeAside } = useChapterStore(
+  const {
+    isAsideOpen,
+    openAside,
+    closeAside,
+    openCreateChapterDrawer,
+    openEditChapterDrawer,
+    setCurrentChapter,
+  } = useChapterStore(
     useShallow((state) => ({
       isAsideOpen: state.isAsideOpen,
       openAside: state.openAside,
       closeAside: state.closeAside,
+      openCreateChapterDrawer: state.openCreateChapterDrawer,
+      openEditChapterDrawer: state.openEditChapterDrawer,
+      setCurrentChapter: state.setCurrentChapter,
     })),
   );
   const {
@@ -82,11 +93,13 @@ function ChapterSelection({
       closePlayersCatalog: state.closePlayersCatalog,
     })),
   );
+
   const { openImmunititesCatalog } = useImmunityStore(
     useShallow((state) => ({
       openImmunititesCatalog: state.openImmunititesCatalog,
     })),
   );
+
   const { openResistancesCatalog } = useResistancesStore(
     useShallow((state) => ({
       openCreateResistanceDrawer: state.openCreateResistanceDrawer,
@@ -149,6 +162,17 @@ function ChapterSelection({
   function handleAddResistanceToPlayer(player: Player) {
     setSelectedPlayer(player);
     openResistancesCatalog();
+  }
+
+  function handleEditChapter(chapter: Chapter) {
+    openEditChapterDrawer(chapter);
+  }
+
+  function handlePlayChapter(chapter: Chapter["id"]) {
+    setCurrentChapter(chapter);
+    navigate({
+      to: `/play`,
+    });
   }
 
   return (
@@ -258,7 +282,39 @@ function ChapterSelection({
             </motion.div>
           </MainLayout.Settings>
 
-          <div className="flex flex-col gap-4">Chapters</div>
+          <div className="flex w-full flex-col items-center gap-4 overflow-hidden">
+            <div className="w-content flex flex-col gap-2">
+              <TypographyH1>{t("chapters")}</TypographyH1>
+
+              <TypographyP>{t("description")}</TypographyP>
+            </div>
+
+            <Button
+              onClick={() => openCreateChapterDrawer()}
+              variant={chapters.length === 0 ? "default" : "outline"}
+            >
+              {t("createChapter")}
+            </Button>
+
+            <AnimatePresence mode="wait">
+              {isLoading && (
+                <Loader size="large" title="loading chapters..." key="loader" />
+              )}
+              {!isLoading && (
+                <div className="scrollable-y w-content flex flex-col gap-4 overflow-y-scroll rounded pt-1 pr-2 pb-4">
+                  {chapters.map((chapter, index) => (
+                    <ChapterCard
+                      key={`chapter-${chapter.id}`}
+                      chapter={chapter}
+                      animationDelay={index * 0.05}
+                      onEdit={handleEditChapter}
+                      onPlay={handlePlayChapter}
+                    />
+                  ))}
+                </div>
+              )}
+            </AnimatePresence>
+          </div>
         </MainLayout>
       )}
     </AnimatePresence>

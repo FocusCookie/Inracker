@@ -1,4 +1,11 @@
+import { usePlayerStore } from "@/stores/usePlayerStore";
 import { Player } from "@/types/player";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useShallow } from "zustand/shallow";
+import IconAvatar from "../IconAvatar/IconAvatar";
+import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -9,15 +16,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
-import { Badge } from "../ui/badge";
-import { usePlayerStore } from "@/stores/usePlayerStore";
-import { useShallow } from "zustand/shallow";
-import IconAvatar from "../IconAvatar/IconAvatar";
-import { useTranslation } from "react-i18next";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 type Props = {
   open: boolean;
@@ -93,9 +93,9 @@ function SettingsDialog({
                   )
 
                   .map((player) => (
-                    <button
+                    <div
                       key={player.id}
-                      className="focus-visible:ring-ring hover:bg-secondary/80 focus-within:bg-secondary/80 group/player flex w-full items-center justify-start gap-2 rounded-md p-4 ring-offset-1 outline-black transition-colors focus-within:outline-1 hover:cursor-pointer focus-visible:ring-1"
+                      className="focus-visible:ring-ring hover:bg-secondary/80 focus-within:bg-secondary/80 flex w-full items-center justify-start gap-2 rounded-md p-4 ring-offset-1 outline-black transition-colors focus-within:outline-1 focus-visible:ring-1"
                     >
                       <IconAvatar player={player} />
 
@@ -110,7 +110,7 @@ function SettingsDialog({
                         </div>
                       </div>
 
-                      <div className="invisible flex gap-4 group-focus-within/player:visible group-hover/player:visible">
+                      <div className="flex gap-4">
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button variant="ghost">{t("delete")}</Button>
@@ -145,7 +145,7 @@ function SettingsDialog({
                           {t("edit")}
                         </Button>
                       </div>
-                    </button>
+                    </div>
                   ))}
               </div>
             </ScrollArea>

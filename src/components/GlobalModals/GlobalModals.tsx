@@ -24,7 +24,12 @@ import PartyEditDrawer from "../PartyEditDrawer/PartyEditDrawer";
 import PlayerCatalog from "../PlayerCatalog/PlayerCatalog";
 import ResistancesCatalog from "../ResistancesCatalog/ResistancesCatalog";
 import SettingsDialog from "../SettingsDialog/SettingsDialog";
+import { useChapterStore } from "@/stores/useChapterStore";
+// @ts-ignore //TODO: fix error here
 import { usePartyStore } from "@/stores/usePartySTore";
+import { Chapter, DBChapter } from "@/types/chapters";
+import CreateChapterDrawer from "../CreateChapterDrawer/CreateChapterDrawer";
+import EditChapterDrawer from "../EditChapterDrawer/EditChapterDrawer";
 
 type Props = {};
 
@@ -43,12 +48,28 @@ function GlobalModals({}: Props) {
     );
 
   const {
+    editingChapter,
+    isEditChapterDrawerOpen,
+    isCreateChapterDrawerOpen,
+    closeEditChapterDrawer,
+    closeCreateChapterDrawer,
+    openCreateChapterDrawer,
+  } = useChapterStore(
+    useShallow((state) => ({
+      isCreateChapterDrawerOpen: state.isCreateChapterDrawerOpen,
+      isEditChapterDrawerOpen: state.isEditChapterDrawerOpen,
+      editingChapter: state.editingChapter,
+      closeCreateChapterDrawer: state.closeCreateChapterDrawer,
+      openCreateChapterDrawer: state.openCreateChapterDrawer,
+      closeEditChapterDrawer: state.closeEditChapterDrawer,
+    })),
+  );
+
+  const {
     isPlayersCatalogOpen,
     isCreatePlayerDrawerOpen,
-    isCreatingPlayer,
     selectedPlayer,
     isEditPlayerDrawerOpen,
-    isUpdatingPlayer,
     setIsUpdatingPlayer,
     setIsCreatingPlayer,
     closeCreatePlayerDrawer,
@@ -62,10 +83,8 @@ function GlobalModals({}: Props) {
     useShallow((state) => ({
       isCreatePlayerDrawerOpen: state.isCreatePlayerDrawerOpen,
       isPlayersCatalogOpen: state.isPlayersCatalogOpen,
-      isCreatingPlayer: state.isCreatingPlayer,
       selectedPlayer: state.selectedPlayer,
       isEditPlayerDrawerOpen: state.isEditPlayerDrawerOpen,
-      isUpdatingPlayer: state.isUpdatingPlayer,
       setIsUpdatingPlayer: state.setIsUpdatingPlayer,
       setSelectedPlayer: state.setSelectedPlayer,
       setIsCreatingPlayer: state.setIsCreatingPlayer,
@@ -100,7 +119,6 @@ function GlobalModals({}: Props) {
   const {
     isImmunitiesCatalogOpen,
     isCreateImmunityDrawerOpen,
-    isCreatingImmunity,
     setIsCreatingImmunity,
     closeCreateImmunityDrawer,
     openCreateImmunityDrawer,
@@ -108,7 +126,6 @@ function GlobalModals({}: Props) {
     closeImmunitiesCatalog,
   } = useImmunityStore(
     useShallow((state) => ({
-      isCreatingImmunity: state.isCreatingImmunity,
       isImmunitiesCatalogOpen: state.isImmunitiesCatalogOpen,
       isCreateImmunityDrawerOpen: state.isCreateImmunityDrawerOpen,
       setIsCreatingImmunity: state.setIsCreatingImmunity,
@@ -121,7 +138,6 @@ function GlobalModals({}: Props) {
   const {
     isResistanceCatalogOpen,
     isCreateResistanceDrawerOpen,
-    isCreatingResistance,
     setIsCreatingResistance,
     closeCreateResistanceDrawer,
     openCreateResistanceDrawer,
@@ -131,7 +147,6 @@ function GlobalModals({}: Props) {
     useShallow((state) => ({
       isResistanceCatalogOpen: state.isResistanceCatalogOpen,
       isCreateResistanceDrawerOpen: state.isCreateResistanceDrawerOpen,
-      isCreatingResistance: state.isCreatingResistance,
       setIsCreatingResistance: state.setIsCreatingResistance,
       openCreateResistanceDrawer: state.openCreateResistanceDrawer,
       closeCreateResistanceDrawer: state.closeCreateResistanceDrawer,
@@ -326,6 +341,36 @@ function GlobalModals({}: Props) {
     },
   });
 
+  const createChapterMutation = useMutationWithErrorToast({
+    mutationFn: (chapter: Omit<Chapter, "id">) => {
+      return db.chapters.create(chapter);
+    },
+    onSuccess: (chapter: DBChapter) => {
+      queryClient.invalidateQueries({ queryKey: ["chapters"] });
+      closeCreateDrawer();
+
+      toast({
+        variant: "default",
+        title: `Created ${chapter.icon} ${chapter.name}`,
+      });
+    },
+  });
+
+  const updateChapterMutation = useMutationWithErrorToast({
+    mutationFn: (chapter: Chapter) => {
+      return db.chapters.update(chapter);
+    },
+    onSuccess: (chapter: Chapter) => {
+      queryClient.invalidateQueries({ queryKey: ["chapters"] });
+      closeCreateDrawer();
+
+      toast({
+        variant: "default",
+        title: `Updated ${chapter.icon} ${chapter.name}`,
+      });
+    },
+  });
+
   const updatePartyMutation = useMutationWithErrorToast({
     mutationFn: (party: Party) => {
       return db.parties.updateByParty(party);
@@ -486,11 +531,12 @@ function GlobalModals({}: Props) {
           players={players.data}
         />
       )}
+
       {immunities.data && resistances.data && (
         <CreatePlayerDrawer
           form={createPlayerForm}
           open={isCreatePlayerDrawerOpen}
-          loading={isCreatingPlayer}
+          loading={createPlayer.isPending}
           immunities={immunities.data || []}
           resistances={resistances.data || []}
           onOpenChange={(state) =>
@@ -503,22 +549,37 @@ function GlobalModals({}: Props) {
           onCreateResistance={openCreateResistanceDrawer}
         />
       )}
+
       <EditPlayerDrawer
         player={selectedPlayer}
         open={isEditPlayerDrawerOpen}
-        loading={isUpdatingPlayer}
+        loading={updatePlayer.isPending}
         form={editPlayerForm}
         onOpenChange={(state: boolean) =>
           state ? openEditPlayerDrawer() : closeEditPlayerDrawer()
         }
         onSave={updatePlayer.mutate}
       />
+
       <CreatePartyDrawer
         open={isCreateDrawerOpen}
         onOpenChange={handleCreateDrawerChange}
         isCreating={createPartyMutation.isPending}
         onCreate={createPartyMutation.mutate}
       />
+
+      {currentParty && (
+        <CreateChapterDrawer
+          isCreating={createChapterMutation.isPending}
+          open={isCreateChapterDrawerOpen && !!currentParty}
+          onOpenChange={(state: boolean) =>
+            state ? openCreateChapterDrawer() : closeCreateChapterDrawer()
+          }
+          onCreate={createChapterMutation.mutate}
+          partyId={currentParty}
+        />
+      )}
+
       <PartyEditDrawer
         open={isEditDrawerOpen}
         onOpenChange={closeEditDrawer}
@@ -529,6 +590,7 @@ function GlobalModals({}: Props) {
         onUpdate={updatePartyMutation.mutate}
         onDelete={deletePartyMutation.mutate}
       />
+
       {immunities.data && (
         <ImmunitiesCatalog
           immunities={immunities.data}
@@ -539,6 +601,7 @@ function GlobalModals({}: Props) {
           onAdd={handleAddImmunity}
         />
       )}
+
       {resistances.data && (
         <ResistancesCatalog
           resistances={resistances.data}
@@ -549,22 +612,25 @@ function GlobalModals({}: Props) {
           onAdd={handleAddResistance}
         />
       )}
+
       <CreateImmunityDrawer
-        isCreating={isCreatingImmunity}
+        isCreating={createImmunity.isPending}
         open={isCreateImmunityDrawerOpen}
         onOpenChange={(state: boolean) =>
           state ? openCreateImmunityDrawer() : closeCreateImmunityDrawer()
         }
         onCreate={createImmunity.mutate}
       />
+
       <CreateResistanceDrawer
-        isCreating={isCreatingResistance}
+        isCreating={createResistance.isPending}
         open={isCreateResistanceDrawerOpen}
         onOpenChange={(state: boolean) =>
           state ? openCreateResistanceDrawer() : closeCreateResistanceDrawer()
         }
         onCreate={createResistance.mutate}
       />
+
       <SettingsDialog
         open={isSettingsDialogOpen}
         onOpenChange={(state: boolean) =>
@@ -572,6 +638,14 @@ function GlobalModals({}: Props) {
         }
         players={players.data || []}
         onDeletePlayer={deletePlayer.mutate}
+      />
+
+      <EditChapterDrawer
+        chapter={editingChapter}
+        loading={updateChapterMutation.isPending}
+        open={isEditChapterDrawerOpen}
+        onOpenChange={closeEditChapterDrawer}
+        onSave={updateChapterMutation.mutate}
       />
     </>
   );

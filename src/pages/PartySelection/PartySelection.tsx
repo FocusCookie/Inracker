@@ -32,7 +32,7 @@ const PartySelection = ({
 
   return (
     <div className="flex h-full w-full flex-col items-center gap-8 rounded-md bg-white p-2">
-      <div className="flex max-w-xl flex-col gap-2">
+      <div className="w-content flex flex-col gap-2">
         <TypographyH1>{t("headline")}</TypographyH1>
 
         <TypographyP>{t("description")}</TypographyP>
@@ -49,7 +49,7 @@ const PartySelection = ({
         {loading && <Loader size="large" title={t("loading")} key="loader" />}
 
         {!loading && (
-          <div className="scrollable-y w-full max-w-xl overflow-y-scroll pr-0.5">
+          <div className="scrollable-y w-content overflow-y-scroll pr-0.5">
             <div className="flex w-full flex-col gap-4 pb-4">
               {parties.map((party, index) => (
                 <PartyCard
@@ -58,7 +58,6 @@ const PartySelection = ({
                   party={party}
                   onEdit={onEditParty}
                   onOpen={() => handlePartySelect(party.id)}
-                  onPlayerClick={() => {}}
                 />
               ))}
             </div>

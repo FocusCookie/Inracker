@@ -87,7 +87,8 @@ pub fn run() {
             description: "create chapters table",
             sql: "CREATE TABLE IF NOT EXISTS chapters (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
+                party INTEGER NOT NULL,
+                name TEXT NOT NULL,
                 description TEXT,
                 icon TEXT NOT NULL,
                 state TEXT NOT NULL,

@@ -1,7 +1,7 @@
-import React from "react";
+import { cn } from "@/lib/utils";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import React from "react";
 import { ScrollArea } from "../ui/scroll-area";
 
 type MainLayoutCompoundProps = {
@@ -51,7 +51,7 @@ const MainLayout: MainLayoutCompound = ({ isAsideOpen, children }) => {
           isAsideFloating ? "absolute inset-0 left-28" : "grow",
         )}
       >
-        <main className="flex w-[608px] flex-col gap-2 pt-4">
+        <main className="w-content flex flex-col gap-2 pt-4">
           {mainContent}
         </main>
       </div>

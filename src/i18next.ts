@@ -1,7 +1,11 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentChapterCardEN from "@/translations/en/components/ChapterCard.json";
+import ComponentChapterCardDE from "@/translations/de/components/ChapterCard.json"; 
+import ComponentEditChapterDrawerEN from "@/translations/en/components/EditChapterDrawer.json";
+import ComponentEditChapterDrawerDE from "@/translations/de/components/EditChapterDrawer.json";
 import ComponentCreateChapterDrawerEN from "@/translations/en/components/CreateChapterDrawer.json";
-import ComponentCreateChapterDrawerDE from "@/translations/de/components/CreateChapterDrawer.json"; 
+import ComponentCreateChapterDrawerDE from "@/translations/de/components/CreateChapterDrawer.json";
 import ComponentPlayerCardEN from "@/translations/en/components/PlayerCard.json";
 import ComponentPlayerCardDE from "@/translations/de/components/PlayerCard.json";
 import ComponentSettingsDialogEN from "@/translations/en/components/SettingsDialog.json";
@@ -47,6 +51,8 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentChapterCard: ComponentChapterCardEN,
+    ComponentEditChapterDrawer: ComponentEditChapterDrawerEN,
     ComponentCreateChapterDrawer: ComponentCreateChapterDrawerEN,
     ComponentPlayerCard: ComponentPlayerCardEN,
     ComponentSettingsDialog: ComponentSettingsDialogEN,
@@ -75,6 +81,8 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentChapterCard: ComponentChapterCardDE,
+    ComponentEditChapterDrawer: ComponentEditChapterDrawerDE,
     ComponentCreateChapterDrawer: ComponentCreateChapterDrawerDE,
     ComponentPlayerCard: ComponentPlayerCardDE,
     ComponentSettingsDialog: ComponentSettingsDialogDE,
