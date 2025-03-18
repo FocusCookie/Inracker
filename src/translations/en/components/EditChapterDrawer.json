@@ -1,0 +1,13 @@
+{
+  "title": "Edit Chapter",
+  "titleDescription": "Revise your chapter and create an even better story.",
+  "save": "Save",
+  "cancel": "Cancel",
+  "icon": "Icon",
+  "name": "Name",
+  "description": "Description",
+  "nameValidation": "The name must be at least 2 characters long.",
+  "battlemap": "Battle Map",
+  "battlemapPlaceholder": "Select a battle map image",
+  "namePlaceholder": "The Inner Conflict"
+}

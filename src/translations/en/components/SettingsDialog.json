@@ -1,0 +1,10 @@
+{
+  "settings": "Settings",
+  "settingsDescription": "Change your overall inracker settings.",
+  "general": "Genral",
+  "players": "Players",
+  "level": "Level",
+  "delete": "Delete",
+  "deletionWarning": "If you confirm the character will be gone forever. Really, there is no scroll or spell to revive the deleted character!",
+  "edit": "Edit"
+}

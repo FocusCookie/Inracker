@@ -7,6 +7,8 @@ import ReactDOM from "react-dom/client";
 import "./i18next";
 import { routeTree } from "./routeTree.gen";
 import "./styles/global.css";
+import { appDataDir } from "@tauri-apps/api/path";
+import { createTauriAppDataSubfolders } from "./lib/utils";
 
 const queryClient = new QueryClient();
 const router = createRouter({ routeTree });
@@ -19,6 +21,13 @@ declare module "@tanstack/react-router" {
 
 const rootElement = document.getElementById("root")!;
 
+//* This prints out the app data dir
+appDataDir().then((dir) => console.info("Inracker app data directory: " + dir));
+
+createTauriAppDataSubfolders().then(() =>
+  console.info("Images folders initialized"),
+);
+
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
@@ -27,8 +36,8 @@ ReactDOM.createRoot(rootElement).render(
       </div>
     </QueryClientProvider>
     <div id="drawer-portal" />
-    <Toaster />
+    <div className="z-50">
+      <Toaster />
+    </div>
   </React.StrictMode>,
 );
-
-//TODO: Error handling for the query with soner notifications.

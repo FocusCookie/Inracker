@@ -1,0 +1,13 @@
+{
+  "title": "Kapitel erstellen",
+  "titleDescription": "Erstelle ein neues Abenteuer und ein spannendes Kapitel.",
+  "create": "Erstellen",
+  "cancel": "Abbrechen",
+  "icon": "Icon",
+  "name": "Name",
+  "description": "Beschreibung",
+  "nameValidation": "Der Name muss mindestens 2 Zeichen lang sein.",
+  "battlemap": "Schlachtkarte",
+  "battlemapPlaceholder": "Wähle ein Schlachtkartenbild",
+  "namePlaceholder": "Der innere Konflikt"
+}

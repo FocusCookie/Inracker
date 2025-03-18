@@ -1,0 +1,6 @@
+{
+  "immunities": "Immunities",
+  "description": "Choose an immunity to add to the character, granting them protection against specific threats.",
+  "nothingFound": "No immunity found. Create a new one!",
+  "loading": "Loading immunities..."
+}

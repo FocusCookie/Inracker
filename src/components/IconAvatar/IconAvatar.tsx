@@ -1,3 +1,5 @@
+import { Player } from "@/types/player";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
   Tooltip,
   TooltipContent,
@@ -5,27 +7,31 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 
-type Props = { icon: string; name: string; onClick?: () => void };
+type Props = { player: Player };
 
-function IconAvatar({ icon, name, onClick, ...props }: Props) {
-  function handleClick() {
-    if (onClick) onClick();
-  }
-
+function IconAvatar({ player, ...props }: Props) {
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <button
+          <span
+            tabIndex={0}
+            aria-describedby={player.name}
             {...props}
-            onClick={handleClick}
-            className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-border bg-background hover:shadow"
+            className="relative grid h-12 w-12 place-content-center rounded-full outline-2 outline-transparent focus-within:outline-black hover:outline-black"
           >
-            <span className="text-4xl">{icon}</span>
-          </button>
+            <Avatar>
+              <AvatarImage src={player.image || undefined} alt={player.name} />
+              <AvatarFallback>{player.icon}</AvatarFallback>
+            </Avatar>
+
+            <span className="absolute top-0 right-0 rounded-full bg-white p-0.5 text-sm shadow">
+              {player.icon}
+            </span>
+          </span>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{name}</p>
+          <p>{player.name}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

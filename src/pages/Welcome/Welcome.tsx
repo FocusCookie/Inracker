@@ -14,7 +14,7 @@ function Welcome({ onLetUsRole }: Props) {
 
   return (
     <div className="flex h-full w-full items-center justify-center rounded-md bg-white">
-      <div className="flex max-w-xl flex-col items-center gap-4 text-center">
+      <div className="w-content flex flex-col items-center gap-4 text-center">
         <div className="flex gap-4">
           <motion.div
             initial={{ opacity: 0, x: -8 }}

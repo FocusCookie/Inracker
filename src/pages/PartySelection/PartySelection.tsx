@@ -1,61 +1,71 @@
 import Loader from "@/components/Loader/Loader";
 import PartyCard from "@/components/PartyCard/PartyCard";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import { TypographyH1 } from "@/components/ui/typographyH1";
 import { TypographyP } from "@/components/ui/typographyP";
 import { Party } from "@/types/party";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
+import React from "react";
 import { useTranslation } from "react-i18next";
 
-type Props = {
+type PartySelectionProps = {
   parties: Party[];
-  renderCreatePartyDrawer: React.ReactElement;
   loading: boolean;
+  children?: React.ReactNode;
   onEditParty: (party: Party) => void;
+  onPartySelect: (id: Party["id"]) => void;
+  onCreateParty: () => void;
 };
 
-function PartySelection({
+const PartySelection = ({
   parties,
-  renderCreatePartyDrawer,
   loading,
   onEditParty,
-}: Props) {
+  onPartySelect,
+  onCreateParty,
+}: PartySelectionProps) => {
   const { t } = useTranslation("PagePartySelection");
+
+  function handlePartySelect(partyId: Party["id"]) {
+    onPartySelect(partyId);
+  }
 
   return (
     <div className="flex h-full w-full flex-col items-center gap-8 rounded-md bg-white p-2">
-      <div className="flex max-w-xl flex-col gap-2">
+      <div className="w-content flex flex-col gap-2">
         <TypographyH1>{t("headline")}</TypographyH1>
 
         <TypographyP>{t("description")}</TypographyP>
-
-        <div className="flex w-full justify-center">
-          {renderCreatePartyDrawer}
-        </div>
       </div>
+
+      <Button
+        onClick={onCreateParty}
+        variant={parties.length === 0 ? "default" : "outline"}
+      >
+        {t("createParty")}
+      </Button>
 
       <AnimatePresence mode="wait">
         {loading && <Loader size="large" title={t("loading")} key="loader" />}
 
         {!loading && (
-          <ScrollArea className="w-full max-w-xl pr-3">
-            <div className="flex flex-col gap-4 pb-4">
+          <div className="scrollable-y w-content overflow-y-scroll pr-0.5">
+            <div className="flex w-full flex-col gap-4 pb-4">
               {parties.map((party, index) => (
                 <PartyCard
                   key={`party-${party.id}`}
                   animationDelay={index * 0.05}
                   party={party}
                   onEdit={onEditParty}
-                  onOpen={() => {}}
-                  onPlayerClick={() => {}}
+                  onOpen={() => handlePartySelect(party.id)}
                 />
               ))}
             </div>
-          </ScrollArea>
+          </div>
         )}
       </AnimatePresence>
     </div>
   );
-}
+};
 
 export default PartySelection;

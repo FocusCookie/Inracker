@@ -1,0 +1,13 @@
+{
+  "title": "Editiere Kapitel",
+  "titleDescription": "Überarbeite dein Kapitel und erschaffe eine noch bessere Geschichte.",
+  "save": "Speichern",
+  "cancel": "Abbrechen",
+  "icon": "Icon",
+  "name": "Name",
+  "description": "Beschreibung",
+  "nameValidation": "Der Name muss mindestens 2 Zeichen lang sein.",
+  "battlemap": "Schlachtkarte",
+  "battlemapPlaceholder": "Wähle ein Schlachtkartenbild",
+  "namePlaceholder": "Der innere Konflikt"
+}

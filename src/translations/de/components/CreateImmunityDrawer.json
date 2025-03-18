@@ -1,0 +1,10 @@
+{
+  "descriptionText": "Entwirf eine einzigartige Immunität, um die Fähigkeiten und Widerstandskraft deines Charakters zu erweitern. Definiere, wogegen dein Charakter unempfindlich ist, sei es gegen bestimmte Zustände, magische Effekte, Umweltgefahren oder körperliche Schäden.",
+  "title": "Erstelle eine neue Immunität",
+  "create": "Erstellen",
+  "cancel": "Abbrechen",
+  "icon": "Symbol",
+  "name": "Name",
+  "namePlaceholder": "Feuerimmunität",
+  "description": "Beschreibung"
+}

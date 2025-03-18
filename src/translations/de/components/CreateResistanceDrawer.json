@@ -1,0 +1,11 @@
+{
+  "minNameChars": "Der Name des Widerstands muss mindestens drei Zeichen lang sein.",
+  "descriptionText": "Erstelle einen individuellen Widerstand, um deinem Spieler einen Vorteil gegen bestimmte Bedrohungen zu verschaffen. Definiere einen Widerstand, der ihn vor bestimmten Schadensarten, Umweltgefahren oder schwächenden Effekten schützt. Egal ob es sich um Schutz vor Feuer, Gift oder magischen Angriffen handelt – mit dieser Funktion kannst du seine Verteidigung an seine Stärken und Hintergrundgeschichte anpassen.",
+  "title": "Erstelle einen neuen Wiederstand",
+  "create": "Erstellen",
+  "cancel": "Abbrechen",
+  "icon": "Symbol",
+  "name": "Name",
+  "namePlaceholder": "Widerstand gegen Fallschaden",
+  "description": "Beschreibung"
+}

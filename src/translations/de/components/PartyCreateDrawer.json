@@ -7,5 +7,5 @@
   "icon": "Symbol",
   "name": "Name",
   "description": "Beschreibung",
-  "usernameMaxTwoChars": "Der Benutzername muss mindestens 2 Zeichen lang sein."
+  "nameValidation": "Der Name muss mindestens 2 Zeichen lang sein."
 }

@@ -1,0 +1,19 @@
+{
+  "cancel": "Abbrechen",
+  "update": "Aktualisiere",
+  "save": "Speichern",
+  "overview": "Übersicht",
+  "icon": "Symbol",
+  "name": "Name",
+  "role": "Rolle/Klasse",
+  "picturePlaceholder": "Wähle ein Bild aus...",
+  "profilePictureAlt": "Das Profilbild des Spielers.",
+  "playerPicture": "Spielerbild",
+  "add": "Hinzufügen",
+  "level": "Stufe",
+  "health": "Trefferpunkte",
+  "overviewDescription": "Hier kannst du dauerhafte Notizen über den Charakter festhalten. Sie sind die ersten Informationen, die du zu einem Spieler öffnest, und ermöglichen eine einfache Referenz während deiner Sitzungen.",
+  "details": "Details",
+  "detailsDescription": "Dieser Bereich ist für alle wichtigen Fähigkeiten und zusätzliche relevante Informationen über den Charakter gedacht. Öffne ihn, wenn du spezifische Details während deiner Abenteuer benötigst!",
+  "select": "Auswahl"
+}

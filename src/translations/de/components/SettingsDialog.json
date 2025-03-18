@@ -1,0 +1,10 @@
+{
+  "settings": "Einstellungen",
+  "settingsDescription": "Ändere deine allgemeinen Inracker-Einstellungen.",
+  "general": "Allgemein",
+  "players": "Spieler",
+  "level": "Level",
+  "delete": "Löschen",
+  "deletionWarning": "Wenn du bestätigst, ist der Charakter für immer weg. Wirklich, es gibt keinen Zauber, um den gelöschten Charakter wiederzubeleben!",
+  "edit": "Bearbeiten"
+}

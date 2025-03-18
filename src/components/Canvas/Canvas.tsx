@@ -13,8 +13,6 @@ const MAX_ZOOM = 5;
 const ZOOM_DELTA = 0.2;
 const DRAW_RECT_FILL_COLOR = "rgba(255, 255, 255, 0.3)";
 const DRAW_RECT_STROKE_COLOR = "rgba(0, 0, 0, 0.6)";
-const PLAYER_SELECTION_CIRCLE_STROKE_COLOR = "rgba(255, 0, 0, 0.8";
-const PLAYER_SELECTION_CIRCLE_RADIUS = 50;
 
 type Props = {
   background?: HTMLImageElement;
@@ -104,11 +102,11 @@ function Canvas({
   >(
     players.map((player) => {
       return { id: player.id, visible: true };
-    })
+    }),
   );
 
   const transformScreenCoordsToSvgCoords = (
-    event: MouseEvent | React.MouseEvent<SVGSVGElement>
+    event: MouseEvent | React.MouseEvent<SVGSVGElement>,
   ) => {
     if (!svgRef.current || !initialCTM.current) return { x: 0, y: 0 };
 
@@ -118,7 +116,7 @@ function Canvas({
     point.y = event.clientY;
 
     const transformedPoint = point.matrixTransform(
-      initialCTM.current.inverse()
+      initialCTM.current.inverse(),
     );
 
     return {
@@ -128,7 +126,7 @@ function Canvas({
   };
 
   const handleMouseDown = (
-    event: React.MouseEvent<SVGSVGElement, MouseEvent>
+    event: React.MouseEvent<SVGSVGElement, MouseEvent>,
   ) => {
     if (isPanning && svgRef.current) {
       const svg = svgRef.current;
@@ -167,7 +165,7 @@ function Canvas({
       // create temporary rect
       const rect = document.createElementNS(
         "http://www.w3.org/2000/svg",
-        "rect"
+        "rect",
       );
       rect.setAttribute("x", coords.x.toString());
       rect.setAttribute("y", coords.y.toString());
@@ -200,7 +198,7 @@ function Canvas({
       "viewBox",
       `${viewBoxStartOnPanStart.current.x - dx} ${
         viewBoxStartOnPanStart.current.y - dy
-      } ${viewBox.width} ${viewBox.height}`
+      } ${viewBox.width} ${viewBox.height}`,
     );
   };
 
@@ -312,7 +310,7 @@ function Canvas({
 
   const handlePlayerDragStart = (
     event: React.MouseEvent<SVGImageElement>,
-    player: Player
+    player: Player,
   ) => {
     if (isDrawing || isPanning) return;
 
@@ -398,7 +396,7 @@ function Canvas({
   function togglePlayerToken(player: Player) {
     const update = [...playersTokenState];
     const playerStateIndex = update.findIndex(
-      (playerState) => playerState.id === player.id
+      (playerState) => playerState.id === player.id,
     );
 
     update[playerStateIndex].visible = !update[playerStateIndex].visible;
@@ -407,15 +405,16 @@ function Canvas({
   }
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative h-full w-full">
       <svg
         ref={svgRef}
         viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
         className={cn(
-          "bg-center bg-contain bg-no-repeat w-full h-full border-2 bg-neutral-50 border-neutral-50 rounded-md shadow-md",
-          isPanning && "cursor-grab"
+          "h-full w-full rounded-md border-2 border-neutral-50 bg-neutral-50 bg-contain bg-center bg-no-repeat shadow-md",
+          isPanning && "cursor-grab",
         )}
-        onMouseDown={handleMouseDown}>
+        onMouseDown={handleMouseDown}
+      >
         <filter id="subtleDropShadow">
           <feDropShadow
             dx="1"
@@ -457,7 +456,8 @@ function Canvas({
           <g
             className="hover:cursor-pointer"
             key={element.id}
-            onClick={() => onElementClick(element.id)}>
+            onClick={() => onElementClick(element.id)}
+          >
             <rect
               x={element.x}
               y={element.y}
@@ -473,8 +473,9 @@ function Canvas({
 
             <g transform={`translate(${element.x + 16}, ${element.y + 32})`}>
               <text
-                className="font-bold fill-white shadow font-sans text-4xl select-none"
-                dominantBaseline="middle">
+                className="select-none fill-white font-sans text-4xl font-bold shadow-sm"
+                dominantBaseline="middle"
+              >
                 {element.icon}
               </text>
             </g>
@@ -486,14 +487,14 @@ function Canvas({
             className={cn(
               Boolean(
                 playersTokenState.find(
-                  (playerToken) => playerToken.id === player.id
-                )?.visible
+                  (playerToken) => playerToken.id === player.id,
+                )?.visible,
               )
                 ? "visible"
                 : "hidden",
               selectedPlayer &&
                 player.id === selectedPlayer.id &&
-                "border-2 border-red-500"
+                "border-2 border-red-500",
             )}
             key={"player-" + player.id}
             href={player.img}
@@ -519,18 +520,20 @@ function Canvas({
         {selectedPlayer && (
           <g transform={`translate(${selectedPlayer.coordinates.x + 30}, 116)`}>
             <text
-              className="font-bold fill-white shadow font-sans text-6xl"
-              dominantBaseline="middle">
+              className="fill-white font-sans text-6xl font-bold shadow-sm"
+              dominantBaseline="middle"
+            >
               👆
             </text>
           </g>
         )}
       </svg>
 
-      <div className="flex flex-col gap-4 absolute right-4 top-1/2 p-2 border rounded-full shadow-md bg-white/20 border-white/80 backdrop-blur -translate-y-1/2">
+      <div className="absolute right-4 top-1/2 flex -translate-y-1/2 flex-col gap-4 rounded-full border border-white/80 bg-white/20 p-2 shadow-md backdrop-blur-sm">
         <button
           onClick={() => setIsDrawing((c) => !c)}
-          className="hover:bg-slate-100 hover:shadow-sm rounded-full bg-white border border-slate-700 h-10 w-10 flex justify-center items-center">
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+        >
           {isDrawing ? (
             <Cross2Icon className="h-4 w-4" />
           ) : (
@@ -542,17 +545,18 @@ function Canvas({
           <button
             key={`player-${player.id}-token-state`}
             onClick={() => togglePlayerToken(player)}
-            className="hover:bg-slate-100 hover:shadow-sm rounded-full bg-white border border-slate-700 h-10 w-10 flex justify-center items-center">
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+          >
             <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
               <img
-                className=" row-start-1 row-end-2 col-start-1 col-end-1"
+                className="col-start-1 col-end-1 row-start-1 row-end-2"
                 src={player.img}
                 alt={`Picture of Player ${player.name}`}
               />
               {!playersTokenState.find((state) => state.id === player.id)
                 ?.visible && (
-                <div className="h-6 w-6 bg-white/20 backdrop-blur flex justify-center items-center row-start-1 row-end-2 col-start-1 col-end-1 rounded-full">
-                  <EyeNoneIcon className="h-4 w-4 text-white " />
+                <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                  <EyeNoneIcon className="h-4 w-4 text-white" />
                 </div>
               )}
             </div>
@@ -560,15 +564,17 @@ function Canvas({
         ))}
       </div>
 
-      <div className="flex gap-2 absolute right-4 bottom-4 p-1 border rounded-full shadow-md bg-white/20 border-white/80 backdrop-blur">
+      <div className="absolute bottom-4 right-4 flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
         <button
           onClick={zoomIn}
-          className="hover:bg-slate-100 hover:shadow-sm border border-slate-700 rounded-full bg-white h-8 w-8 flex justify-center items-center">
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+        >
           <ZoomInIcon className="h-4 w-4" />
         </button>
         <button
           onClick={zoomOut}
-          className="hover:bg-slate-100 hover:shadow-sm rounded-full bg-white border border-slate-700 h-8 w-8 flex justify-center items-center">
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+        >
           <ZoomOutIcon className="h-4 w-4" />
         </button>
       </div>

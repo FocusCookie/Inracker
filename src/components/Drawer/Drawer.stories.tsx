@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 import Drawer from "./Drawer";
 import { Button } from "../ui/button";
+import { ScrollArea } from "../ui/scroll-area";
 
 const meta = {
   title: "Components/Drawer",
@@ -20,6 +21,9 @@ const meta = {
     children: (
       <div className="flex flex-col gap-8">
         <p className="h-96">some content</p>
+        <p className="h-96">some content</p>
+        <p className="h-96">some content</p>
+        <p className="h-96">some content</p>
       </div>
     ),
     actions: (
@@ -37,4 +41,19 @@ type Story = StoryObj<typeof meta>;
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 export const Primary: Story = {
   // args: {},
+};
+
+export const WithScrollAreaChild: Story = {
+  args: {
+    children: (
+      <ScrollArea className="flex flex-col gap-8">
+        <p className="h-96">some123 content</p>
+        <button>test</button>
+        <p className="h-96">some aaa content</p>
+        <button>test 2</button>
+        <p className="h-96">some jalskdjf content</p>
+        <p className="h-96">someffff content</p>
+      </ScrollArea>
+    ),
+  },
 };

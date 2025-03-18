@@ -1,5 +1,6 @@
 {
   "headline": "Party Selection",
   "description": "Hey adventurer! Ready to embark on your next journey? You can select an existing party or create a brand new one and get ready to dive into the adventure!",
-  "loading": "Loading Parties..."
+  "loading": "Loading Parties...",
+  "createParty": "Create a Party"
 }

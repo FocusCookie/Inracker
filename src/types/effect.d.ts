@@ -2,16 +2,17 @@ import { Prettify } from "./utils";
 
 export type DBEffect = {
   description: string;
+  /** Rounds or seconds */
   duration: number;
   /**
    * devided in rounds and time
    */
-  duration_type: string;
+  duration_type: "rounds" | "time";
   icon: string;
   readonly id: number;
   name: string;
   /** positive or negative */
-  type: string;
+  type: "positive" | "negative";
 };
 
 /**

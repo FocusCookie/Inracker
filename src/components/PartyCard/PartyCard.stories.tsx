@@ -26,7 +26,7 @@ const meta = {
           armor: 12,
           role: "barbar",
           classSg: 22,
-          description: "DESTROY!",
+          details: "DESTROY!",
           effects: [],
           icon: "🧙",
           // @ts-ignore
@@ -59,7 +59,7 @@ const meta = {
           armor: 12,
           role: "rouqe",
           classSg: 22,
-          description: "DESTROY!",
+          details: "DESTROY!",
           effects: [],
           icon: "🥷",
           // @ts-ignore
@@ -92,7 +92,7 @@ const meta = {
           armor: 12,
           role: "barbar",
           classSg: 22,
-          description: "DESTROY!",
+          details: "DESTROY!",
           effects: [],
           icon: "🧌",
           // @ts-ignore
@@ -121,7 +121,6 @@ const meta = {
           shield: null,
         },
       ],
-      state: "draft",
     },
   },
 } satisfies Meta<typeof PartyCard>;
