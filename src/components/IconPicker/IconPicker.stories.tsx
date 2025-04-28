@@ -6,7 +6,7 @@ import IconPicker from "./IconPicker";
 const meta = {
   title: "Components/IconPicker",
   component: IconPicker,
-  args: { onIconClick: fn() },
+  args: { onIconClick: fn(), disabled: false, initialIcon: "👨‍🎨" },
 } satisfies Meta<typeof IconPicker>;
 
 export default meta;
