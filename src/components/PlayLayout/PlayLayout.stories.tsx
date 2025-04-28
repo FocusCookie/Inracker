@@ -1,33 +1,38 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import MainLayout from "./MainLayout";
+import PlayLayout from "./PlayLayout";
 
 const meta = {
-  title: "Layout/MainLayout",
-  component: MainLayout,
+  title: "Layout/PlayLayout",
+  component: PlayLayout,
   parameters: {},
   args: {
     isAsideOpen: false,
+    isEncounterOpen: false,
     children: <div>chapters</div>,
-    fullContent: false,
   },
   render: ({ children, ...props }) => (
-    <MainLayout {...props}>
-      <MainLayout.Players>
+    <PlayLayout {...props}>
+      <PlayLayout.Players>
         <div>
           <p className="py-64">player 1</p>
           <p className="py-64">player 2</p>
           <p className="py-64">player 3</p>
           <p className="py-64">player 4</p>
         </div>
-      </MainLayout.Players>
+      </PlayLayout.Players>
 
-      <MainLayout.Settings>
+      <PlayLayout.Settings>
         <div>settings</div>
-      </MainLayout.Settings>
+      </PlayLayout.Settings>
+
+      <PlayLayout.Settings>
+        <div>encounter</div>
+      </PlayLayout.Settings>
+
       {children}
-    </MainLayout>
+    </PlayLayout>
   ),
-} satisfies Meta<typeof MainLayout>;
+} satisfies Meta<typeof PlayLayout>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

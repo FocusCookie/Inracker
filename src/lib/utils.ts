@@ -35,8 +35,6 @@ export async function storeImage(picture: File | string, folder: ImageFolder) {
       const appFilePath = await join(appDataDirPath, filePath);
       const assetUrl = convertFileSrc(appFilePath);
 
-      console.log({ assetUrl });
-
       return assetUrl;
     } catch (error) {
       console.error("Error saving file:", error);

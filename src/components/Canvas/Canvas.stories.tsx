@@ -24,44 +24,39 @@ const meta = {
   ],
   // args: { onClick: fn() },
   args: {
-    background,
+    background:
+      "http://localhost:6006/src/components/Canvas/test_assets/HB_Festplatz.jpg",
     elements: [],
     players: [
       {
-        buffs: [],
-        debuffs: [],
-        coordinates: { x: 0, y: 0 },
-        health: 12,
         id: 1,
-        img: player1,
-        name: "Tanatar",
+        role: "mage",
+        details: "Hex hex!",
+        effects: [],
+        icon: "🧙",
+        ep: 234,
+        health: 23,
+        level: 4,
+        immunities: [],
+        name: "H. Potter",
+        resistances: [
+          {
+            id: 1,
+            name: "resistance xyz",
+            icon: "🚨",
+            description: "# Resistance markdown",
+          },
+        ],
+        image: player1,
+        max_health: 10,
+        overview: "overview",
       },
+    ],
+    tokens: [
       {
-        buffs: [],
-        debuffs: [],
-        coordinates: { x: 100, y: 0 },
-        health: 10,
-        id: 2,
-        img: player2,
-        name: "Flitzi",
-      },
-      {
-        buffs: [],
-        debuffs: [],
-        coordinates: { x: 200, y: 0 },
-        health: 11,
-        id: 3,
-        img: player3,
-        name: "Calian",
-      },
-      {
-        buffs: [],
-        debuffs: [],
-        coordinates: { x: 300, y: 0 },
-        health: 20,
-        id: 4,
-        img: player4,
-        name: "Tebag",
+        coordinates: { x: 1, y: 1 },
+        id: 1,
+        entity: 1,
       },
     ],
     selectedPlayer: null,
@@ -82,13 +77,13 @@ export const Primary: Story = {
 
 export const WithBackground: Story = {
   args: {
-    background,
+    background: testBackground,
   },
 };
 
 export const WithBackgroundAndElements: Story = {
   args: {
-    background,
+    background: testBackground,
     elements: [
       {
         id: "1",
@@ -129,7 +124,7 @@ export const WithBackgroundAndElements: Story = {
 
 export const WithSelectedPlayer: Story = {
   args: {
-    background,
+    background: testBackground,
     elements: [
       {
         id: "1",
@@ -166,13 +161,27 @@ export const WithSelectedPlayer: Story = {
       },
     ],
     selectedPlayer: {
-      buffs: [],
-      debuffs: [],
-      coordinates: { x: 300, y: 0 },
-      health: 20,
-      id: 4,
-      img: player4,
-      name: "Tebag",
+      id: 1,
+      role: "mage",
+      details: "Hex hex!",
+      effects: [],
+      icon: "🧙",
+      ep: 234,
+      health: 23,
+      level: 4,
+      immunities: [],
+      name: "H. Potter",
+      resistances: [
+        {
+          id: 1,
+          name: "resistance xyz",
+          icon: "🚨",
+          description: "# Resistance markdown",
+        },
+      ],
+      image: player1,
+      max_health: 10,
+      overview: "overview",
     },
   },
 };

@@ -30,6 +30,9 @@ import { usePartyStore } from "@/stores/usePartySTore";
 import { Chapter, DBChapter } from "@/types/chapters";
 import CreateChapterDrawer from "../CreateChapterDrawer/CreateChapterDrawer";
 import EditChapterDrawer from "../EditChapterDrawer/EditChapterDrawer";
+import { useEncounterStore } from "@/stores/useEncounterStore";
+import CreateEncounterDrawer from "../CreateEncounterDrawer/CreateEncounterDrawer";
+import { Prettify } from "@/types/utils";
 
 type Props = {};
 
@@ -46,6 +49,22 @@ function GlobalModals({}: Props) {
         openSettingsDialog: state.openSettingsDialog,
       })),
     );
+
+  const {
+    isCreateEncounterDrawerOpen,
+    currentEncounterElement,
+    openCreateEncounterDrawer,
+    closeEncounterDrawer,
+    setCurrentElement,
+  } = useEncounterStore(
+    useShallow((state) => ({
+      isCreateEncounterDrawerOpen: state.isCreateEncounterDrawerOpen,
+      currentEncounterElement: state.currentElement,
+      openCreateEncounterDrawer: state.openCreateEncounterDrawer,
+      closeEncounterDrawer: state.closeEncounterDrawer,
+      setCurrentElement: state.setCurrentElement,
+    })),
+  );
 
   const {
     editingChapter,
@@ -200,11 +219,13 @@ function GlobalModals({}: Props) {
   const createPlayer = useMutationWithErrorToast({
     mutationFn: (player: TCreatePlayer) => {
       setIsCreatingPlayer(true);
+
       return db.players.create(player);
     },
     onSuccess: (player: Player) => {
       queryClient.invalidateQueries({ queryKey: ["players"] });
       setIsCreatingPlayer(false);
+      createPlayerForm.reset();
       closeCreatePlayerDrawer();
       toast({
         variant: "default",
@@ -347,7 +368,7 @@ function GlobalModals({}: Props) {
     },
     onSuccess: (chapter: DBChapter) => {
       queryClient.invalidateQueries({ queryKey: ["chapters"] });
-      closeCreateDrawer();
+      closeCreateChapterDrawer();
 
       toast({
         variant: "default",
@@ -362,7 +383,9 @@ function GlobalModals({}: Props) {
     },
     onSuccess: (chapter: Chapter) => {
       queryClient.invalidateQueries({ queryKey: ["chapters"] });
-      closeCreateDrawer();
+      queryClient.invalidateQueries({ queryKey: ["chapter"] });
+
+      closeEditChapterDrawer();
 
       toast({
         variant: "default",
@@ -405,7 +428,6 @@ function GlobalModals({}: Props) {
   }
 
   function handleAddImmunity(immunity: DBImmunity) {
-    console.log({ isCreatePlayerDrawerOpen });
     if (isCreatePlayerDrawerOpen) {
       const currentImmunities = createPlayerForm.getValues("immunities");
       const isAlreadyAdded = currentImmunities.some((id) => id === immunity.id);
@@ -517,6 +539,15 @@ function GlobalModals({}: Props) {
     }
   }
 
+  function handleEncounterDrawerOpenChange(state: boolean) {
+    if (state) {
+      openCreateEncounterDrawer();
+    } else {
+      closeEncounterDrawer();
+      setCurrentElement(null);
+    }
+  }
+
   return (
     <>
       {party.data && players.data && (
@@ -612,6 +643,14 @@ function GlobalModals({}: Props) {
           onAdd={handleAddResistance}
         />
       )}
+
+      <CreateEncounterDrawer
+        element={currentEncounterElement}
+        onCreate={(enc) => console.log(enc)}
+        isCreating={false}
+        open={isCreateEncounterDrawerOpen}
+        onOpenChange={handleEncounterDrawerOpenChange}
+      />
 
       <CreateImmunityDrawer
         isCreating={createImmunity.isPending}

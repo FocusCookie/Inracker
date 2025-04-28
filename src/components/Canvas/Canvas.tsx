@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
-import { useEffect, useRef, useState } from "react";
+import { useEncounterStore } from "@/stores/useEncounterStore";
+import { Player } from "@/types/player";
+import { Token } from "@/types/tokens";
 import {
   Cross2Icon,
   EyeNoneIcon,
@@ -7,64 +9,82 @@ import {
   ZoomInIcon,
   ZoomOutIcon,
 } from "@radix-ui/react-icons";
+import { useEffect, useRef, useState } from "react";
+import { useShallow } from "zustand/shallow";
 
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
 const ZOOM_DELTA = 0.2;
-const DRAW_RECT_FILL_COLOR = "rgba(255, 255, 255, 0.3)";
-const DRAW_RECT_STROKE_COLOR = "rgba(0, 0, 0, 0.6)";
+const TEMP_DEFAULT_COLOR = "#FFFFFF";
+const TEMP_DEFAULT_ICON = "📝";
 
 type Props = {
-  background?: HTMLImageElement;
+  background?: string;
   elements: CanvasElement[];
+  temporaryElement?: CanvasElement;
   players: Player[];
   selectedPlayer: Player | null;
-  onPlayerSelect: (player: Player) => void;
-  onDrawed: (element: CanvasElement) => void;
-  onElementClick: (id: string) => void;
-  onPlayerMove: (player: Player) => void;
+  tokens: Token[];
+  onPlayerSelect: (player: Player | null) => void;
+  onDrawed: (element: Omit<CanvasElement, "id">) => void;
+  onElementClick: (id: number) => void;
+  onPlayerMove: (token: Token) => void;
 };
 
-export type Player = {
-  id: number;
-  img: string;
-  coordinates: { x: number; y: number };
-  health: number;
-  name: string;
-  buffs: Buff[];
-  debuffs: Buff[];
-};
-
-type Buff = {
-  title: string;
-  icon: string;
-  value: number;
-};
-
-type CanvasElement = {
-  id: string;
+export type CanvasElement = {
   x: number;
   y: number;
   width: number;
   height: number;
   color: string;
-  title: string;
-  icon?: string;
-  onClick: (id: string) => void;
+  icon: string;
 };
 
 function Canvas({
   background,
   elements,
+  temporaryElement,
   players,
   selectedPlayer,
+  tokens,
   onPlayerMove,
   onPlayerSelect,
   onDrawed,
   onElementClick,
 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const backgroundImage = useRef<HTMLImageElement | null>(null);
 
+  const {
+    currentColor,
+    setCurrentColor,
+    currentIcon,
+    setCurrentIcon,
+    resetCount,
+  } = useEncounterStore(
+    useShallow((state) => ({
+      currentIcon: state.currentIcon,
+      currentColor: state.currentColor,
+      setCurrentColor: state.setCurrentColor,
+      setCurrentIcon: state.setCurrentIcon,
+      resetCount: state.resetCount,
+    })),
+  );
+
+  // Use a ref to track the actual current viewBox
+  const currentViewBoxRef = useRef<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }>({
+    x: 0,
+    y: 0,
+    width: 1000,
+    height: 1000,
+  });
+
+  // State for React rendering
   const [viewBox, setViewBox] = useState<{
     x: number;
     y: number;
@@ -76,6 +96,7 @@ function Canvas({
     width: 1000,
     height: 1000,
   });
+
   const [zoom, setZoom] = useState<number>(1);
   const [isPanning, setIsPanning] = useState<boolean>(false);
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
@@ -84,11 +105,17 @@ function Canvas({
   const tempRectRef = useRef<SVGRectElement | null>(null);
   const drawStartPos = useRef<{ x: number; y: number } | null>(null);
   const draggedPlayer = useRef<Player | null>(null);
-  const dragStartPos = useRef<{ x: number; y: number } | null>(null);
+  const selectedPlayerRef = useRef<Player | null>(selectedPlayer);
+  const isDraggingToken = useRef<boolean>(false);
+  const dragTokenStartPos = useRef<{ x: number; y: number } | null>(null);
+  const dragElementStartPos = useRef<{ x: number; y: number } | null>(null);
   const temporaryPlayerPosition = useRef<{
     playerId: number;
     coordinates: { x: number; y: number };
   } | null>(null);
+  const temporaryTempElementPosition = useRef<{ x: number; y: number } | null>(
+    null,
+  );
   const [, forceUpdate] = useState({});
   const viewBoxStartOnPanStart = useRef<{ x: number; y: number }>({
     x: 0,
@@ -104,6 +131,36 @@ function Canvas({
       return { id: player.id, visible: true };
     }),
   );
+
+  useEffect(() => {
+    setCurrentColor(TEMP_DEFAULT_COLOR);
+    setCurrentIcon(TEMP_DEFAULT_ICON);
+  }, []);
+
+  useEffect(() => {
+    if (background && background !== "") {
+      const tmp = new Image();
+      tmp.src = background;
+
+      backgroundImage.current = tmp;
+    }
+  }, [background]);
+
+  useEffect(() => {
+    selectedPlayerRef.current = selectedPlayer;
+  }, [selectedPlayer]);
+
+  useEffect(() => {
+    window.addEventListener("keydown", showPaneCursor);
+    window.addEventListener("keyup", hidePaneCursor);
+    window.addEventListener("keydown", unselectSelectedPlayer);
+
+    return () => {
+      window.removeEventListener("keydown", showPaneCursor);
+      window.removeEventListener("keyup", hidePaneCursor);
+      window.removeEventListener("keydown", unselectSelectedPlayer);
+    };
+  }, []);
 
   const transformScreenCoordsToSvgCoords = (
     event: MouseEvent | React.MouseEvent<SVGSVGElement>,
@@ -137,20 +194,15 @@ function Canvas({
 
       const coords = transformScreenCoordsToSvgCoords(event);
       panStartPosition.current = coords;
-      const currentViewBox = svg
-        ?.getAttribute("viewBox")
-        ?.split(" ")
-        .map(Number);
 
-      if (currentViewBox) {
-        viewBoxStartOnPanStart.current = {
-          x: currentViewBox[0],
-          y: currentViewBox[1],
-        };
-      }
+      viewBoxStartOnPanStart.current = {
+        x: currentViewBoxRef.current.x,
+        y: currentViewBoxRef.current.y,
+      };
 
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("keyup", hidePaneCursor);
     }
 
     if (isDrawing && svgRef.current) {
@@ -173,8 +225,9 @@ function Canvas({
       rect.setAttribute("height", "0");
       rect.setAttribute("rx", "4");
       rect.setAttribute("ry", "4");
-      rect.setAttribute("fill", DRAW_RECT_FILL_COLOR);
-      rect.setAttribute("stroke", DRAW_RECT_STROKE_COLOR);
+      rect.setAttribute("fill", currentColor);
+      rect.setAttribute("opacity", "0.5");
+      rect.setAttribute("stroke", currentColor);
       rect.setAttribute("stroke-width", "2");
       rect.setAttribute("filter", "url(#subtleDropShadow)");
 
@@ -190,19 +243,32 @@ function Canvas({
     if (!svgRef.current) return;
 
     const currentPoint = transformScreenCoordsToSvgCoords(event);
-
     const dx = currentPoint.x - panStartPosition.current.x;
     const dy = currentPoint.y - panStartPosition.current.y;
 
-    svgRef.current.setAttribute(
-      "viewBox",
-      `${viewBoxStartOnPanStart.current.x - dx} ${
-        viewBoxStartOnPanStart.current.y - dy
-      } ${viewBox.width} ${viewBox.height}`,
-    );
+    const newX = viewBoxStartOnPanStart.current.x - dx;
+    const newY = viewBoxStartOnPanStart.current.y - dy;
+
+    currentViewBoxRef.current = {
+      x: newX,
+      y: newY,
+      width: currentViewBoxRef.current.width,
+      height: currentViewBoxRef.current.height,
+    };
+
+    requestAnimationFrame(() => {
+      if (svgRef.current) {
+        svgRef.current.setAttribute(
+          "viewBox",
+          `${newX} ${newY} ${currentViewBoxRef.current.width} ${currentViewBoxRef.current.height}`,
+        );
+      }
+    });
   };
 
   const handleMouseUp = () => {
+    setViewBox(currentViewBoxRef.current);
+
     window.removeEventListener("mousemove", handleMouseMove);
     window.removeEventListener("mouseup", handleMouseUp);
   };
@@ -211,23 +277,30 @@ function Canvas({
     const delta = direction === "in" ? ZOOM_DELTA : -ZOOM_DELTA;
     const newZoom = Math.max(MIN_ZOOM, Math.min(zoom + delta, MAX_ZOOM));
 
-    const scalingFactor = zoom / newZoom;
+    // Get current center of the view from the ref
+    const { x, y, width, height } = currentViewBoxRef.current;
+    const currentCenterX = x + width / 2;
+    const currentCenterY = y + height / 2;
+
+    // Calculate new dimensions
+    const newWidth = (width * zoom) / newZoom;
+    const newHeight = (height * zoom) / newZoom;
+
+    // Calculate new top-left corner while maintaining the center point
+    const newX = currentCenterX - newWidth / 2;
+    const newY = currentCenterY - newHeight / 2;
+
+    // Update both ref and state
+    const newViewBox = {
+      x: newX,
+      y: newY,
+      width: newWidth,
+      height: newHeight,
+    };
+
+    currentViewBoxRef.current = newViewBox;
+    setViewBox(newViewBox);
     setZoom(newZoom);
-
-    setViewBox((prevViewBox) => {
-      const newWidth = prevViewBox.width * scalingFactor;
-      const newHeight = prevViewBox.height * scalingFactor;
-
-      const newX = prevViewBox.x + (prevViewBox.width - newWidth) / 2;
-      const newY = prevViewBox.y + (prevViewBox.height - newHeight) / 2;
-
-      return {
-        x: newX,
-        y: newY,
-        width: newWidth,
-        height: newHeight,
-      };
-    });
   };
 
   function zoomIn() {
@@ -239,6 +312,8 @@ function Canvas({
   }
 
   function showPaneCursor(event: KeyboardEvent) {
+    if (event.repeat) return; // if key is hold return immidiatly
+
     if (!isPanning && event.code === "Space") {
       setIsPanning(true);
       setIsDrawing(false);
@@ -246,7 +321,7 @@ function Canvas({
   }
 
   function hidePaneCursor(event: KeyboardEvent) {
-    if (event.code === "Space") {
+    if (isPanning && event.code === "Space") {
       setIsPanning(false);
     }
   }
@@ -286,14 +361,12 @@ function Canvas({
 
       if (width > 5 && height > 5) {
         onDrawed({
-          id: crypto.randomUUID(),
           x: parseInt(x.toFixed(0)),
           y: parseInt(y.toFixed(0)),
           width: parseInt(width.toFixed(0)),
           height: parseInt(height.toFixed(0)),
-          color: DRAW_RECT_FILL_COLOR,
-          title: "New Rectangle",
-          onClick: onElementClick,
+          color: currentColor,
+          icon: "📝",
         });
       }
 
@@ -312,7 +385,8 @@ function Canvas({
     event: React.MouseEvent<SVGImageElement>,
     player: Player,
   ) => {
-    if (isDrawing || isPanning) return;
+    const playerToken = tokens.find((token) => token.entity === player.id);
+    if (isDrawing || isPanning || !playerToken) return;
 
     const svg = svgRef.current;
     if (!svg) return;
@@ -324,9 +398,9 @@ function Canvas({
     // @ts-ignore
     const coords = transformScreenCoordsToSvgCoords(event);
 
-    dragStartPos.current = {
-      x: coords.x - player.coordinates.x,
-      y: coords.y - player.coordinates.y,
+    dragTokenStartPos.current = {
+      x: coords.x - playerToken.coordinates.x,
+      y: coords.y - playerToken.coordinates.y,
     };
     draggedPlayer.current = player;
 
@@ -334,64 +408,198 @@ function Canvas({
     window.addEventListener("mouseup", handlePlayerDragEnd);
   };
 
-  const handlePlayerDragMove = (event: MouseEvent) => {
-    if (!draggedPlayer.current || !dragStartPos.current || !initialCTM.current)
+  const handeTempElementDragStart = (
+    event: React.MouseEvent<SVGRectElement>,
+  ) => {
+    if (isDrawing || isPanning || !temporaryElement) return;
+
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    const CTM = svg.getScreenCTM();
+    if (!CTM) return;
+    initialCTM.current = CTM;
+
+    // @ts-ignore
+    const coords = transformScreenCoordsToSvgCoords(event);
+
+    dragElementStartPos.current = {
+      x: coords.x - temporaryElement.x,
+      y: coords.y - temporaryElement.y,
+    };
+
+    window.removeEventListener("mousemove", handleTempElementDragMove);
+    window.removeEventListener("mouseup", handleTempElementDragEnd);
+
+    window.addEventListener("mousemove", handleTempElementDragMove);
+    window.addEventListener("mouseup", handleTempElementDragEnd);
+  };
+
+  const handleTempElementDragMove = (event: MouseEvent) => {
+    if (
+      !temporaryElement ||
+      !dragElementStartPos.current ||
+      !initialCTM.current ||
+      !svgRef.current
+    )
       return;
 
+    isDraggingToken.current = true;
     const currentPos = transformScreenCoordsToSvgCoords(event);
 
     const newPosition = {
-      x: currentPos.x - dragStartPos.current.x,
-      y: currentPos.y - dragStartPos.current.y,
+      x: currentPos.x - dragElementStartPos.current.x,
+      y: currentPos.y - dragElementStartPos.current.y,
     };
 
-    temporaryPlayerPosition.current = {
-      playerId: draggedPlayer.current.id,
-      coordinates: newPosition,
-    };
+    // Store the position for when we need to update React state
+    temporaryTempElementPosition.current = Object.assign({}, newPosition);
 
-    forceUpdate({});
-  };
+    const element = svgRef.current.querySelector("#temp-element");
+    const icon = svgRef.current.querySelector("#temp-element-icon");
 
-  const handlePlayerDragEnd = () => {
-    console.log("Drag End", {
-      draggedPlayer: draggedPlayer.current,
-      tempPosition: temporaryPlayerPosition.current,
-    });
+    if (element && icon) {
+      element.setAttribute("x", newPosition.x.toString());
+      element.setAttribute("y", newPosition.y.toString());
 
-    if (draggedPlayer.current && temporaryPlayerPosition.current) {
-      const updatedPlayer = {
-        ...draggedPlayer.current,
-        coordinates: temporaryPlayerPosition.current.coordinates,
-      };
-      onPlayerMove(updatedPlayer);
+      icon.setAttribute(
+        "transform",
+        `translate(${newPosition.x + 16}, ${newPosition.y + 40})`,
+      );
     }
 
-    // Cleanup
-    draggedPlayer.current = null;
-    dragStartPos.current = null;
-    temporaryPlayerPosition.current = null;
+    // Don't call forceUpdate here - we'll only update React state when the drag ends
+  };
 
-    // Force final update
+  const handleTempElementDragEnd = () => {
+    console.log({
+      temporaryElement,
+      temp: temporaryTempElementPosition.current,
+    });
+    if (temporaryElement && temporaryTempElementPosition.current) {
+      const update: CanvasElement = {
+        ...temporaryElement,
+        x: temporaryTempElementPosition.current.x,
+        y: temporaryTempElementPosition.current.y,
+      };
+
+      onDrawed(update);
+    }
+
+    dragElementStartPos.current = null;
+    isDraggingToken.current = false;
+
     forceUpdate({});
 
     window.removeEventListener("mousemove", handlePlayerDragMove);
     window.removeEventListener("mouseup", handlePlayerDragEnd);
   };
 
-  useEffect(() => {
-    console.log("Temporary position updated:", temporaryPlayerPosition);
-  }, [temporaryPlayerPosition]);
+  const handlePlayerDragMove = (event: MouseEvent) => {
+    if (
+      !draggedPlayer.current ||
+      !dragTokenStartPos.current ||
+      !initialCTM.current ||
+      !svgRef.current
+    )
+      return;
+
+    isDraggingToken.current = true;
+    const currentPos = transformScreenCoordsToSvgCoords(event);
+
+    const newPosition = {
+      x: currentPos.x - dragTokenStartPos.current.x,
+      y: currentPos.y - dragTokenStartPos.current.y,
+    };
+
+    // Store the position for when we need to update React state
+    temporaryPlayerPosition.current = {
+      playerId: draggedPlayer.current.id,
+      coordinates: newPosition,
+    };
+
+    // Find the actual SVG image element for this player and update it directly
+    const playerImage = svgRef.current.querySelector(
+      `[data-player-id="${draggedPlayer.current.id}"]`,
+    );
+    if (playerImage) {
+      playerImage.setAttribute("x", newPosition.x.toString());
+      playerImage.setAttribute("y", newPosition.y.toString());
+    }
+
+    // Don't call forceUpdate here - we'll only update React state when the drag ends
+  };
+
+  const handlePlayerDragEnd = () => {
+    if (draggedPlayer.current && temporaryPlayerPosition.current) {
+      const updatedPlayer = {
+        ...draggedPlayer.current,
+      };
+
+      const updatedToken = tokens.find(
+        (token) => token.entity === updatedPlayer.id,
+      );
+
+      if (updatedToken) {
+        updatedToken.coordinates = temporaryPlayerPosition.current.coordinates;
+        onPlayerMove(updatedToken);
+      }
+    }
+
+    draggedPlayer.current = null;
+    dragTokenStartPos.current = null;
+    temporaryPlayerPosition.current = null;
+
+    forceUpdate({});
+
+    window.removeEventListener("mousemove", handlePlayerDragMove);
+    window.removeEventListener("mouseup", handlePlayerDragEnd);
+  };
+
+  function handleMouseUpOnPlayerToken(player: Player) {
+    if (isDraggingToken.current) {
+      isDraggingToken.current = false;
+    } else if (selectedPlayer && selectedPlayer.id === player.id) {
+      onPlayerSelect(null);
+    } else {
+      onPlayerSelect(player);
+    }
+  }
+
+  function unselectSelectedPlayer(event: KeyboardEvent) {
+    if (event.key === "Escape") {
+      onPlayerSelect(null);
+    }
+  }
 
   useEffect(() => {
     window.addEventListener("keydown", showPaneCursor);
     window.addEventListener("keyup", hidePaneCursor);
+    window.addEventListener("keydown", unselectSelectedPlayer);
 
     return () => {
       window.removeEventListener("keydown", showPaneCursor);
       window.removeEventListener("keyup", hidePaneCursor);
+      window.removeEventListener("keydown", unselectSelectedPlayer);
     };
   }, []);
+
+  useEffect(() => {
+    if (temporaryElement && tempRectRef.current) {
+      tempRectRef.current.setAttribute("x", temporaryElement.x.toString());
+      tempRectRef.current.setAttribute("y", temporaryElement.y.toString());
+      tempRectRef.current.setAttribute(
+        "width",
+        temporaryElement.width.toString(),
+      );
+      tempRectRef.current.setAttribute(
+        "height",
+        temporaryElement.height.toString(),
+      );
+      tempRectRef.current.setAttribute("fill", temporaryElement.color);
+      tempRectRef.current.setAttribute("stroke", temporaryElement.color);
+    }
+  }, [temporaryElement]);
 
   function togglePlayerToken(player: Player) {
     const update = [...playersTokenState];
@@ -401,11 +609,19 @@ function Canvas({
 
     update[playerStateIndex].visible = !update[playerStateIndex].visible;
 
+    if (
+      !update[playerStateIndex].visible &&
+      selectedPlayer &&
+      selectedPlayer.id === player.id
+    ) {
+      onPlayerSelect(null);
+    }
+
     setPlayersTokenState(update);
   }
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full" key={resetCount}>
       <svg
         ref={svgRef}
         viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
@@ -413,7 +629,7 @@ function Canvas({
           "h-full w-full rounded-md border-2 border-neutral-50 bg-neutral-50 bg-contain bg-center bg-no-repeat shadow-md",
           isPanning && "cursor-grab",
         )}
-        onMouseDown={handleMouseDown}
+        onMouseDownCapture={handleMouseDown}
       >
         <filter id="subtleDropShadow">
           <feDropShadow
@@ -424,14 +640,14 @@ function Canvas({
           />
         </filter>
 
-        {background && (
+        {backgroundImage.current && (
           <defs>
             <mask id="roundedImageMask">
               <rect
-                x={-background.naturalWidth / 2}
-                y={-background.naturalHeight / 2}
-                width={background.naturalWidth}
-                height={background.naturalHeight}
+                x={-backgroundImage.current.naturalWidth / 2}
+                y={-backgroundImage.current.naturalHeight / 2}
+                width={backgroundImage.current.naturalWidth}
+                height={backgroundImage.current.naturalHeight}
                 rx={8}
                 ry={8}
                 fill="white"
@@ -440,31 +656,32 @@ function Canvas({
           </defs>
         )}
 
-        {background && (
+        {backgroundImage.current && (
           <image
-            href={background.src}
-            width={background.naturalWidth}
-            height={background.naturalHeight}
-            x={-background.naturalWidth / 2}
-            y={-background.naturalHeight / 2}
+            href={backgroundImage.current.src}
+            width={backgroundImage.current.naturalWidth}
+            height={backgroundImage.current.naturalHeight}
+            x={-backgroundImage.current.naturalWidth / 2}
+            y={-backgroundImage.current.naturalHeight / 2}
             preserveAspectRatio="xMidYMid"
             mask="url(#roundedImageMask)"
           />
         )}
 
-        {elements.map((element) => (
+        {elements.map((element, index) => (
           <g
             className="hover:cursor-pointer"
-            key={element.id}
-            onClick={() => onElementClick(element.id)}
+            key={"element-" + index}
+            onClick={() => onElementClick(index)}
           >
             <rect
               x={element.x}
               y={element.y}
               width={element.width}
               height={element.height}
-              fill={`rgba(${element.color}, 0.3)`}
-              stroke={`rgba(${element.color}, 0.8)`}
+              fill={element.color}
+              fillOpacity={0.25}
+              stroke={element.color}
               strokeWidth={4}
               rx={4}
               ry={4}
@@ -473,7 +690,7 @@ function Canvas({
 
             <g transform={`translate(${element.x + 16}, ${element.y + 32})`}>
               <text
-                className="select-none fill-white font-sans text-4xl font-bold shadow-sm"
+                className="font-sans text-4xl font-bold shadow-sm select-none"
                 dominantBaseline="middle"
               >
                 {element.icon}
@@ -482,54 +699,99 @@ function Canvas({
           </g>
         ))}
 
-        {players.map((player) => (
-          <image
-            className={cn(
-              Boolean(
-                playersTokenState.find(
-                  (playerToken) => playerToken.id === player.id,
-                )?.visible,
-              )
-                ? "visible"
-                : "hidden",
-              selectedPlayer &&
-                player.id === selectedPlayer.id &&
-                "border-2 border-red-500",
-            )}
-            key={"player-" + player.id}
-            href={player.img}
-            width={100}
-            height={100}
-            x={
-              temporaryPlayerPosition.current?.playerId === player.id
-                ? temporaryPlayerPosition.current.coordinates.x
-                : player.coordinates.x
-            }
-            y={
-              temporaryPlayerPosition.current?.playerId === player.id
-                ? temporaryPlayerPosition.current.coordinates.y
-                : player.coordinates.y
-            }
-            preserveAspectRatio="xMidYMid"
-            style={{ cursor: isDrawing || isPanning ? "default" : "move" }}
-            onMouseDown={(e) => handlePlayerDragStart(e, player)}
-            onClick={() => onPlayerSelect(player)}
-          />
-        ))}
+        {temporaryElement && (
+          <g className="hover:cursor-move">
+            <rect
+              onMouseDown={handeTempElementDragStart}
+              id="temp-element"
+              x={temporaryElement.x}
+              y={temporaryElement.y}
+              width={temporaryElement.width}
+              height={temporaryElement.height}
+              fill={currentColor}
+              fillOpacity={0.25}
+              stroke={currentColor}
+              strokeWidth={4}
+              rx={4}
+              ry={4}
+              filter="url(#subtleDropShadow)"
+            />
 
-        {selectedPlayer && (
-          <g transform={`translate(${selectedPlayer.coordinates.x + 30}, 116)`}>
-            <text
-              className="fill-white font-sans text-6xl font-bold shadow-sm"
-              dominantBaseline="middle"
+            <g
+              id="temp-element-icon"
+              transform={`translate(${temporaryElement.x + 16}, ${temporaryElement.y + 40})`}
             >
-              👆
-            </text>
+              <text
+                className="font-sans text-4xl font-bold shadow-sm select-none"
+                dominantBaseline="middle"
+              >
+                {currentIcon}
+              </text>
+            </g>
           </g>
         )}
+
+        {selectedPlayer && (
+          <circle
+            id="selection-ring"
+            cx={
+              // @ts-expect-error
+              tokens.find((token) => token.entity === selectedPlayer.id)
+                .coordinates.x + 50
+            }
+            cy={
+              // @ts-expect-error
+              tokens.find((token) => token.entity === selectedPlayer.id)
+                .coordinates.y + 50
+            }
+            r={65}
+            stroke="white"
+            //            stroke="#FA00FF" pink
+            stroke-width="10"
+            className="animate-pulse"
+          />
+        )}
+
+        {tokens.map((token) => {
+          const player = players.find((player) => player.id === token.entity);
+
+          return (
+            player && (
+              <image
+                className={cn(
+                  "hover:cursor-pointer",
+                  Boolean(
+                    playersTokenState.find(
+                      (playerToken) => playerToken.id === token.entity,
+                    )?.visible,
+                  )
+                    ? "visible"
+                    : "hidden",
+                  selectedPlayer &&
+                    token.entity === selectedPlayer.id &&
+                    "border-2 border-red-500",
+                )}
+                key={"player-" + token.entity}
+                data-player-id={player.id} // Add this attribute for direct DOM manipulation
+                // @ts-ignore
+                href={player.image}
+                width={100}
+                height={100}
+                x={token.coordinates.x}
+                y={token.coordinates.y}
+                preserveAspectRatio="xMidYMid"
+                style={{
+                  cursor: isDrawing || isPanning ? "default" : "move",
+                }}
+                onMouseDown={(e) => handlePlayerDragStart(e, player)}
+                onClick={() => handleMouseUpOnPlayerToken(player)}
+              />
+            )
+          );
+        })}
       </svg>
 
-      <div className="absolute right-4 top-1/2 flex -translate-y-1/2 flex-col gap-4 rounded-full border border-white/80 bg-white/20 p-2 shadow-md backdrop-blur-sm">
+      <div className="absolute top-1/2 right-4 flex -translate-y-1/2 flex-col gap-4 rounded-full border border-white/80 bg-white/20 p-2 shadow-md backdrop-blur-sm">
         <button
           onClick={() => setIsDrawing((c) => !c)}
           className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
@@ -548,11 +810,18 @@ function Canvas({
             className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
           >
             <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
-              <img
-                className="col-start-1 col-end-1 row-start-1 row-end-2"
-                src={player.img}
-                alt={`Picture of Player ${player.name}`}
-              />
+              {player.image && player.image !== "" ? (
+                <img
+                  className="col-start-1 col-end-1 row-start-1 row-end-2"
+                  src={player.image}
+                  alt={`Picture of Player ${player.name}`}
+                />
+              ) : (
+                <span className="col-start-1 col-end-1 row-start-1 row-end-2">
+                  {player.icon}
+                </span>
+              )}
+
               {!playersTokenState.find((state) => state.id === player.id)
                 ?.visible && (
                 <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
@@ -564,18 +833,19 @@ function Canvas({
         ))}
       </div>
 
-      <div className="absolute bottom-4 right-4 flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
-        <button
-          onClick={zoomIn}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
-        >
-          <ZoomInIcon className="h-4 w-4" />
-        </button>
+      <div className="absolute bottom-4 left-4 flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
         <button
           onClick={zoomOut}
           className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
         >
           <ZoomOutIcon className="h-4 w-4" />
+        </button>
+
+        <button
+          onClick={zoomIn}
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+        >
+          <ZoomInIcon className="h-4 w-4" />
         </button>
       </div>
     </div>

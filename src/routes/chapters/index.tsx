@@ -80,7 +80,7 @@ function RouteComponent() {
       playerId: Player["id"];
       resistanceId: DBResistance["id"];
     }) => {
-      return db.players.removeResistanceFromPlayer(playerId, immunityId);
+      return await db.players.removeResistanceFromPlayer(playerId, immunityId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

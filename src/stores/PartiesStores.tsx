@@ -108,7 +108,7 @@ export const usePartiesStore = create<PartyState>((set, get) => ({
       );
 
       if (isAlreadyInParty) {
-        console.log("player is already in party");
+        console.info("player is already in party");
         return;
       }
 

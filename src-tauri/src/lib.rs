@@ -100,22 +100,21 @@ pub fn run() {
         },
         Migration {
             version: 7,
-            description: "create encounter table",
-            sql: "CREATE TABLE IF NOT EXISTS encounter (
+            description: "create encounters table",
+            sql: "CREATE TABLE IF NOT EXISTS encounters (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                element TEXT NOT NULL, -- CanvasElement
                 name TEXT NOT NULL,
                 description TEXT,
-                image TEXT,
-                icon TEXT NOT NULL,
+                images TEXT, -- images for the encounter or riddle
                 color TEXT NOT NULL,
                 type TEXT NOT NULL, -- roll / fight / note
                 experience INTEGER,
-                state TEXT NOT NULL,
+                passed INTEGER NOT NULL, -- boolean state
                 dice INTEGER,
-                skill INTEGER,
-                difficulty INTEGER,
+                skill TEXT,
+                difficulties string, -- array of difficulty classes
                 opponents TEXT -- JSON array of ids of opponents
-                ep INTEGER
             )",
             kind: MigrationKind::Up,
         },
@@ -131,6 +130,18 @@ pub fn run() {
                 level INTEGER,
                 labels TEXT -- JSON ARRAY of strings
                 ep INTEGER NOT NULL
+            )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 9,
+            description: "create tokens table",
+            sql: "CREATE TABLE IF NOT EXISTS tokens (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                entity INTEGER NOT NULL,
+                coordinates TEXT NOT NULL, -- JSON Object {x: number, y:number},
+                chapter INTEGER NOT NULL,
+                type TEXT NOT NULL -- to differentiate the entities players and opponents
             )",
             kind: MigrationKind::Up,
         },

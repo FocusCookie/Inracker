@@ -84,19 +84,6 @@ function ChapterCard({ chapter, onEdit, onPlay, animationDelay }: Props) {
             <Badge className="flex gap-2 capitalize">
               {chapterStateIcon} {chapter.state}
             </Badge>
-            {chapter.encounters.length > 0 && (
-              <Badge className="flex gap-2 capitalize">
-                <DoubleArrowUpIcon className="h-3 w-3" />
-                {chapter.encounters.reduce(
-                  (acc: number, encounter: DBEncounter) => {
-                    return encounter.ep ? acc + encounter.ep : acc;
-                  },
-                  0,
-                )}
-
-                <span>{t("ep")}</span>
-              </Badge>
-            )}
           </div>
         </CardHeader>
 
