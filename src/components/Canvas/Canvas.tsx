@@ -474,10 +474,6 @@ function Canvas({
   };
 
   const handleTempElementDragEnd = () => {
-    console.log({
-      temporaryElement,
-      temp: temporaryTempElementPosition.current,
-    });
     if (temporaryElement && temporaryTempElementPosition.current) {
       const update: CanvasElement = {
         ...temporaryElement,

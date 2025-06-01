@@ -261,6 +261,49 @@ const deletePartyById = async (
   id: number,
 ): Promise<DBParty> => {
   const deletedParty = await getPartyById(db, id);
+  const chapters = await getAllChaptersForParty(db, id);
+
+  // 1. Delete all opponents from all encounters of all the chapters
+  for (const chapter of chapters) {
+    const encounters = await getDetailedEncountersByIds(db, chapter.encounters);
+    for (const encounter of encounters) {
+      if (encounter.opponents) {
+        for (const opponentId of encounter.opponents) {
+          try {
+            await deleteEncounterOpponentById(db, Number(opponentId));
+          } catch (error) {
+            console.error(
+              `Failed to delete opponent ${opponentId} from encounter ${encounter.id}:`,
+              error,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  // 2. Delete all encounters of all chapters
+  for (const chapter of chapters) {
+    const encounters = await getDetailedEncountersByIds(db, chapter.encounters);
+    for (const encounter of encounters) {
+      try {
+        await deleteEncounterById(db, encounter.id);
+      } catch (error) {
+        console.error(`Failed to delete encounter ${encounter.id}:`, error);
+      }
+    }
+  }
+
+  // 3. Delete all chapters of the party
+  for (const chapter of chapters) {
+    try {
+      await db.execute("DELETE FROM chapters WHERE id = $1", [chapter.id]);
+    } catch (error) {
+      console.error(`Failed to delete chapter ${chapter.id}:`, error);
+    }
+  }
+
+  // 4. Delete the party
   await db.execute("DELETE FROM parties WHERE id = $1", [id]);
 
   return deletedParty;
@@ -675,7 +718,7 @@ const updateChapterProperty = async <
   await db.execute(sql, [chapterId, value]);
 
   const updated = await getDetailedChapterById(db, chapterId);
-  console.log({ updated, value });
+
   return getDetailedChapterById(db, chapterId);
 };
 
