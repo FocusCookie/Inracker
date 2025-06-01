@@ -1,4 +1,4 @@
-import { BaseDirectory, mkdir, writeFile } from "@tauri-apps/plugin-fs";
+import { BaseDirectory, mkdir, remove, writeFile } from "@tauri-apps/plugin-fs";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { appDataDir, join } from "@tauri-apps/api/path";
@@ -42,4 +42,18 @@ export async function storeImage(picture: File | string, folder: ImageFolder) {
   }
 
   return null;
+}
+
+export async function deleteImage(fileName: string, folder: ImageFolder) {
+  try {
+    const appDataDirPath = await appDataDir();
+    const imagePath = await join(appDataDirPath, "images", folder, fileName); // Construct the correct path
+
+    await remove(imagePath, { baseDir: BaseDirectory.AppData });
+
+    return true;
+  } catch (error) {
+    console.error(`Failed to delete image ${fileName} from ${folder}:`, error);
+    return false;
+  }
 }

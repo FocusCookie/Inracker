@@ -18,7 +18,10 @@ import { DBParty, Party } from "@/types/party";
 import { DBPlayer, Player, TCreatePlayer } from "@/types/player";
 import { DBResistance, Resistance } from "@/types/resistances";
 import { DBToken, Token, TokenCoordinates } from "@/types/tokens";
+import { appDataDir, join } from "@tauri-apps/api/path";
 import TauriDatabase from "@tauri-apps/plugin-sql";
+import { BaseDirectory } from "@tauri-apps/plugin-fs";
+import { deleteImage } from "./utils";
 
 const environment = import.meta.env.VITE_ENV;
 let dbInstance: TauriDatabase | null = null;
@@ -263,7 +266,6 @@ const deletePartyById = async (
   const deletedParty = await getPartyById(db, id);
   const chapters = await getAllChaptersForParty(db, id);
 
-  // 1. Delete all opponents from all encounters of all the chapters
   for (const chapter of chapters) {
     const encounters = await getDetailedEncountersByIds(db, chapter.encounters);
     for (const encounter of encounters) {
@@ -282,7 +284,6 @@ const deletePartyById = async (
     }
   }
 
-  // 2. Delete all encounters of all chapters
   for (const chapter of chapters) {
     const encounters = await getDetailedEncountersByIds(db, chapter.encounters);
     for (const encounter of encounters) {
@@ -294,16 +295,14 @@ const deletePartyById = async (
     }
   }
 
-  // 3. Delete all chapters of the party
   for (const chapter of chapters) {
     try {
-      await db.execute("DELETE FROM chapters WHERE id = $1", [chapter.id]);
+      await deleteChapterById(db, chapter.id);
     } catch (error) {
       console.error(`Failed to delete chapter ${chapter.id}:`, error);
     }
   }
 
-  // 4. Delete the party
   await db.execute("DELETE FROM parties WHERE id = $1", [id]);
 
   return deletedParty;
@@ -720,6 +719,58 @@ const updateChapterProperty = async <
   const updated = await getDetailedChapterById(db, chapterId);
 
   return getDetailedChapterById(db, chapterId);
+};
+
+const deleteChapterById = async (
+  db: TauriDatabase,
+  id: Chapter["id"],
+): Promise<DBChapter> => {
+  const deletedChapter = await getChapterById(db, id);
+
+  const chapter = await getDetailedChapterById(db, id);
+  const encounters = await getDetailedEncountersByIds(db, chapter.encounters);
+
+  for (const encounter of encounters) {
+    if (encounter.opponents) {
+      for (const opponentId of encounter.opponents) {
+        try {
+          await deleteEncounterOpponentById(db, Number(opponentId));
+        } catch (error) {
+          console.error(
+            `Failed to delete opponent ${opponentId} from encounter ${encounter.id}:`,
+            error,
+          );
+        }
+      }
+    }
+  }
+
+  for (const encounter of encounters) {
+    try {
+      await deleteEncounterById(db, encounter.id);
+    } catch (error) {
+      console.error(`Failed to delete encounter ${encounter.id}:`, error);
+    }
+  }
+
+  if (chapter.battlemap) {
+    try {
+      const imageName = decodeURIComponent(chapter.battlemap).split("/").pop();
+
+      if (imageName) {
+        await deleteImage(imageName, "battlemaps");
+      }
+    } catch (error) {
+      console.error(
+        `Failed to delete battlemap image ${chapter.battlemap}:`,
+        error,
+      );
+    }
+  }
+
+  await db.execute("DELETE FROM chapters WHERE id = $1", [id]);
+
+  return deletedChapter;
 };
 
 //* TOKENS
@@ -1662,6 +1713,10 @@ export const Database = {
         : [encounterId];
       return updateChapterProperty(db, chapterId, "encounters", encounters);
     },
+    delete: async (id: Chapter["id"]) => {
+      const db = await connect();
+      return deleteChapterById(db, id);
+    },
   },
 
   tokens: {
@@ -1802,3 +1857,6 @@ export const Database = {
 };
 
 export default Database;
+function removeFile(imagePath: string, arg1: { baseDir: any }) {
+  throw new Error("Function not implemented.");
+}

@@ -19,6 +19,17 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
 
 type Props = {
   chapter: Chapter | null;
@@ -26,6 +37,7 @@ type Props = {
   open: boolean;
   onOpenChange: (state: boolean) => void;
   onSave: (chapter: Chapter) => void;
+  onDelete: (chapterId: Chapter["id"]) => void;
 };
 
 function EditChapterDrawer({
@@ -34,6 +46,7 @@ function EditChapterDrawer({
   loading,
   open,
   onOpenChange,
+  onDelete,
 }: Props) {
   const { t } = useTranslation("ComponentEditChapterDrawer");
   const [refreshKey, setRefreshKey] = useState<number>(0); // to reset the input type file path after a reset
@@ -114,6 +127,14 @@ function EditChapterDrawer({
     form.setValue("icon", icon);
   }
 
+  function handleDeleteChapter() {
+    if (chapter) {
+      onDelete(chapter.id);
+      form.reset();
+      onOpenChange(false);
+    }
+  }
+
   return (
     <Drawer
       description={t("titleDescription")}
@@ -121,9 +142,38 @@ function EditChapterDrawer({
       onOpenChange={onOpenChange}
       title={t("title")}
       actions={
-        <Button loading={loading} onClick={form.handleSubmit(onSubmit)}>
-          {t("save")}
-        </Button>
+        <>
+          <Button loading={loading} onClick={form.handleSubmit(onSubmit)}>
+            {t("save")}
+          </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="destructive"
+                loading={loading}
+                disabled={loading}
+              >
+                {t("delete")}
+              </Button>
+            </AlertDialogTrigger>
+
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("areYouSure")}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("deleteNote")}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex gap-4">
+                <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteChapter}>
+                  {t("yesDelete")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
       }
       cancelTrigger={
         <Button disabled={loading} variant="ghost">
