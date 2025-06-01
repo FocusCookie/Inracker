@@ -28,6 +28,7 @@ import { Party } from "@/types/party";
 import { Player } from "@/types/player";
 import { DBResistance } from "@/types/resistances";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef } from "react";
@@ -58,6 +59,7 @@ function ChapterSelection({
   onRemoveImmunityFromPlayer,
   onRemoveResistanceFromPlayer,
 }: Props) {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { t } = useTranslation("PageChapterSelection");
   const keysPressed = useRef<Record<string, boolean>>({});
@@ -170,6 +172,9 @@ function ChapterSelection({
 
   function handlePlayChapter(chapter: Chapter["id"]) {
     setCurrentChapter(chapter);
+    queryClient.invalidateQueries({ queryKey: ["chapter"] });
+    queryClient.invalidateQueries({ queryKey: ["encounters"] });
+
     navigate({
       to: `/play`,
     });

@@ -68,6 +68,8 @@ function EditChapterDrawer({
         icon: chapter.icon,
         battlemap: chapter.battlemap || "",
       });
+
+      setPicturePreview(chapter?.battlemap || "");
     }
   }, [chapter, form]);
 

@@ -1,0 +1,9 @@
+{
+  "title": "Add Opponent",
+  "description": "Search for an opponent to add to the party.",
+  "search": "Search opponents...",
+  "searchLabels": "Search Labels",
+  "searchByName": "Search by Name",
+  "searchByLabel": "Search by Label",
+  "searchLabelsPlaceholder": "Enter a label and press Enter to add to search"
+}

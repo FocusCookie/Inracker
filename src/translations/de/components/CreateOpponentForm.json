@@ -1,0 +1,35 @@
+{
+  "cancel": "Abbrechen",
+  "create": "Erstellen",
+  "icon": "Symbol",
+  "name": "Name",
+  "picturePlaceholder": "Wähle ein Bild...",
+  "profilePictureAlt": "Das Profilbild des Charakters.",
+  "picture": "Charakterbild",
+  "description": "Beschreibung",
+  "experience": "Erfahrung",
+  "maxHealth": "Max. Gesundheit",
+  "immunities": "Immunitäten",
+  "immunityCatalog": {
+    "title": "Immunitäten",
+    "descriptionText": "Wähle aus einer Liste bestehender Immunitäten, um deinen Charakter anzupassen.",
+    "placeholder": "Suche..."
+  },
+  "resistanceCatalog": {
+    "title": "Resistenzen",
+    "descriptionText": "Wähle aus einer Liste bestehender Resistenzen, um deinen Charakter anzupassen.",
+    "placeholder": "Suche..."
+  },
+  "add": "Hinzufügen",
+  "resistances": "Resistenzen",
+  "level": "Stufe",
+  "health": "Trefferpunkte",
+  "minName": "Der Name muss mindestens zwei Zeichen lang sein.",
+  "details": "Details",
+  "detailsDescription": "Dieser Abschnitt ist für wichtige Fähigkeiten und andere relevante Informationen über den Charakter. Öffne ihn, wenn du spezifische Details während deiner Abenteuer benötigst!",
+  "select": "Auswählen",
+  "catalog": "Katalog",
+  "detailsPlaceholder": "Gib eine Beschreibung ein",
+  "createOpponent": "Gegner erstellen",
+  "labels": "Labels"
+}

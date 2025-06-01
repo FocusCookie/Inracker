@@ -50,8 +50,8 @@ pub fn run() {
             description: "create effects table",
             sql: "CREATE TABLE IF NOT EXISTS effects(
                 description TEXT,
-                damage INTEGER, 
-                duration INTEGER, 
+                damage INTEGER,
+                duration INTEGER,
                 duration_type TEXT NOT NULL,
                 icon TEXT NOT NULL,
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -100,22 +100,21 @@ pub fn run() {
         },
         Migration {
             version: 7,
-            description: "create encounter table",
-            sql: "CREATE TABLE IF NOT EXISTS encounter (
+            description: "create encounters table",
+            sql: "CREATE TABLE IF NOT EXISTS encounters (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                element TEXT NOT NULL, -- CanvasElement
                 name TEXT NOT NULL,
                 description TEXT,
-                image TEXT,
-                icon TEXT NOT NULL,
+                images TEXT, -- images for the encounter or riddle
                 color TEXT NOT NULL,
                 type TEXT NOT NULL, -- roll / fight / note
                 experience INTEGER,
-                state TEXT NOT NULL,
+                passed INTEGER NOT NULL, -- boolean state
                 dice INTEGER,
-                skill INTEGER,
-                difficulty INTEGER,
+                skill TEXT,
+                difficulties string, -- array of difficulty classes
                 opponents TEXT -- JSON array of ids of opponents
-                ep INTEGER
             )",
             kind: MigrationKind::Up,
         },
@@ -125,12 +124,48 @@ pub fn run() {
             sql: "CREATE TABLE IF NOT EXISTS opponents (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
-                description TEXT,
+                details TEXT,
+                health INTEGER NOT NULL,
+                max_health INTEGER NOT NULL,
                 image TEXT,
                 icon TEXT NOT NULL,
-                level INTEGER,
-                labels TEXT -- JSON ARRAY of strings
-                ep INTEGER NOT NULL
+                labels TEXT, -- JSON ARRAY of strings
+                level INTEGER NOT NULL,
+                resistances TEXT, --JSON array ids
+                immunities TEXT, -- JSON array ids
+                effects TEXT -- JSON array ids
+            )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 9,
+            description: "create tokens table",
+            sql: "CREATE TABLE IF NOT EXISTS tokens (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                entity INTEGER NOT NULL,
+                coordinates TEXT NOT NULL, -- JSON Object {x: number, y:number},
+                chapter INTEGER NOT NULL,
+                type TEXT NOT NULL -- to differentiate the entities players and opponents
+            )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 10,
+            description: "create encounter_opponents table",
+            sql: "CREATE TABLE IF NOT EXISTS encounter_opponents (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                details TEXT,
+                health INTEGER NOT NULL,
+                max_health INTEGER NOT NULL,
+                image TEXT,
+                icon TEXT NOT NULL,
+                labels TEXT, -- JSON ARRAY of strings
+                level INTEGER NOT NULL,
+                resistances TEXT, --JSON array ids
+                immunities TEXT, -- JSON array ids
+                effects TEXT, -- JSON array ids,
+                blueprint INTEGER NOT NULL
             )",
             kind: MigrationKind::Up,
         },

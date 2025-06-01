@@ -7,6 +7,7 @@ import { ScrollArea } from "../ui/scroll-area";
 type MainLayoutCompoundProps = {
   isAsideOpen: boolean;
   children: React.ReactNode;
+  fullContent?: boolean;
 };
 
 type MainLayoutCompound = React.FC<MainLayoutCompoundProps> & {
@@ -14,14 +15,16 @@ type MainLayoutCompound = React.FC<MainLayoutCompoundProps> & {
   Settings: React.FC<{ children: React.ReactNode }>;
 };
 
-const MainLayout: MainLayoutCompound = ({ isAsideOpen, children }) => {
+const MainLayout: MainLayoutCompound = ({
+  isAsideOpen,
+  children,
+  fullContent,
+}) => {
   const size = useWindowSize();
   const isAsideFloating = size.width ? size.width < 1264 : true;
 
-  // Convert children into an array so we can extract the compound parts.
   const childrenArray = React.Children.toArray(children);
 
-  // Find the Players and Settings components
   const playersChild = childrenArray.find(
     (child) => React.isValidElement(child) && child.type === MainLayout.Players,
   );
@@ -30,7 +33,6 @@ const MainLayout: MainLayoutCompound = ({ isAsideOpen, children }) => {
       React.isValidElement(child) && child.type === MainLayout.Settings,
   );
 
-  // Everything else is assumed to be the main content.
   const mainContent = childrenArray.filter(
     (child) =>
       React.isValidElement(child) &&
@@ -51,7 +53,13 @@ const MainLayout: MainLayoutCompound = ({ isAsideOpen, children }) => {
           isAsideFloating ? "absolute inset-0 left-28" : "grow",
         )}
       >
-        <main className="w-content flex flex-col gap-2 pt-4">
+        <main
+          className={cn(
+            fullContent
+              ? "h-full w-full"
+              : "w-content flex flex-col gap-2 pt-4",
+          )}
+        >
           {mainContent}
         </main>
       </div>

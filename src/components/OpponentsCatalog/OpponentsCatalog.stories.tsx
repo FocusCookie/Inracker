@@ -1,0 +1,101 @@
+import type { Meta, StoryObj } from "@storybook/react";
+import OpponentsCatalog from "./OpponentsCatalog";
+import { fn } from "@storybook/test";
+
+const meta = {
+  title: "Components/OpponentsCatalog",
+  component: OpponentsCatalog,
+  args: {
+    open: true,
+    opponents: [
+      {
+        id: 1,
+        name: "Test Opponent 1",
+        icon: "👹",
+        details: "This is a test opponent.",
+        health: 100,
+        labels: ["one", "huge"],
+        max_health: 100,
+        image: null,
+        level: 5,
+        resistances: [],
+        effects: [],
+        immunities: [],
+      },
+      {
+        id: 2,
+        name: "Test Opponent 2",
+        icon: "👻",
+        details: "This is another test opponent.",
+        health: 50,
+        labels: [
+          "hello",
+          "world",
+          "tiny",
+          "and",
+          "cute",
+          "extra",
+          "wide",
+          "example",
+        ],
+        max_health: 50,
+        image: null,
+        level: 3,
+        resistances: [],
+        effects: [],
+        immunities: [],
+      },
+      {
+        id: 3,
+        name: "Rare Opponent",
+        icon: "💎",
+        details: "A rare opponent for testing.",
+        health: 150,
+        labels: ["rare"],
+        max_health: 150,
+        image: null,
+        level: 7,
+        resistances: [],
+        effects: [],
+        immunities: [],
+      },
+      {
+        id: 4,
+        name: "Boss Opponent",
+        icon: "👑",
+        details: "A boss opponent for testing.",
+        health: 200,
+        labels: ["boss", "huge"],
+        max_health: 200,
+        image: null,
+        level: 10,
+        resistances: [],
+        effects: [],
+        immunities: [],
+      },
+      {
+        id: 5,
+        name: "Unique Opponent",
+        icon: "🌟",
+        details: "A unique opponent for testing.",
+        health: 120,
+        labels: ["unique", "rare"],
+        max_health: 120,
+        image: null,
+        level: 6,
+        resistances: [],
+        effects: [],
+        immunities: [],
+      },
+    ],
+    partyId: 1,
+    excludedOpponents: [],
+    onAdd: fn(),
+    onOpenChange: fn(),
+  },
+} satisfies Meta<typeof OpponentsCatalog>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Primary: Story = {};

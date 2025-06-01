@@ -68,9 +68,11 @@ function SettingsDialog({
         </DialogHeader>
 
         <Tabs defaultValue="general" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="general">{t("general")}</TabsTrigger>
             <TabsTrigger value="player-catalog">{t("players")}</TabsTrigger>
+            <TabsTrigger value="cleanup">clean up</TabsTrigger>
+            <TabsTrigger value="opponents">Opponents</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general">{t("general")}</TabsContent>
@@ -149,6 +151,15 @@ function SettingsDialog({
                   ))}
               </div>
             </ScrollArea>
+          </TabsContent>
+
+          <TabsContent value="cleanup">
+            //TODO: implement cleanup function button to clean up encounter
+            opponeents which are not attached to any encounter
+          </TabsContent>
+
+          <TabsContent value="opponents">
+            //TODO: implement edit and deletion of opponenets
           </TabsContent>
         </Tabs>
 

@@ -1,0 +1,32 @@
+{
+  "cancel": "Cancel",
+  "create": "Create",
+  "icon": "Icon",
+  "name": "Name",
+  "picturePlaceholder": "Choose an image...",
+  "profilePictureAlt": "The character’s profile picture.",
+  "picture": "Character Image",
+  "description": "Description",
+  "experience": "Experience",
+  "maxHealth": "Max Health",
+  "immunities": "Immunities",
+  "immunityCatalog": {
+    "title": "Immunities",
+    "descriptionText": "Choose from a list of existing immunities to customize your character.",
+    "placeholder": "Search..."
+  },
+  "resistanceCatalog": {
+    "title": "Resistances",
+    "descriptionText": "Choose from a list of existing resistances to customize your character.",
+    "placeholder": "Search..."
+  },
+  "add": "Add",
+  "resistances": "Resistances",
+  "level": "Level",
+  "health": "Hit Points",
+  "minName": "Name must be at least two characters long.",
+  "details": "Details",
+  "detailsDescription": "This section is for key abilities and other relevant information about the character. Open it when you need specific details during your adventures!",
+  "select": "Select",
+  "catalog": "Catalog"
+}

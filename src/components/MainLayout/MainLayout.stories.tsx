@@ -8,6 +8,7 @@ const meta = {
   args: {
     isAsideOpen: false,
     children: <div>chapters</div>,
+    fullContent: false,
   },
   render: ({ children, ...props }) => (
     <MainLayout {...props}>

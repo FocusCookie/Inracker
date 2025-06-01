@@ -1,6 +1,6 @@
 {
   "title": "Create a new Player",
-  "descriptionText": "Create a new player to join your adventure and add them seamlessly to your group. Use this tool to define their name, role, and other key details, ensuring they’re ready to take their place in the party. Whether they’re a cunning rogue, a valiant paladin, or a curious bard, every new player brings their own unique spark, enriching your group's journey through the realms.",
+  "descriptionText": "Create new enemies with custom stats, skills, and resistances to challenge your players.",
   "cancel": "Cancel",
   "create": "Create",
   "createPlayer": "Create new Player",

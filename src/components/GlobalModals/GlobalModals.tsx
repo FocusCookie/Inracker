@@ -30,13 +30,29 @@ import { usePartyStore } from "@/stores/usePartySTore";
 import { Chapter, DBChapter } from "@/types/chapters";
 import CreateChapterDrawer from "../CreateChapterDrawer/CreateChapterDrawer";
 import EditChapterDrawer from "../EditChapterDrawer/EditChapterDrawer";
+import { useEncounterStore } from "@/stores/useEncounterStore";
+import CreateEncounterDrawer from "../CreateEncounterDrawer/CreateEncounterDrawer";
+import CreateOpponentDrawer from "../CreateOpponentDrawer/CreateOpponentDrawer";
+import { useOpponentStore } from "@/stores/useOpponentStore";
+import { useCreateOpponent } from "@/hooks/useCreateOpponent";
+import { EncounterOpponent, Opponent } from "@/types/opponents";
+import OpponentsCatalog from "../OpponentsCatalog/OpponentsCatalog";
+import { useCreateEncounter } from "@/hooks/useCreateEncounter";
+import { useState } from "react";
+import { DBEffect } from "@/types/effect";
+import { Encounter } from "@/types/encounter";
 
 type Props = {};
 
 function GlobalModals({}: Props) {
   const queryClient = useQueryClient();
   const createPlayerForm = useCreatePlayer();
+  const createOpponentForm = useCreateOpponent();
   const editPlayerForm = useEditPlayer();
+  const createEncounterForm = useCreateEncounter();
+  const [selectedEncounterOpponents, setSelectedEncounterOpponents] = useState<
+    EncounterOpponent[]
+  >([]);
 
   const { closeSettingsDialog, isSettingsDialogOpen, openSettingsDialog } =
     useSettingsStore(
@@ -48,12 +64,37 @@ function GlobalModals({}: Props) {
     );
 
   const {
+    isCreateEncounterDrawerOpen,
+    currentEncounterElement,
+    openCreateEncounterDrawer,
+    closeEncounterDrawer,
+    setCurrentElement,
+    setCurrentColor,
+    setCurrentIcon,
+    setResetCount,
+    resetCount,
+  } = useEncounterStore(
+    useShallow((state) => ({
+      isCreateEncounterDrawerOpen: state.isCreateEncounterDrawerOpen,
+      currentEncounterElement: state.currentElement,
+      openCreateEncounterDrawer: state.openCreateEncounterDrawer,
+      closeEncounterDrawer: state.closeEncounterDrawer,
+      setCurrentElement: state.setCurrentElement,
+      setCurrentColor: state.setCurrentColor,
+      setCurrentIcon: state.setCurrentIcon,
+      setResetCount: state.setResetCount,
+      resetCount: state.resetCount,
+    })),
+  );
+
+  const {
     editingChapter,
     isEditChapterDrawerOpen,
     isCreateChapterDrawerOpen,
     closeEditChapterDrawer,
     closeCreateChapterDrawer,
     openCreateChapterDrawer,
+    currentChapter,
   } = useChapterStore(
     useShallow((state) => ({
       isCreateChapterDrawerOpen: state.isCreateChapterDrawerOpen,
@@ -62,6 +103,7 @@ function GlobalModals({}: Props) {
       closeCreateChapterDrawer: state.closeCreateChapterDrawer,
       openCreateChapterDrawer: state.openCreateChapterDrawer,
       closeEditChapterDrawer: state.closeEditChapterDrawer,
+      currentChapter: state.currentChapter,
     })),
   );
 
@@ -94,6 +136,43 @@ function GlobalModals({}: Props) {
       closeCreatePlayerDrawer: state.closeCreatePlayerDrawer,
       openEditPlayerDrawer: state.openEditPlayerDrawer,
       closeEditPlayerDrawer: state.closeEditPlayerDrawer,
+    })),
+  );
+
+  const {
+    closeCreateOpponentDrawer,
+    closeEditOpponentDrawer,
+    closeOpponentsCatalog,
+    isCreateOpponentDrawerOpen,
+    isCreatingOpponent,
+    isEditOpponentDrawerOpen,
+    isOpponentsCatalogOpen,
+    isUpdatingOpponent,
+    openCreateOpponentDrawer,
+    openEditOpponentDrawer,
+    openOpponentsCatalog,
+    selectedOpponent,
+    setIsCreatingOpponent,
+    setIsUpdatingOpponent,
+    setSelectedOpponent,
+  } = useOpponentStore(
+    useShallow((state) => ({
+      isCreateOpponentDrawerOpen: state.isCreateOpponentDrawerOpen,
+      isEditOpponentDrawerOpen: state.isEditOpponentDrawerOpen,
+      isCreatingOpponent: state.isCreatingOpponent,
+      isUpdatingOpponent: state.isUpdatingOpponent,
+      selectedOpponent: state.selectedOpponent,
+      isOpponentsCatalogOpen: state.isOpponentsCatalogOpen,
+
+      setSelectedOpponent: state.setSelectedOpponent,
+      openCreateOpponentDrawer: state.openCreateOpponentDrawer,
+      closeCreateOpponentDrawer: state.closeCreateOpponentDrawer,
+      openEditOpponentDrawer: state.openEditOpponentDrawer,
+      closeEditOpponentDrawer: state.closeEditOpponentDrawer,
+      setIsCreatingOpponent: state.setIsCreatingOpponent,
+      setIsUpdatingOpponent: state.setIsUpdatingOpponent,
+      openOpponentsCatalog: state.openOpponentsCatalog,
+      closeOpponentsCatalog: state.closeOpponentsCatalog,
     })),
   );
 
@@ -176,6 +255,11 @@ function GlobalModals({}: Props) {
     queryFn: () => db.resistances.getAll(),
   });
 
+  const opponents = useQueryWithToast({
+    queryKey: ["opponents"],
+    queryFn: () => db.opponents.getAllDetailed(),
+  });
+
   const addPlayerToParty = useMutationWithErrorToast({
     mutationFn: ({
       partyId,
@@ -200,11 +284,13 @@ function GlobalModals({}: Props) {
   const createPlayer = useMutationWithErrorToast({
     mutationFn: (player: TCreatePlayer) => {
       setIsCreatingPlayer(true);
+
       return db.players.create(player);
     },
     onSuccess: (player: Player) => {
       queryClient.invalidateQueries({ queryKey: ["players"] });
       setIsCreatingPlayer(false);
+      createPlayerForm.reset();
       closeCreatePlayerDrawer();
       toast({
         variant: "default",
@@ -347,7 +433,7 @@ function GlobalModals({}: Props) {
     },
     onSuccess: (chapter: DBChapter) => {
       queryClient.invalidateQueries({ queryKey: ["chapters"] });
-      closeCreateDrawer();
+      closeCreateChapterDrawer();
 
       toast({
         variant: "default",
@@ -362,7 +448,9 @@ function GlobalModals({}: Props) {
     },
     onSuccess: (chapter: Chapter) => {
       queryClient.invalidateQueries({ queryKey: ["chapters"] });
-      closeCreateDrawer();
+      queryClient.invalidateQueries({ queryKey: ["chapter"] });
+
+      closeEditChapterDrawer();
 
       toast({
         variant: "default",
@@ -391,12 +479,85 @@ function GlobalModals({}: Props) {
       queryClient.invalidateQueries({ queryKey: ["party"] });
       queryClient.invalidateQueries({ queryKey: ["players"] });
 
-      closeEditDrawer();
-
       toast({
         variant: "default",
         title: `Deleted ${deletedPlayer.icon} ${deletedPlayer.name}`,
       });
+    },
+    onSettled: () => {
+      closeEditDrawer();
+    },
+  });
+
+  const createOpponentMutation = useMutationWithErrorToast({
+    mutationFn: (opponent: Omit<Opponent, "id">) => {
+      return db.opponents.create(opponent);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["opponents"],
+      });
+    },
+    onSettled: () => {
+      closeCreateOpponentDrawer();
+      createOpponentForm.reset();
+    },
+  });
+
+  const createEncounterOpponentMutation = useMutationWithErrorToast({
+    mutationFn: (opponent: Opponent) => {
+      return db.encounterOpponents.create(opponent);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["opponents"],
+      });
+    },
+    onSettled: () => {
+      closeCreateOpponentDrawer();
+    },
+  });
+
+  const deleteEncounterOpponentMutation = useMutationWithErrorToast({
+    mutationFn: (id: EncounterOpponent["id"]) => {
+      return db.encounterOpponents.delete(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["encounterOpponents"],
+      });
+    },
+  });
+
+  const createEncounterMutation = useMutationWithErrorToast({
+    mutationFn: (encounter: Omit<Encounter, "id">) => {
+      return db.encounters
+        .create(encounter)
+        .then((createdEncounter: Encounter) => {
+          if (currentChapter) {
+            return db.chapters
+              .addEncounter(currentChapter, createdEncounter.id)
+              .then(() => createdEncounter);
+          }
+          return createdEncounter;
+        });
+    },
+    onSuccess: () => {
+      closeEncounterDrawer();
+      createEncounterForm.form.reset();
+
+      setCurrentElement(null);
+      setCurrentColor("#FFFFFF");
+      setCurrentIcon("📝");
+      setResetCount(resetCount + 1);
+
+      //TODO: Make a more specific invalidation this causes a lot of re-fetches and a tiny flicker
+      queryClient.removeQueries();
+
+      setCurrentElement(null);
+      setCurrentColor("#FFFFFF");
+      setCurrentIcon("📝");
+      setResetCount(resetCount + 1);
     },
   });
 
@@ -405,7 +566,6 @@ function GlobalModals({}: Props) {
   }
 
   function handleAddImmunity(immunity: DBImmunity) {
-    console.log({ isCreatePlayerDrawerOpen });
     if (isCreatePlayerDrawerOpen) {
       const currentImmunities = createPlayerForm.getValues("immunities");
       const isAlreadyAdded = currentImmunities.some((id) => id === immunity.id);
@@ -426,32 +586,56 @@ function GlobalModals({}: Props) {
           title: "Already Added",
         });
       }
-    } else {
-      if (selectedPlayer) {
-        const isAlreadyAdded = selectedPlayer.immunities.some(
-          (cImm) => cImm.id === immunity.id,
-        );
+    }
 
-        if (!isAlreadyAdded) {
-          addImmunityToPlayer.mutate({
-            playerId: selectedPlayer.id,
-            immunityId: immunity.id,
-          });
+    if (selectedPlayer && isImmunitiesCatalogOpen) {
+      const isAlreadyAdded = selectedPlayer.immunities.some(
+        (cImm) => cImm.id === immunity.id,
+      );
 
-          toast({
-            variant: "default",
-            title: `Added ${immunity.icon} ${immunity.name} to ${selectedPlayer!.name}`,
-          });
+      if (!isAlreadyAdded) {
+        addImmunityToPlayer.mutate({
+          playerId: selectedPlayer.id,
+          immunityId: immunity.id,
+        });
 
-          const updateSelectedPlayer = Object.assign({}, selectedPlayer);
-          updateSelectedPlayer.immunities.push(immunity);
-          setSelectedPlayer(updateSelectedPlayer);
-        } else {
-          toast({
-            variant: "default",
-            title: "Already Added",
-          });
-        }
+        toast({
+          variant: "default",
+          title: `Added ${immunity.icon} ${immunity.name} to ${selectedPlayer!.name}`,
+        });
+
+        const updateSelectedPlayer = Object.assign({}, selectedPlayer);
+        updateSelectedPlayer.immunities.push(immunity);
+
+        setSelectedPlayer(null);
+      } else {
+        toast({
+          variant: "default",
+          title: "Already Added",
+        });
+      }
+    }
+
+    //TODO: Opponensdrawer open and than add to opponensform .../
+    if (isCreateOpponentDrawerOpen) {
+      const currentImmunities = createOpponentForm.getValues("immunities");
+      const isAlreadyAdded = currentImmunities.some((id) => id === immunity.id);
+
+      if (!isAlreadyAdded) {
+        createOpponentForm.setValue("immunities", [
+          ...currentImmunities,
+          immunity.id,
+        ]);
+
+        toast({
+          variant: "default",
+          title: `Added ${immunity.icon} ${immunity.name} `,
+        });
+      } else {
+        toast({
+          variant: "default",
+          title: "Already Added",
+        });
       }
     }
   }
@@ -479,32 +663,57 @@ function GlobalModals({}: Props) {
           title: "Already Added",
         });
       }
-    } else {
-      if (selectedPlayer) {
-        const isAlreadyAdded = selectedPlayer.resistances.some(
-          (sRe) => sRe.id === resistance.id,
-        );
+    }
 
-        if (!isAlreadyAdded) {
-          addResistanceToPlayer.mutate({
-            playerId: selectedPlayer.id,
-            resistanceId: resistance.id,
-          });
+    if (selectedPlayer && isResistanceCatalogOpen) {
+      const isAlreadyAdded = selectedPlayer.resistances.some(
+        (sRe) => sRe.id === resistance.id,
+      );
 
-          toast({
-            variant: "default",
-            title: `Added ${resistance.icon} ${resistance.name} to ${selectedPlayer!.name}`,
-          });
+      if (!isAlreadyAdded) {
+        addResistanceToPlayer.mutate({
+          playerId: selectedPlayer.id,
+          resistanceId: resistance.id,
+        });
 
-          const updateSelectedPlayer = Object.assign({}, selectedPlayer);
-          updateSelectedPlayer.resistances.push(resistance);
-          setSelectedPlayer(updateSelectedPlayer);
-        } else {
-          toast({
-            variant: "default",
-            title: "Already Added",
-          });
-        }
+        toast({
+          variant: "default",
+          title: `Added ${resistance.icon} ${resistance.name} to ${selectedPlayer!.name}`,
+        });
+
+        const updateSelectedPlayer = Object.assign({}, selectedPlayer);
+        updateSelectedPlayer.resistances.push(resistance);
+
+        setSelectedPlayer(null);
+      } else {
+        toast({
+          variant: "default",
+          title: "Already Added",
+        });
+      }
+    }
+
+    if (isCreateOpponentDrawerOpen) {
+      const currentResistances = createOpponentForm.getValues("resistances");
+      const isAlreadyAdded = currentResistances.some(
+        (cRe) => cRe === resistance.id,
+      );
+
+      if (!isAlreadyAdded) {
+        createOpponentForm.setValue("resistances", [
+          ...currentResistances,
+          resistance.id,
+        ]);
+
+        toast({
+          variant: "default",
+          title: `Added ${resistance.icon} ${resistance.name} `,
+        });
+      } else {
+        toast({
+          variant: "default",
+          title: "Already Added",
+        });
       }
     }
   }
@@ -515,6 +724,63 @@ function GlobalModals({}: Props) {
     } else {
       closeCreateDrawer();
     }
+  }
+
+  function handleEncounterDrawerOpenChange(state: boolean) {
+    if (state) {
+      openCreateEncounterDrawer();
+    } else {
+      closeEncounterDrawer();
+      setCurrentElement(null);
+    }
+  }
+
+  async function handleAddOpponentToEncounter(opponentId: Opponent["id"]) {
+    // @ts-expect-error
+    const opponent = opponents.data.find(
+      (opponent) => opponent.id === opponentId,
+    );
+
+    if (opponent) {
+      const encounterOpponent = Object.assign(opponent, {
+        immunities: opponent.immunities.map((im: DBImmunity) => im.id),
+        resistances: opponent.resistances.map((res: DBResistance) => res.id),
+        effects: opponent.effects.map((effect: DBEffect) => effect.id),
+        blueprint: opponent.id,
+      });
+
+      delete encounterOpponent.id;
+
+      const createdEncounterOpponent =
+        await createEncounterOpponentMutation.mutateAsync(opponent);
+
+      createEncounterForm.form.setValue("opponents", [
+        ...createEncounterForm.form.getValues("opponents"),
+        createdEncounterOpponent.id,
+      ]);
+
+      setSelectedEncounterOpponents((prev) => [
+        ...prev,
+        createdEncounterOpponent,
+      ]);
+
+      closeOpponentsCatalog();
+    }
+  }
+
+  function handleRemoveEncounterOpponent(opponentId: EncounterOpponent["id"]) {
+    deleteEncounterOpponentMutation.mutate(opponentId);
+
+    setSelectedEncounterOpponents((prev) =>
+      prev.filter((opponent) => opponent.id !== opponentId),
+    );
+  }
+
+  function handleCreateEncounter(encounter: Omit<Encounter, "id">) {
+    createEncounterMutation.mutate(encounter);
+
+    setSelectedEncounterOpponents([]);
+    createEncounterForm.form.reset();
   }
 
   return (
@@ -560,6 +826,24 @@ function GlobalModals({}: Props) {
         }
         onSave={updatePlayer.mutate}
       />
+
+      {immunities.data && resistances.data && (
+        <CreateOpponentDrawer
+          form={createOpponentForm}
+          open={isCreateOpponentDrawerOpen}
+          loading={false} //TODO mutation isLoading
+          immunities={immunities.data || []}
+          resistances={resistances.data || []}
+          onOpenChange={(state) =>
+            state ? openCreateOpponentDrawer() : closeCreateOpponentDrawer()
+          }
+          onCreate={createOpponentMutation.mutate}
+          onOpenImmunityCatalog={openImmunititesCatalog}
+          onOpenResistanceCatalog={openResistancesCatalog}
+          onCreateImmunity={openCreateImmunityDrawer}
+          onCreateResistance={openCreateResistanceDrawer}
+        />
+      )}
 
       <CreatePartyDrawer
         open={isCreateDrawerOpen}
@@ -612,6 +896,31 @@ function GlobalModals({}: Props) {
           onAdd={handleAddResistance}
         />
       )}
+
+      <CreateEncounterDrawer
+        form={createEncounterForm}
+        opponents={opponents.data || []}
+        element={currentEncounterElement}
+        onCreate={handleCreateEncounter}
+        isCreating={false}
+        open={isCreateEncounterDrawerOpen}
+        onOpenChange={handleEncounterDrawerOpenChange}
+        onCreateOpponent={() => {
+          openCreateOpponentDrawer();
+        }}
+        onOpenOpponentsCatalog={() => openOpponentsCatalog()}
+        selectedOpponents={selectedEncounterOpponents}
+        onRemoveOpponent={handleRemoveEncounterOpponent}
+      />
+
+      <OpponentsCatalog
+        open={isOpponentsCatalogOpen}
+        onOpenChange={(state) =>
+          state ? openOpponentsCatalog() : closeOpponentsCatalog()
+        }
+        onAdd={handleAddOpponentToEncounter}
+        opponents={opponents.data || []}
+      />
 
       <CreateImmunityDrawer
         isCreating={createImmunity.isPending}

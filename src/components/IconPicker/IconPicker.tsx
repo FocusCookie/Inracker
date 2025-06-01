@@ -5,7 +5,11 @@ import EmojiPicker, {
 } from "emoji-picker-react";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
-import * as Dialog from "@radix-ui/react-dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@radix-ui/react-popover";
 
 type Props = {
   onIconClick: (icon: string) => void;
@@ -37,38 +41,25 @@ function IconPicker({ initialIcon, disabled, onIconClick }: Props) {
     }
   }
 
-  function handleToggleIsOpen() {
-    setIsOpen((c) => !c);
-  }
-
   return (
-    <Dialog.Root onOpenChange={handleToggleIsOpen}>
-      <Dialog.DialogTrigger asChild>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
         <Button disabled={disabled} variant="outline" className="w-full">
           {selectedIcon}
         </Button>
-      </Dialog.DialogTrigger>
+      </PopoverTrigger>
 
-      <Dialog.Portal>
-        {isOpen && (
-          <Dialog.Overlay className="fixed inset-0 bg-black/80"></Dialog.Overlay>
-        )}
-
-        {isOpen && (
-          <Dialog.Content className="fixed left-1/2 top-1/2 w-fit -translate-x-1/2 -translate-y-1/2 border-0 p-0 shadow-md">
-            <Dialog.Title className="hidden">Select an emoji</Dialog.Title>
-            <Dialog.Description>Picking an emoji</Dialog.Description>
-            <EmojiPicker
-              lazyLoadEmojis
-              open={isOpen}
-              onEmojiClick={handleEmojiClick}
-              emojiStyle={EmojiStyle.NATIVE}
-              skinTonePickerLocation={SkinTonePickerLocation.PREVIEW}
-            />
-          </Dialog.Content>
-        )}
-      </Dialog.Portal>
-    </Dialog.Root>
+      <PopoverContent>
+        <EmojiPicker
+          key="picker"
+          lazyLoadEmojis
+          open={isOpen}
+          onEmojiClick={handleEmojiClick}
+          emojiStyle={EmojiStyle.NATIVE}
+          skinTonePickerLocation={SkinTonePickerLocation.PREVIEW}
+        />
+      </PopoverContent>
+    </Popover>
   );
 }
 

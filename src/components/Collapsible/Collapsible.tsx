@@ -9,9 +9,10 @@ type Props = {
   children: React.ReactNode;
   title: React.ReactNode;
   actions?: React.ReactNode;
+  hideCollapse?: boolean;
 };
 
-function Collapsible({ actions, children, title }: Props) {
+function Collapsible({ actions, children, title, hideCollapse }: Props) {
   const [open, setOpen] = useState<boolean>(false);
   const [ref, { height }] = useMeasure();
 
@@ -19,12 +20,14 @@ function Collapsible({ actions, children, title }: Props) {
     <RadixCollapsible.Root open={open} onOpenChange={setOpen}>
       <div className="flex w-full items-center justify-between gap-2 rounded-md">
         <div className="grow text-xl font-bold">{title}</div>
-        <div className="flex items-center gap-2">
-          <RadixCollapsible.Trigger asChild>
-            <Button size="icon" variant="ghost">
-              {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
-            </Button>
-          </RadixCollapsible.Trigger>
+        <div className="flex items-center gap-2 p-0.5">
+          {!hideCollapse && (
+            <RadixCollapsible.Trigger asChild>
+              <Button size="icon" variant="ghost">
+                {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
+              </Button>
+            </RadixCollapsible.Trigger>
+          )}
 
           {actions}
         </div>

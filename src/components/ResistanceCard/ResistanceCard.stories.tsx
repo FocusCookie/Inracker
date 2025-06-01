@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react";
-// import { fn } from "@storybook/test";
+import { fn } from "@storybook/test";
 
-import Collapsible from "./ResistanceCard";
+import ResistanceCard from "./ResistanceCard";
 import { Button } from "../ui/button";
 
 const meta = {
   title: "Components/ResistanceCard",
-  component: Collapsible,
+  component: ResistanceCard,
   parameters: {},
   args: {
     resistance: {
@@ -19,20 +19,19 @@ const meta = {
       icon: "⚔️",
       name: "some resistance",
     },
+    onRemove: fn(),
   },
   decorators: [
     (Story) => (
       <div className="h-fit w-full rounded-md bg-white p-2">{Story()}</div>
     ),
   ],
-} satisfies Meta<typeof Collapsible>;
+} satisfies Meta<typeof ResistanceCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Primary: Story = {
-  // args: {},
-};
+export const Primary: Story = {};
 
 export const WithActions: Story = {
   args: {

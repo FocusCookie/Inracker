@@ -41,6 +41,7 @@ function CreatePlayerDrawer({
   onCreateResistance,
 }: Props) {
   const { t } = useTranslation("ComponentCreatePlayerDrawer");
+
   async function handleCreatePlayer() {
     const {
       picture,

@@ -18,6 +18,8 @@ type Props = {
    */
   createTrigger?: React.ReactNode;
   cancelTrigger: React.ReactNode;
+  noBackgdrop?: boolean;
+  modal?: boolean;
 };
 
 function Drawer({
@@ -29,9 +31,11 @@ function Drawer({
   actions,
   createTrigger,
   cancelTrigger,
+  noBackgdrop,
+  modal,
 }: Props) {
   return (
-    <Dialog.Root modal open={open} onOpenChange={onOpenChange}>
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
       {createTrigger && (
         <Dialog.Trigger asChild>{createTrigger}</Dialog.Trigger>
       )}
@@ -42,16 +46,20 @@ function Drawer({
             container={document.getElementById("drawer-portal")}
             forceMount
           >
-            <Dialog.Overlay asChild>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/50 backdrop-blur-xs"
-              />
-            </Dialog.Overlay>
+            {!noBackgdrop && (
+              <Dialog.Overlay asChild>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-black/50 backdrop-blur-xs"
+                />
+              </Dialog.Overlay>
+            )}
 
-            <Dialog.Content asChild>
+            <Dialog.Content
+              onInteractOutside={modal ? (e) => e.preventDefault() : undefined}
+            >
               <motion.div
                 initial={{ opacity: 0, x: "100%" }}
                 animate={{ opacity: 1, x: 0 }}
