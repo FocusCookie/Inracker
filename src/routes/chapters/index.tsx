@@ -33,7 +33,6 @@ function RouteComponent() {
       setCurrentChapter: state.setCurrentChapter,
     })),
   );
-  console.log({ currentChapter });
 
   useEffect(() => {
     setCurrentChapter(null);

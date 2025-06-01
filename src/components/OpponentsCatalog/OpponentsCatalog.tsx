@@ -123,10 +123,6 @@ function OpponentsCatalog({ open, opponents, onAdd, onOpenChange }: Props) {
                   <button
                     onClick={() => {
                       onAdd(Math.abs(opponent.id));
-                      console.log({
-                        id: opponent.id,
-                        abs: Math.abs(opponent.id),
-                      });
                     }}
                     className="focus-visible:ring-ring hover:bg-secondary/80 focus-within:bg-secondary/80 flex w-full items-start justify-start gap-2 rounded-md p-1 ring-offset-1 outline-black transition-colors focus-within:outline-1 hover:cursor-pointer focus-visible:ring-1"
                   >

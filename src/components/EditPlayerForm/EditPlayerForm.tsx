@@ -56,8 +56,6 @@ function EditPlayerForm({ disabled, player, form }: Props) {
     form.setValue("icon", icon);
   }
 
-  console.log({ player });
-
   return (
     <Form {...form} id="test">
       <form className="scroll flex flex-col gap-6 pt-4">
