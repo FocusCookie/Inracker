@@ -28,7 +28,10 @@ export type DBEncounter = {
 };
 
 export type Encounter = Prettify<
-  Omit<DBEncounter, "images" | "difficulties" | "opponents" | "passed"> & {
+  Omit<
+    DBEncounter,
+    "images" | "difficulties" | "opponents" | "passed" | "element"
+  > & {
     images: string[] | null;
     difficulties: EncounterDifficulty[] | null;
     opponents: string[] | null;

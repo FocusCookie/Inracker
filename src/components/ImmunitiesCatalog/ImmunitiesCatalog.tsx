@@ -14,8 +14,6 @@ type Props = {
 function ImmunitiesCatalog({ open, immunities, onAdd, onOpenChange }: Props) {
   const [immunitySearch, setImmunitySearch] = useState<string>("");
 
-  //TODO: if immunities are empty show create button
-
   return (
     <Catalog
       open={open}

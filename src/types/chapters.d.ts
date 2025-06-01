@@ -1,3 +1,4 @@
+import { Encounter } from "./encounter";
 import { Prettify } from "./utils";
 
 export type ChapterStatus = "completed" | "draft" | "ongoing" | "waiting";
@@ -10,10 +11,12 @@ export type DBChapter = {
   state: string;
   battlemap: string | null;
   party: number;
+  encounters: string;
 };
 
 export type Chapter = Prettify<
-  Omit<DBChapter, "state" | "opponents"> & {
+  Omit<DBChapter, "state" | "encounters"> & {
     state: ChapterStatus;
+    encounters: Array<Encounter["id"]>;
   }
 >;

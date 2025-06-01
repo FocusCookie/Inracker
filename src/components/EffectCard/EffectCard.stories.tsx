@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-// import { fn } from "@storybook/test";
+import { fn } from "@storybook/test";
 
 import EffectCard from "./EffectCard";
 import { Button } from "../ui/button";
@@ -17,6 +17,7 @@ const meta = {
       name: "Santa Effect",
       type: "positive",
     },
+    onRemove: fn(),
   },
   decorators: [
     (Story) => (

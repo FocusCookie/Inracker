@@ -1,0 +1,9 @@
+{
+  "title": "Gegner hinzufügen",
+  "description": "Suche nach einem Gegner, der der Gruppe hinzugefügt werden soll.",
+  "search": "Gegner suchen...",
+  "searchLabels": "Such-Labels",
+  "searchByName": "Suche nach Name",
+  "searchByLabel": "Suche nach Label",
+  "searchLabelsPlaceholder": "Geben Sie eine Bezeichnung ein und drücken Sie die Eingabetaste, um sie zur Suche hinzuzufügen"
+}

@@ -173,6 +173,8 @@ function ChapterSelection({
   function handlePlayChapter(chapter: Chapter["id"]) {
     setCurrentChapter(chapter);
     queryClient.invalidateQueries({ queryKey: ["chapter"] });
+    queryClient.invalidateQueries({ queryKey: ["encounters"] });
+
     navigate({
       to: `/play`,
     });

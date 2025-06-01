@@ -59,14 +59,24 @@ function RouteComponent() {
   );
 
   const partyQuery = useQueryWithToast({
-    queryKey: ["party"],
+    queryKey: ["party", `party-${currentParty}`],
     queryFn: () => db.parties.getDetailedById(currentParty!),
     enabled: !!currentParty,
   });
 
   const chapterQuery = useQueryWithToast({
-    queryKey: ["chapter"],
+    queryKey: ["chapter", `chapter-${currentChapter}`],
     queryFn: () => db.chapters.getByIdDetailed(currentChapter!),
+    enabled: !!currentChapter,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
+  });
+
+  const encountersQuery = useQueryWithToast({
+    queryKey: ["encounters", `${currentParty}-${currentChapter}`],
+    queryFn: () =>
+      db.encounters.getDetailedByIds(chapterQuery.data?.encounters || []),
+    enabled: !!chapterQuery.data?.encounters,
     refetchOnMount: "always",
     refetchOnWindowFocus: "always",
   });
@@ -132,16 +142,19 @@ function RouteComponent() {
           tokensQuery.isSuccess && (
             <Canvas
               background={chapterQuery.data.battlemap || undefined}
-              elements={[]}
+              elements={
+                encountersQuery.data?.map((enc) => ({
+                  ...enc.element,
+                  onClick: () => console.log("click"),
+                })) || []
+              }
+              //TODO: add the encounters to the canvas
               temporaryElement={currentEncounterElement || undefined}
               tokens={tokensQuery.data || []}
               players={partyQuery.data.players}
               selectedPlayer={selectedPlayer}
               onPlayerSelect={setSelectedPlayer}
               onDrawed={handleDrawEncounter}
-              onElementClick={(element) =>
-                console.log("clicked on element ", element)
-              }
               onPlayerMove={updateTokenMutation.mutate}
             />
           )}

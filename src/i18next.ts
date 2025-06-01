@@ -1,7 +1,17 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentOpponentsCatalogEN from "@/translations/en/components/OpponentsCatalog.json";
+import ComponentOpponentsCatalogDE from "@/translations/de/components/OpponentsCatalog.json"; 
+import ComponentOpponentCardEN from "@/translations/en/components/OpponentCard.json";
+import ComponentOpponentCardDE from "@/translations/de/components/OpponentCard.json"; 
+import ComponentCreateEncounterDrawerEN from "@/translations/en/components/CreateEncounterDrawer.json";
+import ComponentCreateEncounterDrawerDE from "@/translations/de/components/CreateEncounterDrawer.json"; 
+import ComponentCreateOpponentDrawerEN from "@/translations/en/components/CreateOpponentDrawer.json";
+import ComponentCreateOpponentDrawerDE from "@/translations/de/components/CreateOpponentDrawer.json";
+import ComponentCreateOpponentFormEN from "@/translations/en/components/CreateOpponentForm.json";
+import ComponentCreateOpponentFormDE from "@/translations/de/components/CreateOpponentForm.json";
 import ComponentChapterCardEN from "@/translations/en/components/ChapterCard.json";
-import ComponentChapterCardDE from "@/translations/de/components/ChapterCard.json"; 
+import ComponentChapterCardDE from "@/translations/de/components/ChapterCard.json";
 import ComponentEditChapterDrawerEN from "@/translations/en/components/EditChapterDrawer.json";
 import ComponentEditChapterDrawerDE from "@/translations/de/components/EditChapterDrawer.json";
 import ComponentCreateChapterDrawerEN from "@/translations/en/components/CreateChapterDrawer.json";
@@ -51,6 +61,11 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentOpponentsCatalog: ComponentOpponentsCatalogEN,
+    ComponentOpponentCard: ComponentOpponentCardEN,
+    ComponentCreateEncounterDrawer: ComponentCreateEncounterDrawerEN,
+    ComponentCreateOpponentDrawer: ComponentCreateOpponentDrawerEN,
+    ComponentCreateOpponentForm: ComponentCreateOpponentFormEN,
     ComponentChapterCard: ComponentChapterCardEN,
     ComponentEditChapterDrawer: ComponentEditChapterDrawerEN,
     ComponentCreateChapterDrawer: ComponentCreateChapterDrawerEN,
@@ -81,6 +96,11 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentOpponentsCatalog: ComponentOpponentsCatalogDE,
+    ComponentOpponentCard: ComponentOpponentCardDE,
+    ComponentCreateEncounterDrawer: ComponentCreateEncounterDrawerDE,
+    ComponentCreateOpponentDrawer: ComponentCreateOpponentDrawerDE,
+    ComponentCreateOpponentForm: ComponentCreateOpponentFormDE,
     ComponentChapterCard: ComponentChapterCardDE,
     ComponentEditChapterDrawer: ComponentEditChapterDrawerDE,
     ComponentCreateChapterDrawer: ComponentCreateChapterDrawerDE,

@@ -21,6 +21,7 @@ export function useQueryWithToast<TQueryFnData, TError, TData = TQueryFnData>(
   useEffect(() => {
     if (query.isError) {
       console.log("Query Error on ", queryOptions.queryKey);
+      console.log(query.error);
 
       toast({
         variant: "destructive",

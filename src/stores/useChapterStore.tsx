@@ -14,7 +14,7 @@ interface ChapterStoreState {
   closeCreateChapterDrawer: () => void;
   openEditChapterDrawer: (chapter: Chapter) => void;
   closeEditChapterDrawer: () => void;
-  setCurrentChapter: (chapterId: Chapter["id"]) => void;
+  setCurrentChapter: (chapterId: Chapter["id"] | null) => void;
 }
 
 export const useChapterStore = create<ChapterStoreState>((set) => ({
@@ -38,7 +38,7 @@ export const useChapterStore = create<ChapterStoreState>((set) => ({
       isEditChapterDrawerOpen: false,
       currentChapter: null,
     }),
-  setCurrentChapter: (chapterId: Chapter["id"]) =>
+  setCurrentChapter: (chapterId: Chapter["id"] | null) =>
     set({
       currentChapter: chapterId,
     }),

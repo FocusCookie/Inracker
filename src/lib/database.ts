@@ -8,6 +8,12 @@ import {
   EncounterType,
 } from "@/types/encounter";
 import { DBImmunity, Immunity } from "@/types/immunitiy";
+import {
+  DBEncounterOpponent,
+  DBOpponent,
+  EncounterOpponent,
+  Opponent,
+} from "@/types/opponents";
 import { DBParty, Party } from "@/types/party";
 import { DBPlayer, Player, TCreatePlayer } from "@/types/player";
 import { DBResistance, Resistance } from "@/types/resistances";
@@ -598,19 +604,21 @@ const getDetailedChapterById = async (
 
   const dbChapter = dbChapters[0];
   const state = dbChapter.state as ChapterStatus;
+  const encounters = JSON.parse(dbChapter.encounters) as number[];
 
-  return { ...dbChapter, state };
+  return { ...dbChapter, state, encounters };
 };
 
 const createChapter = async (
   db: TauriDatabase,
   chapter: Omit<Chapter, "id">,
 ): Promise<DBChapter> => {
-  const { name, icon, description, battlemap, state, party } = chapter;
+  const { name, icon, description, battlemap, state, party, encounters } =
+    chapter;
 
   const result = await db.execute(
-    "INSERT INTO chapters(name, icon, description, battlemap, state, party) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-    [name, icon, description, battlemap, state, party],
+    "INSERT INTO chapters(name, icon, description, battlemap, state, party, encounters) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+    [name, icon, description, battlemap, state, party, encounters],
   );
 
   const createdChapter = await getChapterById(
@@ -651,6 +659,24 @@ const updateChapter = async (
   );
 
   return getDetailedChapterById(db, id);
+};
+
+const updateChapterProperty = async <
+  T extends keyof Chapter,
+  V extends Chapter[T],
+>(
+  db: TauriDatabase,
+  chapterId: Chapter["id"],
+  property: T,
+  value: V,
+): Promise<Chapter> => {
+  const sql = `UPDATE chapters SET ${property} = $2 WHERE id = $1`;
+
+  await db.execute(sql, [chapterId, value]);
+
+  const updated = await getDetailedChapterById(db, chapterId);
+  console.log({ updated, value });
+  return getDetailedChapterById(db, chapterId);
 };
 
 //* TOKENS
@@ -768,6 +794,10 @@ const deleteTokenById = async (
 };
 
 //* Encounters
+const getAllEncounters = async (db: TauriDatabase): Promise<DBEncounter[]> => {
+  return await db.select<DBEncounter[]>("SELECT * FROM encounters");
+};
+
 const getEncounterById = async (
   db: TauriDatabase,
   id: DBEncounter["id"],
@@ -829,21 +859,21 @@ const getDetailedEncounterById = async (
     images,
     opponents,
     passed: Boolean(dbEncounter.passed),
-    // @ts-expect-error - element can not be null
     element,
-  };
+  } as Encounter;
 };
 
-const getDetailedEncountersById = async (
+const getDetailedEncountersByIds = async (
   db: TauriDatabase,
   encounterIds: Array<DBEncounter["id"]>,
-) => {
+): Promise<Encounter[]> => {
   const encounterPromises = encounterIds.map((id) =>
     getDetailedEncounterById(db, id),
   );
   const encounters = await Promise.allSettled(encounterPromises);
 
-  return encounters;
+  //@ts-ignore
+  return encounters.map((enc) => enc.value) as unknown as Encounter[];
 };
 
 const createEncounter = async (
@@ -940,6 +970,442 @@ const deleteEncounterById = async (
   await db.execute("DELETE FROM encounters WHERE id = $1", [id]);
 
   return deletedParty;
+};
+
+// OPPONENTS
+const getAllDetailedOpponents = async (
+  db: TauriDatabase,
+): Promise<Opponent[]> => {
+  const opponentsRaw = await getAllOpponents(db);
+  const detailedOpponents: Opponent[] = [];
+
+  for (const opponent of opponentsRaw) {
+    const detailedOpponent = await getDetailedOpponentById(db, opponent.id);
+    detailedOpponents.push(detailedOpponent);
+  }
+
+  return detailedOpponents;
+};
+
+const getDetailedOpponentById = async (
+  db: TauriDatabase,
+  opponentId: Opponent["id"],
+): Promise<Opponent> => {
+  const dbOpponent = await getOpponentById(db, opponentId);
+  const {
+    details,
+    effects: dbEffects,
+    health,
+    icon,
+    id,
+    image,
+    immunities: dbImmunities,
+    labels,
+    level,
+    max_health,
+    name,
+    resistances: dbResistances,
+  } = dbOpponent;
+
+  const effectsIds = JSON.parse(dbEffects) as number[];
+  const immunitiesIds = JSON.parse(dbImmunities) as number[];
+  const resistancesIds = JSON.parse(dbResistances) as number[];
+  const labelList = JSON.parse(labels) as string[];
+
+  let effects: DBEffect[] = [];
+  let immunities: DBImmunity[] = [];
+  let resistances: DBResistance[] = [];
+
+  for (const effectId of effectsIds) {
+    const effect = await getEffectById(db, effectId);
+    effects.push(effect);
+  }
+
+  for (const immunityId of immunitiesIds) {
+    const immunity = await getImmunityById(db, immunityId);
+    immunities.push(immunity);
+  }
+
+  for (const resistanceId of resistancesIds) {
+    const resistance = await getResistanceById(db, resistanceId);
+    resistances.push(resistance);
+  }
+
+  const opponent: Opponent = {
+    details,
+    effects,
+    health,
+    icon,
+    id,
+    image,
+    immunities,
+    labels: labelList,
+    level,
+    max_health,
+    name,
+    resistances,
+  };
+
+  return opponent;
+};
+
+const getAllOpponents = async (db: TauriDatabase): Promise<DBOpponent[]> =>
+  await db.select<DBOpponent[]>("SELECT * FROM opponents");
+
+const getOpponentById = async (
+  db: TauriDatabase,
+  id: DBOpponent["id"],
+): Promise<DBOpponent> => {
+  const result = await db.select<DBOpponent[]>(
+    "SELECT * FROM opponents WHERE id = $1",
+    [id],
+  );
+
+  if (!result.length) {
+    throw createDatabaseError(`Opponent with ID ${id} not found`);
+  }
+
+  return result[0];
+};
+
+const createOpponent = async (
+  db: TauriDatabase,
+  opponent: Omit<Opponent, "id">,
+): Promise<Opponent> => {
+  const {
+    details,
+    effects,
+    health,
+    icon,
+    image,
+    immunities,
+    labels,
+    level,
+    max_health,
+    name,
+    resistances,
+  } = opponent;
+
+  const result = await db.execute(
+    "INSERT INTO opponents (details, effects, health, icon, image, immunities, labels, level, max_health, name, resistances) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *",
+    [
+      details,
+      JSON.stringify(effects),
+      health,
+      icon,
+      image,
+      JSON.stringify(immunities),
+      JSON.stringify(labels),
+      level,
+      max_health,
+      name,
+      JSON.stringify(resistances),
+    ],
+  );
+
+  return getDetailedOpponentById(db, result!.lastInsertId as number);
+};
+
+const updateOpponent = async (
+  db: TauriDatabase,
+  opponent: Opponent,
+): Promise<Opponent> => {
+  const {
+    details,
+    effects,
+    health,
+    icon,
+    id,
+    image,
+    immunities,
+    labels,
+    level,
+    max_health,
+    name,
+    resistances,
+  } = opponent;
+
+  await db.execute(
+    "UPDATE opponents SET details = $2, effects = $3, health = $4, icon = $5, image = $6, immunities = $7, labels = $8, level = $9, max_health = $10, name = $11, resistances = $12 WHERE id = $1",
+    [
+      id,
+      details,
+      JSON.stringify(effects.map((effect: Effect) => effect.id)),
+      health,
+      icon,
+      image,
+      JSON.stringify(immunities.map((immunity: DBImmunity) => immunity.id)),
+      JSON.stringify(labels),
+      level,
+      max_health,
+      name,
+      JSON.stringify(
+        resistances.map((resistance: DBResistance) => resistance.id),
+      ),
+    ],
+  );
+
+  return getDetailedOpponentById(db, id);
+};
+
+const deleteOpponentById = async (
+  db: TauriDatabase,
+  id: Opponent["id"],
+): Promise<DBOpponent> => {
+  const deletedOpponent = await getOpponentById(db, id);
+
+  await db.execute("DELETE FROM opponents WHERE id = $1", [id]);
+
+  return deletedOpponent;
+};
+
+const updateOpponentProperty = async <
+  T extends keyof Opponent,
+  V extends Opponent[T],
+>(
+  db: TauriDatabase,
+  opponentId: Opponent["id"],
+  property: T,
+  value: V,
+): Promise<Opponent> => {
+  const sql = `UPDATE opponents SET ${String(property)} = $2 WHERE id = $1`;
+
+  await db.execute(sql, [opponentId, value]);
+
+  return getDetailedOpponentById(db, opponentId);
+};
+
+// Encounter opponents
+const getEncounterOpponentById = async (
+  db: TauriDatabase,
+  id: DBEncounterOpponent["id"],
+): Promise<DBEncounterOpponent> => {
+  const result = await db.select<DBEncounterOpponent[]>(
+    "SELECT * FROM encounter_opponents WHERE id = $1",
+    [id],
+  );
+
+  if (!result.length) {
+    throw createDatabaseError(`Encounter Opponent with ID ${id} not found`);
+  }
+
+  return result[0];
+};
+
+const getAllEncounterOpponents = async (
+  db: TauriDatabase,
+): Promise<DBEncounterOpponent[]> =>
+  await db.select<DBEncounterOpponent[]>("SELECT * FROM encounter_opponents");
+
+const getDetailedEncounterOpponentById = async (
+  db: TauriDatabase,
+  encounterOpponentId: DBEncounterOpponent["id"],
+): Promise<EncounterOpponent> => {
+  const dbOpponent = await getEncounterOpponentById(db, encounterOpponentId);
+  const {
+    details,
+    effects: dbEffects,
+    health,
+    icon,
+    id,
+    image,
+    immunities: dbImmunities,
+    labels,
+    level,
+    max_health,
+    name,
+    resistances: dbResistances,
+    blueprint,
+  } = dbOpponent;
+
+  const effectsIds = JSON.parse(dbEffects) as number[];
+  const immunitiesIds = JSON.parse(dbImmunities) as number[];
+  const resistancesIds = JSON.parse(dbResistances) as number[];
+  const labelList = JSON.parse(labels) as string[];
+
+  let effects: DBEffect[] = [];
+  let immunities: DBImmunity[] = [];
+  let resistances: DBResistance[] = [];
+
+  for (const effectId of effectsIds) {
+    const effect = await getEffectById(db, effectId);
+    effects.push(effect);
+  }
+
+  for (const immunityId of immunitiesIds) {
+    const immunity = await getImmunityById(db, immunityId);
+    immunities.push(immunity);
+  }
+
+  for (const resistanceId of resistancesIds) {
+    const resistance = await getResistanceById(db, resistanceId);
+    resistances.push(resistance);
+  }
+
+  const encounterOpponent: EncounterOpponent = {
+    details,
+    effects,
+    health,
+    icon,
+    id,
+    image,
+    immunities,
+    labels: labelList,
+    level,
+    max_health,
+    name,
+    resistances,
+    blueprint,
+  };
+
+  const getAllEncounterOpponentsDetailed = async (
+    db: TauriDatabase,
+  ): Promise<EncounterOpponent[]> => {
+    const encounterOpponentsRaw = await getAllEncounterOpponents(db); // Fetch basic encounter opponents
+    const detailedEncounterOpponents: EncounterOpponent[] = [];
+
+    for (const opponent of encounterOpponentsRaw) {
+      const detailedOpponent = await getDetailedEncounterOpponentById(
+        db,
+        opponent.id,
+      ); // Get detailed opponent data
+      detailedEncounterOpponents.push(detailedOpponent); // Store it in the array
+    }
+
+    return detailedEncounterOpponents; // Return the array of detailed encounter opponents
+  };
+
+  return encounterOpponent;
+};
+
+const getAllEncounterOpponentsDetailed = async (
+  db: TauriDatabase,
+): Promise<EncounterOpponent[]> => {
+  const encounterOpponentsRaw = await getAllEncounterOpponents(db);
+  const detailedEncounterOpponents: EncounterOpponent[] = [];
+
+  for (const opponent of encounterOpponentsRaw) {
+    const detailedOpponent = await getDetailedEncounterOpponentById(
+      db,
+      opponent.id,
+    );
+    detailedEncounterOpponents.push(detailedOpponent);
+  }
+
+  return detailedEncounterOpponents; // Return the array of detailed encounter opponents
+};
+
+const createEncounterOpponent = async (
+  db: TauriDatabase,
+  encounterOpponent: Omit<EncounterOpponent, "id">,
+): Promise<EncounterOpponent> => {
+  const {
+    details,
+    effects,
+    health,
+    icon,
+    image,
+    immunities,
+    labels,
+    level,
+    max_health,
+    name,
+    resistances,
+    blueprint, // additional prop
+  } = encounterOpponent;
+
+  const result = await db.execute(
+    "INSERT INTO encounter_opponents (details, effects, health, icon, image, immunities, labels, level, max_health, name, resistances, blueprint) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
+    [
+      details,
+      JSON.stringify(effects),
+      health,
+      icon,
+      image,
+      JSON.stringify(immunities),
+      JSON.stringify(labels),
+      level,
+      max_health,
+      name,
+      JSON.stringify(resistances),
+      blueprint,
+    ],
+  );
+
+  return getDetailedEncounterOpponentById(db, result!.lastInsertId as number);
+};
+
+const updateEncounterOpponent = async (
+  db: TauriDatabase,
+  encounterOpponent: EncounterOpponent,
+): Promise<EncounterOpponent> => {
+  const {
+    details,
+    effects,
+    health,
+    icon,
+    id,
+    image,
+    immunities,
+    labels,
+    level,
+    max_health,
+    name,
+    resistances,
+    blueprint,
+  } = encounterOpponent;
+
+  await db.execute(
+    "UPDATE encounter_opponents SET details = $2, effects = $3, health = $4, icon = $5, image = $6, immunities = $7, labels = $8, level = $9, max_health = $10, name = $11, resistances = $12, blueprint = $13 WHERE id = $1",
+    [
+      id,
+      details,
+      JSON.stringify(effects.map((effect: Effect) => effect.id)),
+      health,
+      icon,
+      image,
+      JSON.stringify(immunities.map((immunity: DBImmunity) => immunity.id)),
+      JSON.stringify(labels),
+      level,
+      max_health,
+      name,
+      JSON.stringify(
+        resistances.map((resistance: DBResistance) => resistance.id),
+      ),
+      blueprint,
+    ],
+  );
+
+  return getDetailedEncounterOpponentById(db, id);
+};
+
+const deleteEncounterOpponentById = async (
+  db: TauriDatabase,
+  id: EncounterOpponent["id"],
+): Promise<DBEncounterOpponent> => {
+  const deletedEncounterOpponent = await getEncounterOpponentById(db, id);
+
+  await db.execute("DELETE FROM encounter_opponents WHERE id = $1", [id]);
+
+  return deletedEncounterOpponent;
+};
+
+const getEncountersByIds = async (
+  db: TauriDatabase,
+  encounterIds: number[],
+): Promise<Encounter[]> => {
+  const encounters: Encounter[] = [];
+
+  for (const id of encounterIds) {
+    try {
+      const encounter = await getDetailedEncounterById(db, id);
+      encounters.push(encounter);
+    } catch (error) {
+      console.error(`Failed to fetch encounter with id ${id}:`, error);
+    }
+  }
+
+  return encounters;
 };
 
 export const Database = {
@@ -1134,6 +1600,25 @@ export const Database = {
       const db = await connect();
       return updateChapter(db, chapter);
     },
+    updateProperty: async <T extends keyof Chapter, V extends Chapter[T]>(
+      chapterId: Chapter["id"],
+      property: T,
+      value: V,
+    ) => {
+      const db = await connect();
+      return updateChapterProperty(db, chapterId, property, value);
+    },
+    addEncounter: async (
+      chapterId: Chapter["id"],
+      encounterId: Encounter["id"],
+    ) => {
+      const db = await connect();
+      const chapter = await getDetailedChapterById(db, chapterId);
+      const encounters = chapter.encounters
+        ? [...chapter.encounters, encounterId]
+        : [encounterId];
+      return updateChapterProperty(db, chapterId, "encounters", encounters);
+    },
   },
 
   tokens: {
@@ -1206,11 +1691,69 @@ export const Database = {
     },
     getDetailedEncountersByIds: async (ids: Array<Encounter["id"]>) => {
       const db = await connect();
-      return getDetailedEncountersById(db, ids);
+      return getDetailedEncountersByIds(db, ids);
     },
     delete: async (id: Encounter["id"]) => {
       const db = await connect();
       return deleteEncounterById(db, id);
+    },
+    getDetailedByIds: async (ids: Array<EncounterOpponent["id"]>) => {
+      const db = await connect();
+      return getDetailedEncountersByIds(db, ids);
+    },
+  },
+
+  opponents: {
+    create: async (opponent: Omit<Opponent, "id">) => {
+      const db = await connect();
+      return createOpponent(db, opponent);
+    },
+    update: async (opponent: Opponent) => {
+      const db = await connect();
+      return updateOpponent(db, opponent);
+    },
+    getById: async (id: Opponent["id"]) => {
+      const db = await connect();
+      return getOpponentById(db, id);
+    },
+    getDetailedById: async (id: Opponent["id"]) => {
+      const db = await connect();
+      return getDetailedOpponentById(db, id);
+    },
+    getAllDetailed: async () => {
+      const db = await connect();
+      return getAllDetailedOpponents(db);
+    },
+    delete: async (id: Opponent["id"]) => {
+      const db = await connect();
+      return deleteOpponentById(db, id);
+    },
+  },
+
+  encounterOpponents: {
+    create: async (encounterOpponent: Omit<EncounterOpponent, "id">) => {
+      const db = await connect();
+      return createEncounterOpponent(db, encounterOpponent);
+    },
+    update: async (encounterOpponent: EncounterOpponent) => {
+      const db = await connect();
+      return updateEncounterOpponent(db, encounterOpponent);
+    },
+    getById: async (id: DBEncounterOpponent["id"]) => {
+      const db = await connect();
+      return getEncounterOpponentById(db, id);
+    },
+    getDetailedById: async (id: DBEncounterOpponent["id"]) => {
+      const db = await connect();
+      return getDetailedEncounterOpponentById(db, id);
+    },
+    getAllDetailed: async () => {
+      const db = await connect();
+      return getAllEncounterOpponentsDetailed(db);
+    },
+    delete: async (id: EncounterOpponent["id"]) => {
+      const db = await connect();
+      return deleteEncounterOpponentById(db, id);
     },
   },
 };

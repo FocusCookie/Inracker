@@ -48,6 +48,7 @@ function CreateChapterDrawer({
     description: z.string(),
     icon: z.string().emoji(),
     battlemap: z.instanceof(File).or(z.string()),
+    encounters: z.array(z.number()),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -57,11 +58,12 @@ function CreateChapterDrawer({
       description: "",
       icon: "🧙",
       battlemap: "",
+      encounters: [],
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { name, description, icon, battlemap } = values;
+    const { name, description, icon, battlemap, encounters } = values;
     let battlemapFilePath: string | null = null;
 
     if (!!battlemap) {
@@ -74,9 +76,8 @@ function CreateChapterDrawer({
       description,
       battlemap: battlemapFilePath,
       state: "draft",
-      tokens: [],
-      encounters: [],
       party: partyId,
+      encounters,
     });
 
     form.reset();

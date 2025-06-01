@@ -15,7 +15,6 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
-import { TypographyH2 } from "../ui/typographyh2";
 
 type Props = {
   disabled: boolean;
@@ -73,8 +72,6 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
     <Form {...form}>
       <form className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
-          <TypographyH2>{t("overview")}</TypographyH2>
-
           <div className="flex items-start gap-2">
             <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
               <FormLabel>{t("icon")}</FormLabel>

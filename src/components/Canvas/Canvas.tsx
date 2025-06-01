@@ -20,14 +20,13 @@ const TEMP_DEFAULT_ICON = "📝";
 
 type Props = {
   background?: string;
-  elements: CanvasElement[];
+  elements: ClickableCanvasElement[];
   temporaryElement?: CanvasElement;
   players: Player[];
   selectedPlayer: Player | null;
   tokens: Token[];
   onPlayerSelect: (player: Player | null) => void;
   onDrawed: (element: Omit<CanvasElement, "id">) => void;
-  onElementClick: (id: number) => void;
   onPlayerMove: (token: Token) => void;
 };
 
@@ -40,6 +39,10 @@ export type CanvasElement = {
   icon: string;
 };
 
+export type ClickableCanvasElement = CanvasElement & {
+  onClick: () => void;
+};
+
 function Canvas({
   background,
   elements,
@@ -50,7 +53,6 @@ function Canvas({
   onPlayerMove,
   onPlayerSelect,
   onDrawed,
-  onElementClick,
 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const backgroundImage = useRef<HTMLImageElement | null>(null);
@@ -672,7 +674,7 @@ function Canvas({
           <g
             className="hover:cursor-pointer"
             key={"element-" + index}
-            onClick={() => onElementClick(index)}
+            onClick={element.onClick}
           >
             <rect
               x={element.x}
@@ -688,9 +690,9 @@ function Canvas({
               filter="url(#subtleDropShadow)"
             />
 
-            <g transform={`translate(${element.x + 16}, ${element.y + 32})`}>
+            <g transform={`translate(${element.x + 6}, ${element.y + 45})`}>
               <text
-                className="font-sans text-4xl font-bold shadow-sm select-none"
+                className="font-sans text-6xl font-bold shadow-sm select-none"
                 dominantBaseline="middle"
               >
                 {element.icon}

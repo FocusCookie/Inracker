@@ -50,8 +50,8 @@ pub fn run() {
             description: "create effects table",
             sql: "CREATE TABLE IF NOT EXISTS effects(
                 description TEXT,
-                damage INTEGER, 
-                duration INTEGER, 
+                damage INTEGER,
+                duration INTEGER,
                 duration_type TEXT NOT NULL,
                 icon TEXT NOT NULL,
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -124,12 +124,16 @@ pub fn run() {
             sql: "CREATE TABLE IF NOT EXISTS opponents (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
-                description TEXT,
+                details TEXT,
+                health INTEGER NOT NULL,
+                max_health INTEGER NOT NULL,
                 image TEXT,
                 icon TEXT NOT NULL,
-                level INTEGER,
-                labels TEXT -- JSON ARRAY of strings
-                ep INTEGER NOT NULL
+                labels TEXT, -- JSON ARRAY of strings
+                level INTEGER NOT NULL,
+                resistances TEXT, --JSON array ids
+                immunities TEXT, -- JSON array ids
+                effects TEXT -- JSON array ids
             )",
             kind: MigrationKind::Up,
         },
@@ -142,6 +146,26 @@ pub fn run() {
                 coordinates TEXT NOT NULL, -- JSON Object {x: number, y:number},
                 chapter INTEGER NOT NULL,
                 type TEXT NOT NULL -- to differentiate the entities players and opponents
+            )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 10,
+            description: "create encounter_opponents table",
+            sql: "CREATE TABLE IF NOT EXISTS encounter_opponents (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                details TEXT,
+                health INTEGER NOT NULL,
+                max_health INTEGER NOT NULL,
+                image TEXT,
+                icon TEXT NOT NULL,
+                labels TEXT, -- JSON ARRAY of strings
+                level INTEGER NOT NULL,
+                resistances TEXT, --JSON array ids
+                immunities TEXT, -- JSON array ids
+                effects TEXT, -- JSON array ids,
+                blueprint INTEGER NOT NULL
             )",
             kind: MigrationKind::Up,
         },
