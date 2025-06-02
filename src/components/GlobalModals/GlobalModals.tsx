@@ -459,6 +459,21 @@ function GlobalModals({}: Props) {
     },
   });
 
+  const deleteChapter = useMutationWithErrorToast({
+    mutationFn: (id: Chapter["id"]) => {
+      return db.chapters.delete(id);
+    },
+    onSuccess: (deletedChapter: DBChapter) => {
+      queryClient.invalidateQueries({ queryKey: ["chapters"] });
+      queryClient.invalidateQueries({ queryKey: ["chapter"] });
+
+      toast({
+        variant: "default",
+        title: `Deleted ${deletedChapter.icon} ${deletedChapter.name}`,
+      });
+    },
+  });
+
   const updatePartyMutation = useMutationWithErrorToast({
     mutationFn: (party: Party) => {
       return db.parties.updateByParty(party);
@@ -951,10 +966,11 @@ function GlobalModals({}: Props) {
 
       <EditChapterDrawer
         chapter={editingChapter}
-        loading={updateChapterMutation.isPending}
+        loading={updateChapterMutation.isPending || deleteChapter.isPending}
         open={isEditChapterDrawerOpen}
         onOpenChange={closeEditChapterDrawer}
         onSave={updateChapterMutation.mutate}
+        onDelete={deleteChapter.mutate}
       />
     </>
   );

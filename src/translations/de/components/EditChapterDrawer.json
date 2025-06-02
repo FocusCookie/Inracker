@@ -9,5 +9,9 @@
   "nameValidation": "Der Name muss mindestens 2 Zeichen lang sein.",
   "battlemap": "Schlachtkarte",
   "battlemapPlaceholder": "Wähle ein Schlachtkartenbild",
-  "namePlaceholder": "Der innere Konflikt"
+  "namePlaceholder": "Der innere Konflikt",
+  "delete": "Löschen",
+  "areYouSure": "Bist du dir absolute sicher?",
+  "deleteNote": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch das Kapitel dauerhaft gelöscht.",
+  "yesDelete": "Ja Löschen"
 }

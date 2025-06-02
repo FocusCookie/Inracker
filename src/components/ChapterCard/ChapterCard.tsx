@@ -1,11 +1,9 @@
 import { Chapter as TChapter } from "@/types/chapters";
-import { DBEncounter } from "@/types/encounters";
 import {
   CheckIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   ClockIcon,
-  DoubleArrowUpIcon,
   Pencil1Icon,
   PlayIcon,
 } from "@radix-ui/react-icons";
@@ -72,18 +70,18 @@ function ChapterCard({ chapter, onEdit, onPlay, animationDelay }: Props) {
             </div>
 
             <div className="flex items-center gap-2">
+              <Badge variant="outline" className="flex gap-2 capitalize">
+                {chapterStateIcon} {chapter.state}
+              </Badge>
+
+              <Button onClick={handleEdit} variant="ghost">
+                <Pencil1Icon />
+              </Button>
+
               <Button variant="ghost" onClick={handleToggleDescription}>
                 {isDescriptionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
               </Button>
             </div>
-          </div>
-
-          <div className="mt-2 flex gap-2">
-            <div className="h-full w-8"></div>
-
-            <Badge className="flex gap-2 capitalize">
-              {chapterStateIcon} {chapter.state}
-            </Badge>
           </div>
         </CardHeader>
 
@@ -106,10 +104,6 @@ function ChapterCard({ chapter, onEdit, onPlay, animationDelay }: Props) {
         </AnimatePresence>
 
         <CardFooter className="flex justify-end gap-2 px-4 pt-2">
-          <Button onClick={handleEdit} variant="ghost">
-            <Pencil1Icon />
-          </Button>
-
           <Button onClick={handlePlay}>{t("select")}</Button>
         </CardFooter>
       </Card>

@@ -9,5 +9,9 @@
   "nameValidation": "The name must be at least 2 characters long.",
   "battlemap": "Battle Map",
   "battlemapPlaceholder": "Select a battle map image",
-  "namePlaceholder": "The Inner Conflict"
+  "namePlaceholder": "The Inner Conflict",
+  "delete": "Delete",
+  "areYouSure": "Are you absolutely sure?",
+  "deleteNote": "This action cannot be undone. This will permanently delete the chapter.",
+  "yesDelete": "Yes, Delete"
 }
