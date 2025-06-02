@@ -242,7 +242,9 @@
     @apply bg-background text-foreground;
   }
 }
-
+/* To enable the original styling of remark markdown with tailwind */
+/*
 .markdown-reader > * {
   all: revert;
 }
+  */

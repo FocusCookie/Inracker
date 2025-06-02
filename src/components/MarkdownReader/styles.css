@@ -7,3 +7,14 @@
 .markdown-reader > table > thead > tr > th {
   font-size: 1.5rem;
 }
+
+.markdown-reader > ul > li {
+  padding-left: 0rem;
+  margin-left: 1.5rem;
+  list-style-type: disc;
+}
+.markdown-reader > ol > li {
+  padding-left: 0rem;
+  margin-left: 1.5rem;
+  list-style-type: decimal;
+}
