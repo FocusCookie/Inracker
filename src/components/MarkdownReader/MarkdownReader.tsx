@@ -87,13 +87,6 @@ function MarkdownReader({ markdown, className }: Props) {
         tfoot({ children, ...props }: MarkdownComponent) {
           return <TableFooter children={children} {...props} />;
         },
-        details({ children, ...props }: MarkdownComponent) {
-          return (
-            <details className="group" {...props}>
-              <summary className="cursor-pointer list-none">{children}</summary>
-            </details>
-          );
-        },
       }}
       remarkPlugins={[remarkGfm]}
     >
