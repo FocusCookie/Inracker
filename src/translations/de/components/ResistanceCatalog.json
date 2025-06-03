@@ -1,4 +1,8 @@
 {
   "resistances": "Widerstände",
-  "description": "Wähle einen Widerstand, den du dem Charakter hinzufügen möchtest, um seine Verteidigung zu verbessern."
+  "description": "Wähle einen Widerstand, den du dem Charakter hinzufügen möchtest, um seine Verteidigung zu verbessern.",
+  "placeholderSearch": "Suche nach einem bestimmten Widerstand",
+  "noResistances": "Keine Widerstände verfügbar",
+  "noResistancesDescription": "Es gibt noch keine Widerstände. Erstelle jetzt einen!",
+  "createResistance": "Widerstand erstellen"
 }

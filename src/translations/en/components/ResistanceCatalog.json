@@ -1,4 +1,8 @@
 {
   "resistances": "Resistances",
-  "description": "Select a resistance to add to the character, enhancing their defenses."
+  "description": "Choose a resistance to add to the character to improve their defense.",
+  "placeholderSearch": "Search for a specific resistance",
+  "noResistances": "No resistances available",
+  "noResistancesDescription": "There are no resistances yet. Create one now!",
+  "createResistance": "Create resistance"
 }
