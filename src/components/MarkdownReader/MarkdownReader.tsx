@@ -1,14 +1,13 @@
 import { cn } from "@/lib/utils";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import ryhpeRawe from "rehype-raw";
 import { TypographyH1 } from "../ui/typographyH1";
 import { TypographyH2 } from "../ui/typographyh2";
 import { TypographyH3 } from "../ui/typographyH3";
 import { TypographyH4 } from "../ui/typographyH4";
 import "./styles.css";
 import { Alert, AlertTitle } from "../ui/alert";
-import { DotFilledIcon, QuoteIcon } from "@radix-ui/react-icons";
+import { QuoteIcon } from "@radix-ui/react-icons";
 import {
   Table,
   TableBody,

@@ -44,7 +44,13 @@ function PartyCard({ party, animationDelay = 0, onEdit, onOpen }: Props) {
             <TypographyH3>{party.icon}</TypographyH3>
           </div>
 
-          <TypographyH3>{party.name}</TypographyH3>
+          <div className="grow">
+            <TypographyH3>{party.name}</TypographyH3>
+          </div>
+
+          <Button onClick={handleEditClick} variant="ghost">
+            <Pencil1Icon />
+          </Button>
         </CardHeader>
 
         <CardContent className="flex">
@@ -71,9 +77,6 @@ function PartyCard({ party, animationDelay = 0, onEdit, onOpen }: Props) {
         </CardContent>
 
         <CardFooter className="flex justify-end gap-4">
-          <Button onClick={handleEditClick} variant="ghost">
-            <Pencil1Icon />
-          </Button>
           <Button onClick={handleOpenClick}>{t("select")}</Button>
         </CardFooter>
       </Card>

@@ -195,6 +195,7 @@ function GlobalModals({}: Props) {
       closeEditDrawer: state.closeEditDrawer,
     })),
   );
+
   const {
     isImmunitiesCatalogOpen,
     isCreateImmunityDrawerOpen,
@@ -214,6 +215,7 @@ function GlobalModals({}: Props) {
       closeImmunitiesCatalog: state.closeImmunitiesCatalog,
     })),
   );
+
   const {
     isResistanceCatalogOpen,
     isCreateResistanceDrawerOpen,
