@@ -8,7 +8,6 @@ import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { MoonIcon } from "@radix-ui/react-icons";
 import { useImmunityStore } from "@/stores/useImmunityStore";
 import { useShallow } from "zustand/shallow";
-import { on } from "events";
 
 type Props = {
   immunities: DBImmunity[];
