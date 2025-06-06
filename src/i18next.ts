@@ -1,5 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentCreateEffectDrawerEN from "@/translations/en/components/CreateEffectDrawer.json";
+import ComponentCreateEffectDrawerDE from "@/translations/de/components/CreateEffectDrawer.json"; 
 import ComponentOpponentsCatalogEN from "@/translations/en/components/OpponentsCatalog.json";
 import ComponentOpponentsCatalogDE from "@/translations/de/components/OpponentsCatalog.json"; 
 import ComponentOpponentCardEN from "@/translations/en/components/OpponentCard.json";
@@ -61,6 +63,7 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentCreateEffectDrawer: ComponentCreateEffectDrawerEN,
     ComponentOpponentsCatalog: ComponentOpponentsCatalogEN,
     ComponentOpponentCard: ComponentOpponentCardEN,
     ComponentCreateEncounterDrawer: ComponentCreateEncounterDrawerEN,
@@ -96,6 +99,7 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentCreateEffectDrawer: ComponentCreateEffectDrawerDE,
     ComponentOpponentsCatalog: ComponentOpponentsCatalogDE,
     ComponentOpponentCard: ComponentOpponentCardDE,
     ComponentCreateEncounterDrawer: ComponentCreateEncounterDrawerDE,

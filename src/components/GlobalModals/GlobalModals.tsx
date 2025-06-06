@@ -39,8 +39,11 @@ import { EncounterOpponent, Opponent } from "@/types/opponents";
 import OpponentsCatalog from "../OpponentsCatalog/OpponentsCatalog";
 import { useCreateEncounter } from "@/hooks/useCreateEncounter";
 import { useState } from "react";
-import { DBEffect } from "@/types/effect";
+import { DBEffect, Effect } from "@/types/effect";
 import { Encounter } from "@/types/encounter";
+import CreateEffectDrawer from "../CreateEffectDrawer/CreateEffectDrawer";
+import { useEffectStore } from "@/stores/useEffectStore";
+import { create } from "domain";
 
 type Props = {};
 
@@ -236,6 +239,30 @@ function GlobalModals({}: Props) {
     })),
   );
 
+  const {
+    effects,
+    isCreateEffectDrawerOpen,
+    isCreatingEffect,
+    isEffectsCatalogOpen,
+    openCreateEffectDrawer,
+    closeCreateEffectDrawer,
+    openEffectsCatalog,
+    closeEffectsCatalog,
+    setIsCreatingEffect,
+  } = useEffectStore(
+    useShallow((state) => ({
+      effects: state.effects,
+      isCreateEffectDrawerOpen: state.isCreateEffectDrawerOpen,
+      isCreatingEffect: state.isCreatingEffect,
+      isEffectsCatalogOpen: state.isEffectsCatalogOpen,
+      openCreateEffectDrawer: state.openCreateEffectDrawer,
+      closeCreateEffectDrawer: state.closeCreateEffectDrawer,
+      openEffectsCatalog: state.openEffectsCatalog,
+      closeEffectsCatalog: state.closeEffectsCatalog,
+      setIsCreatingEffect: state.setIsCreatingEffect,
+    })),
+  );
+
   const players = useQueryWithToast({
     queryKey: ["players"],
     queryFn: () => db.players.getAllDetailed(),
@@ -375,6 +402,22 @@ function GlobalModals({}: Props) {
       toast({
         variant: "default",
         title: `Created ${resistance.icon} ${resistance.name}`,
+      });
+    },
+  });
+
+  const createEffect = useMutationWithErrorToast({
+    mutationFn: (effect: Omit<Effect, "id">) => {
+      setIsCreatingEffect(true);
+      return db.effects.create(effect);
+    },
+    onSuccess: (effect: DBEffect) => {
+      queryClient.invalidateQueries({ queryKey: ["effects"] });
+      setIsCreatingEffect(false);
+      closeCreateEffectDrawer();
+      toast({
+        variant: "default",
+        title: `Created ${effect.icon} ${effect.name}`,
       });
     },
   });
@@ -955,6 +998,15 @@ function GlobalModals({}: Props) {
           state ? openCreateResistanceDrawer() : closeCreateResistanceDrawer()
         }
         onCreate={createResistance.mutate}
+      />
+
+      <CreateEffectDrawer
+        isCreating={createEffect.isPending}
+        open={true}
+        onOpenChange={(state: boolean) =>
+          state ? openCreateEffectDrawer() : closeCreateEffectDrawer()
+        }
+        onCreate={createEffect.mutate}
       />
 
       <SettingsDialog

@@ -13,6 +13,7 @@ export type DBEffect = {
   name: string;
   /** positive or negative */
   type: "positive" | "negative";
+  value: number;
 };
 
 /**
