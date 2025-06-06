@@ -76,7 +76,6 @@ const CreateOpponentForm: CreateOpponentDrawerCompound = ({
       <Form {...form}>
         <form className="flex flex-col gap-6">
           <div className="flex flex-col gap-4">
-            <TypographyH2>{t("createOpponent")}</TypographyH2>
             <div className="flex w-full items-start gap-2">
               <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
                 <FormLabel>{t("icon")}</FormLabel>
