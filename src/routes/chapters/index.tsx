@@ -3,6 +3,7 @@ import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
 import ChapterSelection from "@/pages/ChapterSelection/ChapterSelection";
 import { useChapterStore } from "@/stores/useChapterStore";
+import { DBEffect } from "@/types/effect";
 import { DBImmunity } from "@/types/immunitiy";
 import { Player } from "@/types/player";
 import { DBResistance } from "@/types/resistances";
@@ -92,12 +93,35 @@ function RouteComponent() {
   const removeResistanceFromPlayer = useMutationWithErrorToast({
     mutationFn: async ({
       playerId,
-      resistanceId: immunityId,
+      resistanceId,
     }: {
       playerId: Player["id"];
       resistanceId: DBResistance["id"];
     }) => {
-      return await db.players.removeResistanceFromPlayer(playerId, immunityId);
+      return await db.players.removeResistanceFromPlayer(
+        playerId,
+        resistanceId,
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["party"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["players"],
+      });
+    },
+  });
+
+  const removeEffectFromPlayer = useMutationWithErrorToast({
+    mutationFn: async ({
+      playerId,
+      effectId,
+    }: {
+      playerId: Player["id"];
+      effectId: DBEffect["id"];
+    }) => {
+      return await db.players.removeEffectFromPlayer(playerId, effectId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -120,6 +144,9 @@ function RouteComponent() {
       }
       onRemoveResistanceFromPlayer={(playerId, resistanceId) =>
         removeResistanceFromPlayer.mutate({ playerId, resistanceId })
+      }
+      onRemoveEffectFromPlayer={(playerId, effectId) =>
+        removeEffectFromPlayer.mutate({ playerId, effectId })
       }
     />
   ) : (

@@ -21,6 +21,7 @@ import { Button } from "../ui/button";
 import ResistanceCard from "../ResistanceCard/ResistanceCard";
 import IconAvatar from "../IconAvatar/IconAvatar";
 import { useTranslation } from "react-i18next";
+import { DBEffect } from "@/types/effect";
 
 type Props = {
   player: Player;
@@ -29,6 +30,7 @@ type Props = {
   onEdit: (player: Player) => void;
   onAddImmunity: (player: Player) => void;
   onAddResistance: (player: Player) => void;
+  onAddEffect: (player: Player) => void;
   onRemoveImmunity: (
     playerId: Player["id"],
     immunityId: DBImmunity["id"],
@@ -37,6 +39,7 @@ type Props = {
     playerId: Player["id"],
     resistanceId: DBResistance["id"],
   ) => void;
+  onRemoveEffect: (playerId: Player["id"], effectId: DBEffect["id"]) => void;
 };
 
 function PlayerCard({
@@ -44,12 +47,21 @@ function PlayerCard({
   expanded,
   onEdit,
   onRemove,
+  onAddEffect,
   onAddImmunity,
   onAddResistance,
   onRemoveImmunity,
   onRemoveResistance,
+  onRemoveEffect,
 }: Props) {
   const { t } = useTranslation("ComponentPlayerCard");
+  const positiveEffects = player.effects.filter(
+    (effect) => effect.type === "positive",
+  );
+  const negativeEffects = player.effects.filter(
+    (effect) => effect.type === "negative",
+  );
+
   function handleRemovePlayer() {
     onRemove(player.id);
   }
@@ -66,12 +78,18 @@ function PlayerCard({
     onRemoveResistance(player.id, resistanceId);
   }
 
+  function handleRemoveEffect(effectId: DBEffect["id"]) {
+    onRemoveEffect(player.id, effectId);
+  }
+
   const quickActions = () => (
     <DropdownMenuContent className="w-56">
       <DropdownMenuLabel>{player.name}</DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
-        <DropdownMenuItem>{t("addEffect")}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onAddEffect(player)}>
+          {t("addEffect")}
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onAddImmunity(player)}>
           {t("addImmunity")}
         </DropdownMenuItem>
@@ -192,6 +210,60 @@ function PlayerCard({
                         <Button
                           onClick={() => handleRemoveResistance(resistance.id)}
                         >
+                          {t("remove")}
+                        </Button>
+                      }
+                    />
+                  ))}
+                </div>
+              </Collapsible>
+            )}
+
+            {positiveEffects.length > 0 && (
+              <Collapsible
+                title={
+                  <div className="items-cent flex justify-between gap-2">
+                    <span>{t("positiveEffects")}</span>
+                    <span className="rounded-md bg-emerald-500 px-2 py-1 text-sm text-white">
+                      {positiveEffects.length}
+                    </span>
+                  </div>
+                }
+              >
+                <div className="flex w-full flex-col gap-4">
+                  {positiveEffects.map((effect) => (
+                    <ResistanceCard
+                      key={`player-${player.id}-effect-${effect.id}`}
+                      resistance={effect}
+                      actions={
+                        <Button onClick={() => handleRemoveEffect(effect.id)}>
+                          {t("remove")}
+                        </Button>
+                      }
+                    />
+                  ))}
+                </div>
+              </Collapsible>
+            )}
+
+            {negativeEffects.length > 0 && (
+              <Collapsible
+                title={
+                  <div className="items-cent flex justify-between gap-2">
+                    <span>{t("negativeEffects")}</span>
+                    <span className="rounded-md bg-red-500 px-2 py-1 text-sm text-white">
+                      {negativeEffects.length}
+                    </span>
+                  </div>
+                }
+              >
+                <div className="flex w-full flex-col gap-4">
+                  {negativeEffects.map((effect) => (
+                    <ResistanceCard
+                      key={`player-${player.id}-effect-${effect.id}`}
+                      resistance={effect}
+                      actions={
+                        <Button onClick={() => handleRemoveEffect(effect.id)}>
                           {t("remove")}
                         </Button>
                       }

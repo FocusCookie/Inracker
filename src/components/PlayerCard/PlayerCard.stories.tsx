@@ -8,6 +8,8 @@ const meta = {
   component: PlayerCard,
   parameters: {},
   args: {
+    onAddEffect: fn(),
+    onRemoveEffect: fn(),
     onAddImmunity: fn(),
     onAddResistance: fn(),
     onEdit: fn(),

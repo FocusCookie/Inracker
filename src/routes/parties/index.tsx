@@ -4,7 +4,6 @@ import PartySelection from "@/pages/PartySelection/PartySelection";
 import { usePartyStore } from "@/stores/usePartySTore";
 import { Party } from "@/types/party";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
 import { useShallow } from "zustand/shallow";
 
 export const Route = createFileRoute("/parties/")({

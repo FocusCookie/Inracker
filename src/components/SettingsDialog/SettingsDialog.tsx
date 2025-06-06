@@ -68,9 +68,10 @@ function SettingsDialog({
         </DialogHeader>
 
         <Tabs defaultValue="general" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="general">{t("general")}</TabsTrigger>
             <TabsTrigger value="player-catalog">{t("players")}</TabsTrigger>
+            <TabsTrigger value="effects">Effects</TabsTrigger>
             <TabsTrigger value="cleanup">clean up</TabsTrigger>
             <TabsTrigger value="opponents">Opponents</TabsTrigger>
           </TabsList>
@@ -151,6 +152,11 @@ function SettingsDialog({
                   ))}
               </div>
             </ScrollArea>
+          </TabsContent>
+
+          <TabsContent value="effects">
+            //TODO: implement a delete function for effects but they need to be
+            removed on every char as well effects
           </TabsContent>
 
           <TabsContent value="cleanup">

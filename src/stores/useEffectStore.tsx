@@ -1,8 +1,6 @@
-import { DBEffect } from "@/types/effect";
 import { create } from "zustand";
 
 interface EffectState {
-  effects: DBEffect[];
   isCreateEffectDrawerOpen: boolean;
   isCreatingEffect: boolean;
   isEffectsCatalogOpen: boolean;
@@ -14,7 +12,6 @@ interface EffectState {
 }
 
 export const useEffectStore = create<EffectState>((set) => ({
-  effects: [],
   isCreateEffectDrawerOpen: false,
   isCreatingEffect: false,
   isEffectsCatalogOpen: false,

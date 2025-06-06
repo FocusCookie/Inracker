@@ -19,15 +19,21 @@ import {
 import { TypographyH1 } from "@/components/ui/typographyH1";
 import { TypographyP } from "@/components/ui/typographyP";
 import { useChapterStore } from "@/stores/useChapterStore";
+import { useEffectStore } from "@/stores/useEffectStore";
 import { useImmunityStore } from "@/stores/useImmunityStore";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { useResistancesStore } from "@/stores/useResistanceStore";
 import { Chapter } from "@/types/chapters";
+import { DBEffect } from "@/types/effect";
 import { DBImmunity } from "@/types/immunitiy";
 import { Party } from "@/types/party";
 import { Player } from "@/types/player";
 import { DBResistance } from "@/types/resistances";
-import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
+import {
+  CardStackPlusIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@radix-ui/react-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
@@ -49,6 +55,10 @@ type Props = {
     playerId: Player["id"],
     resistanceId: DBResistance["id"],
   ) => void;
+  onRemoveEffectFromPlayer: (
+    playerId: Player["id"],
+    effectId: DBEffect["id"],
+  ) => void;
 };
 
 function ChapterSelection({
@@ -58,6 +68,7 @@ function ChapterSelection({
   onRemovePlayerFromParty,
   onRemoveImmunityFromPlayer,
   onRemoveResistanceFromPlayer,
+  onRemoveEffectFromPlayer,
 }: Props) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -96,19 +107,27 @@ function ChapterSelection({
     })),
   );
 
-  const { openImmunititesCatalog } = useImmunityStore(
+  const { openImmunititesCatalog, openCreateImmunityDrawer } = useImmunityStore(
     useShallow((state) => ({
       openImmunititesCatalog: state.openImmunititesCatalog,
+      openCreateImmunityDrawer: state.openCreateImmunityDrawer,
     })),
   );
 
-  const { openResistancesCatalog } = useResistancesStore(
+  const { openEffectsCatalog, openCreateEffectDrawer } = useEffectStore(
     useShallow((state) => ({
-      openCreateResistanceDrawer: state.openCreateResistanceDrawer,
-      closeCreateResistanceDrawer: state.closeCreateResistanceDrawer,
-      openResistancesCatalog: state.openResistancesCatalog,
+      openEffectsCatalog: state.openEffectsCatalog,
+      openCreateEffectDrawer: state.openCreateEffectDrawer,
     })),
   );
+
+  const { openResistancesCatalog, openCreateResistanceDrawer } =
+    useResistancesStore(
+      useShallow((state) => ({
+        openCreateResistanceDrawer: state.openCreateResistanceDrawer,
+        openResistancesCatalog: state.openResistancesCatalog,
+      })),
+    );
 
   useEffect(() => {
     //TODO: Shortcut for other OS
@@ -161,6 +180,11 @@ function ChapterSelection({
     openImmunititesCatalog();
   }
 
+  function handleOnAddEffectToPlayer(player: Player) {
+    setSelectedPlayer(player);
+    openEffectsCatalog();
+  }
+
   function handleAddResistanceToPlayer(player: Player) {
     setSelectedPlayer(player);
     openResistancesCatalog();
@@ -196,6 +220,7 @@ function ChapterSelection({
                 key={player.id}
                 player={player}
                 expanded={isAsideOpen}
+                onAddEffect={handleOnAddEffectToPlayer}
                 onRemove={onRemovePlayerFromParty}
                 onEdit={(player: Player) => {
                   setSelectedPlayer(player);
@@ -205,6 +230,7 @@ function ChapterSelection({
                 onAddResistance={handleAddResistanceToPlayer}
                 onRemoveImmunity={onRemoveImmunityFromPlayer}
                 onRemoveResistance={onRemoveResistanceFromPlayer}
+                onRemoveEffect={onRemoveEffectFromPlayer}
               />
             ))}
           </MainLayout.Players>
@@ -224,6 +250,28 @@ function ChapterSelection({
             >
               {!isAsideOpen && (
                 <>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost">
+                        <CardStackPlusIcon />
+                      </Button>
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent className="w-56">
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem onClick={openCreateEffectDrawer}>
+                          {t("createEffect")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={openCreateImmunityDrawer}>
+                          {t("createImmunity")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={openCreateResistanceDrawer}>
+                          {t("createResistance")}
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button size="icon" variant="ghost">

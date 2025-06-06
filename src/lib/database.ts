@@ -1676,6 +1676,41 @@ export const Database = {
       const db = await connect();
       return removeResistanceFromPlayer(db, playerId, resistanceId);
     },
+    addEffectToPlayer: async (
+      playerId: Player["id"],
+      effectId: DBEffect["id"],
+    ) => {
+      const db = await connect();
+      const { effects } = await getDetailedPlayerById(db, playerId);
+      const isAlreadySet = effects.some((effect) => effect.id === effectId);
+      const update = effects.map((effect) => effect.id);
+
+      if (!isAlreadySet) {
+        update.push(effectId);
+
+        await db.execute("UPDATE players SET effects = $2 WHERE id = $1", [
+          playerId,
+          JSON.stringify(update.map((id: number) => id)),
+        ]);
+      }
+
+      return getDetailedPlayerById(db, playerId);
+    },
+    removeEffectFromPlayer: async (
+      playerId: Player["id"],
+      effectId: DBEffect["id"],
+    ) => {
+      const db = await connect();
+      const { effects } = await getDetailedPlayerById(db, playerId);
+      const update = effects.filter((effect) => effect.id !== effectId);
+
+      await db.execute("UPDATE players SET effects = $2 WHERE id = $1", [
+        playerId,
+        JSON.stringify(update.map((im) => im.id).map((id: number) => id)),
+      ]);
+
+      return getDetailedPlayerById(db, playerId);
+    },
     deletePlayerById: async (playerId: Player["id"]) => {
       const db = await connect();
       return deletePlayerById(db, playerId);

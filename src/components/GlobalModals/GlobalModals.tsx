@@ -43,7 +43,7 @@ import { DBEffect, Effect } from "@/types/effect";
 import { Encounter } from "@/types/encounter";
 import CreateEffectDrawer from "../CreateEffectDrawer/CreateEffectDrawer";
 import { useEffectStore } from "@/stores/useEffectStore";
-import { create } from "domain";
+import EffectsCatalog from "../EffectsCatalog/EffectsCatalog";
 
 type Props = {};
 
@@ -240,7 +240,6 @@ function GlobalModals({}: Props) {
   );
 
   const {
-    effects,
     isCreateEffectDrawerOpen,
     isCreatingEffect,
     isEffectsCatalogOpen,
@@ -251,7 +250,6 @@ function GlobalModals({}: Props) {
     setIsCreatingEffect,
   } = useEffectStore(
     useShallow((state) => ({
-      effects: state.effects,
       isCreateEffectDrawerOpen: state.isCreateEffectDrawerOpen,
       isCreatingEffect: state.isCreatingEffect,
       isEffectsCatalogOpen: state.isEffectsCatalogOpen,
@@ -287,6 +285,11 @@ function GlobalModals({}: Props) {
   const opponents = useQueryWithToast({
     queryKey: ["opponents"],
     queryFn: () => db.opponents.getAllDetailed(),
+  });
+
+  const effects = useQueryWithToast({
+    queryKey: ["effects"],
+    queryFn: () => db.effects.getAll(),
   });
 
   const addPlayerToParty = useMutationWithErrorToast({
@@ -338,9 +341,7 @@ function GlobalModals({}: Props) {
     }) => {
       return db.players.addImmunityToPlayer(playerId, immunityId);
     },
-    onError: (error) => {
-      console.log(error);
-    },
+
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["party"],
@@ -361,8 +362,26 @@ function GlobalModals({}: Props) {
     }) => {
       return db.players.addResistanceToPlayer(playerId, resistanceId);
     },
-    onError: (error) => {
-      console.log(error);
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["party"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["players"],
+      });
+    },
+  });
+
+  const addEffectToPlayer = useMutationWithErrorToast({
+    mutationFn: async ({
+      playerId,
+      effectId: effectId,
+    }: {
+      playerId: Player["id"];
+      effectId: DBEffect["id"];
+    }) => {
+      return db.players.addEffectToPlayer(playerId, effectId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -828,6 +847,34 @@ function GlobalModals({}: Props) {
     }
   }
 
+  function handleAddEffectToChar(effect: DBEffect) {
+    if (selectedPlayer) {
+      const isAlreadyAdded = selectedPlayer.effects.some(
+        (playerEffect) => playerEffect.id === effect.id,
+      );
+
+      if (!isAlreadyAdded) {
+        addEffectToPlayer.mutate({
+          playerId: selectedPlayer.id,
+          effectId: effect.id,
+        });
+
+        toast({
+          variant: "default",
+          title: `Added ${effect.icon} ${effect.name} to ${selectedPlayer!.name}`,
+        });
+
+        const updateSelectedPlayer = Object.assign({}, selectedPlayer);
+        updateSelectedPlayer.effects.push(effect);
+      } else {
+        toast({
+          variant: "default",
+          title: "Already Added",
+        });
+      }
+    }
+  }
+
   function handleRemoveEncounterOpponent(opponentId: EncounterOpponent["id"]) {
     deleteEncounterOpponentMutation.mutate(opponentId);
 
@@ -957,6 +1004,17 @@ function GlobalModals({}: Props) {
         />
       )}
 
+      {effects.data && (
+        <EffectsCatalog
+          effects={effects.data || []}
+          open={isEffectsCatalogOpen}
+          onOpenChange={(state: boolean) =>
+            state ? openEffectsCatalog() : closeEffectsCatalog()
+          }
+          onAdd={handleAddEffectToChar}
+        />
+      )}
+
       <CreateEncounterDrawer
         form={createEncounterForm}
         opponents={opponents.data || []}
@@ -1002,7 +1060,7 @@ function GlobalModals({}: Props) {
 
       <CreateEffectDrawer
         isCreating={createEffect.isPending}
-        open={true}
+        open={isCreateEffectDrawerOpen}
         onOpenChange={(state: boolean) =>
           state ? openCreateEffectDrawer() : closeCreateEffectDrawer()
         }
