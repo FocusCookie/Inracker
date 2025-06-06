@@ -11,5 +11,8 @@
   "addPlayer": "Add Player",
   "addFromCatalog": "Add from catalog",
   "createNewPlayer": "Create new Player",
-  "createChapter": "Create a Chapter"
+  "createChapter": "Create a Chapter",
+  "createImmunity": "Create Immunity",
+  "createResistance": "Create Resistance",
+  "createEffect": "Create Effect"
 }

@@ -18,9 +18,7 @@ import { DBParty, Party } from "@/types/party";
 import { DBPlayer, Player, TCreatePlayer } from "@/types/player";
 import { DBResistance, Resistance } from "@/types/resistances";
 import { DBToken, Token, TokenCoordinates } from "@/types/tokens";
-import { appDataDir, join } from "@tauri-apps/api/path";
 import TauriDatabase from "@tauri-apps/plugin-sql";
-import { BaseDirectory } from "@tauri-apps/plugin-fs";
 import { deleteImage } from "./utils";
 
 const environment = import.meta.env.VITE_ENV;
@@ -77,10 +75,11 @@ const createEffect = async (
   db: TauriDatabase,
   effect: Omit<Effect, "id">,
 ): Promise<DBEffect> => {
-  const { name, icon, description, duration, durationType, type } = effect;
+  const { name, icon, description, duration, durationType, type, value } =
+    effect;
   const result = await db.execute(
-    "INSERT INTO effects (name, icon, description, duration, duration_type, type) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-    [name, icon, description, duration, durationType, type],
+    "INSERT INTO effects (name, icon, description, duration, duration_type, type, value) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+    [name, icon, description, duration, durationType, type, value],
   );
 
   return getEffectById(db, result!.lastInsertId as number);
@@ -342,7 +341,16 @@ const getDetailedPlayerById = async (
   for (const effectId of effectsIds) {
     const buff = await getEffectById(db, effectId);
 
-    const { description, duration, duration_type, icon, id, name, type } = buff;
+    const {
+      description,
+      duration,
+      duration_type,
+      icon,
+      id,
+      name,
+      type,
+      value,
+    } = buff;
 
     effects.push({
       description,
@@ -352,6 +360,7 @@ const getDetailedPlayerById = async (
       id,
       name,
       type,
+      value,
     });
   }
 
@@ -1666,6 +1675,41 @@ export const Database = {
     ) => {
       const db = await connect();
       return removeResistanceFromPlayer(db, playerId, resistanceId);
+    },
+    addEffectToPlayer: async (
+      playerId: Player["id"],
+      effectId: DBEffect["id"],
+    ) => {
+      const db = await connect();
+      const { effects } = await getDetailedPlayerById(db, playerId);
+      const isAlreadySet = effects.some((effect) => effect.id === effectId);
+      const update = effects.map((effect) => effect.id);
+
+      if (!isAlreadySet) {
+        update.push(effectId);
+
+        await db.execute("UPDATE players SET effects = $2 WHERE id = $1", [
+          playerId,
+          JSON.stringify(update.map((id: number) => id)),
+        ]);
+      }
+
+      return getDetailedPlayerById(db, playerId);
+    },
+    removeEffectFromPlayer: async (
+      playerId: Player["id"],
+      effectId: DBEffect["id"],
+    ) => {
+      const db = await connect();
+      const { effects } = await getDetailedPlayerById(db, playerId);
+      const update = effects.filter((effect) => effect.id !== effectId);
+
+      await db.execute("UPDATE players SET effects = $2 WHERE id = $1", [
+        playerId,
+        JSON.stringify(update.map((im) => im.id).map((id: number) => id)),
+      ]);
+
+      return getDetailedPlayerById(db, playerId);
     },
     deletePlayerById: async (playerId: Player["id"]) => {
       const db = await connect();

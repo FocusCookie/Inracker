@@ -1,4 +1,5 @@
 import "i18next";
+import ComponentCreateEffectDrawer from "@/translations/en/component/CreateEffectDrawer.json";
 import ComponentOpponentsCatalog from "@/translations/en/component/OpponentsCatalog.json";
 import ComponentOpponentCard from "@/translations/en/component/OpponentCard.json";
 import ComponentCreateEncounterDrawer from "@/translations/en/component/CreateEncounterDrawer.json";
@@ -34,6 +35,7 @@ declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
       // hygen-components - DO NOT DELETE THIS LINE
+      ComponentCreateEffectDrawer: typeof ComponentCreateEffectDrawer;
       ComponentOpponentsCatalog: typeof ComponentOpponentsCatalog;
       ComponentOpponentCard: typeof ComponentOpponentCard;
       ComponentCreateEncounterDrawer: typeof ComponentCreateEncounterDrawer;

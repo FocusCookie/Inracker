@@ -16,6 +16,7 @@ const meta = {
       id: 1,
       name: "Santa Effect",
       type: "positive",
+      value: 1,
     },
     onRemove: fn(),
   },
@@ -43,6 +44,7 @@ export const NegativeEffect: Story = {
       id: 1,
       name: "Satan Effect",
       type: "negative",
+      value: 1,
     },
   },
 };

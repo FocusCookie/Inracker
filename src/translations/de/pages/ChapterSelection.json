@@ -12,5 +12,8 @@
   "addPlayer": "Spieler hinzufügen",
   "addFromCatalog": "Aus dem Katalog",
   "createNewPlayer": "Neuen Character erstellen",
-  "createChapter": "Erstelle ein Kapitlel"
+  "createChapter": "Erstelle ein Kapitlel",
+  "createImmunity": "Immunität erstellen",
+  "createResistance": "Resistenz erstellen",
+  "createEffect": "Effekt erstellen"
 }

@@ -7,31 +7,31 @@ const meta = {
   title: "Components/EffectsCatalog",
   component: EffectsCatalog,
   args: {
-    onAddEffect: fn(),
-    // @ts-expect-error
-    query: {
-      data: [
-        {
-          description: "description text",
-          duration: 1,
-          duration_type: "rounds",
-          icon: "😎",
-          id: 1,
-          name: "sunglass filter",
-          type: "positive",
-        },
-        {
-          description: "description text",
-          duration: 1,
-          duration_type: "rounds",
-          icon: "💩",
-          id: 2,
-          name: "bad sunglass filter",
-          type: "negative",
-        },
-      ],
-    },
-    selection: [],
+    open: true,
+    onOpenChange: fn(),
+    onAdd: fn(),
+    effects: [
+      {
+        description: "descriptive text",
+        duration: 4,
+        duration_type: "rounds",
+        icon: "🎅",
+        id: 1,
+        name: "Santa Effect",
+        type: "positive",
+        value: 1,
+      },
+      {
+        description: "descriptive text",
+        duration: 4,
+        duration_type: "rounds",
+        icon: "👹",
+        id: 2,
+        name: "Satan Effect",
+        type: "negative",
+        value: 1,
+      },
+    ],
   },
   decorators: [
     (Story) => (

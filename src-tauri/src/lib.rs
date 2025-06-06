@@ -50,7 +50,7 @@ pub fn run() {
             description: "create effects table",
             sql: "CREATE TABLE IF NOT EXISTS effects(
                 description TEXT,
-                damage INTEGER,
+                value INTEGER,
                 duration INTEGER,
                 duration_type TEXT NOT NULL,
                 icon TEXT NOT NULL,

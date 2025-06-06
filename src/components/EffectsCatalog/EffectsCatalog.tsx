@@ -1,94 +1,75 @@
 import { DBEffect } from "@/types/effect";
-import { UseQueryResult } from "@tanstack/react-query";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Catalog from "../Catalog/Catalog";
-import { ScrollArea } from "../ui/scroll-area";
 import EffectCard from "../EffectCard/EffectCard";
 import { Button } from "../ui/button";
-import { PlusIcon } from "@radix-ui/react-icons";
-import Loader from "../Loader/Loader";
-import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import { MoonIcon } from "@radix-ui/react-icons";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { useEffectStore } from "@/stores/useEffectStore";
+import { useShallow } from "zustand/shallow";
 
 type Props = {
-  query: UseQueryResult<DBEffect[], unknown>;
-  selection: DBEffect[];
-  onAddEffect: (effect: DBEffect) => void;
+  effects: DBEffect[];
+  open: boolean;
+  onOpenChange: (state: boolean) => void;
+  onAdd: (effect: DBEffect) => void;
 };
 
-type TType = "all" | "negative" | "positive";
-
-function EffectsCatalog({ query, selection, onAddEffect }: Props) {
+function EffectsCatalog({ effects, open, onOpenChange, onAdd }: Props) {
   const { t } = useTranslation("ComponentEffectsCatalog");
   const [searchTerm, setSearchTerm] = useState("");
-  const [type, setType] = useState<TType>("all");
 
-  function handleSearchTerm(search: string) {
-    setSearchTerm(search);
-  }
+  const { openCreateEffectDrawer } = useEffectStore(
+    useShallow((state) => ({
+      openCreateEffectDrawer: state.openCreateEffectDrawer,
+    })),
+  );
 
-  function handleTypeSelection(type: string) {
-    setType(type as TType);
+  function handleCreateEffect() {
+    onOpenChange(false);
+    openCreateEffectDrawer();
   }
 
   return (
-    <>
-      {!query.isLoading && query?.data && (
-        <Catalog
-          disabled={query.isLoading}
-          triggerName={t("effects")}
-          title={t("effects")}
-          description={t("description")}
-          onSearchChange={handleSearchTerm}
-        >
-          <Tabs
-            onValueChange={handleTypeSelection}
-            defaultValue="all"
-            className="w-full pb-4 pr-4"
-          >
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="positive">Positive</TabsTrigger>
-              <TabsTrigger value="negative">Negative</TabsTrigger>
-            </TabsList>
-          </Tabs>
+    <Catalog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("effects")}
+      description={t("description")}
+      placeholder={t("placeholderSearch")}
+      search={searchTerm}
+      onSearchChange={setSearchTerm}
+    >
+      {effects
+        .filter((effect) =>
+          effect.name
+            .toLocaleLowerCase()
+            .includes(searchTerm.toLocaleLowerCase()),
+        )
+        .map((effect) => (
+          <EffectCard
+            key={`effect-catalog-${effect.id}`}
+            effect={effect}
+            actions={<Button onClick={() => onAdd(effect)}>add</Button>}
+          />
+        ))}
 
-          <ScrollArea className="h-full">
-            <div className="flex h-full flex-col gap-4 p-0.5 pr-4">
-              {query.data
-                .filter((effect) =>
-                  type === "positive" || type === "negative"
-                    ? effect.type === type
-                    : true,
-                )
-                .filter((effect) =>
-                  effect.name.toLowerCase().includes(searchTerm.toLowerCase()),
-                )
-                .filter(
-                  (effect) => !selection.some((item) => item.id === effect.id),
-                )
-                .map((effect) => (
-                  <EffectCard
-                    key={effect.id}
-                    effect={effect}
-                    actions={
-                      <Button size="icon" onClick={() => onAddEffect(effect)}>
-                        <PlusIcon />
-                      </Button>
-                    }
-                  />
-                ))}
+      {effects.length === 0 && (
+        <Alert>
+          <MoonIcon />
+          <AlertTitle>{t("noEffects")}</AlertTitle>
+          <AlertDescription>
+            {t("noEffectsDescription")}
+            <div className="flex w-full justify-center">
+              <Button onClick={handleCreateEffect} className="mt-2">
+                {t("createEffect")}
+              </Button>
             </div>
-          </ScrollArea>
-        </Catalog>
+          </AlertDescription>
+        </Alert>
       )}
-
-      {!query.isLoading && !query?.data && t("nothingFound")}
-
-      {query.isLoading && (
-        <Loader size="large" title={t("loading")} key="loader-effect-catalog" />
-      )}
-    </>
+    </Catalog>
   );
 }
 

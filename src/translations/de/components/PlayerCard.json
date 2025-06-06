@@ -9,5 +9,7 @@
   "addEffect": "Effekt hinzufügen",
   "level": "Stufe",
   "immunitites": "Immunitäten",
-  "resistances": "Wiederstände"
+  "resistances": "Wiederstände",
+  "positiveEffects": "Positive Effekte",
+  "negativeEffects": "Negative Effekte"
 }

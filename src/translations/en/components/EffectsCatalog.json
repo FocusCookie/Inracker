@@ -1,6 +1,10 @@
 {
   "effects": "Effects",
-  "description": "Choose an effect that is either positive or negative for the character, influencing their abilities, weaknesses, or behavior.",
+  "description": "Choose an effect that is either positive or negative for the character, thereby influencing his abilities, weaknesses or behavior.",
   "nothingFound": "No effects found. Create one!",
-  "loading": "Loading effects..."
+  "placeholderSearch": "Search for effects...",
+  "loading": "Loading effects...",
+  "noEffects": "No effects available",
+  "noEffectsDescription": "There are no effects yet. Create one now!",
+  "createEffect": "Create effect"
 }
