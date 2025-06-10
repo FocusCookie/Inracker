@@ -38,6 +38,7 @@ ReactDOM.createRoot(rootElement).render(
         <RouterProvider router={router} />
       </div>
     </QueryClientProvider>
+
     <div id="drawer-portal" />
 
     <div className="z-50">

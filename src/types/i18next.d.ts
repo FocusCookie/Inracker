@@ -1,4 +1,7 @@
 import "i18next";
+import ComponentSettingEffectCard from "@/translations/en/component/SettingEffectCard.json";
+import ComponentSettingPlayerCard from "@/translations/en/component/SettingPlayerCard.json";
+import ComponentEditEffectDrawer from "@/translations/en/component/EditEffectDrawer.json";
 import ComponentCreateEffectDrawer from "@/translations/en/component/CreateEffectDrawer.json";
 import ComponentOpponentsCatalog from "@/translations/en/component/OpponentsCatalog.json";
 import ComponentOpponentCard from "@/translations/en/component/OpponentCard.json";
@@ -35,6 +38,9 @@ declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
       // hygen-components - DO NOT DELETE THIS LINE
+      ComponentSettingEffectCard: typeof ComponentSettingEffectCard;
+      ComponentSettingPlayerCard: typeof ComponentSettingPlayerCard;
+      ComponentEditEffectDrawer: typeof ComponentEditEffectDrawer;
       ComponentCreateEffectDrawer: typeof ComponentCreateEffectDrawer;
       ComponentOpponentsCatalog: typeof ComponentOpponentsCatalog;
       ComponentOpponentCard: typeof ComponentOpponentCard;

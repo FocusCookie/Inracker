@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { DBEffect } from "@/types/effect";
+import { DBEffect, Effect } from "@/types/effect";
 import { TrashIcon } from "@radix-ui/react-icons";
 import React from "react";
 import Collapsible from "../Collapsible/Collapsible";
@@ -7,7 +7,7 @@ import MarkdownReader from "../MarkdownReader/MarkdownReader";
 import { Button } from "../ui/button";
 
 type Props = {
-  effect: DBEffect;
+  effect: Effect;
   /**
    * react element rendered behind the chevron
    */

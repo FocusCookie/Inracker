@@ -1,11 +1,8 @@
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { Player } from "@/types/player";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/shallow";
-import IconAvatar from "../IconAvatar/IconAvatar";
-import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -14,26 +11,34 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import SettingPlayerCard from "../SettingPlayerCard/SettingPlayerCard";
+import { useEffectStore } from "@/stores/useEffectStore";
+import { Effect } from "@/types/effect";
+import SettingEffectCard from "../SettingEffectCard/SettingEffectCard";
 
 type Props = {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
   players: Player[];
+  effects: Effect[];
+  onOpenChange: (open: boolean) => void;
   onDeletePlayer: (playerId: Player["id"]) => void;
+  onDeleteEffect: (effectId: Effect["id"]) => void;
 };
 
 function SettingsDialog({
   open,
   players,
+  effects,
   onOpenChange,
   onDeletePlayer,
+  onDeleteEffect,
 }: Props) {
   const { t } = useTranslation("ComponentSettingsDialog");
-  const [search, setSearch] = useState("");
+  const [playerSearch, setPlayerSearch] = useState("");
+  const [effectSearch, setEffectSearch] = useState("");
 
   const { setSelectedPlayer, openEditPlayerDrawer } = usePlayerStore(
     useShallow((state) => ({
@@ -42,19 +47,37 @@ function SettingsDialog({
     })),
   );
 
+  const { openEditEffectDrawer, setSelectedEffect } = useEffectStore(
+    useShallow((state) => ({
+      openEditEffectDrawer: state.openEditEffectDrawer,
+      setSelectedEffect: state.setSelectedEffect,
+    })),
+  );
+
   useEffect(() => {
     if (!open) {
-      setSearch("");
+      setPlayerSearch("");
+      setEffectSearch("");
     }
   }, [open]);
 
-  function handleSearchTerm(event: React.ChangeEvent<HTMLInputElement>) {
-    setSearch(event.target.value);
+  function handlePlayerSearchTerm(event: React.ChangeEvent<HTMLInputElement>) {
+    setPlayerSearch(event.target.value);
   }
 
   function handleEditPlayer(player: Player) {
     setSelectedPlayer(player);
     openEditPlayerDrawer();
+    onOpenChange(false);
+  }
+
+  function handleEffectSearch(event: React.ChangeEvent<HTMLInputElement>) {
+    setEffectSearch(event.target.value);
+  }
+
+  function handleEditEffect(effect: Effect) {
+    setSelectedEffect(effect);
+    openEditEffectDrawer();
     onOpenChange(false);
   }
 
@@ -85,78 +108,56 @@ function SettingsDialog({
             <Input
               className="mt-4"
               placeholder="Search for a specific hero..."
-              onChange={handleSearchTerm}
+              onChange={handlePlayerSearchTerm}
             />
 
-            <ScrollArea className="h-full">
-              <div className="flex h-full flex-col gap-4">
+            <div className="scrollable-y overflow-y-scroll pr-0.5">
+              <div className="flex h-full max-h-96 flex-col gap-4">
                 {players
                   .filter((player) =>
-                    player.name.toLowerCase().includes(search.toLowerCase()),
+                    player.name
+                      .toLowerCase()
+                      .includes(playerSearch.toLowerCase()),
                   )
 
                   .map((player) => (
-                    <div
+                    <SettingPlayerCard
                       key={player.id}
-                      className="focus-visible:ring-ring hover:bg-secondary/80 focus-within:bg-secondary/80 flex w-full items-center justify-start gap-2 rounded-md p-4 ring-offset-1 outline-black transition-colors focus-within:outline-1 focus-visible:ring-1"
-                    >
-                      <IconAvatar player={player} />
-
-                      <div className="flex grow flex-col items-start justify-start">
-                        <span className="text-xl font-bold">{player.name}</span>
-
-                        <div className="flex gap-2">
-                          <Badge variant="outline">{player.role}</Badge>
-                          <Badge variant="outline">
-                            {t("level")} {player.level}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-4">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="ghost">{t("delete")}</Button>
-                          </DialogTrigger>
-                          <DialogContent className="sm:max-w-[425px]">
-                            <DialogHeader>
-                              <DialogTitle>
-                                {t("delete")} {player.name}
-                              </DialogTitle>
-                              <DialogDescription>
-                                {t("deletionWarning")}
-                              </DialogDescription>
-                            </DialogHeader>
-
-                            <DialogFooter>
-                              <Button
-                                variant="destructive"
-                                type="button"
-                                onClick={() => onDeletePlayer(player.id)}
-                              >
-                                {t("delete")}
-                                {player.name}
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-
-                        <Button
-                          onClick={() => handleEditPlayer(player)}
-                          variant="outline"
-                        >
-                          {t("edit")}
-                        </Button>
-                      </div>
-                    </div>
+                      player={player}
+                      onDelete={() => onDeletePlayer(player.id)}
+                      onEdit={() => handleEditPlayer(player)}
+                    />
                   ))}
               </div>
-            </ScrollArea>
+            </div>
           </TabsContent>
 
           <TabsContent value="effects">
-            //TODO: implement a delete function for effects but they need to be
-            removed on every char as well effects
+            <Input
+              className="mt-4"
+              placeholder="Search for a specific effect..."
+              onChange={handleEffectSearch}
+            />
+
+            <div className="scrollable-y overflow-y-scroll pr-0.5">
+              <div className="flex h-full max-h-96 flex-col gap-4">
+                {effects
+                  .filter((effect) =>
+                    effect.name
+                      .toLowerCase()
+                      .includes(effectSearch.toLowerCase()),
+                  )
+
+                  .map((effect) => (
+                    <SettingEffectCard
+                      key={effect.id}
+                      effect={effect}
+                      onDelete={onDeleteEffect}
+                      onEdit={handleEditEffect}
+                    />
+                  ))}
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="cleanup">

@@ -29,7 +29,7 @@ export type DBPlayer = {
 
 export type Player = Prettify<
   Omit<DBPlayer, "effects" | "immunities" | "resistances"> & {
-    effects: DBEffect[];
+    effects: Effect[];
     immunities: DBImmunity[];
     resistances: DBResistance[];
   }

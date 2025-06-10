@@ -1,5 +1,11 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentSettingEffectCardEN from "@/translations/en/components/SettingEffectCard.json";
+import ComponentSettingEffectCardDE from "@/translations/de/components/SettingEffectCard.json"; 
+import ComponentSettingPlayerCardEN from "@/translations/en/components/SettingPlayerCard.json";
+import ComponentSettingPlayerCardDE from "@/translations/de/components/SettingPlayerCard.json"; 
+import ComponentEditEffectDrawerEN from "@/translations/en/components/EditEffectDrawer.json";
+import ComponentEditEffectDrawerDE from "@/translations/de/components/EditEffectDrawer.json"; 
 import ComponentCreateEffectDrawerEN from "@/translations/en/components/CreateEffectDrawer.json";
 import ComponentCreateEffectDrawerDE from "@/translations/de/components/CreateEffectDrawer.json"; 
 import ComponentOpponentsCatalogEN from "@/translations/en/components/OpponentsCatalog.json";
@@ -63,6 +69,9 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentSettingEffectCard: ComponentSettingEffectCardEN,
+    ComponentSettingPlayerCard: ComponentSettingPlayerCardEN,
+    ComponentEditEffectDrawer: ComponentEditEffectDrawerEN,
     ComponentCreateEffectDrawer: ComponentCreateEffectDrawerEN,
     ComponentOpponentsCatalog: ComponentOpponentsCatalogEN,
     ComponentOpponentCard: ComponentOpponentCardEN,
@@ -99,6 +108,9 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentSettingEffectCard: ComponentSettingEffectCardDE,
+    ComponentSettingPlayerCard: ComponentSettingPlayerCardDE,
+    ComponentEditEffectDrawer: ComponentEditEffectDrawerDE,
     ComponentCreateEffectDrawer: ComponentCreateEffectDrawerDE,
     ComponentOpponentsCatalog: ComponentOpponentsCatalogDE,
     ComponentOpponentCard: ComponentOpponentCardDE,

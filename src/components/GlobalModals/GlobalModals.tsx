@@ -25,7 +25,6 @@ import PlayerCatalog from "../PlayerCatalog/PlayerCatalog";
 import ResistancesCatalog from "../ResistancesCatalog/ResistancesCatalog";
 import SettingsDialog from "../SettingsDialog/SettingsDialog";
 import { useChapterStore } from "@/stores/useChapterStore";
-// @ts-ignore //TODO: fix error here
 import { usePartyStore } from "@/stores/usePartySTore";
 import { Chapter, DBChapter } from "@/types/chapters";
 import CreateChapterDrawer from "../CreateChapterDrawer/CreateChapterDrawer";
@@ -44,8 +43,11 @@ import { Encounter } from "@/types/encounter";
 import CreateEffectDrawer from "../CreateEffectDrawer/CreateEffectDrawer";
 import { useEffectStore } from "@/stores/useEffectStore";
 import EffectsCatalog from "../EffectsCatalog/EffectsCatalog";
+import EditEffectDrawer from "../EditEffectDrawer/EditEffectDrawer";
 
 type Props = {};
+
+//TODO: Refacot this component, it is too big and has too many responsibilities
 
 function GlobalModals({}: Props) {
   const queryClient = useQueryClient();
@@ -241,23 +243,29 @@ function GlobalModals({}: Props) {
 
   const {
     isCreateEffectDrawerOpen,
-    isCreatingEffect,
     isEffectsCatalogOpen,
     openCreateEffectDrawer,
     closeCreateEffectDrawer,
     openEffectsCatalog,
     closeEffectsCatalog,
-    setIsCreatingEffect,
+    selectedEffect,
+    openEditEffectDrawer,
+    closeEditEffectDrawer,
+    isEditingEffectDrawerOpen,
+    setSelectedEffect,
   } = useEffectStore(
     useShallow((state) => ({
       isCreateEffectDrawerOpen: state.isCreateEffectDrawerOpen,
-      isCreatingEffect: state.isCreatingEffect,
       isEffectsCatalogOpen: state.isEffectsCatalogOpen,
       openCreateEffectDrawer: state.openCreateEffectDrawer,
       closeCreateEffectDrawer: state.closeCreateEffectDrawer,
       openEffectsCatalog: state.openEffectsCatalog,
       closeEffectsCatalog: state.closeEffectsCatalog,
-      setIsCreatingEffect: state.setIsCreatingEffect,
+      selectedEffect: state.selectedEffect,
+      openEditEffectDrawer: state.openEditEffectDrawer,
+      closeEditEffectDrawer: state.closeEditEffectDrawer,
+      isEditingEffectDrawerOpen: state.isEditingEffectDrawerOpen,
+      setSelectedEffect: state.setSelectedEffect,
     })),
   );
 
@@ -427,12 +435,10 @@ function GlobalModals({}: Props) {
 
   const createEffect = useMutationWithErrorToast({
     mutationFn: (effect: Omit<Effect, "id">) => {
-      setIsCreatingEffect(true);
       return db.effects.create(effect);
     },
-    onSuccess: (effect: DBEffect) => {
+    onSuccess: (effect: Effect) => {
       queryClient.invalidateQueries({ queryKey: ["effects"] });
-      setIsCreatingEffect(false);
       closeCreateEffectDrawer();
       toast({
         variant: "default",
@@ -458,6 +464,26 @@ function GlobalModals({}: Props) {
         variant: "default",
         title: `Updated ${player.icon} ${player.name}`,
       });
+    },
+  });
+
+  const updateEffect = useMutationWithErrorToast({
+    mutationFn: (effect: Effect) => {
+      return db.effects.update(effect);
+    },
+    onSuccess: (effect: Effect) => {
+      queryClient.invalidateQueries({ queryKey: ["effects"] });
+      queryClient.invalidateQueries({ queryKey: ["party"] });
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+
+      toast({
+        variant: "default",
+        title: `Updated ${effect.icon} ${effect.name}`,
+      });
+    },
+    onSettled: () => {
+      closeEditEffectDrawer();
+      setSelectedEffect(null);
     },
   });
 
@@ -565,6 +591,25 @@ function GlobalModals({}: Props) {
     },
     onSettled: () => {
       closeEditDrawer();
+    },
+  });
+
+  const deleteEffect = useMutationWithErrorToast({
+    mutationFn: (id: Effect["id"]) => {
+      return db.effects.delete(id);
+    },
+    onSuccess: (deletedEffect: DBEffect) => {
+      queryClient.invalidateQueries({ queryKey: ["effects"] });
+      queryClient.invalidateQueries({ queryKey: ["party"] });
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+
+      toast({
+        variant: "default",
+        title: `Deleted ${deletedEffect.icon} ${deletedEffect.name}`,
+      });
+    },
+    onSettled: () => {
+      closeEffectsCatalog();
     },
   });
 
@@ -847,7 +892,7 @@ function GlobalModals({}: Props) {
     }
   }
 
-  function handleAddEffectToChar(effect: DBEffect) {
+  function handleAddEffectToChar(effect: Effect) {
     if (selectedPlayer) {
       const isAlreadyAdded = selectedPlayer.effects.some(
         (playerEffect) => playerEffect.id === effect.id,
@@ -923,17 +968,6 @@ function GlobalModals({}: Props) {
         />
       )}
 
-      <EditPlayerDrawer
-        player={selectedPlayer}
-        open={isEditPlayerDrawerOpen}
-        loading={updatePlayer.isPending}
-        form={editPlayerForm}
-        onOpenChange={(state: boolean) =>
-          state ? openEditPlayerDrawer() : closeEditPlayerDrawer()
-        }
-        onSave={updatePlayer.mutate}
-      />
-
       {immunities.data && resistances.data && (
         <CreateOpponentDrawer
           form={createOpponentForm}
@@ -970,17 +1004,6 @@ function GlobalModals({}: Props) {
           partyId={currentParty}
         />
       )}
-
-      <PartyEditDrawer
-        open={isEditDrawerOpen}
-        onOpenChange={closeEditDrawer}
-        party={editingParty}
-        isUpdating={
-          deletePartyMutation.isPending || deletePartyMutation.isPending
-        }
-        onUpdate={updatePartyMutation.mutate}
-        onDelete={deletePartyMutation.mutate}
-      />
 
       {immunities.data && (
         <ImmunitiesCatalog
@@ -1073,7 +1096,20 @@ function GlobalModals({}: Props) {
           state ? openSettingsDialog() : closeSettingsDialog()
         }
         players={players.data || []}
+        effects={effects.data || []}
         onDeletePlayer={deletePlayer.mutate}
+        onDeleteEffect={deleteEffect.mutate}
+      />
+
+      <PartyEditDrawer
+        open={isEditDrawerOpen}
+        onOpenChange={closeEditDrawer}
+        party={editingParty}
+        isUpdating={
+          deletePartyMutation.isPending || deletePartyMutation.isPending
+        }
+        onUpdate={updatePartyMutation.mutate}
+        onDelete={deletePartyMutation.mutate}
       />
 
       <EditChapterDrawer
@@ -1083,6 +1119,27 @@ function GlobalModals({}: Props) {
         onOpenChange={closeEditChapterDrawer}
         onSave={updateChapterMutation.mutate}
         onDelete={deleteChapter.mutate}
+      />
+
+      <EditPlayerDrawer
+        player={selectedPlayer}
+        open={isEditPlayerDrawerOpen}
+        loading={updatePlayer.isPending}
+        form={editPlayerForm}
+        onOpenChange={(state: boolean) =>
+          state ? openEditPlayerDrawer() : closeEditPlayerDrawer()
+        }
+        onSave={updatePlayer.mutate}
+      />
+
+      <EditEffectDrawer
+        effect={selectedEffect}
+        isLoading={updateEffect.isPending}
+        open={isEditingEffectDrawerOpen}
+        onOpenChange={(state) =>
+          state ? openEditEffectDrawer() : closeEditEffectDrawer()
+        }
+        onEdit={updateEffect.mutate}
       />
     </>
   );

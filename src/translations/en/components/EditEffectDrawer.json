@@ -1,0 +1,30 @@
+{
+  "title": "Edit Effect",
+  "description": "Description",
+  "descriptionText": "Edit an existing effect.",
+  "create": "Create",
+  "cancel": "Cancel",
+  "name": "Name",
+  "namePlaceholder": "Enter the name of the effect",
+  "descriptionLabel": "Description",
+  "descriptionPlaceholder": "Enter a short description of the effect",
+  "durationPlaceholder": "Enter the duration of the effect (in seconds)",
+  "icon": "Icon",
+  "duration": "Duration",
+  "positive": "Positive",
+  "negative": "Negative",
+  "type": "Type",
+  "typeTooltip": "Negative buffs can cause damage, positive buffs cannot.",
+  "rounds": "Rounds",
+  "time": "Time",
+  "durationType": "Duration Type",
+  "durationUnitTooltip": "The time unit is in minutes",
+  "value": "Effect Value",
+  "valueTooltip": "For positive effects, the value is added to health, for negative effects it is subtracted. If Duration Type=Rounds, the value is applied per round, otherwise once.",
+  "timeUnit": "in minutes",
+  "validation": {
+    "minNameLength": "The name must be at least 2 characters long.",
+    "minDuration": "The duration must be at least 1 round or second."
+  },
+  "edit": "Edit"
+}
