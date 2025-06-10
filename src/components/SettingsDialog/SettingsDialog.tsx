@@ -111,7 +111,7 @@ function SettingsDialog({
               onChange={handlePlayerSearchTerm}
             />
 
-            <div className="scrollable-y overflow-y-scroll pr-0.5">
+            <div className="scrollable-y overflow-y-scroll p-0.5">
               <div className="flex h-full max-h-96 flex-col gap-4">
                 {players
                   .filter((player) =>
@@ -139,7 +139,7 @@ function SettingsDialog({
               onChange={handleEffectSearch}
             />
 
-            <div className="scrollable-y overflow-y-scroll pr-0.5">
+            <div className="scrollable-y overflow-y-scroll p-0.5 pt-4">
               <div className="flex h-full max-h-96 flex-col gap-4">
                 {effects
                   .filter((effect) =>
