@@ -21,5 +21,7 @@
   "durationUnitTooltip": "Die Zeiteinheit ist in Minuten",
   "value": "Effekt Wert",
   "valueTooltip": "Bei Positiven Effekten wird der Wert zur Gesundheit hinzugefügt, bei Negativen abgezogen. Bei Dauer Typ=Runden wird der Wert pro Runde angewendet, sonst einmalig.",
-  "timeUnit": "in Minuten"
+  "timeUnit": "in Minuten",
+  "longRest": "Lange Rast",
+  "shortRest": "Kurze Rast"
 }

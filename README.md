@@ -95,7 +95,8 @@ hygen translation new
 
 # Todos
 
-- [ ] Effects need to have a boolean value for until long rest
+- [x] Effects need to have a boolean value for until long rest
+- [ ] ActiveEffects connecting with players and opponents in chapter
 - [ ] effectCard - show duration and value in the opened card or as badges
 - [ ] need to store a game round and time state for the effects. time needs to be enabled somehow with a timer than rounds could be updated with a next round function
 - [ ] settings dialog

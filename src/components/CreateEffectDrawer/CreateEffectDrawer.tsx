@@ -53,7 +53,7 @@ function CreateEffectDrawer({
     duration: z.coerce.number().min(1, {
       message: "Duration must be at least 1.",
     }),
-    durationType: z.enum(["rounds", "time"]),
+    durationType: z.enum(["rounds", "time", "short", "long"]),
     value: z.coerce.number(),
   });
 
@@ -89,8 +89,8 @@ function CreateEffectDrawer({
     form.setValue("icon", icon);
   }
 
-  function handleTypeChange(value: "positive" | "negative") {
-    form.setValue("type", value);
+  function handleTypeChange(value: string) {
+    form.setValue("type", value as "positive" | "negative");
   }
 
   function handleDurationTypeChange(value: "rounds" | "time") {
@@ -174,11 +174,8 @@ function CreateEffectDrawer({
             <div className="flex w-full gap-2">
               <div className="flex h-full w-2/3 flex-col gap-[0.25rem+1px] pt-1.5">
                 <FormLabel>{t("type")}</FormLabel>
-                <Tabs
-                  // @ts-ignore
-                  onValueChange={handleTypeChange}
-                  defaultValue="positive"
-                >
+
+                <Tabs onValueChange={handleTypeChange} defaultValue="positive">
                   <TabsList className="mt-px grid h-9 w-full grid-cols-2 gap-2">
                     <TabsTrigger
                       className="hover:cursor-pointer hover:bg-white/80"
@@ -230,32 +227,47 @@ function CreateEffectDrawer({
               />
             </div>
 
-            <div className="flex w-full gap-2">
-              <div className="flex h-full w-2/3 flex-col gap-[0.25rem+1px] pt-1.5">
-                <FormLabel>{t("durationType")}</FormLabel>
-                <Tabs
-                  // @ts-ignore
-                  onValueChange={handleDurationTypeChange}
-                  defaultValue="rounds"
-                >
-                  <TabsList className="mt-px grid h-9 w-full grid-cols-2 gap-2">
-                    <TabsTrigger
-                      className="hover:cursor-pointer hover:bg-white/80"
-                      value="rounds"
-                    >
-                      {t("rounds")}
-                    </TabsTrigger>
+            <div className="flex h-full w-full flex-col gap-[0.25rem+1px] pt-1.5">
+              <FormLabel>{t("durationType")}</FormLabel>
 
-                    <TabsTrigger
-                      className="hover:cursor-pointer hover:bg-white/80"
-                      value="time"
-                    >
-                      {t("time")}
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
+              <Tabs
+                // @ts-ignore
+                onValueChange={handleDurationTypeChange}
+                defaultValue="rounds"
+              >
+                <TabsList className="mt-px grid h-9 w-full grid-cols-4 gap-2">
+                  <TabsTrigger
+                    className="hover:cursor-pointer hover:bg-white/80"
+                    value="rounds"
+                  >
+                    {t("rounds")}
+                  </TabsTrigger>
 
+                  <TabsTrigger
+                    className="hover:cursor-pointer hover:bg-white/80"
+                    value="time"
+                  >
+                    {t("time")}
+                  </TabsTrigger>
+
+                  <TabsTrigger
+                    className="hover:cursor-pointer hover:bg-white/80"
+                    value="short"
+                  >
+                    {t("shortRest")}
+                  </TabsTrigger>
+
+                  <TabsTrigger
+                    className="hover:cursor-pointer hover:bg-white/80"
+                    value="long"
+                  >
+                    {t("longRest")}
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+
+            {(durationType === "rounds" || durationType === "time") && (
               <FormField
                 control={form.control}
                 name="duration"
@@ -280,7 +292,7 @@ function CreateEffectDrawer({
                   </FormItem>
                 )}
               />
-            </div>
+            )}
           </form>
         </Form>
       }
