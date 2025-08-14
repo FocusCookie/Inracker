@@ -28,7 +28,6 @@ type Props = {
   onDeleteEffect: (effectId: Effect["id"]) => void;
   onDeleteImmunity: (immunityId: DBImmunity["id"]) => void;
   onDeleteResistance: (resistanceId: DBResistance["id"]) => void;
-  onSetWasOpenedFromSettings: (value: boolean) => void;
 };
 
 function SettingsDialog({
@@ -42,7 +41,6 @@ function SettingsDialog({
   onDeleteEffect,
   onDeleteImmunity,
   onDeleteResistance,
-  onSetWasOpenedFromSettings,
 }: Props) {
   const { t } = useTranslation("ComponentSettingsDialog");
   const [playerSearch, setPlayerSearch] = useState("");
@@ -93,7 +91,6 @@ function SettingsDialog({
 
   function handleEditPlayer(player: Player) {
     setSelectedPlayer(player);
-    onSetWasOpenedFromSettings(true);
     openEditPlayerDrawer();
     onOpenChange(false);
   }
@@ -104,7 +101,6 @@ function SettingsDialog({
 
   function handleEditEffect(effect: Effect) {
     setSelectedEffect(effect);
-    onSetWasOpenedFromSettings(true);
     openEditEffectDrawer();
     onOpenChange(false);
   }
@@ -115,7 +111,6 @@ function SettingsDialog({
 
   function handleEditImmunity(immunity: DBImmunity) {
     setSelectedImmunity(immunity);
-    onSetWasOpenedFromSettings(true);
     openEditImmunityDrawer();
     onOpenChange(false);
   }
@@ -126,7 +121,6 @@ function SettingsDialog({
 
   function onEditResistance(resistance: DBResistance) {
     setSelectedResistance(resistance);
-    onSetWasOpenedFromSettings(true);
     openEditResistanceDrawer();
     onOpenChange(false);
   }
