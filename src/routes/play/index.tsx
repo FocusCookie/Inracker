@@ -145,6 +145,7 @@ function RouteComponent() {
               elements={
                 encountersQuery.data?.map((enc) => ({
                   ...enc.element,
+                  name: enc.name,
                   onClick: () => console.log("click"),
                 })) || []
               }

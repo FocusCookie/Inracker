@@ -37,6 +37,7 @@ export type CanvasElement = {
   height: number;
   color: string;
   icon: string;
+  name?: string;
 };
 
 export type ClickableCanvasElement = CanvasElement & {
@@ -142,9 +143,21 @@ function Canvas({
   useEffect(() => {
     if (background && background !== "") {
       const tmp = new Image();
-      tmp.src = background;
+      tmp.onload = () => {
+        backgroundImage.current = tmp;
 
-      backgroundImage.current = tmp;
+        // Update viewBox to fit the background image
+        const newViewBox = {
+          x: -tmp.naturalWidth / 2,
+          y: -tmp.naturalHeight / 2,
+          width: tmp.naturalWidth,
+          height: tmp.naturalHeight,
+        };
+
+        currentViewBoxRef.current = newViewBox;
+        setViewBox(newViewBox);
+      };
+      tmp.src = background;
     }
   }, [background]);
 
@@ -686,14 +699,52 @@ function Canvas({
               filter="url(#subtleDropShadow)"
             />
 
-            <g transform={`translate(${element.x + 6}, ${element.y + 45})`}>
+            {/* Header rectangle */}
+            <rect
+              x={element.x}
+              y={element.y}
+              width={element.width}
+              height={60}
+              fill={element.color}
+              fillOpacity={0.8}
+              stroke={element.color}
+              strokeWidth={4}
+              rx={4}
+              ry={4}
+            />
+
+            {/* Icon */}
+            <g transform={`translate(${element.x + 6}, ${element.y + 30})`}>
               <text
-                className="font-sans text-6xl font-bold shadow-sm select-none"
+                className="font-sans text-4xl font-bold shadow-sm select-none"
                 dominantBaseline="middle"
               >
                 {element.icon}
               </text>
             </g>
+
+            {/* Text */}
+            {element.name && (
+              <g transform={`translate(${element.x + 60}, ${element.y + 30})`}>
+                <defs>
+                  <clipPath id={`text-clip-${index}`}>
+                    <rect
+                      x="0"
+                      y="-12"
+                      width={element.width - 66}
+                      height="24"
+                    />
+                  </clipPath>
+                </defs>
+                <text
+                  className="font-sans text-lg font-medium text-white select-none"
+                  dominantBaseline="middle"
+                  clipPath={`url(#text-clip-${index})`}
+                >
+                  {element.name}
+                </text>
+              </g>
+            )}
           </g>
         ))}
 

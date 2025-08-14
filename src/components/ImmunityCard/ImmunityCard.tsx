@@ -2,7 +2,7 @@ import { DBImmunity } from "@/types/immunitiy";
 import Collapsible from "../Collapsible/Collapsible";
 import MarkdownReader from "../MarkdownReader/MarkdownReader";
 import { Button } from "../ui/button";
-import { TrashIcon } from "@radix-ui/react-icons";
+import { TrashIcon, Pencil1Icon } from "@radix-ui/react-icons";
 
 type Props = {
   immunity: DBImmunity;
@@ -11,12 +11,19 @@ type Props = {
    */
   actions?: React.ReactNode;
   onRemove?: (immunityId: DBImmunity["id"]) => void;
+  onEdit?: (immunity: DBImmunity) => void;
 };
 
-function ImmunityCard({ immunity, actions, onRemove }: Props) {
+function ImmunityCard({ immunity, actions, onRemove, onEdit }: Props) {
   function handleRemoveImmunity() {
     if (onRemove) {
       onRemove(immunity.id);
+    }
+  }
+
+  function handleEditImmunity() {
+    if (onEdit) {
+      onEdit(immunity);
     }
   }
 
@@ -28,16 +35,28 @@ function ImmunityCard({ immunity, actions, onRemove }: Props) {
             <span>{immunity.icon}</span>
             <span className="font-semibold">{immunity.name}</span>
           </div>
-          {actions ||
-            (onRemove && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleRemoveImmunity}
-              >
-                <TrashIcon />
-              </Button>
-            ))}
+          {actions || (
+            <div className="flex gap-1">
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleEditImmunity}
+                >
+                  <Pencil1Icon />
+                </Button>
+              )}
+              {onRemove && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleRemoveImmunity}
+                >
+                  <TrashIcon />
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       }
     >

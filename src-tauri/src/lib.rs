@@ -169,6 +169,20 @@ pub fn run() {
             )",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 11,
+            description: "create active_effects table",
+            sql: "CREATE TABLE IF NOT EXISTS active_effects (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                effect_id INTEGER NOT NULL,
+                entity_id INTEGER NOT NULL, -- player or opponent id
+                entity_type TEXT NOT NULL, -- 'player' or 'opponent'
+                remaining_duration INTEGER, -- null for 'until rest' effects
+                duration_type TEXT NOT NULL, -- 'rounds', 'minutes', 'hours', 'short_rest', 'long_rest'
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            )",
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()

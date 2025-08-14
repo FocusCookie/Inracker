@@ -2,7 +2,7 @@ import { DBResistance } from "@/types/resistances";
 import Collapsible from "../Collapsible/Collapsible";
 import MarkdownReader from "../MarkdownReader/MarkdownReader";
 import { Button } from "../ui/button";
-import { TrashIcon } from "@radix-ui/react-icons";
+import { TrashIcon, Pencil1Icon } from "@radix-ui/react-icons";
 
 type Props = {
   resistance: DBResistance;
@@ -11,12 +11,19 @@ type Props = {
    */
   actions?: React.ReactNode;
   onRemove?: (resistanceId: DBResistance["id"]) => void;
+  onEdit?: (resistance: DBResistance) => void;
 };
 
-function ResistanceCard({ resistance, actions, onRemove }: Props) {
+function ResistanceCard({ resistance, actions, onRemove, onEdit }: Props) {
   function handleRemoveResistance() {
     if (onRemove) {
       onRemove(resistance.id);
+    }
+  }
+
+  function handleEditResistance() {
+    if (onEdit) {
+      onEdit(resistance);
     }
   }
 
@@ -28,16 +35,28 @@ function ResistanceCard({ resistance, actions, onRemove }: Props) {
             <span>{resistance.icon}</span>
             <span className="font-semibold">{resistance.name}</span>
           </div>
-          {actions ||
-            (onRemove && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleRemoveResistance}
-              >
-                <TrashIcon />
-              </Button>
-            ))}
+          {actions || (
+            <div className="flex gap-1">
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleEditResistance}
+                >
+                  <Pencil1Icon />
+                </Button>
+              )}
+              {onRemove && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleRemoveResistance}
+                >
+                  <TrashIcon />
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       }
     >

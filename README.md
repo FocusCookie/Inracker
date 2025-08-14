@@ -92,3 +92,20 @@ hygen translation new
 
 - In settings: see all files that are in the app directory in order to delete files that are not used
 - Importing and Exporting databases
+
+# Todos
+
+- [x] Effects need to have a boolean value for until long rest
+- [ ] ActiveEffects connecting with players and opponents in chapter
+- [ ] effectCard - show duration and value in the opened card or as badges
+- [ ] need to store a game round and time state for the effects. time needs to be enabled somehow with a timer than rounds could be updated with a next round function
+- [ ] settings dialog
+  - [ ] immunites edit
+  - [ ] resistances edit
+  - [ ] user settings
+- [ ] ui for round interaction
+- [ ] innitiative
+  - [ ] ui
+  - [ ] gamestate
+    - [ ] stored as an entity for each party
+  - [ ]

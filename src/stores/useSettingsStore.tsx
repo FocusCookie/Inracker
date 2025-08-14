@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { subscribeWithSelector } from "zustand/middleware";
 
 interface SettingsState {
   isSettingsDialogOpen: boolean;
@@ -6,8 +7,10 @@ interface SettingsState {
   closeSettingsDialog: () => void;
 }
 
-export const useSettingsStore = create<SettingsState>((set) => ({
+export const useSettingsStore = create<SettingsState>()(
+  subscribeWithSelector((set) => ({
   isSettingsDialogOpen: false,
   openSettingsDialog: () => set({ isSettingsDialogOpen: true }),
-  closeSettingsDialog: () => set({ isSettingsDialogOpen: false }),
-}));
+      closeSettingsDialog: () => set({ isSettingsDialogOpen: false }),
+  }))
+);

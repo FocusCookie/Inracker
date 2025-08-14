@@ -17,11 +17,14 @@ import {
 import { DBImmunity } from "@/types/immunitiy";
 import { DBResistance } from "@/types/resistances";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
-import { Button } from "../ui/button";
 import ResistanceCard from "../ResistanceCard/ResistanceCard";
 import IconAvatar from "../IconAvatar/IconAvatar";
 import { useTranslation } from "react-i18next";
-import { DBEffect } from "@/types/effect";
+import { DBEffect, Effect } from "@/types/effect";
+import EffectCard from "../EffectCard/EffectCard";
+import { useImmunityStore } from "@/stores/useImmunityStore";
+import { useEffectStore } from "@/stores/useEffectStore";
+import { useResistancesStore } from "@/stores/useResistanceStore";
 
 type Props = {
   player: Player;
@@ -55,6 +58,11 @@ function PlayerCard({
   onRemoveEffect,
 }: Props) {
   const { t } = useTranslation("ComponentPlayerCard");
+  const { setSelectedImmunity, openEditImmunityDrawer } = useImmunityStore();
+  const { setSelectedEffect, openEditEffectDrawer } = useEffectStore();
+  const { setSelectedResistance, openEditResistanceDrawer } =
+    useResistancesStore();
+
   const positiveEffects = player.effects.filter(
     (effect) => effect.type === "positive",
   );
@@ -80,6 +88,21 @@ function PlayerCard({
 
   function handleRemoveEffect(effectId: DBEffect["id"]) {
     onRemoveEffect(player.id, effectId);
+  }
+
+  function handleEditImmunity(immunity: DBImmunity) {
+    setSelectedImmunity(immunity);
+    openEditImmunityDrawer();
+  }
+
+  function handleEditEffect(effect: Effect) {
+    setSelectedEffect(effect);
+    openEditEffectDrawer();
+  }
+
+  function handleEditResistance(resistance: DBResistance) {
+    setSelectedResistance(resistance);
+    openEditResistanceDrawer();
   }
 
   const quickActions = () => (
@@ -177,13 +200,8 @@ function PlayerCard({
                     <ImmunityCard
                       key={`player-${player.id}-immunity-${immunity.id}`}
                       immunity={immunity}
-                      actions={
-                        <Button
-                          onClick={() => handleRemoveImmunity(immunity.id)}
-                        >
-                          {t("remove")}
-                        </Button>
-                      }
+                      onRemove={() => handleRemoveImmunity(immunity.id)}
+                      onEdit={handleEditImmunity}
                     />
                   ))}
                 </div>
@@ -206,13 +224,8 @@ function PlayerCard({
                     <ResistanceCard
                       key={`player-${player.id}-resistances-${resistance.id}`}
                       resistance={resistance}
-                      actions={
-                        <Button
-                          onClick={() => handleRemoveResistance(resistance.id)}
-                        >
-                          {t("remove")}
-                        </Button>
-                      }
+                      onRemove={() => handleRemoveResistance(resistance.id)}
+                      onEdit={handleEditResistance}
                     />
                   ))}
                 </div>
@@ -232,14 +245,11 @@ function PlayerCard({
               >
                 <div className="flex w-full flex-col gap-4">
                   {positiveEffects.map((effect) => (
-                    <ResistanceCard
+                    <EffectCard
                       key={`player-${player.id}-effect-${effect.id}`}
-                      resistance={effect}
-                      actions={
-                        <Button onClick={() => handleRemoveEffect(effect.id)}>
-                          {t("remove")}
-                        </Button>
-                      }
+                      effect={effect}
+                      onRemove={() => handleRemoveEffect(effect.id)}
+                      onEdit={handleEditEffect}
                     />
                   ))}
                 </div>
@@ -259,14 +269,11 @@ function PlayerCard({
               >
                 <div className="flex w-full flex-col gap-4">
                   {negativeEffects.map((effect) => (
-                    <ResistanceCard
+                    <EffectCard
                       key={`player-${player.id}-effect-${effect.id}`}
-                      resistance={effect}
-                      actions={
-                        <Button onClick={() => handleRemoveEffect(effect.id)}>
-                          {t("remove")}
-                        </Button>
-                      }
+                      effect={effect}
+                      onRemove={() => handleRemoveEffect(effect.id)}
+                      onEdit={handleEditEffect}
                     />
                   ))}
                 </div>

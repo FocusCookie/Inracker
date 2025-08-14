@@ -78,9 +78,11 @@ function ChapterCard({ chapter, onEdit, onPlay, animationDelay }: Props) {
                 <Pencil1Icon />
               </Button>
 
-              <Button variant="ghost" onClick={handleToggleDescription}>
-                {isDescriptionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-              </Button>
+              {chapter?.description && (
+                <Button variant="ghost" onClick={handleToggleDescription}>
+                  {isDescriptionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>

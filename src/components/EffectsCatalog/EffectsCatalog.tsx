@@ -1,4 +1,4 @@
-import { DBEffect } from "@/types/effect";
+import { Effect } from "@/types/effect";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Catalog from "../Catalog/Catalog";
@@ -10,10 +10,10 @@ import { useEffectStore } from "@/stores/useEffectStore";
 import { useShallow } from "zustand/shallow";
 
 type Props = {
-  effects: DBEffect[];
+  effects: Effect[];
   open: boolean;
   onOpenChange: (state: boolean) => void;
-  onAdd: (effect: DBEffect) => void;
+  onAdd: (effect: Effect) => void;
 };
 
 function EffectsCatalog({ effects, open, onOpenChange, onAdd }: Props) {

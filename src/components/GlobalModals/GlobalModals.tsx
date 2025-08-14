@@ -25,7 +25,6 @@ import PlayerCatalog from "../PlayerCatalog/PlayerCatalog";
 import ResistancesCatalog from "../ResistancesCatalog/ResistancesCatalog";
 import SettingsDialog from "../SettingsDialog/SettingsDialog";
 import { useChapterStore } from "@/stores/useChapterStore";
-// @ts-ignore //TODO: fix error here
 import { usePartyStore } from "@/stores/usePartySTore";
 import { Chapter, DBChapter } from "@/types/chapters";
 import CreateChapterDrawer from "../CreateChapterDrawer/CreateChapterDrawer";
@@ -44,8 +43,13 @@ import { Encounter } from "@/types/encounter";
 import CreateEffectDrawer from "../CreateEffectDrawer/CreateEffectDrawer";
 import { useEffectStore } from "@/stores/useEffectStore";
 import EffectsCatalog from "../EffectsCatalog/EffectsCatalog";
+import EditEffectDrawer from "../EditEffectDrawer/EditEffectDrawer";
+import EditImmunityDrawer from "../EditImmunityDrawer/EditImmunityDrawer";
+import EditResistanceDrawer from "../EditResistanceDrawer/EditResistanceDrawer";
 
 type Props = {};
+
+//TODO: Refacot this component, it is too big and has too many responsibilities
 
 function GlobalModals({}: Props) {
   const queryClient = useQueryClient();
@@ -202,62 +206,88 @@ function GlobalModals({}: Props) {
   const {
     isImmunitiesCatalogOpen,
     isCreateImmunityDrawerOpen,
+    isEditImmunityDrawerOpen,
     setIsCreatingImmunity,
+    selectedImmunity,
+    setSelectedImmunity,
     closeCreateImmunityDrawer,
     openCreateImmunityDrawer,
     openImmunititesCatalog,
     closeImmunitiesCatalog,
+    openEditImmunityDrawer,
+    closeEditImmunityDrawer,
   } = useImmunityStore(
     useShallow((state) => ({
       isImmunitiesCatalogOpen: state.isImmunitiesCatalogOpen,
       isCreateImmunityDrawerOpen: state.isCreateImmunityDrawerOpen,
+      isEditImmunityDrawerOpen: state.isEditImmunityDrawerOpen,
       setIsCreatingImmunity: state.setIsCreatingImmunity,
+      selectedImmunity: state.selectedImmunity,
+      setSelectedImmunity: state.setSelectedImmunity,
       openCreateImmunityDrawer: state.openCreateImmunityDrawer,
       closeCreateImmunityDrawer: state.closeCreateImmunityDrawer,
       openImmunititesCatalog: state.openImmunititesCatalog,
       closeImmunitiesCatalog: state.closeImmunitiesCatalog,
+      openEditImmunityDrawer: state.openEditImmunityDrawer,
+      closeEditImmunityDrawer: state.closeEditImmunityDrawer,
     })),
   );
 
   const {
     isResistanceCatalogOpen,
     isCreateResistanceDrawerOpen,
+    isEditResistanceDrawerOpen,
     setIsCreatingResistance,
+    selectedResistance,
+    setSelectedResistance,
     closeCreateResistanceDrawer,
     openCreateResistanceDrawer,
     closeResistancesCatalog,
     openResistancesCatalog,
+    openEditResistanceDrawer,
+    closeEditResistanceDrawer,
   } = useResistancesStore(
     useShallow((state) => ({
       isResistanceCatalogOpen: state.isResistanceCatalogOpen,
       isCreateResistanceDrawerOpen: state.isCreateResistanceDrawerOpen,
+      isEditResistanceDrawerOpen: state.isEditResistanceDrawerOpen,
       setIsCreatingResistance: state.setIsCreatingResistance,
+      selectedResistance: state.selectedResistance,
+      setSelectedResistance: state.setSelectedResistance,
       openCreateResistanceDrawer: state.openCreateResistanceDrawer,
       closeCreateResistanceDrawer: state.closeCreateResistanceDrawer,
       closeResistancesCatalog: state.closeResistancesCatalog,
       openResistancesCatalog: state.openResistancesCatalog,
+      openEditResistanceDrawer: state.openEditResistanceDrawer,
+      closeEditResistanceDrawer: state.closeEditResistanceDrawer,
     })),
   );
 
   const {
     isCreateEffectDrawerOpen,
-    isCreatingEffect,
     isEffectsCatalogOpen,
     openCreateEffectDrawer,
     closeCreateEffectDrawer,
     openEffectsCatalog,
     closeEffectsCatalog,
-    setIsCreatingEffect,
+    selectedEffect,
+    openEditEffectDrawer,
+    closeEditEffectDrawer,
+    isEditingEffectDrawerOpen,
+    setSelectedEffect,
   } = useEffectStore(
     useShallow((state) => ({
       isCreateEffectDrawerOpen: state.isCreateEffectDrawerOpen,
-      isCreatingEffect: state.isCreatingEffect,
       isEffectsCatalogOpen: state.isEffectsCatalogOpen,
       openCreateEffectDrawer: state.openCreateEffectDrawer,
       closeCreateEffectDrawer: state.closeCreateEffectDrawer,
       openEffectsCatalog: state.openEffectsCatalog,
       closeEffectsCatalog: state.closeEffectsCatalog,
-      setIsCreatingEffect: state.setIsCreatingEffect,
+      selectedEffect: state.selectedEffect,
+      openEditEffectDrawer: state.openEditEffectDrawer,
+      closeEditEffectDrawer: state.closeEditEffectDrawer,
+      isEditingEffectDrawerOpen: state.isEditingEffectDrawerOpen,
+      setSelectedEffect: state.setSelectedEffect,
     })),
   );
 
@@ -427,12 +457,10 @@ function GlobalModals({}: Props) {
 
   const createEffect = useMutationWithErrorToast({
     mutationFn: (effect: Omit<Effect, "id">) => {
-      setIsCreatingEffect(true);
       return db.effects.create(effect);
     },
-    onSuccess: (effect: DBEffect) => {
+    onSuccess: (effect: Effect) => {
       queryClient.invalidateQueries({ queryKey: ["effects"] });
-      setIsCreatingEffect(false);
       closeCreateEffectDrawer();
       toast({
         variant: "default",
@@ -458,6 +486,66 @@ function GlobalModals({}: Props) {
         variant: "default",
         title: `Updated ${player.icon} ${player.name}`,
       });
+    },
+  });
+
+  const updateEffect = useMutationWithErrorToast({
+    mutationFn: (effect: Effect) => {
+      return db.effects.update(effect);
+    },
+    onSuccess: (effect: Effect) => {
+      queryClient.invalidateQueries({ queryKey: ["effects"] });
+      queryClient.invalidateQueries({ queryKey: ["party"] });
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+
+      toast({
+        variant: "default",
+        title: `Updated ${effect.icon} ${effect.name}`,
+      });
+    },
+    onSettled: () => {
+      closeEditEffectDrawer();
+      setSelectedEffect(null);
+    },
+  });
+
+  const updateImmunity = useMutationWithErrorToast({
+    mutationFn: (immunity: DBImmunity) => {
+      return db.immunitites.update(immunity);
+    },
+    onSuccess: (effect: DBImmunity) => {
+      queryClient.invalidateQueries({ queryKey: ["immunities"] });
+      queryClient.invalidateQueries({ queryKey: ["party"] });
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+
+      toast({
+        variant: "default",
+        title: `Updated ${effect.icon} ${effect.name}`,
+      });
+    },
+    onSettled: () => {
+      closeEditImmunityDrawer();
+      setSelectedImmunity(null);
+    },
+  });
+
+  const updateResistance = useMutationWithErrorToast({
+    mutationFn: (resistance: DBResistance) => {
+      return db.resistances.update(resistance);
+    },
+    onSuccess: (resistance: DBResistance) => {
+      queryClient.invalidateQueries({ queryKey: ["resistances"] });
+      queryClient.invalidateQueries({ queryKey: ["party"] });
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+
+      toast({
+        variant: "default",
+        title: `Updated ${resistance.icon} ${resistance.name}`,
+      });
+    },
+    onSettled: () => {
+      closeEditResistanceDrawer();
+      setSelectedResistance(null);
     },
   });
 
@@ -565,6 +653,56 @@ function GlobalModals({}: Props) {
     },
     onSettled: () => {
       closeEditDrawer();
+    },
+  });
+
+  const deleteEffect = useMutationWithErrorToast({
+    mutationFn: (id: Effect["id"]) => {
+      return db.effects.delete(id);
+    },
+    onSuccess: (deletedEffect: DBEffect) => {
+      queryClient.invalidateQueries({ queryKey: ["effects"] });
+      queryClient.invalidateQueries({ queryKey: ["party"] });
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+
+      toast({
+        variant: "default",
+        title: `Deleted ${deletedEffect.icon} ${deletedEffect.name}`,
+      });
+    },
+  });
+
+  const deleteImmunity = useMutationWithErrorToast({
+    mutationFn: (id: DBImmunity["id"]) => {
+      return db.immunitites.delete(id);
+    },
+    onSuccess: (deletedImmunity: DBImmunity) => {
+      queryClient.invalidateQueries({ queryKey: ["immunites"] });
+      queryClient.invalidateQueries({ queryKey: ["party"] });
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+      queryClient.invalidateQueries({ queryKey: ["opponents"] });
+
+      toast({
+        variant: "default",
+        title: `Deleted ${deletedImmunity.icon} ${deletedImmunity.name}`,
+      });
+    },
+  });
+
+  const deleteResistance = useMutationWithErrorToast({
+    mutationFn: (id: DBResistance["id"]) => {
+      return db.resistances.delete(id);
+    },
+    onSuccess: (deletedResistance: DBImmunity) => {
+      queryClient.invalidateQueries({ queryKey: ["resistances"] });
+      queryClient.invalidateQueries({ queryKey: ["party"] });
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+      queryClient.invalidateQueries({ queryKey: ["opponents"] });
+
+      toast({
+        variant: "default",
+        title: `Deleted ${deletedResistance.icon} ${deletedResistance.name}`,
+      });
     },
   });
 
@@ -847,7 +985,7 @@ function GlobalModals({}: Props) {
     }
   }
 
-  function handleAddEffectToChar(effect: DBEffect) {
+  function handleAddEffectToChar(effect: Effect) {
     if (selectedPlayer) {
       const isAlreadyAdded = selectedPlayer.effects.some(
         (playerEffect) => playerEffect.id === effect.id,
@@ -923,17 +1061,6 @@ function GlobalModals({}: Props) {
         />
       )}
 
-      <EditPlayerDrawer
-        player={selectedPlayer}
-        open={isEditPlayerDrawerOpen}
-        loading={updatePlayer.isPending}
-        form={editPlayerForm}
-        onOpenChange={(state: boolean) =>
-          state ? openEditPlayerDrawer() : closeEditPlayerDrawer()
-        }
-        onSave={updatePlayer.mutate}
-      />
-
       {immunities.data && resistances.data && (
         <CreateOpponentDrawer
           form={createOpponentForm}
@@ -970,17 +1097,6 @@ function GlobalModals({}: Props) {
           partyId={currentParty}
         />
       )}
-
-      <PartyEditDrawer
-        open={isEditDrawerOpen}
-        onOpenChange={closeEditDrawer}
-        party={editingParty}
-        isUpdating={
-          deletePartyMutation.isPending || deletePartyMutation.isPending
-        }
-        onUpdate={updatePartyMutation.mutate}
-        onDelete={deletePartyMutation.mutate}
-      />
 
       {immunities.data && (
         <ImmunitiesCatalog
@@ -1073,7 +1189,24 @@ function GlobalModals({}: Props) {
           state ? openSettingsDialog() : closeSettingsDialog()
         }
         players={players.data || []}
+        effects={effects.data || []}
+        immunities={immunities.data || []}
+        resistances={resistances.data || []}
         onDeletePlayer={deletePlayer.mutate}
+        onDeleteEffect={deleteEffect.mutate}
+        onDeleteImmunity={deleteImmunity.mutate}
+        onDeleteResistance={deleteResistance.mutate}
+      />
+
+      <PartyEditDrawer
+        open={isEditDrawerOpen}
+        onOpenChange={closeEditDrawer}
+        party={editingParty}
+        isUpdating={
+          deletePartyMutation.isPending || deletePartyMutation.isPending
+        }
+        onUpdate={updatePartyMutation.mutate}
+        onDelete={deletePartyMutation.mutate}
       />
 
       <EditChapterDrawer
@@ -1083,6 +1216,47 @@ function GlobalModals({}: Props) {
         onOpenChange={closeEditChapterDrawer}
         onSave={updateChapterMutation.mutate}
         onDelete={deleteChapter.mutate}
+      />
+
+      <EditPlayerDrawer
+        player={selectedPlayer}
+        open={isEditPlayerDrawerOpen}
+        loading={updatePlayer.isPending}
+        form={editPlayerForm}
+        onOpenChange={(state: boolean) =>
+          state ? openEditPlayerDrawer() : closeEditPlayerDrawer()
+        }
+        onSave={updatePlayer.mutate}
+      />
+
+      <EditEffectDrawer
+        effect={selectedEffect}
+        isLoading={updateEffect.isPending}
+        open={isEditingEffectDrawerOpen}
+        onOpenChange={(state) =>
+          state ? openEditEffectDrawer() : closeEditEffectDrawer()
+        }
+        onEdit={updateEffect.mutate}
+      />
+
+      <EditImmunityDrawer
+        immunity={selectedImmunity}
+        isLoading={updateImmunity.isPending}
+        open={isEditImmunityDrawerOpen}
+        onOpenChange={(state) =>
+          state ? openEditImmunityDrawer() : closeEditImmunityDrawer()
+        }
+        onEdit={updateImmunity.mutate}
+      />
+
+      <EditResistanceDrawer
+        resistance={selectedResistance}
+        isLoading={updateResistance.isPending}
+        open={isEditResistanceDrawerOpen}
+        onOpenChange={(state) =>
+          state ? openEditResistanceDrawer() : closeEditResistanceDrawer()
+        }
+        onEdit={updateResistance.mutate}
       />
     </>
   );

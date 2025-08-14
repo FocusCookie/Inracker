@@ -1,10 +1,10 @@
 {
-  "descriptionText": "Entwirf eine einzigartige Immunität, um die Fähigkeiten und Widerstandskraft deines Charakters zu erweitern. Definiere, wogegen dein Charakter unempfindlich ist, sei es gegen bestimmte Zustände, magische Effekte, Umweltgefahren oder körperliche Schäden.",
-  "title": "Erstelle eine neue Immunität",
-  "create": "Erstellen",
-  "cancel": "Abbrechen",
-  "icon": "Symbol",
+  "descriptionText": "Design a unique immunity to enhance your character's abilities and resilience. Define what your character is immune to, whether specific conditions, magical effects, environmental hazards, or physical damage.",
+  "title": "Create a New Immunity",
+  "create": "Create",
+  "cancel": "Cancel",
+  "icon": "Icon",
   "name": "Name",
-  "namePlaceholder": "Feuerimmunität",
-  "description": "Beschreibung"
+  "namePlaceholder": "Fire Immunity",
+  "description": "Description"
 }

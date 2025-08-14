@@ -3,8 +3,19 @@
   "settingsDescription": "Ändere deine allgemeinen Inracker-Einstellungen.",
   "general": "Allgemein",
   "players": "Spieler",
+  "effects": "Effekte",
+  "cleanup": "Aufräumen",
+  "immunities": "Immunitäten",
+  "resistances": "Resistenzen",
+  "opponents": "Gegner",
   "level": "Level",
   "delete": "Löschen",
   "deletionWarning": "Wenn du bestätigst, ist der Charakter für immer weg. Wirklich, es gibt keinen Zauber, um den gelöschten Charakter wiederzubeleben!",
-  "edit": "Bearbeiten"
+  "edit": "Bearbeiten",
+  "playerSearchPlaceholder": "Suche nach einem bestimmten Helden...",
+  "effectSearchPlaceholder": "Suche nach einem bestimmten Effekt...",
+  "immunitySearchPlaceholder": "Suche nach einer bestimmten Immunität...",
+  "resistanceSearchPlaceholder": "Suche nach einer bestimmten Resistenz...",
+  "cleanupDescription": "TODO: Implementiere Aufräumfunktion-Button um Encounter-Gegner zu bereinigen, die nicht an einen Encounter angehängt sind",
+  "opponentsDescription": "TODO: Implementiere Bearbeitung und Löschung von Gegnern"
 }

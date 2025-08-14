@@ -1,24 +1,31 @@
 import { cn } from "@/lib/utils";
-import { DBEffect } from "@/types/effect";
-import { TrashIcon } from "@radix-ui/react-icons";
+import { DBEffect, Effect } from "@/types/effect";
+import { TrashIcon, Pencil1Icon } from "@radix-ui/react-icons";
 import React from "react";
 import Collapsible from "../Collapsible/Collapsible";
 import MarkdownReader from "../MarkdownReader/MarkdownReader";
 import { Button } from "../ui/button";
 
 type Props = {
-  effect: DBEffect;
+  effect: Effect;
   /**
    * react element rendered behind the chevron
    */
   actions?: React.ReactNode;
   onRemove?: (effectId: DBEffect["id"]) => void;
+  onEdit?: (effect: Effect) => void;
 };
 
-function EffectCard({ actions, effect, onRemove }: Props) {
+function EffectCard({ actions, effect, onRemove, onEdit }: Props) {
   function handleRemoveEffect() {
     if (onRemove) {
       onRemove(effect.id);
+    }
+  }
+
+  function handleEditEffect() {
+    if (onEdit) {
+      onEdit(effect);
     }
   }
 
@@ -37,12 +44,24 @@ function EffectCard({ actions, effect, onRemove }: Props) {
             </span>
             <span className="font-semibold">{effect.name}</span>
           </div>
-          {actions ||
-            (onRemove && (
-              <Button variant="ghost" size="icon" onClick={handleRemoveEffect}>
-                <TrashIcon />
-              </Button>
-            ))}
+          {actions || (
+            <div className="flex gap-1">
+              {onEdit && (
+                <Button variant="ghost" size="icon" onClick={handleEditEffect}>
+                  <Pencil1Icon />
+                </Button>
+              )}
+              {onRemove && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleRemoveEffect}
+                >
+                  <TrashIcon />
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       }
     >

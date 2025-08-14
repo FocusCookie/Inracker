@@ -1,5 +1,6 @@
 import { Prettify } from "./utils";
 
+export type EffectDurationType = "rounds" | "time" | "long" | "short";
 export type DBEffect = {
   description: string;
   /** Rounds or seconds */
@@ -7,7 +8,7 @@ export type DBEffect = {
   /**
    * devided in rounds and time
    */
-  duration_type: "rounds" | "time";
+  duration_type: EffectDurationType;
   icon: string;
   readonly id: number;
   name: string;
@@ -21,6 +22,6 @@ export type DBEffect = {
  */
 export type Effect = Prettify<
   Omit<DBEffect, "duration_type"> & {
-    durationType: "rounds" | "time";
+    durationType: EffectDurationType;
   }
 >;
