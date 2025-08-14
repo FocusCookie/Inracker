@@ -39,7 +39,7 @@ Planned Features 🌟
 
 ## Notes
 
-- **Remove** in `index.html` the ` <script src="http://localhost:8097"></script>` in the build process.
+- **Remove** in `index.html` the `<script src="http://localhost:8097"></script>` in the build process.
 
 ## Templates
 
@@ -96,12 +96,18 @@ hygen translation new
 # Todos
 
 - [x] Effects need to have a boolean value for until long rest
+- [ ] Canvas
+  - [ ] Show opponents when there are tokens for the encounters
+  - [ ] make the elements movable like the tokens
+- [ ] Play screen
+  - [ ] Go back button and exit party button
+  - [ ] show the game states here if there are implemented
 - [ ] ActiveEffects connecting with players and opponents in chapter
 - [ ] effectCard - show duration and value in the opened card or as badges
 - [ ] need to store a game round and time state for the effects. time needs to be enabled somehow with a timer than rounds could be updated with a next round function
 - [ ] settings dialog
-  - [ ] immunites edit
-  - [ ] resistances edit
+  - [x] immunites edit
+  - [x] resistances edit
   - [ ] user settings
 - [ ] ui for round interaction
 - [ ] innitiative
