@@ -44,6 +44,8 @@ import CreateEffectDrawer from "../CreateEffectDrawer/CreateEffectDrawer";
 import { useEffectStore } from "@/stores/useEffectStore";
 import EffectsCatalog from "../EffectsCatalog/EffectsCatalog";
 import EditEffectDrawer from "../EditEffectDrawer/EditEffectDrawer";
+import EditImmunityDrawer from "../EditImmunityDrawer/EditImmunityDrawer";
+import EditResistanceDrawer from "../EditResistanceDrawer/EditResistanceDrawer";
 
 type Props = {};
 
@@ -204,40 +206,60 @@ function GlobalModals({}: Props) {
   const {
     isImmunitiesCatalogOpen,
     isCreateImmunityDrawerOpen,
+    isEditImmunityDrawerOpen,
     setIsCreatingImmunity,
+    selectedImmunity,
+    setSelectedImmunity,
     closeCreateImmunityDrawer,
     openCreateImmunityDrawer,
     openImmunititesCatalog,
     closeImmunitiesCatalog,
+    openEditImmunityDrawer,
+    closeEditImmunityDrawer,
   } = useImmunityStore(
     useShallow((state) => ({
       isImmunitiesCatalogOpen: state.isImmunitiesCatalogOpen,
       isCreateImmunityDrawerOpen: state.isCreateImmunityDrawerOpen,
+      isEditImmunityDrawerOpen: state.isEditImmunityDrawerOpen,
       setIsCreatingImmunity: state.setIsCreatingImmunity,
+      selectedImmunity: state.selectedImmunity,
+      setSelectedImmunity: state.setSelectedImmunity,
       openCreateImmunityDrawer: state.openCreateImmunityDrawer,
       closeCreateImmunityDrawer: state.closeCreateImmunityDrawer,
       openImmunititesCatalog: state.openImmunititesCatalog,
       closeImmunitiesCatalog: state.closeImmunitiesCatalog,
+      openEditImmunityDrawer: state.openEditImmunityDrawer,
+      closeEditImmunityDrawer: state.closeEditImmunityDrawer,
     })),
   );
 
   const {
     isResistanceCatalogOpen,
     isCreateResistanceDrawerOpen,
+    isEditResistanceDrawerOpen,
     setIsCreatingResistance,
+    selectedResistance,
+    setSelectedResistance,
     closeCreateResistanceDrawer,
     openCreateResistanceDrawer,
     closeResistancesCatalog,
     openResistancesCatalog,
+    openEditResistanceDrawer,
+    closeEditResistanceDrawer,
   } = useResistancesStore(
     useShallow((state) => ({
       isResistanceCatalogOpen: state.isResistanceCatalogOpen,
       isCreateResistanceDrawerOpen: state.isCreateResistanceDrawerOpen,
+      isEditResistanceDrawerOpen: state.isEditResistanceDrawerOpen,
       setIsCreatingResistance: state.setIsCreatingResistance,
+      selectedResistance: state.selectedResistance,
+      setSelectedResistance: state.setSelectedResistance,
       openCreateResistanceDrawer: state.openCreateResistanceDrawer,
       closeCreateResistanceDrawer: state.closeCreateResistanceDrawer,
       closeResistancesCatalog: state.closeResistancesCatalog,
       openResistancesCatalog: state.openResistancesCatalog,
+      openEditResistanceDrawer: state.openEditResistanceDrawer,
+      closeEditResistanceDrawer: state.closeEditResistanceDrawer,
     })),
   );
 
@@ -487,6 +509,46 @@ function GlobalModals({}: Props) {
     },
   });
 
+  const updateImmunity = useMutationWithErrorToast({
+    mutationFn: (immunity: DBImmunity) => {
+      return db.immunitites.update(immunity);
+    },
+    onSuccess: (effect: DBImmunity) => {
+      queryClient.invalidateQueries({ queryKey: ["immunities"] });
+      queryClient.invalidateQueries({ queryKey: ["party"] });
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+
+      toast({
+        variant: "default",
+        title: `Updated ${effect.icon} ${effect.name}`,
+      });
+    },
+    onSettled: () => {
+      closeEditImmunityDrawer();
+      setSelectedImmunity(null);
+    },
+  });
+
+  const updateResistance = useMutationWithErrorToast({
+    mutationFn: (resistance: DBResistance) => {
+      return db.resistances.update(resistance);
+    },
+    onSuccess: (resistance: DBResistance) => {
+      queryClient.invalidateQueries({ queryKey: ["resistances"] });
+      queryClient.invalidateQueries({ queryKey: ["party"] });
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+
+      toast({
+        variant: "default",
+        title: `Updated ${resistance.icon} ${resistance.name}`,
+      });
+    },
+    onSettled: () => {
+      closeEditResistanceDrawer();
+      setSelectedResistance(null);
+    },
+  });
+
   const deletePartyMutation = useMutationWithErrorToast({
     mutationFn: (id: Party["id"]) => {
       return db.parties.deleteById(id);
@@ -608,8 +670,39 @@ function GlobalModals({}: Props) {
         title: `Deleted ${deletedEffect.icon} ${deletedEffect.name}`,
       });
     },
-    onSettled: () => {
-      closeEffectsCatalog();
+  });
+
+  const deleteImmunity = useMutationWithErrorToast({
+    mutationFn: (id: DBImmunity["id"]) => {
+      return db.immunitites.delete(id);
+    },
+    onSuccess: (deletedImmunity: DBImmunity) => {
+      queryClient.invalidateQueries({ queryKey: ["immunites"] });
+      queryClient.invalidateQueries({ queryKey: ["party"] });
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+      queryClient.invalidateQueries({ queryKey: ["opponents"] });
+
+      toast({
+        variant: "default",
+        title: `Deleted ${deletedImmunity.icon} ${deletedImmunity.name}`,
+      });
+    },
+  });
+
+  const deleteResistance = useMutationWithErrorToast({
+    mutationFn: (id: DBResistance["id"]) => {
+      return db.resistances.delete(id);
+    },
+    onSuccess: (deletedResistance: DBImmunity) => {
+      queryClient.invalidateQueries({ queryKey: ["resistances"] });
+      queryClient.invalidateQueries({ queryKey: ["party"] });
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+      queryClient.invalidateQueries({ queryKey: ["opponents"] });
+
+      toast({
+        variant: "default",
+        title: `Deleted ${deletedResistance.icon} ${deletedResistance.name}`,
+      });
     },
   });
 
@@ -1097,8 +1190,12 @@ function GlobalModals({}: Props) {
         }
         players={players.data || []}
         effects={effects.data || []}
+        immunities={immunities.data || []}
+        resistances={resistances.data || []}
         onDeletePlayer={deletePlayer.mutate}
         onDeleteEffect={deleteEffect.mutate}
+        onDeleteImmunity={deleteImmunity.mutate}
+        onDeleteResistance={deleteResistance.mutate}
       />
 
       <PartyEditDrawer
@@ -1140,6 +1237,26 @@ function GlobalModals({}: Props) {
           state ? openEditEffectDrawer() : closeEditEffectDrawer()
         }
         onEdit={updateEffect.mutate}
+      />
+
+      <EditImmunityDrawer
+        immunity={selectedImmunity}
+        isLoading={updateImmunity.isPending}
+        open={isEditImmunityDrawerOpen}
+        onOpenChange={(state) =>
+          state ? openEditImmunityDrawer() : closeEditImmunityDrawer()
+        }
+        onEdit={updateImmunity.mutate}
+      />
+
+      <EditResistanceDrawer
+        resistance={selectedResistance}
+        isLoading={updateResistance.isPending}
+        open={isEditResistanceDrawerOpen}
+        onOpenChange={(state) =>
+          state ? openEditResistanceDrawer() : closeEditResistanceDrawer()
+        }
+        onEdit={updateResistance.mutate}
       />
     </>
   );

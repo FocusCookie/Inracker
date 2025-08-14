@@ -206,6 +206,69 @@ const createImmunitiy = async (
   return getImmunityById(db, result!.lastInsertId as number);
 };
 
+const deleteImmunityById = async (
+  db: TauriDatabase,
+  id: DBImmunity["id"],
+): Promise<DBImmunity> => {
+  const deletedImmunity = await getImmunityById(db, id);
+
+  const allPlayers = await getAllPlayers(db);
+  for (const player of allPlayers) {
+    const detailedPlayer = await getDetailedPlayerById(db, player.id);
+    const hasImmunity = detailedPlayer.immunities.some(
+      (immunity) => immunity.id === id,
+    );
+
+    if (hasImmunity) {
+      const updatedImmunities = detailedPlayer.immunities.filter(
+        (immunity) => immunity.id !== id,
+      );
+      await db.execute("UPDATE players SET immunities = $2 WHERE id = $1", [
+        player.id,
+        JSON.stringify(updatedImmunities.map((im) => im.id)),
+      ]);
+    }
+  }
+
+  const allOpponents = await getAllOpponents(db);
+  for (const opponent of allOpponents) {
+    const detailedOpponent = await getDetailedOpponentById(db, opponent.id);
+    const hasImmunity = detailedOpponent.immunities.some(
+      (immunity: DBImmunity) => immunity.id === id,
+    );
+
+    if (hasImmunity) {
+      const updatedImmunities = detailedOpponent.immunities.filter(
+        (immunity: DBImmunity) => immunity.id !== id,
+      );
+      await db.execute("UPDATE opponents SET immunities = $2 WHERE id = $1", [
+        opponent.id,
+        JSON.stringify(
+          updatedImmunities.map((immunity: DBImmunity) => immunity.id),
+        ),
+      ]);
+    }
+  }
+
+  await db.execute("DELETE FROM immunities WHERE id = $1", [id]);
+
+  return deletedImmunity;
+};
+
+const updateImmunity = async (
+  db: TauriDatabase,
+  immunity: DBImmunity,
+): Promise<DBImmunity> => {
+  const { id, name, icon, description } = immunity;
+
+  await db.execute(
+    "UPDATE immunities SET name = $2, icon = $3, description = $4 WHERE id = $1",
+    [id, name, icon, description],
+  );
+
+  return getImmunityById(db, id);
+};
+
 //* Resistances
 const getAllResistances = async (db: TauriDatabase): Promise<DBResistance[]> =>
   await db.select<DBResistance[]>("SELECT * FROM resistances");
@@ -237,6 +300,69 @@ const createResistance = async (
   );
 
   return getResistanceById(db, result!.lastInsertId as number);
+};
+
+const deleteResistanceById = async (
+  db: TauriDatabase,
+  id: DBResistance["id"],
+): Promise<DBResistance> => {
+  const deletedResistance = await getResistanceById(db, id);
+
+  const allPlayers = await getAllPlayers(db);
+  for (const player of allPlayers) {
+    const detailedPlayer = await getDetailedPlayerById(db, player.id);
+    const hasResistance = detailedPlayer.resistances.some(
+      (resistance) => resistance.id === id,
+    );
+
+    if (hasResistance) {
+      const updatedResistances = detailedPlayer.resistances.filter(
+        (resistance) => resistance.id !== id,
+      );
+      await db.execute("UPDATE players SET resistances = $2 WHERE id = $1", [
+        player.id,
+        JSON.stringify(updatedResistances.map((resistance) => resistance.id)),
+      ]);
+    }
+  }
+
+  const allOpponents = await getAllOpponents(db);
+  for (const opponent of allOpponents) {
+    const detailedOpponent = await getDetailedOpponentById(db, opponent.id);
+    const hasResistance = detailedOpponent.resistance.some(
+      (resistance: DBResistance) => resistance.id === id,
+    );
+
+    if (hasResistance) {
+      const updatedResistances = detailedOpponent.resistances.filter(
+        (resistance: DBResistance) => resistance.id !== id,
+      );
+      await db.execute("UPDATE opponents SET resistances = $2 WHERE id = $1", [
+        opponent.id,
+        JSON.stringify(
+          updatedResistances.map((resistance: DBResistance) => resistance.id),
+        ),
+      ]);
+    }
+  }
+
+  await db.execute("DELETE FROM resistances WHERE id = $1", [id]);
+
+  return deletedResistance;
+};
+
+const updatedResistances = async (
+  db: TauriDatabase,
+  resistance: DBResistance,
+): Promise<DBResistance> => {
+  const { id, name, icon, description } = resistance;
+
+  await db.execute(
+    "UPDATE resistances SET name = $2, icon = $3, description = $4 WHERE id = $1",
+    [id, name, icon, description],
+  );
+
+  return getResistanceById(db, id);
 };
 
 //* Party
@@ -476,6 +602,18 @@ const getDetailedPlayerById = async (
 
 const getAllPlayers = async (db: TauriDatabase): Promise<DBPlayer[]> =>
   await db.select<DBPlayer[]>("SELECT * FROM players");
+
+const getAllDetailedPlayers = async (db: TauriDatabase): Promise<Player[]> => {
+  const playersRaw = await getAllPlayers(db);
+  const detailedPlayers: Player[] = [];
+
+  for (const player of playersRaw) {
+    const detailedPlayer = await getDetailedPlayerById(db, player.id);
+    detailedPlayers.push(detailedPlayer);
+  }
+
+  return detailedPlayers;
+};
 
 const getPlayerById = async (
   db: TauriDatabase,
@@ -1609,9 +1747,17 @@ export const Database = {
       const db = await connect();
       return getImmunityById(db, id);
     },
-    create: async (immunity: Omit<DBResistance, "id">) => {
+    create: async (immunity: Omit<DBImmunity, "id">) => {
       const db = await connect();
       return createImmunitiy(db, immunity);
+    },
+    delete: async (immunityId: DBImmunity["id"]) => {
+      const db = await connect();
+      return deleteImmunityById(db, immunityId);
+    },
+    update: async (immunity: DBImmunity) => {
+      const db = await connect();
+      return updateImmunity(db, immunity);
     },
   },
 
@@ -1627,6 +1773,14 @@ export const Database = {
     create: async (resistance: Omit<DBResistance, "id">) => {
       const db = await connect();
       return createResistance(db, resistance);
+    },
+    delete: async (resistanceId: DBResistance["id"]) => {
+      const db = await connect();
+      return deleteResistanceById(db, resistanceId);
+    },
+    update: async (resistance: DBResistance) => {
+      const db = await connect();
+      return updatedResistances(db, resistance);
     },
   },
 

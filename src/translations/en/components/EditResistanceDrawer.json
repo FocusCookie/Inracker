@@ -1,0 +1,11 @@
+{
+  "descriptionText": "Modify an existing resistance to enhance your character's defensive capabilities. Update what your character is resistant to, whether specific damage types, magical effects, environmental conditions, or physical attacks.",
+  "title": "Edit Resistance",
+  "edit": "Save Changes",
+  "cancel": "Cancel",
+  "icon": "Icon",
+  "name": "Name",
+  "namePlaceholder": "Fire Resistance",
+  "description": "Description",
+  "minNameChars": "The resistance name must be at least 3 characters."
+}

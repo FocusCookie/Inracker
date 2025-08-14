@@ -1,5 +1,6 @@
 import { Player } from "@/types/player";
 import { create } from "zustand";
+import { subscribeWithSelector } from "zustand/middleware";
 
 interface PlayerState {
   isCreatePlayerDrawerOpen: boolean;

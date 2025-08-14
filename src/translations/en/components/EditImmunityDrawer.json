@@ -1,0 +1,10 @@
+{
+  "descriptionText": "Modify an existing immunity to enhance your character's abilities and resilience. Update what your character is immune to, whether specific conditions, magical effects, environmental hazards, or physical damage.",
+  "title": "Edit Immunity",
+  "edit": "Save Changes",
+  "cancel": "Cancel",
+  "icon": "Icon",
+  "name": "Name",
+  "namePlaceholder": "Fire Immunity",
+  "description": "Description"
+}

@@ -1,5 +1,13 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentEditResistanceDrawerEN from "@/translations/en/components/EditResistanceDrawer.json";
+import ComponentEditResistanceDrawerDE from "@/translations/de/components/EditResistanceDrawer.json"; 
+import ComponentSettingResistanceCardEN from "@/translations/en/components/SettingResistanceCard.json";
+import ComponentSettingResistanceCardDE from "@/translations/de/components/SettingResistanceCard.json"; 
+import ComponentEditImmunityDrawerEN from "@/translations/en/components/EditImmunityDrawer.json";
+import ComponentEditImmunityDrawerDE from "@/translations/de/components/EditImmunityDrawer.json"; 
+import ComponentSettingImmunityCardEN from "@/translations/en/components/SettingImmunityCard.json";
+import ComponentSettingImmunityCardDE from "@/translations/de/components/SettingImmunityCard.json"; 
 import ComponentSettingEffectCardEN from "@/translations/en/components/SettingEffectCard.json";
 import ComponentSettingEffectCardDE from "@/translations/de/components/SettingEffectCard.json"; 
 import ComponentSettingPlayerCardEN from "@/translations/en/components/SettingPlayerCard.json";
@@ -69,6 +77,10 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentEditResistanceDrawer: ComponentEditResistanceDrawerEN,
+    ComponentSettingResistanceCard: ComponentSettingResistanceCardEN,
+    ComponentEditImmunityDrawer: ComponentEditImmunityDrawerEN,
+    ComponentSettingImmunityCard: ComponentSettingImmunityCardEN,
     ComponentSettingEffectCard: ComponentSettingEffectCardEN,
     ComponentSettingPlayerCard: ComponentSettingPlayerCardEN,
     ComponentEditEffectDrawer: ComponentEditEffectDrawerEN,
@@ -108,6 +120,10 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentEditResistanceDrawer: ComponentEditResistanceDrawerDE,
+    ComponentSettingResistanceCard: ComponentSettingResistanceCardDE,
+    ComponentEditImmunityDrawer: ComponentEditImmunityDrawerDE,
+    ComponentSettingImmunityCard: ComponentSettingImmunityCardDE,
     ComponentSettingEffectCard: ComponentSettingEffectCardDE,
     ComponentSettingPlayerCard: ComponentSettingPlayerCardDE,
     ComponentEditEffectDrawer: ComponentEditEffectDrawerDE,

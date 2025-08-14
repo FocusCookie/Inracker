@@ -1,4 +1,8 @@
 import "i18next";
+import ComponentEditResistanceDrawer from "@/translations/en/component/EditResistanceDrawer.json";
+import ComponentSettingResistanceCard from "@/translations/en/component/SettingResistanceCard.json";
+import ComponentEditImmunityDrawer from "@/translations/en/component/EditImmunityDrawer.json";
+import ComponentSettingImmunityCard from "@/translations/en/component/SettingImmunityCard.json";
 import ComponentSettingEffectCard from "@/translations/en/component/SettingEffectCard.json";
 import ComponentSettingPlayerCard from "@/translations/en/component/SettingPlayerCard.json";
 import ComponentEditEffectDrawer from "@/translations/en/component/EditEffectDrawer.json";
@@ -38,6 +42,10 @@ declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
       // hygen-components - DO NOT DELETE THIS LINE
+      ComponentEditResistanceDrawer: typeof ComponentEditResistanceDrawer;
+      ComponentSettingResistanceCard: typeof ComponentSettingResistanceCard;
+      ComponentEditImmunityDrawer: typeof ComponentEditImmunityDrawer;
+      ComponentSettingImmunityCard: typeof ComponentSettingImmunityCard;
       ComponentSettingEffectCard: typeof ComponentSettingEffectCard;
       ComponentSettingPlayerCard: typeof ComponentSettingPlayerCard;
       ComponentEditEffectDrawer: typeof ComponentEditEffectDrawer;
