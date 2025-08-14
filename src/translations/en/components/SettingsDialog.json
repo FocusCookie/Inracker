@@ -1,10 +1,21 @@
 {
   "settings": "Settings",
   "settingsDescription": "Change your overall inracker settings.",
-  "general": "Genral",
+  "general": "General",
   "players": "Players",
+  "effects": "Effects",
+  "cleanup": "Clean up",
+  "immunities": "Immunities",
+  "resistances": "Resistances",
+  "opponents": "Opponents",
   "level": "Level",
   "delete": "Delete",
   "deletionWarning": "If you confirm the character will be gone forever. Really, there is no scroll or spell to revive the deleted character!",
-  "edit": "Edit"
+  "edit": "Edit",
+  "playerSearchPlaceholder": "Search for a specific hero...",
+  "effectSearchPlaceholder": "Search for a specific effect...",
+  "immunitySearchPlaceholder": "Search for a specific immunity...",
+  "resistanceSearchPlaceholder": "Search for a specific resistance...",
+  "cleanupDescription": "TODO: implement cleanup function button to clean up encounter opponents which are not attached to any encounter",
+  "opponentsDescription": "TODO: implement edit and deletion of opponents"
 }

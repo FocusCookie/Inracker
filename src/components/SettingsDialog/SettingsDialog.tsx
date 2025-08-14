@@ -136,11 +136,11 @@ function SettingsDialog({
           <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="general">{t("general")}</TabsTrigger>
             <TabsTrigger value="player-catalog">{t("players")}</TabsTrigger>
-            <TabsTrigger value="effects">Effects</TabsTrigger>
-            <TabsTrigger value="cleanup">clean up</TabsTrigger>
-            <TabsTrigger value="immunities">immunities</TabsTrigger>
-            <TabsTrigger value="resistances">resistances</TabsTrigger>
-            <TabsTrigger value="opponents">Opponents</TabsTrigger>
+            <TabsTrigger value="effects">{t("effects")}</TabsTrigger>
+            <TabsTrigger value="cleanup">{t("cleanup")}</TabsTrigger>
+            <TabsTrigger value="immunities">{t("immunities")}</TabsTrigger>
+            <TabsTrigger value="resistances">{t("resistances")}</TabsTrigger>
+            <TabsTrigger value="opponents">{t("opponents")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general">{t("general")}</TabsContent>
@@ -151,7 +151,7 @@ function SettingsDialog({
           >
             <Input
               className="mt-4"
-              placeholder="Search for a specific hero..."
+              placeholder={t("playerSearchPlaceholder")}
               onChange={handlePlayerSearchTerm}
             />
 
@@ -179,7 +179,7 @@ function SettingsDialog({
           <TabsContent value="effects">
             <Input
               className="mt-4"
-              placeholder="Search for a specific effect..."
+              placeholder={t("effectSearchPlaceholder")}
               onChange={handleEffectSearch}
             />
 
@@ -207,7 +207,7 @@ function SettingsDialog({
           <TabsContent value="immunities">
             <Input
               className="mt-4"
-              placeholder="Search for a specific immunity..."
+              placeholder={t("immunitySearchPlaceholder")}
               onChange={handleImmunitySearch}
             />
 
@@ -233,7 +233,7 @@ function SettingsDialog({
           <TabsContent value="resistances">
             <Input
               className="mt-4"
-              placeholder="Search for a specific resistance..."
+              placeholder={t("resistanceSearchPlaceholder")}
               onChange={handleResistanceSearch}
             />
 
@@ -255,13 +255,10 @@ function SettingsDialog({
                 ))}
             </div>
           </TabsContent>
-          <TabsContent value="cleanup">
-            //TODO: implement cleanup function button to clean up encounter
-            opponeents which are not attached to any encounter
-          </TabsContent>
+          <TabsContent value="cleanup">{t("cleanupDescription")}</TabsContent>
 
           <TabsContent value="opponents">
-            //TODO: implement edit and deletion of opponenets
+            {t("opponentsDescription")}
           </TabsContent>
         </Tabs>
       </DialogContent>
