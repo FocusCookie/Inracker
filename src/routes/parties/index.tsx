@@ -1,3 +1,4 @@
+import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
 import PartySelection from "@/pages/PartySelection/PartySelection";
@@ -12,10 +13,10 @@ export const Route = createFileRoute("/parties/")({
 
 function Parties() {
   const navigate = useNavigate();
-  const { openCreateDrawer, openEditDrawer, setCurrentParty } = usePartyStore(
+
+  const { openEditDrawer, setCurrentParty } = usePartyStore(
     useShallow((state) => ({
       setCurrentParty: state.setCurrentParty,
-      openCreateDrawer: state.openCreateDrawer,
       openEditDrawer: state.openEditDrawer,
     })),
   );
@@ -23,6 +24,12 @@ function Parties() {
   const partiesQuery = useQueryWithToast({
     queryKey: ["parties"],
     queryFn: db.parties.getAllDetailed,
+  });
+
+  const createPartyMutation = useMutationWithErrorToast({
+    mutationFn: (party: Omit<Party, "id">) => {
+      return db.parties.create(party);
+    },
   });
 
   function handleEditParty(party: Party) {
@@ -43,7 +50,7 @@ function Parties() {
       parties={partiesQuery.data || []}
       onEditParty={handleEditParty}
       onPartySelect={handlePartySelection}
-      onCreateParty={openCreateDrawer}
+      onCreateParty={createPartyMutation}
     />
   );
 }

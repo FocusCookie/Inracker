@@ -1,20 +1,35 @@
 import Loader from "@/components/Loader/Loader";
 import PartyCard from "@/components/PartyCard/PartyCard";
-import { Button } from "@/components/ui/button";
 import { TypographyH1 } from "@/components/ui/typographyH1";
 import { TypographyP } from "@/components/ui/typographyP";
-import { Party } from "@/types/party";
+import { Button } from "@/components/ui/button";
+import { useOverlayStore } from "@/stores/useOverlayStore";
+import type { DBParty, Party } from "@/types/party";
 import { AnimatePresence } from "framer-motion";
-import React from "react";
 import { useTranslation } from "react-i18next";
+import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
+import { Player } from "@/types/player";
 
 type PartySelectionProps = {
   parties: Party[];
   loading: boolean;
-  children?: React.ReactNode;
   onEditParty: (party: Party) => void;
   onPartySelect: (id: Party["id"]) => void;
-  onCreateParty: () => void;
+  onCreateParty: UseMutationResult<
+    DBParty,
+    unknown,
+    Omit<
+      {
+        readonly id: number;
+        name: string;
+        icon: string;
+        description: string;
+        players: Player[];
+      },
+      "id"
+    >,
+    unknown
+  >;
 };
 
 const PartySelection = ({
@@ -25,25 +40,29 @@ const PartySelection = ({
   onCreateParty,
 }: PartySelectionProps) => {
   const { t } = useTranslation("PagePartySelection");
+  const openOverlay = useOverlayStore((s) => s.open);
+  const queryClient = useQueryClient();
 
-  function handlePartySelect(partyId: Party["id"]) {
-    onPartySelect(partyId);
+  function handleOpenCreateParty() {
+    openOverlay("party.create", {
+      onCreate: (party) => onCreateParty.mutateAsync(party),
+      onComplete: ({ partyId }) => {
+        console.log("oncomplete");
+        queryClient.invalidateQueries({ queryKey: ["parties"] });
+        onPartySelect(partyId);
+        console.log("created party with id: ", partyId);
+      },
+    });
   }
 
   return (
     <div className="flex h-full w-full flex-col items-center gap-8 rounded-md bg-white p-2">
       <div className="w-content flex flex-col gap-2">
         <TypographyH1>{t("headline")}</TypographyH1>
-
         <TypographyP>{t("description")}</TypographyP>
       </div>
 
-      <Button
-        onClick={onCreateParty}
-        variant={parties.length === 0 ? "default" : "outline"}
-      >
-        {t("createParty")}
-      </Button>
+      <Button onClick={handleOpenCreateParty}>{t("createParty")}</Button>
 
       <AnimatePresence mode="wait">
         {loading && <Loader size="large" title={t("loading")} key="loader" />}
@@ -57,7 +76,7 @@ const PartySelection = ({
                   animationDelay={index * 0.05}
                   party={party}
                   onEdit={onEditParty}
-                  onOpen={() => handlePartySelect(party.id)}
+                  onOpen={() => onPartySelect(party.id)}
                 />
               ))}
             </div>

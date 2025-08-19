@@ -8,81 +8,115 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Party } from "@/types/party";
-import { Prettify } from "@/types/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { z } from "zod";
 import Drawer from "../Drawer/Drawer";
 import IconPicker from "../IconPicker/IconPicker";
 import { Button } from "../ui/button";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslation } from "react-i18next";
+import { useState } from "react";
+import type { Party } from "@/types/party";
+import type {
+  CancelReason,
+  OverlayMap,
+  OverlaySuccessMap,
+} from "@/types/overlay";
 
-type Props = {
-  onCreate: (party: Prettify<Omit<Party, "id">>) => void;
-  isCreating: boolean;
+type OverlayProps = OverlayMap["party.create"];
+type RuntimeProps = {
   open: boolean;
-  onOpenChange: (state: boolean) => void;
+  onOpenChange: (state: boolean) => void; // host toggles open; exit anim plays
+  onExitComplete: () => void; // host removes after exit
 };
+type Props = OverlayProps & RuntimeProps;
 
-function CreatePartyDrawer({
+export default function CreatePartyDrawer({
   onCreate,
-  isCreating,
+  onComplete,
+  onCancel,
   open,
-  onOpenChange,
+  onOpenChange: hostOnOpenChange,
+  onExitComplete,
 }: Props) {
   const { t } = useTranslation("ComponentPartyCreateDrawer");
+  const [isCreating, setIsCreating] = useState(false);
+  // null = nothing emitted yet; otherwise we already emitted success/cancel
+  const [closingReason, setClosingReason] = useState<
+    null | "success" | CancelReason
+  >(null);
 
-  const formSchema = z.object({
-    name: z.string().min(2, {
-      message: t("nameValidation"),
-    }),
-    description: z.string(),
+  const schema = z.object({
+    name: z.string().min(2, { message: t("nameValidation") }),
+    description: z.string().optional().default(""),
     icon: z.string().emoji(),
   });
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      description: "",
-      icon: "🧙",
-    },
+
+  const form = useForm<z.infer<typeof schema>>({
+    resolver: zodResolver(schema),
+    defaultValues: { name: "", description: "", icon: "🧙" },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const { name, description, icon } = values;
+  async function handleSubmit(values: z.infer<typeof schema>) {
+    try {
+      setIsCreating(true);
+      const input: Omit<Party, "id"> = {
+        name: values.name,
+        description: values.description ?? "",
+        icon: values.icon,
+        players: [],
+      };
+      const created = await onCreate(input); // must return { id: number }
+      const partyId = (created as any).id as number;
 
-    onCreate({
-      name,
-      icon,
-      description,
-      players: [],
-    });
+      onComplete({ partyId } as OverlaySuccessMap["party.create"]);
 
-    form.reset();
+      setClosingReason("success");
+      hostOnOpenChange(false);
+      form.reset();
+    } finally {
+      setIsCreating(false);
+    }
   }
 
-  function handleIconSelect(icon: string) {
-    form.setValue("icon", icon);
+  function handleCancelClick() {
+    onCancel?.("cancel");
+    setClosingReason("cancel");
+    hostOnOpenChange(false);
+  }
+
+  // Only emit dismissed if we didn't already emit success/cancel
+  function handleOpenChange(state: boolean) {
+    if (!state && closingReason === null) {
+      onCancel?.("dismissed");
+      setClosingReason("dismissed");
+    }
+
+    hostOnOpenChange(state);
   }
 
   return (
     <Drawer
       description={t("titleDescription")}
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
+      onExitComplete={onExitComplete}
       title={t("title")}
       actions={
         <Button
           loading={isCreating}
           disabled={isCreating}
-          onClick={form.handleSubmit(onSubmit)}
+          onClick={form.handleSubmit(handleSubmit)}
         >
           {t("create")}
         </Button>
       }
       cancelTrigger={
-        <Button disabled={isCreating} variant="ghost">
+        <Button
+          onClick={handleCancelClick}
+          disabled={isCreating}
+          variant="ghost"
+        >
           {t("cancel")}
         </Button>
       }
@@ -95,7 +129,7 @@ function CreatePartyDrawer({
               <IconPicker
                 initialIcon={form.getValues("icon")}
                 disabled={isCreating}
-                onIconClick={handleIconSelect}
+                onIconClick={(icon) => form.setValue("icon", icon)}
               />
               <FormMessage />
             </div>
@@ -125,11 +159,9 @@ function CreatePartyDrawer({
             render={({ field }) => (
               <FormItem className="px-0.5">
                 <FormLabel>{t("description")}</FormLabel>
-
                 <FormControl>
                   <Textarea disabled={isCreating} placeholder="" {...field} />
                 </FormControl>
-
                 <FormMessage />
               </FormItem>
             )}
@@ -139,5 +171,3 @@ function CreatePartyDrawer({
     </Drawer>
   );
 }
-
-export default CreatePartyDrawer;

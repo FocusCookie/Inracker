@@ -564,21 +564,6 @@ function GlobalModals({}: Props) {
     },
   });
 
-  const createPartyMutation = useMutationWithErrorToast({
-    mutationFn: (party: Omit<Party, "id">) => {
-      return db.parties.create(party);
-    },
-    onSuccess: (party: DBParty) => {
-      queryClient.invalidateQueries({ queryKey: ["parties"] });
-      closeCreateDrawer();
-
-      toast({
-        variant: "default",
-        title: `Created ${party.icon} ${party.name}`,
-      });
-    },
-  });
-
   const createChapterMutation = useMutationWithErrorToast({
     mutationFn: (chapter: Omit<Chapter, "id">) => {
       return db.chapters.create(chapter);
@@ -935,14 +920,6 @@ function GlobalModals({}: Props) {
     }
   }
 
-  function handleCreateDrawerChange(state: boolean) {
-    if (state) {
-      openCreateDrawer();
-    } else {
-      closeCreateDrawer();
-    }
-  }
-
   function handleEncounterDrawerOpenChange(state: boolean) {
     if (state) {
       openCreateEncounterDrawer();
@@ -1078,13 +1055,6 @@ function GlobalModals({}: Props) {
           onCreateResistance={openCreateResistanceDrawer}
         />
       )}
-
-      <CreatePartyDrawer
-        open={isCreateDrawerOpen}
-        onOpenChange={handleCreateDrawerChange}
-        isCreating={createPartyMutation.isPending}
-        onCreate={createPartyMutation.mutate}
-      />
 
       {currentParty && (
         <CreateChapterDrawer
