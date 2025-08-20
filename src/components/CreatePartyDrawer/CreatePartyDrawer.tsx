@@ -24,6 +24,7 @@ import type {
 } from "@/types/overlay";
 
 type OverlayProps = OverlayMap["party.create"];
+
 type RuntimeProps = {
   open: boolean;
   onOpenChange: (state: boolean) => void; // host toggles open; exit anim plays
@@ -32,11 +33,11 @@ type RuntimeProps = {
 type Props = OverlayProps & RuntimeProps;
 
 export default function CreatePartyDrawer({
+  open,
   onCreate,
   onComplete,
   onCancel,
-  open,
-  onOpenChange: hostOnOpenChange,
+  onOpenChange,
   onExitComplete,
 }: Props) {
   const { t } = useTranslation("ComponentPartyCreateDrawer");
@@ -60,6 +61,7 @@ export default function CreatePartyDrawer({
   async function handleSubmit(values: z.infer<typeof schema>) {
     try {
       setIsCreating(true);
+
       const input: Omit<Party, "id"> = {
         name: values.name,
         description: values.description ?? "",
@@ -72,7 +74,7 @@ export default function CreatePartyDrawer({
       onComplete({ partyId } as OverlaySuccessMap["party.create"]);
 
       setClosingReason("success");
-      hostOnOpenChange(false);
+      onOpenChange(false);
       form.reset();
     } finally {
       setIsCreating(false);
@@ -82,7 +84,7 @@ export default function CreatePartyDrawer({
   function handleCancelClick() {
     onCancel?.("cancel");
     setClosingReason("cancel");
-    hostOnOpenChange(false);
+    onOpenChange(false);
   }
 
   // Only emit dismissed if we didn't already emit success/cancel
@@ -92,7 +94,7 @@ export default function CreatePartyDrawer({
       setClosingReason("dismissed");
     }
 
-    hostOnOpenChange(state);
+    onOpenChange(state);
   }
 
   return (
