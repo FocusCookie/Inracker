@@ -24,11 +24,11 @@ function PartyCard({ party, animationDelay = 0, onEdit, onOpen }: Props) {
   const { t } = useTranslation("ComponentPartyCard");
 
   function handleEditClick() {
-    if (onEdit) onEdit(party);
+    onEdit(party);
   }
 
   function handleOpenClick() {
-    if (onOpen) onOpen(party.id);
+    onOpen(party.id);
   }
 
   return (
