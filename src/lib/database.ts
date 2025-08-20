@@ -475,7 +475,7 @@ const removePlayerFromParty = async (
 const deletePartyById = async (
   db: TauriDatabase,
   id: number,
-): Promise<DBParty> => {
+): Promise<Party["id"]> => {
   const deletedParty = await getPartyById(db, id);
   const chapters = await getAllChaptersForParty(db, id);
 
@@ -518,7 +518,7 @@ const deletePartyById = async (
 
   await db.execute("DELETE FROM parties WHERE id = $1", [id]);
 
-  return deletedParty;
+  return deletedParty.id;
 };
 
 //* Player
