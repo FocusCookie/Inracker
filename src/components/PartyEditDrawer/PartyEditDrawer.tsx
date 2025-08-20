@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Party } from "@/types/party";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -28,28 +28,34 @@ import {
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
 import { Button } from "../ui/button";
+import { CancelReason, OverlayMap } from "@/types/overlay";
 
-type Props = {
-  party: Party | null;
-  onUpdate: (party: Party) => void;
-  /**
-   * disabels the inputs and sets the create button to loading and disables other buttons
-   */
-  isUpdating: boolean;
+type OverlayProps = OverlayMap["party.edit"];
+
+type RuntimeProps = {
+  party: Party;
   open: boolean;
   onOpenChange: (state: boolean) => void;
-  onDelete: (id: Party["id"]) => void;
+  onExitComplete: () => void; // host removes after exit
 };
+
+type Props = OverlayProps & RuntimeProps;
 
 function PartyEditDrawer({
   party,
-  isUpdating,
   open,
-  onUpdate,
   onOpenChange,
   onDelete,
+  onCancel,
+  onComplete,
+  onExitComplete,
+  onEdit,
 }: Props) {
   const { t } = useTranslation("ComponentPartyEditDrawer");
+  const [closingReason, setClosingReason] = useState<
+    null | "success" | CancelReason
+  >(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const formSchema = z.object({
     name: z.string().min(2, {
@@ -78,16 +84,28 @@ function PartyEditDrawer({
     }
   }, [party, form]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    if (party) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      setIsLoading(true);
       const { name, description, icon } = values;
 
-      onUpdate({
+      const updatedParty = await onEdit({
         ...party,
         name,
         icon,
         description,
       });
+
+      onComplete({ partyId: updatedParty.id });
+
+      setClosingReason("success");
+      onOpenChange(false);
+      form.reset();
+    } catch (error) {
+      console.log("Error while updating a party");
+      console.log(error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -95,23 +113,51 @@ function PartyEditDrawer({
     form.setValue("icon", icon);
   }
 
-  function handleDeleteParty() {
-    if (party) {
-      onDelete(party.id);
+  async function handleDeleteParty() {
+    try {
+      setIsLoading(true);
+
+      await onDelete(party.id);
+
+      onComplete({ partyId: party.id });
+      setClosingReason("success");
+      onOpenChange(false);
+      form.reset();
+    } catch (error) {
+      console.log("Error while deleting a party");
+      console.log(error);
+    } finally {
+      setIsLoading(false);
     }
+  }
+
+  function handleCancelClick() {
+    onCancel?.("cancel");
+    setClosingReason("cancel");
+    onOpenChange(false);
+  }
+
+  function handleOpenChange(state: boolean) {
+    if (!state && closingReason === null) {
+      onCancel?.("dismissed");
+      setClosingReason("dismissed");
+    }
+
+    onOpenChange(state);
   }
 
   return (
     <Drawer
+      onExitComplete={onExitComplete}
       description={t("titleDescription")}
-      open={open && !!party}
-      onOpenChange={onOpenChange}
+      open={open}
+      onOpenChange={handleOpenChange}
       title={t("title")}
       actions={
         <div className="flex gap-4">
           <Button
-            loading={isUpdating}
-            disabled={isUpdating}
+            loading={isLoading}
+            disabled={isLoading}
             onClick={form.handleSubmit(onSubmit)}
           >
             {t("save")}
@@ -121,8 +167,8 @@ function PartyEditDrawer({
             <AlertDialogTrigger asChild>
               <Button
                 variant="destructive"
-                loading={isUpdating}
-                disabled={isUpdating}
+                loading={isLoading}
+                disabled={isLoading}
               >
                 {t("delete")}
               </Button>
@@ -146,7 +192,11 @@ function PartyEditDrawer({
         </div>
       }
       cancelTrigger={
-        <Button disabled={isUpdating} variant="ghost">
+        <Button
+          disabled={isLoading}
+          variant="ghost"
+          onClick={handleCancelClick}
+        >
           {t("cancel")}
         </Button>
       }
@@ -158,7 +208,7 @@ function PartyEditDrawer({
               <FormLabel>{t("icon")}</FormLabel>
               <IconPicker
                 initialIcon={party?.icon}
-                disabled={isUpdating}
+                disabled={isLoading}
                 onIconClick={handleIconSelect}
               />
               <FormMessage />
@@ -171,7 +221,7 @@ function PartyEditDrawer({
                   <FormLabel>{t("name")}</FormLabel>
                   <FormControl>
                     <Input
-                      disabled={isUpdating}
+                      disabled={isLoading}
                       placeholder="The greedy Adventurer"
                       {...field}
                     />
@@ -188,7 +238,7 @@ function PartyEditDrawer({
               <FormItem className="px-0.5">
                 <FormLabel>{t("description")}</FormLabel>
                 <FormControl>
-                  <Textarea disabled={isUpdating} placeholder="" {...field} />
+                  <Textarea disabled={isLoading} placeholder="" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

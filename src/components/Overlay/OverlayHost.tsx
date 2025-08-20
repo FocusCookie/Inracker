@@ -1,6 +1,7 @@
 import { useOverlayStore } from "@/stores/useOverlayStore";
 import type { OverlayKind, OverlayMap } from "@/types/overlay";
 import CreatePartyDrawer from "@/components/CreatePartyDrawer/CreatePartyDrawer";
+import PartyEditDrawer from "../PartyEditDrawer/PartyEditDrawer";
 
 type RuntimeOverlayProps = {
   open: boolean;
@@ -14,6 +15,7 @@ type OverlayComponent<K extends OverlayKind> = React.FC<
 
 const registry: Record<OverlayKind, OverlayComponent<any>> = {
   "party.create": CreatePartyDrawer,
+  "party.edit": PartyEditDrawer,
   // "player.create": PlayerCreateDrawer,
   // "player.edit": PlayerEditDrawer,
 };
@@ -25,20 +27,18 @@ export function OverlayHost() {
 
   return (
     <>
-      {stack.map((item, i) => {
+      {stack.map((item) => {
         const Cmp = registry[item.type] as OverlayComponent<typeof item.type>;
-        const z = 1000 + i;
         return (
-          <div key={item.id} style={{ position: "fixed", inset: 0, zIndex: z }}>
-            <Cmp
-              {...(item.props as any)} // your domain props (e.g., onCreate)
-              open={item.open}
-              onOpenChange={(o) => {
-                if (!o) close(item.id);
-              }}
-              onExitComplete={() => remove(item.id)}
-            />
-          </div>
+          <Cmp
+            key={item.id}
+            open={item.open}
+            onOpenChange={(o) => {
+              if (!o) close(item.id);
+            }}
+            onExitComplete={() => remove(item.id)}
+            {...(item.props as any)}
+          />
         );
       })}
     </>

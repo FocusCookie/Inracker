@@ -13,7 +13,24 @@ import { Player } from "@/types/player";
 type PartySelectionProps = {
   parties: Party[];
   loading: boolean;
-  onEditParty: (party: Party) => void;
+  onEditParty: UseMutationResult<
+    {
+      description: string;
+      readonly id: number;
+      name: string;
+      icon: string;
+      players: Player[];
+    },
+    unknown,
+    {
+      description: string;
+      readonly id: number;
+      name: string;
+      icon: string;
+      players: Player[];
+    },
+    unknown
+  >;
   onPartySelect: (id: Party["id"]) => void;
   onCreateParty: UseMutationResult<
     DBParty,
@@ -30,6 +47,7 @@ type PartySelectionProps = {
     >,
     unknown
   >;
+  onDeleteParty: UseMutationResult<number, unknown, number, unknown>;
 };
 
 const PartySelection = ({
@@ -38,6 +56,7 @@ const PartySelection = ({
   onEditParty,
   onPartySelect,
   onCreateParty,
+  onDeleteParty,
 }: PartySelectionProps) => {
   const { t } = useTranslation("PagePartySelection");
   const openOverlay = useOverlayStore((s) => s.open);
@@ -47,11 +66,20 @@ const PartySelection = ({
     openOverlay("party.create", {
       onCreate: (party) => onCreateParty.mutateAsync(party),
       onComplete: ({ partyId }) => {
-        console.log("oncomplete");
         queryClient.invalidateQueries({ queryKey: ["parties"] });
         onPartySelect(partyId);
-        console.log("created party with id: ", partyId);
       },
+    });
+  }
+
+  function handleOpenEditParty(party: Party) {
+    openOverlay("party.edit", {
+      party,
+      onEdit: (party) => onEditParty.mutateAsync(party),
+      onComplete: (_partyId) => {
+        queryClient.invalidateQueries({ queryKey: ["parties"] });
+      },
+      onDelete: (partyId: Party["id"]) => onDeleteParty.mutateAsync(partyId),
     });
   }
 
@@ -75,7 +103,7 @@ const PartySelection = ({
                   key={`party-${party.id}`}
                   animationDelay={index * 0.05}
                   party={party}
-                  onEdit={onEditParty}
+                  onEdit={() => handleOpenEditParty(party)}
                   onOpen={() => onPartySelect(party.id)}
                 />
               ))}

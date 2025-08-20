@@ -14,10 +14,9 @@ export const Route = createFileRoute("/parties/")({
 function Parties() {
   const navigate = useNavigate();
 
-  const { openEditDrawer, setCurrentParty } = usePartyStore(
+  const { setCurrentParty } = usePartyStore(
     useShallow((state) => ({
       setCurrentParty: state.setCurrentParty,
-      openEditDrawer: state.openEditDrawer,
     })),
   );
 
@@ -32,9 +31,17 @@ function Parties() {
     },
   });
 
-  function handleEditParty(party: Party) {
-    openEditDrawer(party);
-  }
+  const editPartyMutation = useMutationWithErrorToast({
+    mutationFn: (party: Party) => {
+      return db.parties.updateByParty(party);
+    },
+  });
+
+  const deletePartyMutation = useMutationWithErrorToast({
+    mutationFn: (id: Party["id"]) => {
+      return db.parties.deleteById(id);
+    },
+  });
 
   function handlePartySelection(partyId: Party["id"]) {
     setCurrentParty(partyId);
@@ -48,7 +55,8 @@ function Parties() {
     <PartySelection
       loading={partiesQuery.isPending}
       parties={partiesQuery.data || []}
-      onEditParty={handleEditParty}
+      onEditParty={editPartyMutation}
+      onDeleteParty={deletePartyMutation}
       onPartySelect={handlePartySelection}
       onCreateParty={createPartyMutation}
     />

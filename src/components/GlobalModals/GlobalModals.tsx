@@ -20,7 +20,6 @@ import CreatePlayerDrawer from "../CreatePlayerDrawer/CreatePlayerDrawer";
 import CreateResistanceDrawer from "../CreateResistanceDrawer/CreateResistanceDrawer";
 import EditPlayerDrawer from "../EditPlayerDrawer/EditPlayerDrawer";
 import ImmunitiesCatalog from "../ImmunitiesCatalog/ImmunitiesCatalog";
-import PartyEditDrawer from "../PartyEditDrawer/PartyEditDrawer";
 import PlayerCatalog from "../PlayerCatalog/PlayerCatalog";
 import ResistancesCatalog from "../ResistancesCatalog/ResistancesCatalog";
 import SettingsDialog from "../SettingsDialog/SettingsDialog";
@@ -549,21 +548,6 @@ function GlobalModals({}: Props) {
     },
   });
 
-  const deletePartyMutation = useMutationWithErrorToast({
-    mutationFn: (id: Party["id"]) => {
-      return db.parties.deleteById(id);
-    },
-    onSuccess: (deletedParty: DBParty) => {
-      queryClient.invalidateQueries({ queryKey: ["parties"] });
-      closeEditDrawer();
-
-      toast({
-        variant: "default",
-        title: `Deleted ${deletedParty.icon} ${deletedParty.name}`,
-      });
-    },
-  });
-
   const createChapterMutation = useMutationWithErrorToast({
     mutationFn: (chapter: Omit<Chapter, "id">) => {
       return db.chapters.create(chapter);
@@ -609,17 +593,6 @@ function GlobalModals({}: Props) {
         title: `Deleted ${deletedChapter.icon} ${deletedChapter.name}`,
       });
     },
-  });
-
-  const updatePartyMutation = useMutationWithErrorToast({
-    mutationFn: (party: Party) => {
-      return db.parties.updateByParty(party);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["parties"] });
-      closeEditDrawer();
-    },
-    onError: (error) => console.log(error),
   });
 
   const deletePlayer = useMutationWithErrorToast({
@@ -1166,17 +1139,6 @@ function GlobalModals({}: Props) {
         onDeleteEffect={deleteEffect.mutate}
         onDeleteImmunity={deleteImmunity.mutate}
         onDeleteResistance={deleteResistance.mutate}
-      />
-
-      <PartyEditDrawer
-        open={isEditDrawerOpen}
-        onOpenChange={closeEditDrawer}
-        party={editingParty}
-        isUpdating={
-          deletePartyMutation.isPending || deletePartyMutation.isPending
-        }
-        onUpdate={updatePartyMutation.mutate}
-        onDelete={deletePartyMutation.mutate}
       />
 
       <EditChapterDrawer
