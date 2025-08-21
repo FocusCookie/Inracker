@@ -113,7 +113,7 @@ pub fn run() {
                 passed INTEGER NOT NULL, -- boolean state
                 dice INTEGER,
                 skill TEXT,
-                difficulties string, -- array of difficulty classes
+                difficulties TEXT, -- array of difficulty classes
                 opponents TEXT -- JSON array of ids of opponents
             )",
             kind: MigrationKind::Up,
