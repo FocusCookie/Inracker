@@ -1,44 +1,27 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
+import Drawer from "../Drawer/Drawer";
+import { Button } from "../ui/button";
+import { useTranslation } from "react-i18next";
+import { CancelReason } from "@/types/overlay";
 
 type Props = {
-  open?: boolean;
-  onOpenChange?: (state: boolean) => void;
-  /**
-   * button which opens the catalog dialog
-   */
-  trigger?: React.ReactElement<HTMLButtonElement>;
-  /** optional tooltip, for trigger */
-  tooltip?: string;
+  open: boolean;
+  onOpenChange: (state: boolean) => void;
   /** optional action */
   action?: React.ReactElement<HTMLButtonElement>;
   title: string;
   description: string;
   children: React.ReactNode;
-  placeholder: string;
+  placeholder?: string;
   search: string;
   onSearchChange: (search: string) => void;
+  onExitComplete: () => void;
+  onCancel: (reason: CancelReason) => void;
 };
 
 function Catalog({
   open,
-  trigger,
-  tooltip,
   action,
   title,
   description,
@@ -47,60 +30,49 @@ function Catalog({
   search,
   onOpenChange,
   onSearchChange,
+  onExitComplete,
+  onCancel,
 }: Props) {
+  const { t } = useTranslation("ComponentCatalog");
+
   function handleSearchTerm(event: React.ChangeEvent<HTMLInputElement>) {
     onSearchChange(event.target.value);
   }
 
+  function handleCancel() {
+    onCancel("cancel");
+  }
+
   return (
-    <>
-      <Dialog
-        open={trigger ? undefined : open}
-        onOpenChange={trigger ? undefined : onOpenChange}
-      >
-        {trigger && tooltip && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DialogTrigger asChild>{trigger}</DialogTrigger>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{tooltip} </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
+    <Drawer
+      open={open}
+      onOpenChange={onOpenChange}
+      onExitComplete={onExitComplete}
+      title={title}
+      description={description}
+      actions={action}
+      cancelTrigger={
+        <Button onClick={handleCancel} variant="ghost">
+          {t("cancel")}
+        </Button>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        <div className="p-0.5 pr-4">
+          <Input
+            placeholder={placeholder ? placeholder : t("searchPlaceholder")}
+            defaultValue={search}
+            onChange={handleSearchTerm}
+          />
+        </div>
 
-        {trigger && !tooltip && (
-          <DialogTrigger asChild>{trigger}</DialogTrigger>
-        )}
-
-        <DialogContent className="m-4 p-4 pr-0">
-          <div className="pr-4">
-            <DialogHeader>
-              <DialogTitle>{title}</DialogTitle>
-
-              <DialogDescription>{description}</DialogDescription>
-            </DialogHeader>
-
-            <Input
-              className="mt-4"
-              placeholder={placeholder}
-              defaultValue={search}
-              onChange={handleSearchTerm}
-            />
-          </div>
-
-          <div className="max-h-[200px] overflow-hidden">
-            <ScrollArea className="h-full pr-4">
-              <div className="flex h-full flex-col gap-4 p-1">{children}</div>
-            </ScrollArea>
-          </div>
-
-          {action && <DialogFooter className="pr-4">{action}</DialogFooter>}
-        </DialogContent>
-      </Dialog>
-    </>
+        <div className="max-h-[200px] overflow-hidden">
+          <ScrollArea className="h-full pr-4">
+            <div className="flex h-full flex-col gap-4 p-1">{children}</div>
+          </ScrollArea>
+        </div>
+      </div>
+    </Drawer>
   );
 }
 

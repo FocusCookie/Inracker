@@ -27,8 +27,8 @@ type OverlayProps = OverlayMap["resistance.create"];
 
 type RuntimeProps = {
   open: boolean;
-  onOpenChange: (state: boolean) => void; // host toggles open; exit anim plays
-  onExitComplete: () => void; // host removes after exit
+  onOpenChange: (state: boolean) => void;
+  onExitComplete: () => void;
 };
 type Props = OverlayProps & RuntimeProps;
 
@@ -42,7 +42,6 @@ export default function CreateResistanceDrawer({
 }: Props) {
   const { t } = useTranslation("ComponentCreateResistanceDrawer");
   const [isCreating, setIsCreating] = useState(false);
-  // null = nothing emitted yet; otherwise we already emitted success/cancel
   const [closingReason, setClosingReason] = useState<
     null | "success" | CancelReason
   >(null);
@@ -54,7 +53,7 @@ export default function CreateResistanceDrawer({
     description: z.string(),
     icon: z.string().emoji(),
   });
-  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -74,7 +73,7 @@ export default function CreateResistanceDrawer({
         description: values.description,
       };
 
-      const created = await onCreate(input); // must return { id: number }
+      const created = await onCreate(input);
       const resistanceId = (created as any).id as number;
 
       onComplete({ resistanceId } as OverlaySuccessMap["resistance.create"]);
@@ -93,7 +92,6 @@ export default function CreateResistanceDrawer({
     onOpenChange(false);
   }
 
-  // Only emit dismissed if we didn't already emit success/cancel
   function handleOpenChange(state: boolean) {
     if (!state && closingReason === null) {
       onCancel?.("dismissed");
@@ -132,7 +130,7 @@ export default function CreateResistanceDrawer({
       <Form {...form}>
         <form
           onSubmit={(e) => e.preventDefault()}
-          className="space-y-4 p-0.5"
+          className="space-y-4 p-0.5 pr-2"
         >
           <div className="flex items-start gap-2">
             <div className="flex flex-col gap-1 pt-1.5 pl-0.5">

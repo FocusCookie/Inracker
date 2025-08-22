@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const createOpponentSchema = z.object({
   name: z.string().min(2, {
-    message: i18next.t("ComponentOpponentForm:minName"),
+    message: i18next.t("ComponentCreateOpponentForm:minName"),
   }),
   icon: z.string().emoji(),
   details: z.string(),

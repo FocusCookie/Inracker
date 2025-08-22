@@ -9,18 +9,14 @@ import { MoonIcon } from "@radix-ui/react-icons";
 import { useOverlayStore } from "@/stores/useOverlayStore";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
-import type {
-  CancelReason,
-  OverlayMap,
-  OverlaySuccessMap,
-} from "@/types/overlay";
+import type { OverlayMap } from "@/types/overlay";
 
 type OverlayProps = OverlayMap["resistance.catalog"];
 
 type RuntimeProps = {
   open: boolean;
-  onOpenChange: (state: boolean) => void; // host toggles open; exit anim plays
-  onExitComplete: () => void; // host removes after exit
+  onOpenChange: (state: boolean) => void;
+  onExitComplete: () => void;
 };
 type Props = OverlayProps & RuntimeProps;
 
@@ -35,7 +31,6 @@ export default function ResistancesCatalog({
   const { t } = useTranslation("ComponentResistanceCatalog");
   const openOverlay = useOverlayStore((s) => s.open);
 
-  // Fetch resistances from database
   const resistances = useQueryWithToast({
     queryKey: ["resistances"],
     queryFn: () => db.resistances.getAll(),
@@ -44,12 +39,10 @@ export default function ResistancesCatalog({
   function handleCreateResistance() {
     openOverlay("resistance.create", {
       onCreate: async (resistance) => {
-        // Create the resistance in the database
         const created = await db.resistances.create(resistance);
         return { id: created.id };
       },
-      onComplete: ({ resistanceId }) => {
-        // Resistance created successfully, refresh the catalog
+      onComplete: () => {
         resistances.refetch();
       },
       onCancel: (reason) => {
@@ -68,7 +61,6 @@ export default function ResistancesCatalog({
     onOpenChange(false);
   }
 
-  // Only emit dismissed if we didn't already emit success/cancel
   function handleOpenChange(state: boolean) {
     if (!state && !resistances.data) {
       onCancel?.("dismissed");
@@ -87,6 +79,7 @@ export default function ResistancesCatalog({
       placeholder={t("placeholderSearch")}
       search={search}
       onSearchChange={setSearch}
+      onCancel={handleCancelClick}
     >
       {resistances.data
         ?.filter((resistance) =>

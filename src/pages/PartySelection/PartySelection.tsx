@@ -90,7 +90,12 @@ const PartySelection = ({
         <TypographyP>{t("description")}</TypographyP>
       </div>
 
-      <Button onClick={handleOpenCreateParty}>{t("createParty")}</Button>
+      <Button
+        variant={parties.length === 0 ? "default" : "outline"}
+        onClick={handleOpenCreateParty}
+      >
+        {t("createParty")}
+      </Button>
 
       <AnimatePresence mode="wait">
         {loading && <Loader size="large" title={t("loading")} key="loader" />}

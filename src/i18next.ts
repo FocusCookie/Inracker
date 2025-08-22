@@ -1,5 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentCatalogEN from "@/translations/en/components/Catalog.json";
+import ComponentCatalogDE from "@/translations/de/components/Catalog.json"; 
 import ComponentEditResistanceDrawerEN from "@/translations/en/components/EditResistanceDrawer.json";
 import ComponentEditResistanceDrawerDE from "@/translations/de/components/EditResistanceDrawer.json"; 
 import ComponentSettingResistanceCardEN from "@/translations/en/components/SettingResistanceCard.json";
@@ -77,6 +79,7 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentCatalog: ComponentCatalogEN,
     ComponentEditResistanceDrawer: ComponentEditResistanceDrawerEN,
     ComponentSettingResistanceCard: ComponentSettingResistanceCardEN,
     ComponentEditImmunityDrawer: ComponentEditImmunityDrawerEN,
@@ -120,6 +123,7 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentCatalog: ComponentCatalogDE,
     ComponentEditResistanceDrawer: ComponentEditResistanceDrawerDE,
     ComponentSettingResistanceCard: ComponentSettingResistanceCardDE,
     ComponentEditImmunityDrawer: ComponentEditImmunityDrawerDE,

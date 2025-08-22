@@ -1,7 +1,7 @@
 {
   "minNameChars": "The resistance name must be at least three characters long.",
-  "descriptionText": "Create a custom resistance to give your player an edge against specific threats. Define a resistance that shields them from certain damage types, environmental hazards, or debilitating effects. Whether it’s protection against fire, poison, or magical attacks, this feature lets you tailor their defenses to align with their strengths and backstory.",
-  "title": "Create a new Resistance",
+  "descriptionText": "Create a custom resistance to shield your player from specific damage types, environmental hazards, or debilitating effects. Tailor their defenses to align with their strengths and backstory.",
+  "title": "Create a Resistance",
   "create": "Create",
   "cancel": "Cancel",
   "icon": "Icon",
@@ -9,3 +9,4 @@
   "namePlaceholder": "Fall Damage Resistance",
   "description": "Description"
 }
+

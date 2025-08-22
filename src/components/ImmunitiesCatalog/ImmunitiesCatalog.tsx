@@ -9,18 +9,14 @@ import { MoonIcon } from "@radix-ui/react-icons";
 import { useOverlayStore } from "@/stores/useOverlayStore";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
-import type {
-  CancelReason,
-  OverlayMap,
-  OverlaySuccessMap,
-} from "@/types/overlay";
+import type { OverlayMap } from "@/types/overlay";
 
 type OverlayProps = OverlayMap["immunity.catalog"];
 
 type RuntimeProps = {
   open: boolean;
-  onOpenChange: (state: boolean) => void; // host toggles open; exit anim plays
-  onExitComplete: () => void; // host removes after exit
+  onOpenChange: (state: boolean) => void;
+  onExitComplete: () => void;
 };
 type Props = OverlayProps & RuntimeProps;
 
@@ -35,7 +31,6 @@ export default function ImmunitiesCatalog({
   const { t } = useTranslation("ComponentImmunitiesCatalog");
   const openOverlay = useOverlayStore((s) => s.open);
 
-  // Fetch immunities from database
   const immunities = useQueryWithToast({
     queryKey: ["immunities"],
     queryFn: () => db.immunitites.getAll(),
@@ -48,8 +43,7 @@ export default function ImmunitiesCatalog({
         const created = await db.immunitites.create(immunity);
         return { id: created.id };
       },
-      onComplete: ({ immunityId }) => {
-        // Immunity created successfully, refresh the catalog
+      onComplete: () => {
         immunities.refetch();
       },
       onCancel: (reason) => {
@@ -87,6 +81,7 @@ export default function ImmunitiesCatalog({
       placeholder={t("placeholderSearch")}
       search={immunitySearch}
       onSearchChange={setImmunitySearch}
+      onCancel={handleCancelClick}
     >
       {immunities.data
         ?.filter((immunity) =>

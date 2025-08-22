@@ -7,4 +7,4 @@ export type DBResistance = {
   description: string;
 };
 
-export type Resistance = Prettify<Omit<Resistance, "id">>;
+export type Resistance = Prettify<Omit<DBResistance, "id">>;

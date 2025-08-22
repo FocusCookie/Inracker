@@ -4,5 +4,6 @@
   "placeholderSearch": "Suche nach einer bestimmten Immunität",
   "noImmunities": "Keine Immunitäten verfügbar",
   "noImmunitiesDescription": "Es gibt noch keine Immunitäten. Erstelle jetzt eine!",
-  "createImmunity": "Immunität erstellen"
+  "createImmunity": "Immunität erstellen",
+  "add": "Hinzufügen"
 }

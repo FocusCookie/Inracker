@@ -27,7 +27,7 @@ import { Chapter } from "@/types/chapters";
 import { DBEffect } from "@/types/effect";
 import { DBImmunity } from "@/types/immunitiy";
 import { Party } from "@/types/party";
-import { Player } from "@/types/player";
+import { Player, TCreatePlayer } from "@/types/player";
 import { DBResistance } from "@/types/resistances";
 import {
   CardStackPlusIcon,
@@ -41,6 +41,10 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { RiArrowLeftBoxLine, RiUserAddFill } from "react-icons/ri";
 import { useShallow } from "zustand/shallow";
+import { useOverlayStore } from "@/stores/useOverlayStore";
+import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
+import db from "@/lib/database";
+import { toast } from "@/hooks/use-toast";
 
 type Props = {
   party: Party;
@@ -74,6 +78,8 @@ function ChapterSelection({
   const navigate = useNavigate();
   const { t } = useTranslation("PageChapterSelection");
   const keysPressed = useRef<Record<string, boolean>>({});
+  const openOverlay = useOverlayStore((s) => s.open);
+
   const {
     isAsideOpen,
     openAside,
@@ -94,14 +100,12 @@ function ChapterSelection({
   const {
     openEditPlayerDrawer,
     setSelectedPlayer,
-    openCreateDrawer,
     openPlayersCatalog,
     closePlayersCatalog,
   } = usePlayerStore(
     useShallow((state) => ({
       openEditPlayerDrawer: state.openEditPlayerDrawer,
       setSelectedPlayer: state.setSelectedPlayer,
-      openCreateDrawer: state.openCreatePlayerDrawer,
       openPlayersCatalog: state.openPlayersCatalog,
       closePlayersCatalog: state.closePlayersCatalog,
     })),
@@ -128,6 +132,19 @@ function ChapterSelection({
         openResistancesCatalog: state.openResistancesCatalog,
       })),
     );
+
+  const createPlayer = useMutationWithErrorToast({
+    mutationFn: (player: TCreatePlayer) => {
+      return db.players.create(player);
+    },
+    onSuccess: (player: Player) => {
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+      toast({
+        variant: "default",
+        title: `Created ${player.icon} ${player.name}`,
+      });
+    },
+  });
 
   useEffect(() => {
     //TODO: Shortcut for other OS
@@ -201,6 +218,19 @@ function ChapterSelection({
 
     navigate({
       to: `/play`,
+    });
+  }
+
+  function handleOpenCreatePlayer() {
+    openOverlay("player.create", {
+      onCreate: (player) => createPlayer.mutateAsync(player),
+      onComplete: ({ playerId }) => {
+        // Player created successfully
+        console.log("Player created:", playerId);
+      },
+      onCancel: (reason) => {
+        console.log("Player creation cancelled:", reason);
+      },
     });
   }
 
@@ -286,7 +316,7 @@ function ChapterSelection({
                         >
                           {t("addFromCatalog")}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={openCreateDrawer}>
+                        <DropdownMenuItem onClick={handleOpenCreatePlayer}>
                           {t("createNewPlayer")}
                         </DropdownMenuItem>
                       </DropdownMenuGroup>

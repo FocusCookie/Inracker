@@ -4,5 +4,6 @@
   "placeholderSearch": "Search for a specific resistance",
   "noResistances": "No resistances available",
   "noResistancesDescription": "There are no resistances yet. Create one now!",
-  "createResistance": "Create resistance"
+  "createResistance": "Create resistance",
+  "add": "Add"
 }
