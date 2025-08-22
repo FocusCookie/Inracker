@@ -16,21 +16,36 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
+import { useState } from "react";
+import type {
+  CancelReason,
+  OverlayMap,
+  OverlaySuccessMap,
+} from "@/types/overlay";
 
-type Props = {
-  isCreating: boolean;
+type OverlayProps = OverlayMap["resistance.create"];
+
+type RuntimeProps = {
   open: boolean;
-  onOpenChange: (state: boolean) => void;
-  onCreate: (Immunity: Omit<Resistance, "id">) => void;
+  onOpenChange: (state: boolean) => void; // host toggles open; exit anim plays
+  onExitComplete: () => void; // host removes after exit
 };
+type Props = OverlayProps & RuntimeProps;
 
-function CreateResistanceDrawer({
-  isCreating,
-  onCreate,
-  onOpenChange,
+export default function CreateResistanceDrawer({
   open,
+  onCreate,
+  onComplete,
+  onCancel,
+  onOpenChange,
+  onExitComplete,
 }: Props) {
   const { t } = useTranslation("ComponentCreateResistanceDrawer");
+  const [isCreating, setIsCreating] = useState(false);
+  // null = nothing emitted yet; otherwise we already emitted success/cancel
+  const [closingReason, setClosingReason] = useState<
+    null | "success" | CancelReason
+  >(null);
 
   const formSchema = z.object({
     name: z.string().min(3, {
@@ -39,6 +54,7 @@ function CreateResistanceDrawer({
     description: z.string(),
     icon: z.string().emoji(),
   });
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,14 +64,43 @@ function CreateResistanceDrawer({
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const { name, description, icon } = values;
+  async function handleSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      setIsCreating(true);
 
-    onCreate({
-      name,
-      icon,
-      description,
-    });
+      const input: Resistance = {
+        name: values.name,
+        icon: values.icon,
+        description: values.description,
+      };
+
+      const created = await onCreate(input); // must return { id: number }
+      const resistanceId = (created as any).id as number;
+
+      onComplete({ resistanceId } as OverlaySuccessMap["resistance.create"]);
+
+      setClosingReason("success");
+      onOpenChange(false);
+      form.reset();
+    } finally {
+      setIsCreating(false);
+    }
+  }
+
+  function handleCancelClick() {
+    onCancel?.("cancel");
+    setClosingReason("cancel");
+    onOpenChange(false);
+  }
+
+  // Only emit dismissed if we didn't already emit success/cancel
+  function handleOpenChange(state: boolean) {
+    if (!state && closingReason === null) {
+      onCancel?.("dismissed");
+      setClosingReason("dismissed");
+    }
+
+    onOpenChange(state);
   }
 
   function handleIconSelect(icon: string) {
@@ -66,78 +111,78 @@ function CreateResistanceDrawer({
     <Drawer
       description={t("descriptionText")}
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
+      onExitComplete={onExitComplete}
       title={t("title")}
       actions={
-        <Button loading={isCreating} onClick={form.handleSubmit(onSubmit)}>
+        <Button loading={isCreating} onClick={form.handleSubmit(handleSubmit)}>
           {t("create")}
         </Button>
       }
       cancelTrigger={
-        <Button disabled={isCreating} variant="ghost">
+        <Button
+          onClick={handleCancelClick}
+          disabled={isCreating}
+          variant="ghost"
+        >
           {t("cancel")}
         </Button>
       }
-      children={
-        <Form {...form}>
-          <form
-            onSubmit={(e) => e.preventDefault()}
-            className="space-y-4 p-0.5"
-          >
-            <div className="flex items-start gap-2">
-              <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
-                <FormLabel>{t("icon")}</FormLabel>
-                <IconPicker
-                  initialIcon={form.getValues("icon")}
-                  disabled={isCreating}
-                  onIconClick={handleIconSelect}
-                />
-                <FormMessage />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel>{t("name")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        disabled={isCreating}
-                        placeholder={t("namePlaceholder")}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+    >
+      <Form {...form}>
+        <form
+          onSubmit={(e) => e.preventDefault()}
+          className="space-y-4 p-0.5"
+        >
+          <div className="flex items-start gap-2">
+            <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
+              <FormLabel>{t("icon")}</FormLabel>
+              <IconPicker
+                initialIcon={form.getValues("icon")}
+                disabled={isCreating}
+                onIconClick={handleIconSelect}
               />
+              <FormMessage />
             </div>
 
             <FormField
               control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem className="px-0.5">
-                  <FormLabel>{t("description")}</FormLabel>
-
-                  <FormControl className="rounded-md border">
-                    <Textarea
-                      readOnly={isCreating}
+              name="name"
+              render={({ field }: { field: any }) => (
+                <FormItem className="w-full px-0.5">
+                  <FormLabel>{t("name")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={isCreating}
+                      placeholder={t("namePlaceholder")}
                       {...field}
-                      placeholder="enter a description"
                     />
                   </FormControl>
-
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </form>
-        </Form>
-      }
-    />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }: { field: any }) => (
+              <FormItem className="px-0.5">
+                <FormLabel>{t("description")}</FormLabel>
+                <FormControl>
+                  <Textarea
+                    disabled={isCreating}
+                    placeholder={t("descriptionPlaceholder")}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </form>
+      </Form>
+    </Drawer>
   );
 }
-
-export default CreateResistanceDrawer;

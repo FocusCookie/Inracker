@@ -6,43 +6,90 @@ import ImmunityCard from "../ImmunityCard/ImmunityCard";
 import { useTranslation } from "react-i18next";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { MoonIcon } from "@radix-ui/react-icons";
-import { useImmunityStore } from "@/stores/useImmunityStore";
-import { useShallow } from "zustand/shallow";
+import { useOverlayStore } from "@/stores/useOverlayStore";
+import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
+import db from "@/lib/database";
+import type {
+  CancelReason,
+  OverlayMap,
+  OverlaySuccessMap,
+} from "@/types/overlay";
 
-type Props = {
-  immunities: DBImmunity[];
+type OverlayProps = OverlayMap["immunity.catalog"];
+
+type RuntimeProps = {
   open: boolean;
-  onOpenChange: (state: boolean) => void;
-  onAdd: (id: DBImmunity) => void;
+  onOpenChange: (state: boolean) => void; // host toggles open; exit anim plays
+  onExitComplete: () => void; // host removes after exit
 };
+type Props = OverlayProps & RuntimeProps;
 
-function ImmunitiesCatalog({ open, immunities, onAdd, onOpenChange }: Props) {
+export default function ImmunitiesCatalog({
+  open,
+  onSelect,
+  onCancel,
+  onOpenChange,
+  onExitComplete,
+}: Props) {
   const [immunitySearch, setImmunitySearch] = useState<string>("");
   const { t } = useTranslation("ComponentImmunitiesCatalog");
+  const openOverlay = useOverlayStore((s) => s.open);
 
-  const { openCreateImmunityDrawer } = useImmunityStore(
-    useShallow((state) => ({
-      openCreateImmunityDrawer: state.openCreateImmunityDrawer,
-    })),
-  );
+  // Fetch immunities from database
+  const immunities = useQueryWithToast({
+    queryKey: ["immunities"],
+    queryFn: () => db.immunitites.getAll(),
+  });
 
   function handleCreateImmunity() {
+    openOverlay("immunity.create", {
+      onCreate: async (immunity) => {
+        // Create the immunity in the database
+        const created = await db.immunitites.create(immunity);
+        return { id: created.id };
+      },
+      onComplete: ({ immunityId }) => {
+        // Immunity created successfully, refresh the catalog
+        immunities.refetch();
+      },
+      onCancel: (reason) => {
+        console.log("Immunity creation cancelled:", reason);
+      },
+    });
+  }
+
+  function handleSelectImmunity(immunity: DBImmunity) {
+    onSelect(immunity.id);
     onOpenChange(false);
-    openCreateImmunityDrawer();
+  }
+
+  function handleCancelClick() {
+    onCancel?.("cancel");
+    onOpenChange(false);
+  }
+
+  // Only emit dismissed if we didn't already emit success/cancel
+  function handleOpenChange(state: boolean) {
+    if (!state && !immunities.data) {
+      onCancel?.("dismissed");
+    }
+
+    onOpenChange(state);
   }
 
   return (
     <Catalog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
+      onExitComplete={onExitComplete}
       title={t("immunities")}
       description={t("description")}
       placeholder={t("placeholderSearch")}
       search={immunitySearch}
       onSearchChange={setImmunitySearch}
     >
-      {immunities
-        .filter((immunity) =>
+      {immunities.data
+        ?.filter((immunity) =>
           immunity.name
             .toLocaleLowerCase()
             .includes(immunitySearch.toLocaleLowerCase()),
@@ -51,11 +98,15 @@ function ImmunitiesCatalog({ open, immunities, onAdd, onOpenChange }: Props) {
           <ImmunityCard
             key={`immunitiy-catalog-${immunity.id}`}
             immunity={immunity}
-            actions={<Button onClick={() => onAdd(immunity)}>add</Button>}
+            actions={
+              <Button onClick={() => handleSelectImmunity(immunity)}>
+                {t("add")}
+              </Button>
+            }
           />
         ))}
 
-      {immunities.length === 0 && (
+      {(!immunities.data || immunities.data.length === 0) && (
         <Alert>
           <MoonIcon />
           <AlertTitle>{t("noImmunities")}</AlertTitle>
@@ -72,5 +123,3 @@ function ImmunitiesCatalog({ open, immunities, onAdd, onOpenChange }: Props) {
     </Catalog>
   );
 }
-
-export default ImmunitiesCatalog;

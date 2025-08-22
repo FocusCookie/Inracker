@@ -2,6 +2,11 @@ import { useOverlayStore } from "@/stores/useOverlayStore";
 import type { OverlayKind, OverlayMap } from "@/types/overlay";
 import CreatePartyDrawer from "@/components/CreatePartyDrawer/CreatePartyDrawer";
 import PartyEditDrawer from "../PartyEditDrawer/PartyEditDrawer";
+import CreatePlayerDrawer from "../CreatePlayerDrawer/CreatePlayerDrawer";
+import CreateImmunityDrawer from "../CreateImmunityDrawer/CreateImmunityDrawer";
+import CreateResistanceDrawer from "../CreateResistanceDrawer/CreateResistanceDrawer";
+import ImmunitiesCatalog from "../ImmunitiesCatalog/ImmunitiesCatalog";
+import ResistancesCatalog from "../ResistancesCatalog/ResistancesCatalog";
 
 type RuntimeOverlayProps = {
   open: boolean;
@@ -16,8 +21,11 @@ type OverlayComponent<K extends OverlayKind> = React.FC<
 const registry: Record<OverlayKind, OverlayComponent<any>> = {
   "party.create": CreatePartyDrawer,
   "party.edit": PartyEditDrawer,
-  // "player.create": PlayerCreateDrawer,
-  // "player.edit": PlayerEditDrawer,
+  "player.create": CreatePlayerDrawer,
+  "immunity.create": CreateImmunityDrawer,
+  "resistance.create": CreateResistanceDrawer,
+  "immunity.catalog": ImmunitiesCatalog,
+  "resistance.catalog": ResistancesCatalog,
 };
 
 export function OverlayHost() {
