@@ -57,7 +57,7 @@ function Catalog({
         </Button>
       }
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex h-full flex-col gap-4">
         <div className="p-0.5 pr-4">
           <Input
             placeholder={placeholder ? placeholder : t("searchPlaceholder")}
@@ -66,7 +66,7 @@ function Catalog({
           />
         </div>
 
-        <div className="max-h-[200px] overflow-hidden">
+        <div className="h-full overflow-hidden">
           <ScrollArea className="h-full pr-4">
             <div className="flex h-full flex-col gap-4 p-1">{children}</div>
           </ScrollArea>
