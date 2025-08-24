@@ -7,6 +7,13 @@
   "name": "Name",
   "namePlaceholder": "Feuerimmunität",
   "description": "Beschreibung",
-  "descriptionPlaceholder": "Diese Immunität schützt vor Feuerschaden und hitzebasierten Angriffen..."
+  "descriptionPlaceholder": "Diese Immunität schützt vor Feuerschaden und hitzebasierten Angriffen...",
+  "validation": {
+    "name": {
+      "minLength": "Der Name der Immunität muss mindestens 2 Zeichen lang sein."
+    },
+    "icon": {
+      "emoji": "Das Symbol muss ein Emoji sein."
+    }
+  }
 }
-

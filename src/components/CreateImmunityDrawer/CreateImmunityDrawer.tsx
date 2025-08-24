@@ -30,6 +30,7 @@ type RuntimeProps = {
   onOpenChange: (state: boolean) => void;
   onExitComplete: () => void;
 };
+
 type Props = OverlayProps & RuntimeProps;
 
 export default function CreateImmunityDrawer({
@@ -48,10 +49,10 @@ export default function CreateImmunityDrawer({
 
   const formSchema = z.object({
     name: z.string().min(2, {
-      message: "The immunity name must be at least 2 characters.",
+      message: t("validation.name.minLength"),
     }),
     description: z.string(),
-    icon: z.string().emoji(),
+    icon: z.string().emoji({ message: t("validation.icon.emoji") }),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -73,8 +74,8 @@ export default function CreateImmunityDrawer({
         description: values.description,
       };
 
-      const created = await onCreate(input); // must return { id: number }
-      const immunityId = (created as any).id as number;
+      const created = await onCreate(input);
+      const immunityId = created.id;
 
       onComplete({ immunityId } as OverlaySuccessMap["immunity.create"]);
 
@@ -92,7 +93,6 @@ export default function CreateImmunityDrawer({
     onOpenChange(false);
   }
 
-  // Only emit dismissed if we didn't already emit success/cancel
   function handleOpenChange(state: boolean) {
     if (!state && closingReason === null) {
       onCancel?.("dismissed");
