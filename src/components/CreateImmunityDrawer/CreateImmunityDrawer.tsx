@@ -17,11 +17,7 @@ import {
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { useState } from "react";
-import type {
-  CancelReason,
-  OverlayMap,
-  OverlaySuccessMap,
-} from "@/types/overlay";
+import type { CancelReason, OverlayMap } from "@/types/overlay";
 
 type OverlayProps = OverlayMap["immunity.create"];
 
@@ -74,10 +70,9 @@ export default function CreateImmunityDrawer({
         description: values.description,
       };
 
-      const created = await onCreate(input);
-      const immunityId = created.id;
+      const createdImmunity = await onCreate(input);
 
-      onComplete({ immunityId } as OverlaySuccessMap["immunity.create"]);
+      onComplete(createdImmunity);
 
       setClosingReason("success");
       onOpenChange(false);

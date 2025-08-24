@@ -117,15 +117,14 @@ export default function CreatePlayerDrawer({
   function handleCreateImmunity() {
     openOverlay("immunity.create", {
       onCreate: async (immunity) => {
-        // Create the immunity in the database
-        const created = await db.immunitites.create(immunity);
-        return { id: created.id };
+        const createdImmunity = await db.immunitites.create(immunity);
+
+        return createdImmunity;
       },
-      onComplete: ({ immunityId }) => {
-        // Immunity created successfully, add it to the form
+      onComplete: (immunity) => {
         const currentImmunities = form.getValues("immunities");
-        form.setValue("immunities", [...currentImmunities, immunityId]);
-        // Invalidate the immunities query to refresh the list
+        form.setValue("immunities", [...currentImmunities, immunity.id]);
+
         immunities.refetch();
       },
       onCancel: (reason) => {
@@ -137,15 +136,12 @@ export default function CreatePlayerDrawer({
   function handleCreateResistance() {
     openOverlay("resistance.create", {
       onCreate: async (resistance) => {
-        // Create the resistance in the database
         const created = await db.resistances.create(resistance);
         return { id: created.id };
       },
       onComplete: ({ resistanceId }) => {
-        // Resistance created successfully, add it to the form
         const currentResistances = form.getValues("resistances");
         form.setValue("resistances", [...currentResistances, resistanceId]);
-        // Invalidate the resistances query to refresh the list
         resistances.refetch();
       },
       onCancel: (reason) => {
@@ -156,10 +152,9 @@ export default function CreatePlayerDrawer({
 
   function handleOpenImmunityCatalog() {
     openOverlay("immunity.catalog", {
-      onSelect: (immunityId) => {
-        // Add the selected immunity to the form
+      onSelect: async (immunity) => {
         const currentImmunities = form.getValues("immunities");
-        form.setValue("immunities", [...currentImmunities, immunityId]);
+        form.setValue("immunities", [...currentImmunities, immunity.id]);
       },
       onCancel: (reason) => {
         console.log("Immunity catalog cancelled:", reason);
@@ -170,7 +165,6 @@ export default function CreatePlayerDrawer({
   function handleOpenResistanceCatalog() {
     openOverlay("resistance.catalog", {
       onSelect: (resistanceId) => {
-        // Add the selected resistance to the form
         const currentResistances = form.getValues("resistances");
         form.setValue("resistances", [...currentResistances, resistanceId]);
       },

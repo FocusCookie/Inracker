@@ -1,6 +1,6 @@
 import type { Party } from "@/types/party";
 import type { Player, TCreatePlayer } from "@/types/player";
-import type { Immunity } from "@/types/immunitiy";
+import type { DBImmunity, Immunity } from "@/types/immunitiy";
 import type { Resistance } from "@/types/resistances";
 import { Effect } from "zod";
 
@@ -14,8 +14,8 @@ export type OverlaySuccessMap = {
   "player.catalog": { playerId: Player["id"] };
   "resistance.create": { resistanceId: Resistance["id"] };
   "resistance.catalog": { resistanceId: Resistance[""] };
-  "immunity.create": { immunityId: Immunity["id"] };
-  "immunity.catalog": { immunityId: Immunity["id"] };
+  "immunity.create": DBImmunity;
+  "immunity.catalog": DBImmunity;
 };
 
 export type OverlayMap = {
@@ -48,12 +48,12 @@ export type OverlayMap = {
     excludedPlayers: Player[];
   };
   "immunity.create": {
-    onCreate: (immunity: Immunity) => Promise<{ id: Immunity["id"] }>;
+    onCreate: (immunity: Immunity) => Promise<DBImmunity>;
     onComplete: (result: OverlaySuccessMap["immunity.create"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
   "immunity.catalog": {
-    onSelect: (immunityId: number) => Promise<void>;
+    onSelect: (immunity: DBImmunity) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
   };
   "resistance.create": {
