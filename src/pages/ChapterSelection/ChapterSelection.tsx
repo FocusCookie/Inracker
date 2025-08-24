@@ -186,7 +186,7 @@ function ChapterSelection({
     openOverlay("player.catalog", {
       excludedPlayers: party.players,
       partyId: party.id,
-      onAdd: async (partyId: Party["id"], playerId: Player["id"]) => {
+      onSelect: async (partyId: Party["id"], playerId: Player["id"]) => {
         await db.parties.addPlayerToParty(partyId, playerId);
 
         queryClient.invalidateQueries({ queryKey: ["players"] });
@@ -204,11 +204,15 @@ function ChapterSelection({
       onCreate: async (effect: Omit<Effect, "id">) => {
         const createdEffect = await db.effects.create(effect);
 
-        return { id: createdEffect.id };
+        return createdEffect;
       },
-      onComplete: (_result) => {
+      onComplete: (effect) => {
         queryClient.invalidateQueries({ queryKey: ["players"] });
         queryClient.invalidateQueries({ queryKey: ["effects"] });
+
+        toast({
+          title: `Created ${effect.icon} ${effect.name}`,
+        });
       },
       onCancel: (reason) => {
         console.log("Effect creation cancelled:", reason);

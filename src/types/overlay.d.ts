@@ -7,6 +7,7 @@ import { Effect } from "zod";
 export type CancelReason = "cancel" | "dismissed";
 
 export type OverlaySuccessMap = {
+  "effect.create": Effect;
   "party.create": { partyId: Party["id"] };
   "party.edit": { partyId: Party["id"] };
   "player.create": { playerId: Player["id"] };
@@ -15,12 +16,11 @@ export type OverlaySuccessMap = {
   "resistance.catalog": { resistanceId: Resistance[""] };
   "immunity.create": { immunityId: Immunity["id"] };
   "immunity.catalog": { immunityId: Immunity["id"] };
-  "effect.create": { effectId: Effect["id"] };
 };
 
 export type OverlayMap = {
   "effect.create": {
-    onCreate: (effect: Omit<Effect, "id">) => Promise<{ id: Effect["id"] }>;
+    onCreate: (effect: Omit<Effect, "id">) => Promise<Effect>;
     onComplete: (result: OverlaySuccessMap["effect.create"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
@@ -42,7 +42,7 @@ export type OverlayMap = {
     onCancel?: (reason: CancelReason) => void;
   };
   "player.catalog": {
-    onAdd: (partyId: Party["id"], playerId: Player["id"]) => void;
+    onSelect: (partyId: Party["id"], playerId: Player["id"]) => Promis<void>;
     onCancel?: (reason: CancelReason) => void;
     partyId: Party["id"];
     excludedPlayers: Player[];
@@ -53,7 +53,7 @@ export type OverlayMap = {
     onCancel?: (reason: CancelReason) => void;
   };
   "immunity.catalog": {
-    onSelect: (immunityId: number) => void;
+    onSelect: (immunityId: number) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
   };
   "resistance.create": {
@@ -62,7 +62,7 @@ export type OverlayMap = {
     onCancel?: (reason: CancelReason) => void;
   };
   "resistance.catalog": {
-    onSelect: (resistanceId: number) => void;
+    onSelect: (resistanceId: number) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
   };
 };

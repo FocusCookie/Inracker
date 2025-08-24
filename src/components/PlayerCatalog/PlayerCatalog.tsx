@@ -28,7 +28,7 @@ function PlayerCatalog({
   partyId,
   open,
   excludedPlayers,
-  onAdd,
+  onSelect,
   onCancel,
   onExitComplete,
   onOpenChange,
@@ -60,8 +60,8 @@ function PlayerCatalog({
     });
   }
 
-  function handleAddPlayer(player: Player) {
-    onAdd(partyId, player.id);
+  async function handleAddPlayer(player: Player) {
+    await onSelect(partyId, player.id);
     onOpenChange(false);
   }
 

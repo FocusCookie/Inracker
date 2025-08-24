@@ -97,7 +97,7 @@ function CreateEffectDrawer({
         value: type === "positive" ? value : Math.abs(value) * -1,
       });
 
-      onComplete(createdEffect.id);
+      onComplete(createdEffect);
 
       setClosingReason("success");
       onOpenChange(false);
