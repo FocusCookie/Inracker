@@ -1,4 +1,3 @@
-import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
 import PartySelection from "@/pages/PartySelection/PartySelection";
@@ -25,24 +24,6 @@ function Parties() {
     queryFn: db.parties.getAllDetailed,
   });
 
-  const createPartyMutation = useMutationWithErrorToast({
-    mutationFn: (party: Omit<Party, "id">) => {
-      return db.parties.create(party);
-    },
-  });
-
-  const editPartyMutation = useMutationWithErrorToast({
-    mutationFn: (party: Party) => {
-      return db.parties.updateByParty(party);
-    },
-  });
-
-  const deletePartyMutation = useMutationWithErrorToast({
-    mutationFn: (id: Party["id"]) => {
-      return db.parties.deleteById(id);
-    },
-  });
-
   function handlePartySelection(partyId: Party["id"]) {
     setCurrentParty(partyId);
     navigate({
@@ -55,10 +36,10 @@ function Parties() {
     <PartySelection
       loading={partiesQuery.isPending}
       parties={partiesQuery.data || []}
-      onEditParty={editPartyMutation}
-      onDeleteParty={deletePartyMutation}
+      onEditParty={db.parties.updateByParty}
+      onDeleteParty={db.parties.deleteById}
       onPartySelect={handlePartySelection}
-      onCreateParty={createPartyMutation}
+      onCreateParty={db.parties.create}
     />
   );
 }

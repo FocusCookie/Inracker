@@ -1,53 +1,22 @@
 import Loader from "@/components/Loader/Loader";
 import PartyCard from "@/components/PartyCard/PartyCard";
+import { Button } from "@/components/ui/button";
 import { TypographyH1 } from "@/components/ui/typographyH1";
 import { TypographyP } from "@/components/ui/typographyP";
-import { Button } from "@/components/ui/button";
+import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { useOverlayStore } from "@/stores/useOverlayStore";
 import type { DBParty, Party } from "@/types/party";
+import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
-import { Player } from "@/types/player";
 
 type PartySelectionProps = {
   parties: Party[];
   loading: boolean;
-  onEditParty: UseMutationResult<
-    {
-      description: string;
-      readonly id: number;
-      name: string;
-      icon: string;
-      players: Player[];
-    },
-    unknown,
-    {
-      description: string;
-      readonly id: number;
-      name: string;
-      icon: string;
-      players: Player[];
-    },
-    unknown
-  >;
+  onEditParty: (party: Party) => Promise<Party>;
   onPartySelect: (id: Party["id"]) => void;
-  onCreateParty: UseMutationResult<
-    DBParty,
-    unknown,
-    Omit<
-      {
-        readonly id: number;
-        name: string;
-        icon: string;
-        description: string;
-        players: Player[];
-      },
-      "id"
-    >,
-    unknown
-  >;
-  onDeleteParty: UseMutationResult<number, unknown, number, unknown>;
+  onCreateParty: (party: Omit<Party, "id">) => Promise<DBParty>;
+  onDeleteParty: (id: Party["id"]) => Promise<number>;
 };
 
 const PartySelection = ({
@@ -62,9 +31,24 @@ const PartySelection = ({
   const openOverlay = useOverlayStore((s) => s.open);
   const queryClient = useQueryClient();
 
+  const createPartyMutation = useMutationWithErrorToast({
+    mutationFn: onCreateParty,
+  });
+
+  const editPartyMutation = useMutationWithErrorToast({
+    mutationFn: onEditParty,
+  });
+
+  const deletePartyMutation = useMutationWithErrorToast({
+    mutationFn: onDeleteParty,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["parties"] });
+    },
+  });
+
   function handleOpenCreateParty() {
     openOverlay("party.create", {
-      onCreate: (party) => onCreateParty.mutateAsync(party),
+      onCreate: (party) => createPartyMutation.mutateAsync(party),
       onComplete: ({ partyId }) => {
         queryClient.invalidateQueries({ queryKey: ["party"] });
         queryClient.invalidateQueries({ queryKey: ["parties"] });
@@ -76,11 +60,12 @@ const PartySelection = ({
   function handleOpenEditParty(party: Party) {
     openOverlay("party.edit", {
       party,
-      onEdit: (party) => onEditParty.mutateAsync(party),
+      onEdit: (party) => editPartyMutation.mutateAsync(party),
       onComplete: (_partyId) => {
         queryClient.invalidateQueries({ queryKey: ["parties"] });
       },
-      onDelete: (partyId: Party["id"]) => onDeleteParty.mutateAsync(partyId),
+      onDelete: (partyId: Party["id"]) =>
+        deletePartyMutation.mutateAsync(partyId),
     });
   }
 
