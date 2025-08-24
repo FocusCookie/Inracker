@@ -1770,7 +1770,7 @@ export const Database = {
       const db = await connect();
       return getResistanceById(db, id);
     },
-    create: async (resistance: Omit<DBResistance, "id">) => {
+    create: async (resistance: Resistance) => {
       const db = await connect();
       return createResistance(db, resistance);
     },

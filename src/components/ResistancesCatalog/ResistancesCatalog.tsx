@@ -40,7 +40,7 @@ export default function ResistancesCatalog({
     openOverlay("resistance.create", {
       onCreate: async (resistance) => {
         const created = await db.resistances.create(resistance);
-        return { id: created.id };
+        return created;
       },
       onComplete: () => {
         resistances.refetch();
@@ -52,7 +52,7 @@ export default function ResistancesCatalog({
   }
 
   function handleSelectResistance(resistance: DBResistance) {
-    onSelect(resistance.id);
+    onSelect(resistance);
     onOpenChange(false);
   }
 

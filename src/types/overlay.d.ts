@@ -1,27 +1,32 @@
 import type { Party } from "@/types/party";
 import type { Player, TCreatePlayer } from "@/types/player";
 import type { DBImmunity, Immunity } from "@/types/immunitiy";
-import type { Resistance } from "@/types/resistances";
+import type { DBResistance, Resistance } from "@/types/resistances";
 import { Effect } from "zod";
 
 export type CancelReason = "cancel" | "dismissed";
 
 export type OverlaySuccessMap = {
   "effect.create": Effect;
+  "effect.catalog": Effect;
   "party.create": { partyId: Party["id"] };
   "party.edit": { partyId: Party["id"] };
-  "player.create": { playerId: Player["id"] };
+  "player.create": Player;
   "player.catalog": { playerId: Player["id"] };
-  "resistance.create": { resistanceId: Resistance["id"] };
-  "resistance.catalog": { resistanceId: Resistance[""] };
+  "resistance.create": DBResistance;
+  "resistance.catalog": DBResistance;
   "immunity.create": DBImmunity;
   "immunity.catalog": DBImmunity;
 };
 
 export type OverlayMap = {
   "effect.create": {
-    onCreate: (effect: Omit<Effect, "id">) => Promise<Effect>;
+    onCreate: (effect: Effect) => Promise<Effect>;
     onComplete: (result: OverlaySuccessMap["effect.create"]) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "effect.catalog": {
+    onSelect: (effect: DBEffect) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
   };
   "party.create": {
@@ -37,7 +42,7 @@ export type OverlayMap = {
     onDelete: (partyId: Party["id"]) => Promise<Party["id"]>;
   };
   "player.create": {
-    onCreate: (player: TCreatePlayer) => Promise<{ id: Player["id"] }>;
+    onCreate: (player: TCreatePlayer) => Promise<Player>;
     onComplete: (result: OverlaySuccessMap["player.create"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
@@ -57,12 +62,12 @@ export type OverlayMap = {
     onCancel?: (reason: CancelReason) => void;
   };
   "resistance.create": {
-    onCreate: (resistance: Resistance) => Promise<{ id: Resistance["id"] }>;
+    onCreate: (resistance: Resistance) => Promise<DBResistance>;
     onComplete: (result: OverlaySuccessMap["resistance.create"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
   "resistance.catalog": {
-    onSelect: (resistanceId: number) => Promise<void>;
+    onSelect: (restistance: DBResistance) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
   };
 };

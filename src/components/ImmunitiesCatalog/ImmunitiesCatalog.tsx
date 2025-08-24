@@ -10,6 +10,7 @@ import { useOverlayStore } from "@/stores/useOverlayStore";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
 import type { OverlayMap } from "@/types/overlay";
+import { useQueryClient } from "@tanstack/react-query";
 
 type OverlayProps = OverlayMap["immunity.catalog"];
 
@@ -18,6 +19,7 @@ type RuntimeProps = {
   onOpenChange: (state: boolean) => void;
   onExitComplete: () => void;
 };
+
 type Props = OverlayProps & RuntimeProps;
 
 export default function ImmunitiesCatalog({
@@ -27,8 +29,9 @@ export default function ImmunitiesCatalog({
   onOpenChange,
   onExitComplete,
 }: Props) {
-  const [immunitySearch, setImmunitySearch] = useState<string>("");
   const { t } = useTranslation("ComponentImmunitiesCatalog");
+  const queryClient = useQueryClient();
+  const [immunitySearch, setImmunitySearch] = useState<string>("");
   const openOverlay = useOverlayStore((s) => s.open);
 
   const immunities = useQueryWithToast({
@@ -39,12 +42,11 @@ export default function ImmunitiesCatalog({
   function handleCreateImmunity() {
     openOverlay("immunity.create", {
       onCreate: async (immunity) => {
-        // Create the immunity in the database
         const created = await db.immunitites.create(immunity);
-        return { id: created.id };
+        return created;
       },
       onComplete: () => {
-        immunities.refetch();
+        queryClient.invalidateQueries({ queryKey: ["immunities"] });
       },
       onCancel: (reason) => {
         console.log("Immunity creation cancelled:", reason);
@@ -52,8 +54,8 @@ export default function ImmunitiesCatalog({
     });
   }
 
-  function handleSelectImmunity(immunity: DBImmunity) {
-    onSelect(immunity.id);
+  async function handleSelectImmunity(immunity: DBImmunity) {
+    await onSelect(immunity);
     onOpenChange(false);
   }
 
@@ -62,7 +64,6 @@ export default function ImmunitiesCatalog({
     onOpenChange(false);
   }
 
-  // Only emit dismissed if we didn't already emit success/cancel
   function handleOpenChange(state: boolean) {
     if (!state && !immunities.data) {
       onCancel?.("dismissed");

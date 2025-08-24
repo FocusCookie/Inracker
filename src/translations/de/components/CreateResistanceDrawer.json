@@ -7,6 +7,6 @@
   "icon": "Symbol",
   "name": "Name",
   "namePlaceholder": "Widerstand gegen Fallschaden",
-  "description": "Beschreibung"
+  "description": "Beschreibung",
+  "descriptionPlaceholder": "Füge ein Details zu diesen Effekt hinzu..."
 }
-

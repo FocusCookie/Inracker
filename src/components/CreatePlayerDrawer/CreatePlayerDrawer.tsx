@@ -19,13 +19,12 @@ import type {
   OverlayMap,
   OverlaySuccessMap,
 } from "@/types/overlay";
-
 type OverlayProps = OverlayMap["player.create"];
 
 type RuntimeProps = {
   open: boolean;
-  onOpenChange: (state: boolean) => void; // host toggles open; exit anim plays
-  onExitComplete: () => void; // host removes after exit
+  onOpenChange: (state: boolean) => void;
+  onExitComplete: () => void;
 };
 type Props = OverlayProps & RuntimeProps;
 
@@ -39,15 +38,11 @@ export default function CreatePlayerDrawer({
 }: Props) {
   const { t } = useTranslation("ComponentCreatePlayerDrawer");
   const [isCreating, setIsCreating] = useState(false);
-  // null = nothing emitted yet; otherwise we already emitted success/cancel
   const [closingReason, setClosingReason] = useState<
     null | "success" | CancelReason
   >(null);
-
-  // Use the existing hook that provides proper templates
   const form = useCreatePlayer();
 
-  // Fetch immunities and resistances from database
   const immunities = useQueryWithToast({
     queryKey: ["immunities"],
     queryFn: () => db.immunitites.getAll(),
@@ -86,9 +81,8 @@ export default function CreatePlayerDrawer({
       };
 
       const created = await onCreate(input); // must return { id: number }
-      const playerId = (created as any).id as number;
 
-      onComplete({ playerId } as OverlaySuccessMap["player.create"]);
+      onComplete(created);
 
       setClosingReason("success");
       onOpenChange(false);
@@ -104,7 +98,6 @@ export default function CreatePlayerDrawer({
     onOpenChange(false);
   }
 
-  // Only emit dismissed if we didn't already emit success/cancel
   function handleOpenChange(state: boolean) {
     if (!state && closingReason === null) {
       onCancel?.("dismissed");
@@ -137,11 +130,14 @@ export default function CreatePlayerDrawer({
     openOverlay("resistance.create", {
       onCreate: async (resistance) => {
         const created = await db.resistances.create(resistance);
-        return { id: created.id };
+
+        return created;
       },
-      onComplete: ({ resistanceId }) => {
+      onComplete: (resistance) => {
         const currentResistances = form.getValues("resistances");
-        form.setValue("resistances", [...currentResistances, resistanceId]);
+        form.setValue("resistances", [...currentResistances, resistance.id]);
+
+        console.log(form.getValues("resistances"));
         resistances.refetch();
       },
       onCancel: (reason) => {
@@ -164,9 +160,9 @@ export default function CreatePlayerDrawer({
 
   function handleOpenResistanceCatalog() {
     openOverlay("resistance.catalog", {
-      onSelect: (resistanceId) => {
+      onSelect: async (resistances) => {
         const currentResistances = form.getValues("resistances");
-        form.setValue("resistances", [...currentResistances, resistanceId]);
+        form.setValue("resistances", [...currentResistances, resistances.id]);
       },
       onCancel: (reason) => {
         console.log("Resistance catalog cancelled:", reason);

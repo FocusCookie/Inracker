@@ -10,7 +10,7 @@ export type OverlayItem<K extends OverlayKind = OverlayKind> = {
   createdAt: number;
 };
 
-type State = {
+export type OverlayState = {
   stack: OverlayItem[];
 
   open: <K extends OverlayKind>(type: K, props: OverlayMap[K]) => string;
@@ -20,7 +20,7 @@ type State = {
   remove: (id: string) => void;
 };
 
-export const useOverlayStore = create<State>()((set) => ({
+export const useOverlayStore = create<OverlayState>()((set) => ({
   stack: [],
 
   open: (type, props) => {

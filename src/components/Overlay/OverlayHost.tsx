@@ -9,6 +9,7 @@ import ImmunitiesCatalog from "../ImmunitiesCatalog/ImmunitiesCatalog";
 import ResistancesCatalog from "../ResistancesCatalog/ResistancesCatalog";
 import PlayerCatalog from "../PlayerCatalog/PlayerCatalog";
 import CreateEffectDrawer from "../CreateEffectDrawer/CreateEffectDrawer";
+import EffectsCatalog from "../EffectsCatalog/EffectsCatalog";
 
 type RuntimeOverlayProps = {
   open: boolean;
@@ -22,6 +23,7 @@ type OverlayComponent<K extends OverlayKind> = React.FC<
 
 const registry: Record<OverlayKind, OverlayComponent<any>> = {
   "effect.create": CreateEffectDrawer,
+  "effect.catalog": EffectsCatalog,
   "party.create": CreatePartyDrawer,
   "party.edit": PartyEditDrawer,
   "player.create": CreatePlayerDrawer,

@@ -7,6 +7,6 @@
   "icon": "Icon",
   "name": "Name",
   "namePlaceholder": "Fall Damage Resistance",
-  "description": "Description"
+  "description": "Description",
+  "descriptionPlaceholder": "Add some details about the resistance..."
 }
-

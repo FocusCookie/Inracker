@@ -17,11 +17,7 @@ import {
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { useState } from "react";
-import type {
-  CancelReason,
-  OverlayMap,
-  OverlaySuccessMap,
-} from "@/types/overlay";
+import type { CancelReason, OverlayMap } from "@/types/overlay";
 
 type OverlayProps = OverlayMap["resistance.create"];
 
@@ -74,9 +70,8 @@ export default function CreateResistanceDrawer({
       };
 
       const created = await onCreate(input);
-      const resistanceId = (created as any).id as number;
 
-      onComplete({ resistanceId } as OverlaySuccessMap["resistance.create"]);
+      onComplete(created);
 
       setClosingReason("success");
       onOpenChange(false);

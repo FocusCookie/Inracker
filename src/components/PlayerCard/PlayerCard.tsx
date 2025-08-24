@@ -31,9 +31,6 @@ type Props = {
   expanded: boolean;
   onRemove: (playerId: Player["id"]) => void;
   onEdit: (player: Player) => void;
-  onAddImmunity: (player: Player) => void;
-  onAddResistance: (player: Player) => void;
-  onAddEffect: (player: Player) => void;
   onRemoveImmunity: (
     playerId: Player["id"],
     immunityId: DBImmunity["id"],
@@ -43,6 +40,9 @@ type Props = {
     resistanceId: DBResistance["id"],
   ) => void;
   onRemoveEffect: (playerId: Player["id"], effectId: DBEffect["id"]) => void;
+  onOpenImmunitiesCatalog: () => void;
+  onOpenResistancesCatalog: () => void;
+  onOpenEffectsCatalog: () => void;
 };
 
 function PlayerCard({
@@ -50,12 +50,12 @@ function PlayerCard({
   expanded,
   onEdit,
   onRemove,
-  onAddEffect,
-  onAddImmunity,
-  onAddResistance,
   onRemoveImmunity,
   onRemoveResistance,
   onRemoveEffect,
+  onOpenResistancesCatalog,
+  onOpenImmunitiesCatalog,
+  onOpenEffectsCatalog,
 }: Props) {
   const { t } = useTranslation("ComponentPlayerCard");
   const { setSelectedImmunity, openEditImmunityDrawer } = useImmunityStore();
@@ -110,13 +110,13 @@ function PlayerCard({
       <DropdownMenuLabel>{player.name}</DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
-        <DropdownMenuItem onClick={() => onAddEffect(player)}>
+        <DropdownMenuItem onClick={onOpenEffectsCatalog}>
           {t("addEffect")}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onAddImmunity(player)}>
+        <DropdownMenuItem onClick={onOpenImmunitiesCatalog}>
           {t("addImmunity")}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onAddResistance(player)}>
+        <DropdownMenuItem onClick={onOpenResistancesCatalog}>
           {t("addResistance")}
         </DropdownMenuItem>
       </DropdownMenuGroup>
