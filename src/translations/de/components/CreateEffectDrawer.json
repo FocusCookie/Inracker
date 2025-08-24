@@ -23,5 +23,13 @@
   "valueTooltip": "Bei Positiven Effekten wird der Wert zur Gesundheit hinzugefügt, bei Negativen abgezogen. Bei Dauer Typ=Runden wird der Wert pro Runde angewendet, sonst einmalig.",
   "timeUnit": "in Minuten",
   "longRest": "Lange Rast",
-  "shortRest": "Kurze Rast"
+  "shortRest": "Kurze Rast",
+  "validation": {
+    "name": {
+      "minLength": "Der Name des Effekts muss mindestens 2 Zeichen lang sein."
+    },
+    "duration": {
+      "minValue": "Die Dauer muss mindestens 1 betragen."
+    }
+  }
 }

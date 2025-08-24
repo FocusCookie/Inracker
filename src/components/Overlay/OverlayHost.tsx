@@ -8,6 +8,7 @@ import CreateResistanceDrawer from "../CreateResistanceDrawer/CreateResistanceDr
 import ImmunitiesCatalog from "../ImmunitiesCatalog/ImmunitiesCatalog";
 import ResistancesCatalog from "../ResistancesCatalog/ResistancesCatalog";
 import PlayerCatalog from "../PlayerCatalog/PlayerCatalog";
+import CreateEffectDrawer from "../CreateEffectDrawer/CreateEffectDrawer";
 
 type RuntimeOverlayProps = {
   open: boolean;
@@ -20,6 +21,7 @@ type OverlayComponent<K extends OverlayKind> = React.FC<
 >;
 
 const registry: Record<OverlayKind, OverlayComponent<any>> = {
+  "effect.create": CreateEffectDrawer,
   "party.create": CreatePartyDrawer,
   "party.edit": PartyEditDrawer,
   "player.create": CreatePlayerDrawer,

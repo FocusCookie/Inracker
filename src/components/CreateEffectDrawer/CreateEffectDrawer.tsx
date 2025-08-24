@@ -25,33 +25,43 @@ import {
   TooltipProvider,
 } from "../ui/tooltip";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
+import { CancelReason, OverlayMap } from "@/types/overlay";
 
-type Props = {
-  isCreating: boolean;
+type OverlayProps = OverlayMap["effect.create"];
+
+type RuntimeProps = {
   open: boolean;
   onOpenChange: (state: boolean) => void;
-  onCreate: (effect: Omit<Effect, "id">) => void;
+  onExitComplete: () => void;
 };
 
+type Props = OverlayProps & RuntimeProps;
+
 function CreateEffectDrawer({
-  isCreating,
   open,
   onCreate,
   onOpenChange,
+  onComplete,
+  onExitComplete,
+  onCancel,
 }: Props) {
   const { t } = useTranslation("ComponentCreateEffectDrawer");
+  const [isCreating, setIsCreating] = useState(false);
+  const [closingReason, setClosingReason] = useState<
+    null | "success" | CancelReason
+  >(null);
   const [durationType, setDurationType] =
     useState<Effect["durationType"]>("rounds");
 
   const formSchema = z.object({
     name: z.string().min(2, {
-      message: "The effect name must be at least 2 characters.",
+      message: t("validation.name.minLength"),
     }),
     description: z.string(),
     icon: z.string().emoji(),
     type: z.enum(["positive", "negative"]),
     duration: z.coerce.number().min(1, {
-      message: "Duration must be at least 1.",
+      message: t("validation.duration.minValue"),
     }),
     durationType: z.enum(["rounds", "time", "short", "long"]),
     value: z.coerce.number(),
@@ -70,19 +80,49 @@ function CreateEffectDrawer({
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const { name, description, icon, duration, durationType, type, value } =
-      values;
+  async function handleSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      setIsCreating(true);
 
-    onCreate({
-      name,
-      icon,
-      description,
-      duration,
-      durationType,
-      type,
-      value: type === "positive" ? value : Math.abs(value) * -1,
-    });
+      const { name, description, icon, duration, durationType, type, value } =
+        values;
+
+      const createdEffect = await onCreate({
+        name,
+        icon,
+        description,
+        duration,
+        durationType,
+        type,
+        value: type === "positive" ? value : Math.abs(value) * -1,
+      });
+
+      onComplete(createdEffect.id);
+
+      setClosingReason("success");
+      onOpenChange(false);
+      form.reset();
+    } catch (error) {
+      console.log("Error while creating effect: ", values);
+      console.log(error);
+    } finally {
+      setIsCreating(false);
+    }
+  }
+
+  function handleCancelClick() {
+    onCancel?.("cancel");
+    setClosingReason("cancel");
+    onOpenChange(false);
+  }
+
+  function handleOpenChange(state: boolean) {
+    if (!state && closingReason === null) {
+      onCancel?.("dismissed");
+      setClosingReason("dismissed");
+    }
+
+    onOpenChange(state);
   }
 
   function handleIconSelect(icon: string) {
@@ -100,17 +140,22 @@ function CreateEffectDrawer({
 
   return (
     <Drawer
+      onExitComplete={onExitComplete}
       description={t("descriptionText")}
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
       title={t("title")}
       actions={
-        <Button loading={isCreating} onClick={form.handleSubmit(onSubmit)}>
+        <Button loading={isCreating} onClick={form.handleSubmit(handleSubmit)}>
           {t("create")}
         </Button>
       }
       cancelTrigger={
-        <Button disabled={isCreating} variant="ghost">
+        <Button
+          disabled={isCreating}
+          variant="ghost"
+          onClick={handleCancelClick}
+        >
           {t("cancel")}
         </Button>
       }

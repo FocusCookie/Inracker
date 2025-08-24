@@ -2,6 +2,7 @@ import type { Party } from "@/types/party";
 import type { Player, TCreatePlayer } from "@/types/player";
 import type { Immunity } from "@/types/immunitiy";
 import type { Resistance } from "@/types/resistances";
+import { Effect } from "zod";
 
 export type CancelReason = "cancel" | "dismissed";
 
@@ -10,28 +11,34 @@ export type OverlaySuccessMap = {
   "party.edit": { partyId: Party["id"] };
   "player.create": { playerId: Player["id"] };
   "player.catalog": { playerId: Player["id"] };
-  "immunity.create": { immunityId: number };
-  "resistance.create": { resistanceId: number };
-  "immunity.catalog": { immunityId: number };
-  "resistance.catalog": { resistanceId: number };
+  "resistance.create": { resistanceId: Resistance["id"] };
+  "resistance.catalog": { resistanceId: Resistance[""] };
+  "immunity.create": { immunityId: Immunity["id"] };
+  "immunity.catalog": { immunityId: Immunity["id"] };
+  "effect.create": { effectId: Effect["id"] };
 };
 
 export type OverlayMap = {
+  "effect.create": {
+    onCreate: (effect: Omit<Effect, "id">) => Promise<{ id: Effect["id"] }>;
+    onComplete: (result: OverlaySuccessMap["effect.create"]) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
   "party.create": {
-    onCreate: (party: Omit<Party, "id">) => Promise<{ id: number }>;
-    onComplete: (r: OverlaySuccessMap["party.create"]) => void;
+    onCreate: (party: Omit<Party, "id">) => Promise<{ id: Party["id"] }>;
+    onComplete: (result: OverlaySuccessMap["party.create"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
   "party.edit": {
     party: Party;
     onEdit: (party: Party) => Promise<Party>;
-    onComplete: (r: OverlaySuccessMap["party.edit"]) => void;
+    onComplete: (result: OverlaySuccessMap["party.edit"]) => void;
     onCancel?: (reason: CancelReason) => void;
     onDelete: (partyId: Party["id"]) => Promise<Party["id"]>;
   };
   "player.create": {
-    onCreate: (player: TCreatePlayer) => Promise<{ id: number }>;
-    onComplete: (r: OverlaySuccessMap["player.create"]) => void;
+    onCreate: (player: TCreatePlayer) => Promise<{ id: Player["id"] }>;
+    onComplete: (result: OverlaySuccessMap["player.create"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
   "player.catalog": {
@@ -41,25 +48,23 @@ export type OverlayMap = {
     excludedPlayers: Player[];
   };
   "immunity.create": {
-    onCreate: (immunity: Immunity) => Promise<{ id: number }>;
-    onComplete: (r: OverlaySuccessMap["immunity.create"]) => void;
-    onCancel?: (reason: CancelReason) => void;
-  };
-  "resistance.create": {
-    onCreate: (resistance: Resistance) => Promise<{ id: number }>;
-    onComplete: (r: OverlaySuccessMap["resistance.create"]) => void;
+    onCreate: (immunity: Immunity) => Promise<{ id: Immunity["id"] }>;
+    onComplete: (result: OverlaySuccessMap["immunity.create"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
   "immunity.catalog": {
     onSelect: (immunityId: number) => void;
     onCancel?: (reason: CancelReason) => void;
   };
+  "resistance.create": {
+    onCreate: (resistance: Resistance) => Promise<{ id: Resistance["id"] }>;
+    onComplete: (result: OverlaySuccessMap["resistance.create"]) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
   "resistance.catalog": {
     onSelect: (resistanceId: number) => void;
     onCancel?: (reason: CancelReason) => void;
   };
-
-  // add other overlay kinds with the same pattern as you refactor them
 };
 
 export type OverlayKind = keyof OverlayMap;

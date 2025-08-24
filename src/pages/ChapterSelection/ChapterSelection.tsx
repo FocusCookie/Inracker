@@ -24,7 +24,7 @@ import { useImmunityStore } from "@/stores/useImmunityStore";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { useResistancesStore } from "@/stores/useResistanceStore";
 import { Chapter } from "@/types/chapters";
-import { DBEffect } from "@/types/effect";
+import { DBEffect, Effect } from "@/types/effect";
 import { DBImmunity } from "@/types/immunitiy";
 import { Party } from "@/types/party";
 import { Player, TCreatePlayer } from "@/types/player";
@@ -106,17 +106,16 @@ function ChapterSelection({
     })),
   );
 
+  const { openEffectsCatalog } = useEffectStore(
+    useShallow((state) => ({
+      openEffectsCatalog: state.openEffectsCatalog,
+    })),
+  );
+
   const { openImmunititesCatalog, openCreateImmunityDrawer } = useImmunityStore(
     useShallow((state) => ({
       openImmunititesCatalog: state.openImmunititesCatalog,
       openCreateImmunityDrawer: state.openCreateImmunityDrawer,
-    })),
-  );
-
-  const { openEffectsCatalog, openCreateEffectDrawer } = useEffectStore(
-    useShallow((state) => ({
-      openEffectsCatalog: state.openEffectsCatalog,
-      openCreateEffectDrawer: state.openCreateEffectDrawer,
     })),
   );
 
@@ -199,6 +198,24 @@ function ChapterSelection({
       },
     });
   }
+
+  function handleCreateEffect() {
+    openOverlay("effect.create", {
+      onCreate: async (effect: Omit<Effect, "id">) => {
+        const createdEffect = await db.effects.create(effect);
+
+        return { id: createdEffect.id };
+      },
+      onComplete: (_result) => {
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["effects"] });
+      },
+      onCancel: (reason) => {
+        console.log("Effect creation cancelled:", reason);
+      },
+    });
+  }
+
   function handleAddImmunityToPlayer(player: Player) {
     setSelectedPlayer(player);
     openImmunititesCatalog();
@@ -296,7 +313,7 @@ function ChapterSelection({
 
                     <DropdownMenuContent className="w-56">
                       <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={openCreateEffectDrawer}>
+                        <DropdownMenuItem onClick={handleCreateEffect}>
                           {t("createEffect")}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={openCreateImmunityDrawer}>
