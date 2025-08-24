@@ -59,6 +59,17 @@ In order to use the react dev tools within the tauri application, you need to in
 `npm install -g react-devtools`
 This is because it uses webkit as the browser engine. As you can read [here](https://react.dev/learn/react-developer-tools) it can be connected via the npm package.
 
+## Architecture
+
+### Overlays
+
+- tbd
+
+### Components
+
+- if the components uses data from the database and also manipulates the same data and nothing else, you can use useQuery and useMutation in the component itself. There is no need for passing the data trough the props.
+- if the component mutates another data than it shows, for example the add players catalog, which mutates the party and not the players list. Than pass the mutation function as a prop from the parent.
+
 ## Internationalization and localization
 
 This project uses react-i18next for handlin the internationalization and localization. If you want to add translations add them to `src/translations/[lng]/[namespace].json`. Also you need to update:

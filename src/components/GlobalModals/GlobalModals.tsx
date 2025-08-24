@@ -15,7 +15,6 @@ import { DBResistance, Resistance } from "@/types/resistances";
 import { useQueryClient } from "@tanstack/react-query";
 import { useShallow } from "zustand/shallow";
 import CreateImmunityDrawer from "../CreateImmunityDrawer/CreateImmunityDrawer";
-import CreatePartyDrawer from "../CreatePartyDrawer/CreatePartyDrawer";
 import CreatePlayerDrawer from "../CreatePlayerDrawer/CreatePlayerDrawer";
 import CreateResistanceDrawer from "../CreateResistanceDrawer/CreateResistanceDrawer";
 import EditPlayerDrawer from "../EditPlayerDrawer/EditPlayerDrawer";

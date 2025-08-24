@@ -66,6 +66,7 @@ const PartySelection = ({
     openOverlay("party.create", {
       onCreate: (party) => onCreateParty.mutateAsync(party),
       onComplete: ({ partyId }) => {
+        queryClient.invalidateQueries({ queryKey: ["party"] });
         queryClient.invalidateQueries({ queryKey: ["parties"] });
         onPartySelect(partyId);
       },

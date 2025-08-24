@@ -97,12 +97,7 @@ function ChapterSelection({
       setCurrentChapter: state.setCurrentChapter,
     })),
   );
-  const {
-    openEditPlayerDrawer,
-    setSelectedPlayer,
-    openPlayersCatalog,
-    closePlayersCatalog,
-  } = usePlayerStore(
+  const { openEditPlayerDrawer, setSelectedPlayer } = usePlayerStore(
     useShallow((state) => ({
       openEditPlayerDrawer: state.openEditPlayerDrawer,
       setSelectedPlayer: state.setSelectedPlayer,
@@ -188,10 +183,22 @@ function ChapterSelection({
     });
   }
 
-  function handlePlayersCatalogOpen(state: boolean) {
-    state ? openPlayersCatalog() : closePlayersCatalog();
-  }
+  function handlePlayersCatalog() {
+    openOverlay("player.catalog", {
+      excludedPlayers: party.players,
+      partyId: party.id,
+      onAdd: async (partyId: Party["id"], playerId: Player["id"]) => {
+        await db.parties.addPlayerToParty(partyId, playerId);
 
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["parties"] });
+      },
+      onCancel: (reason) => {
+        console.log("Player creation cancelled:", reason);
+      },
+    });
+  }
   function handleAddImmunityToPlayer(player: Player) {
     setSelectedPlayer(player);
     openImmunititesCatalog();
@@ -311,9 +318,7 @@ function ChapterSelection({
 
                     <DropdownMenuContent className="w-56">
                       <DropdownMenuGroup>
-                        <DropdownMenuItem
-                          onClick={() => handlePlayersCatalogOpen(true)}
-                        >
+                        <DropdownMenuItem onClick={handlePlayersCatalog}>
                           {t("addFromCatalog")}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleOpenCreatePlayer}>

@@ -28,9 +28,8 @@ export const Route = createFileRoute("/chapters/")({
 function RouteComponent() {
   const queryClient = useQueryClient();
 
-  const { currentChapter, setCurrentChapter } = useChapterStore(
+  const { setCurrentChapter } = useChapterStore(
     useShallow((state) => ({
-      currentChapter: state.currentChapter,
       setCurrentChapter: state.setCurrentChapter,
     })),
   );

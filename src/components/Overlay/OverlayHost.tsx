@@ -7,6 +7,7 @@ import CreateImmunityDrawer from "../CreateImmunityDrawer/CreateImmunityDrawer";
 import CreateResistanceDrawer from "../CreateResistanceDrawer/CreateResistanceDrawer";
 import ImmunitiesCatalog from "../ImmunitiesCatalog/ImmunitiesCatalog";
 import ResistancesCatalog from "../ResistancesCatalog/ResistancesCatalog";
+import PlayerCatalog from "../PlayerCatalog/PlayerCatalog";
 
 type RuntimeOverlayProps = {
   open: boolean;
@@ -22,6 +23,7 @@ const registry: Record<OverlayKind, OverlayComponent<any>> = {
   "party.create": CreatePartyDrawer,
   "party.edit": PartyEditDrawer,
   "player.create": CreatePlayerDrawer,
+  "player.catalog": PlayerCatalog,
   "immunity.create": CreateImmunityDrawer,
   "resistance.create": CreateResistanceDrawer,
   "immunity.catalog": ImmunitiesCatalog,

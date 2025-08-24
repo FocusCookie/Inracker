@@ -1,5 +1,8 @@
 {
-  "title": "Add a character to the group",
-  "description": "Recruit a hero from your catalog of adventure companions to join the group!",
-  "search": "Search for a specific hero..."
+  "title": "Add a player to the party",
+  "description": "Recruit a player from your catalog of adventurers to join the party.",
+  "search": "Search for a specific player...",
+  "noPlayers": "No players available",
+  "noPlayersDescription": "All available players have already been added to the party.",
+  "createPlayer": "Create Player"
 }
