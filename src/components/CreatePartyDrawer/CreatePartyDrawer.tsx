@@ -17,18 +17,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import type { Party } from "@/types/party";
-import type {
-  CancelReason,
-  OverlayMap,
-  OverlaySuccessMap,
-} from "@/types/overlay";
+import type { CancelReason, OverlayMap } from "@/types/overlay";
 
 type OverlayProps = OverlayMap["party.create"];
 
 type RuntimeProps = {
   open: boolean;
-  onOpenChange: (state: boolean) => void; // host toggles open; exit anim plays
-  onExitComplete: () => void; // host removes after exit
+  onOpenChange: (state: boolean) => void;
+  onExitComplete: () => void;
 };
 type Props = OverlayProps & RuntimeProps;
 
@@ -42,7 +38,6 @@ export default function CreatePartyDrawer({
 }: Props) {
   const { t } = useTranslation("ComponentPartyCreateDrawer");
   const [isCreating, setIsCreating] = useState(false);
-  // null = nothing emitted yet; otherwise we already emitted success/cancel
   const [closingReason, setClosingReason] = useState<
     null | "success" | CancelReason
   >(null);
@@ -68,10 +63,9 @@ export default function CreatePartyDrawer({
         icon: values.icon,
         players: [],
       };
-      const created = await onCreate(input); // must return { id: number }
-      const partyId = (created as any).id as number;
+      const created = await onCreate(input);
 
-      onComplete({ partyId } as OverlaySuccessMap["party.create"]);
+      onComplete({ partyId: created.id });
 
       setClosingReason("success");
       onOpenChange(false);
@@ -87,7 +81,6 @@ export default function CreatePartyDrawer({
     onOpenChange(false);
   }
 
-  // Only emit dismissed if we didn't already emit success/cancel
   function handleOpenChange(state: boolean) {
     if (!state && closingReason === null) {
       onCancel?.("dismissed");
