@@ -14,11 +14,7 @@ import { useOverlayStore } from "@/stores/useOverlayStore";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import { useCreatePlayer } from "@/hooks/useCreatePlayer";
 import db from "@/lib/database";
-import type {
-  CancelReason,
-  OverlayMap,
-  OverlaySuccessMap,
-} from "@/types/overlay";
+import type { CancelReason, OverlayMap } from "@/types/overlay";
 type OverlayProps = OverlayMap["player.create"];
 
 type RuntimeProps = {

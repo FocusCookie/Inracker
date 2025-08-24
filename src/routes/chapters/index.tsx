@@ -1,12 +1,7 @@
-import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
 import ChapterSelection from "@/pages/ChapterSelection/ChapterSelection";
 import { useChapterStore } from "@/stores/useChapterStore";
-import { DBEffect } from "@/types/effect";
-import { DBImmunity } from "@/types/immunitiy";
-import { Player } from "@/types/player";
-import { DBResistance } from "@/types/resistances";
 import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useEffect } from "react";
@@ -58,94 +53,39 @@ function RouteComponent() {
     enabled: !!partyId,
   });
 
-  const removePlayerFromParty = useMutationWithErrorToast({
-    mutationFn: (id: Player["id"]) => {
-      return db.parties.removePlayerFromParty(partyId!, id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["party"],
-      });
-    },
-  });
-
-  const removeImmunityFromPlayer = useMutationWithErrorToast({
-    mutationFn: async ({
-      playerId,
-      immunityId,
-    }: {
-      playerId: Player["id"];
-      immunityId: DBImmunity["id"];
-    }) => {
-      return db.players.removeImmunityFromPlayer(playerId, immunityId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["party"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["players"],
-      });
-    },
-  });
-
-  const removeResistanceFromPlayer = useMutationWithErrorToast({
-    mutationFn: async ({
-      playerId,
-      resistanceId,
-    }: {
-      playerId: Player["id"];
-      resistanceId: DBResistance["id"];
-    }) => {
-      return await db.players.removeResistanceFromPlayer(
-        playerId,
-        resistanceId,
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["party"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["players"],
-      });
-    },
-  });
-
-  const removeEffectFromPlayer = useMutationWithErrorToast({
-    mutationFn: async ({
-      playerId,
-      effectId,
-    }: {
-      playerId: Player["id"];
-      effectId: DBEffect["id"];
-    }) => {
-      return await db.players.removeEffectFromPlayer(playerId, effectId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["party"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["players"],
-      });
-    },
-  });
-
   return !!party.data ? (
     <ChapterSelection
       isLoading={chapters.isLoading || party.isLoading}
       chapters={chapters.data || []}
       party={party.data}
-      onRemovePlayerFromParty={removePlayerFromParty.mutate}
-      onRemoveImmunityFromPlayer={(playerId, immunityId) =>
-        removeImmunityFromPlayer.mutate({ playerId, immunityId })
+      onRemovePlayerFromParty={(data) =>
+        db.parties.removePlayerFromParty(data.partyId, data.playerId)
       }
-      onRemoveResistanceFromPlayer={(playerId, resistanceId) =>
-        removeResistanceFromPlayer.mutate({ playerId, resistanceId })
+      onRemoveImmunityFromPlayer={(data) =>
+        db.players.removeImmunityFromPlayer(data.playerId, data.immunityId)
       }
-      onRemoveEffectFromPlayer={(playerId, effectId) =>
-        removeEffectFromPlayer.mutate({ playerId, effectId })
+      onRemoveResistanceFromPlayer={(data) =>
+        db.players.removeResistanceFromPlayer(data.playerId, data.resistanceId)
+      }
+      onRemoveEffectFromPlayer={(data) =>
+        db.players.removeEffectFromPlayer(data.playerId, data.effectId)
+      }
+      onCreateChapter={db.chapters.create}
+      onCreatePlayer={db.players.create}
+      onAddPlayerToParty={(data) =>
+        db.parties.addPlayerToParty(data.partyId, data.playerId)
+      }
+      onCreateEffect={db.effects.create}
+      onAddEffectToPlayer={(data) =>
+        db.players.addEffectToPlayer(data.playerId, data.effectId)
+      }
+      onCreateImmunity={db.immunitites.create}
+      onAddImmunityToPlayer={(data) =>
+        db.players.addImmunityToPlayer(data.playerId, data.immunityId)
+      }
+      onCreateResistance={db.resistances.create}
+      onAddResistanceToPlayer={(data) =>
+        db.players.addResistanceToPlayer(data.playerId, data.resistanceId)
       }
     />
   ) : (

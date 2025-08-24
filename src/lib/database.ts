@@ -20,6 +20,7 @@ import { DBResistance, Resistance } from "@/types/resistances";
 import { DBToken, Token, TokenCoordinates } from "@/types/tokens";
 import TauriDatabase from "@tauri-apps/plugin-sql";
 import { deleteImage } from "./utils";
+import { effect } from "zod";
 
 const environment = import.meta.env.VITE_ENV;
 let dbInstance: TauriDatabase | null = null;
@@ -444,6 +445,7 @@ const addPlayerToParty = async (
   playerId: number,
 ) => {
   const dbParty = await getPartyById(db, partyId);
+  const player = await getDetailedPlayerById(db, playerId);
   const players = JSON.parse(dbParty.players) as number[];
   players.push(playerId);
 
@@ -452,9 +454,7 @@ const addPlayerToParty = async (
     JSON.stringify(players),
   ]);
 
-  const updatedParty = await getPartyDetailedById(db, partyId);
-
-  return updatedParty;
+  return player;
 };
 
 const removePlayerFromParty = async (
@@ -525,7 +525,7 @@ const deletePartyById = async (
 const getDetailedPlayerById = async (
   db: TauriDatabase,
   playerId: Player["id"],
-) => {
+): Promise<Player> => {
   const dbPlayer = await getPlayerById(db, playerId);
   const {
     effects: dbEffects,
@@ -727,7 +727,7 @@ const addImmunityToPlayer = async (
   db: TauriDatabase,
   playerId: Player["id"],
   immunityId: DBImmunity["id"],
-) => {
+): Promise<Player> => {
   const { immunities } = await getDetailedPlayerById(db, playerId);
   const isAlreadySet = immunities.some(
     (immunity) => immunity.id === immunityId,
@@ -752,6 +752,9 @@ const removeImmunityFromPlayer = async (
   immunityId: DBImmunity["id"],
 ) => {
   const { immunities } = await getDetailedPlayerById(db, playerId);
+  const removedImmunity = immunities.find(
+    (immunity) => immunity.id === immunityId,
+  );
   const update = immunities.filter((immunity) => immunity.id !== immunityId);
 
   await db.execute("UPDATE players SET immunities = $2 WHERE id = $1", [
@@ -764,14 +767,14 @@ const removeImmunityFromPlayer = async (
     ),
   ]);
 
-  return getDetailedPlayerById(db, playerId);
+  return removedImmunity as DBImmunity;
 };
 
 const addResistanceToPlayer = async (
   db: TauriDatabase,
   playerId: Player["id"],
   resistanceId: DBResistance["id"],
-) => {
+): Promise<Player> => {
   const { resistances } = await getDetailedPlayerById(db, playerId);
   const isAlreadySet = resistances.some(
     (resistance) => resistance.id === resistanceId,
@@ -796,6 +799,9 @@ const removeResistanceFromPlayer = async (
   resistanceId: DBResistance["id"],
 ) => {
   const { resistances } = await getDetailedPlayerById(db, playerId);
+  const removedResistance = resistances.find(
+    (resistance) => resistance.id === resistanceId,
+  ) as DBResistance;
   const update = resistances.filter(
     (resistance) => resistance.id !== resistanceId,
   );
@@ -810,7 +816,7 @@ const removeResistanceFromPlayer = async (
     ),
   ]);
 
-  return getDetailedPlayerById(db, playerId);
+  return removedResistance;
 };
 
 const deletePlayerById = async (
@@ -1927,13 +1933,16 @@ export const Database = {
       const db = await connect();
       const { effects } = await getDetailedPlayerById(db, playerId);
       const update = effects.filter((effect) => effect.id !== effectId);
+      const removedEffect = effects.find(
+        (effect) => effect.id === effectId,
+      ) as Effect;
 
       await db.execute("UPDATE players SET effects = $2 WHERE id = $1", [
         playerId,
         JSON.stringify(update.map((im) => im.id).map((id: number) => id)),
       ]);
 
-      return getDetailedPlayerById(db, playerId);
+      return removedEffect;
     },
     deletePlayerById: async (playerId: Player["id"]) => {
       const db = await connect();
