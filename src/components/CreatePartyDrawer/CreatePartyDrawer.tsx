@@ -26,6 +26,7 @@ type RuntimeProps = {
   onOpenChange: (state: boolean) => void;
   onExitComplete: () => void;
 };
+
 type Props = OverlayProps & RuntimeProps;
 
 export default function CreatePartyDrawer({
@@ -70,6 +71,8 @@ export default function CreatePartyDrawer({
       setClosingReason("success");
       onOpenChange(false);
       form.reset();
+    } catch (error) {
+      console.log(error);
     } finally {
       setIsCreating(false);
     }

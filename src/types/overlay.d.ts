@@ -2,11 +2,12 @@ import type { Party } from "@/types/party";
 import type { Player, TCreatePlayer } from "@/types/player";
 import type { DBImmunity, Immunity } from "@/types/immunitiy";
 import type { DBResistance, Resistance } from "@/types/resistances";
-import { Effect } from "zod";
+import { DBEffect, Effect } from "./effect";
 
 export type CancelReason = "cancel" | "dismissed";
 
 export type OverlaySuccessMap = {
+  "chapter.create": Chapter;
   "effect.create": Effect;
   "effect.catalog": Effect;
   "party.create": { partyId: Party["id"] };
@@ -20,8 +21,14 @@ export type OverlaySuccessMap = {
 };
 
 export type OverlayMap = {
+  "chapter.create": {
+    partyId: Party["id"];
+    onCreate: (chapter: Omit<Chapter, "id">) => Promise<Chapter>;
+    onComplete: (result: OverlaySuccessMap["chapter.create"]) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
   "effect.create": {
-    onCreate: (effect: Effect) => Promise<Effect>;
+    onCreate: (effect: Omit<Effect, "id">) => Promise<Effect>;
     onComplete: (result: OverlaySuccessMap["effect.create"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };

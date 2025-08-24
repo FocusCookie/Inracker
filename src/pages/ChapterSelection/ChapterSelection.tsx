@@ -81,7 +81,6 @@ function ChapterSelection({
     isAsideOpen,
     openAside,
     closeAside,
-    openCreateChapterDrawer,
     openEditChapterDrawer,
     setCurrentChapter,
   } = useChapterStore(
@@ -193,6 +192,24 @@ function ChapterSelection({
       },
       onCancel: (reason) => {
         console.log("Effect creation cancelled:", reason);
+      },
+    });
+  }
+
+  function handleCreateChapter() {
+    openOverlay("chapter.create", {
+      partyId: party.id,
+      onCreate: async (chapter: Omit<Chapter, "id">) => {
+        const created = await db.chapters.create(chapter);
+
+        return created;
+      },
+      onComplete: (__chapter) => {
+        queryClient.invalidateQueries({ queryKey: ["chapters"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+      },
+      onCancel: (reason) => {
+        console.log("Chapter creation cancelled:", reason);
       },
     });
   }
@@ -453,7 +470,7 @@ function ChapterSelection({
             </div>
 
             <Button
-              onClick={() => openCreateChapterDrawer()}
+              onClick={handleCreateChapter}
               variant={chapters.length === 0 ? "default" : "outline"}
             >
               {t("createChapter")}
