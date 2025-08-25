@@ -13,5 +13,10 @@
   "delete": "Delete",
   "areYouSure": "Are you absolutely sure?",
   "deleteNote": "This action cannot be undone. This will permanently delete the chapter.",
-  "yesDelete": "Yes, Delete"
+  "yesDelete": "Yes, Delete",
+  "status": "Status",
+  "statusPlaceholder": "Wähle einen Status",
+  "draft": "Draft",
+  "ongoing": "Ongoing",
+  "completed": "Completed"
 }

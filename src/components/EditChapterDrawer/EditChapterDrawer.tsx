@@ -17,6 +17,13 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import {
   AlertDialog,
@@ -69,6 +76,7 @@ function EditChapterDrawer({
     description: z.string(),
     icon: z.string().emoji(),
     battlemap: z.instanceof(File).or(z.string()),
+    state: z.enum(["draft", "ongoing", "completed"]),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -78,6 +86,7 @@ function EditChapterDrawer({
       description: "",
       icon: "🧙",
       battlemap: "",
+      state: "draft",
     },
   });
 
@@ -88,6 +97,7 @@ function EditChapterDrawer({
         description: chapter.description || "",
         icon: chapter.icon,
         battlemap: chapter.battlemap || "",
+        state: chapter.state,
       });
 
       setPicturePreview(chapter?.battlemap || "");
@@ -98,7 +108,7 @@ function EditChapterDrawer({
     try {
       setIsLoading(true);
 
-      const { name, description, icon, battlemap } = values;
+      const { name, description, icon, battlemap, state } = values;
       let battlemapFilePath: string | null = null;
 
       if (!!battlemap) {
@@ -111,6 +121,7 @@ function EditChapterDrawer({
         description,
         icon,
         battlemap: battlemapFilePath || chapter.battlemap,
+        state,
       });
 
       form.reset();
@@ -258,6 +269,33 @@ function EditChapterDrawer({
 
           <FormField
             control={form.control}
+            name="state"
+            render={({ field }) => (
+              <FormItem className="px-0.5">
+                <FormLabel>{t("status")}</FormLabel>
+                <Select
+                  disabled={isLoading}
+                  onValueChange={field.onChange}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("statusPlaceholder")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="draft">{t("draft")}</SelectItem>
+                    <SelectItem value="ongoing">{t("ongoing")}</SelectItem>
+                    <SelectItem value="completed">{t("completed")}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem className="px-0.5">
@@ -315,3 +353,4 @@ function EditChapterDrawer({
 }
 
 export default EditChapterDrawer;
+

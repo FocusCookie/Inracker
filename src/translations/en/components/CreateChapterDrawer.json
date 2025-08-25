@@ -9,5 +9,10 @@
   "nameValidation": "Name must be at least 2 characters.",
   "battlemap": "Battlemap",
   "battlemapPlaceholder": "Select a battlemap picture",
-  "namePlaceholder": "The inner conflict"
+  "namePlaceholder": "The inner conflict",
+  "status": "Status",
+  "statusPlaceholder": "Select a status",
+  "draft": "Draft",
+  "ongoing": "Ongoing",
+  "completed": "Completed"
 }

@@ -9,5 +9,10 @@
   "nameValidation": "Der Name muss mindestens 2 Zeichen lang sein.",
   "battlemap": "Schlachtkarte",
   "battlemapPlaceholder": "Wähle ein Schlachtkartenbild",
-  "namePlaceholder": "Der innere Konflikt"
+  "namePlaceholder": "Der innere Konflikt",
+  "status": "Status",
+  "statusPlaceholder": "Wähle einen Status",
+  "draft": "Entwurf",
+  "ongoing": "Spielen",
+  "completed": "Abgeschloßen"
 }

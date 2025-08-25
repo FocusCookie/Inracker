@@ -17,6 +17,13 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import { CancelReason, OverlayMap } from "@/types/overlay";
 
@@ -55,6 +62,7 @@ function CreateChapterDrawer({
     icon: z.string().emoji(),
     battlemap: z.instanceof(File).or(z.string()),
     encounters: z.array(z.number()),
+    state: z.enum(["draft", "ongoing", "completed"]),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -65,6 +73,7 @@ function CreateChapterDrawer({
       icon: "🧙",
       battlemap: "",
       encounters: [],
+      state: "draft",
     },
   });
 
@@ -72,7 +81,7 @@ function CreateChapterDrawer({
     try {
       setIsCreating(true);
 
-      const { name, description, icon, battlemap, encounters } = values;
+      const { name, description, icon, battlemap, encounters, state } = values;
       let battlemapFilePath: string | null = null;
 
       if (!!battlemap) {
@@ -84,7 +93,7 @@ function CreateChapterDrawer({
         icon,
         description,
         battlemap: battlemapFilePath,
-        state: "draft",
+        state,
         party: partyId,
         encounters,
       });
@@ -194,6 +203,33 @@ function CreateChapterDrawer({
 
           <FormField
             control={form.control}
+            name="state"
+            render={({ field }) => (
+              <FormItem className="px-0.5">
+                <FormLabel>{t("status")}</FormLabel>
+                <Select
+                  disabled={isCreating}
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("statusPlaceholder")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="draft">{t("draft")}</SelectItem>
+                    <SelectItem value="ongoing">{t("ongoing")}</SelectItem>
+                    <SelectItem value="completed">{t("completed")}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem className="px-0.5">
@@ -251,3 +287,4 @@ function CreateChapterDrawer({
 }
 
 export default CreateChapterDrawer;
+

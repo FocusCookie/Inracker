@@ -1,7 +1,7 @@
 import { Encounter } from "./encounter";
 import { Prettify } from "./utils";
 
-export type ChapterStatus = "completed" | "draft" | "ongoing" | "waiting";
+export type ChapterStatus = "completed" | "draft" | "ongoing";
 
 export type DBChapter = {
   readonly id: number;

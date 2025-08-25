@@ -13,5 +13,10 @@
   "delete": "Löschen",
   "areYouSure": "Bist du dir absolute sicher?",
   "deleteNote": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch das Kapitel dauerhaft gelöscht.",
-  "yesDelete": "Ja Löschen"
+  "yesDelete": "Ja Löschen",
+  "status": "Status",
+  "statusPlaceholder": "Select a status",
+  "draft": "Entwurf",
+  "ongoing": "Spielen",
+  "completed": "Abgeschloßen"
 }
