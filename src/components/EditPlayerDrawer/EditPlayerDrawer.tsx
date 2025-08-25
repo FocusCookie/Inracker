@@ -3,8 +3,8 @@ import Drawer from "../Drawer/Drawer";
 import { Button } from "../ui/button";
 import EditPlayerForm from "../EditPlayerForm/EditPlayerForm";
 import { storeImage } from "@/lib/utils";
-import { CancelReason, OverlayMap } from "@/types/overlay";
 import { useEditPlayer } from "@/hooks/useEditPlayer";
+import { CancelReason, OverlayMap } from "@/types/overlay";
 
 type OverlayProps = OverlayMap["player.edit"];
 

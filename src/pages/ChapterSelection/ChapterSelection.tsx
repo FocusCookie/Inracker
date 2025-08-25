@@ -158,7 +158,7 @@ function ChapterSelection({
   });
 
   const createChapterMutation = useMutationWithErrorToast({
-    mutationFn: (chapter: Omit<Chapter, "id">) => onCreateChapter(chapter),
+    mutationFn: onCreateChapter,
   });
 
   const addPlayerToPartyMutation = useMutationWithErrorToast({
@@ -306,8 +306,13 @@ function ChapterSelection({
   function handleCreateChapter() {
     openOverlay("chapter.create", {
       partyId: party.id,
-      onCreate: (chapter: Omit<Chapter, "id">) =>
-        createChapterMutation.mutateAsync(chapter),
+      onCreate: async (chapter: Omit<Chapter, "id">) => {
+        const newChapter = await createChapterMutation.mutateAsync(chapter);
+        return {
+          ...newChapter,
+          encounters: JSON.parse(newChapter.encounters || "[]"),
+        };
+      },
       onComplete: (_chapter) => {
         queryClient.invalidateQueries({ queryKey: ["chapters"] });
         queryClient.invalidateQueries({ queryKey: ["party"] });

@@ -8,7 +8,7 @@ export type DBChapter = {
   name: string;
   icon: string;
   description: string | null;
-  state: string;
+  state: chapter;
   battlemap: string | null;
   party: number;
   encounters: string;
