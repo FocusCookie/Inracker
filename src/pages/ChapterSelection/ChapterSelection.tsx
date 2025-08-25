@@ -19,7 +19,6 @@ import {
 import { TypographyH1 } from "@/components/ui/typographyH1";
 import { TypographyP } from "@/components/ui/typographyP";
 import { useChapterStore } from "@/stores/useChapterStore";
-import { usePlayerStore } from "@/stores/usePlayerStore";
 import { Chapter, DBChapter } from "@/types/chapters";
 import { DBEffect, Effect } from "@/types/effect";
 import { DBImmunity, Immunity } from "@/types/immunitiy";
@@ -64,6 +63,7 @@ type Props = {
   }) => Promise<Effect>;
   onCreateChapter: (chapter: Omit<Chapter, "id">) => Promise<DBChapter>;
   onCreatePlayer: (player: TCreatePlayer) => Promise<Player>;
+  onEditPlayer: (player: Player) => Promise<Player>;
   onAddPlayerToParty: (data: {
     partyId: Party["id"];
     playerId: Player["id"];
@@ -95,6 +95,7 @@ function ChapterSelection({
   onRemoveEffectFromPlayer,
   onCreateChapter,
   onCreatePlayer,
+  onEditPlayer,
   onAddPlayerToParty,
   onCreateEffect,
   onAddEffectToPlayer,
@@ -125,14 +126,6 @@ function ChapterSelection({
       setCurrentChapter: state.setCurrentChapter,
     })),
   );
-  const { openEditPlayerDrawer, setSelectedPlayer } = usePlayerStore(
-    useShallow((state) => ({
-      openEditPlayerDrawer: state.openEditPlayerDrawer,
-      setSelectedPlayer: state.setSelectedPlayer,
-      openPlayersCatalog: state.openPlayersCatalog,
-      closePlayersCatalog: state.closePlayersCatalog,
-    })),
-  );
 
   const createPlayer = useMutationWithErrorToast({
     mutationFn: onCreatePlayer,
@@ -142,6 +135,16 @@ function ChapterSelection({
         variant: "default",
         title: `Created ${player.icon} ${player.name}`,
       });
+    },
+  });
+
+  const editPlayer = useMutationWithErrorToast({
+    mutationFn: onEditPlayer,
+    onSuccess: (_player: Player) => {
+      console.log("invalidation");
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+      queryClient.invalidateQueries({ queryKey: ["party"] });
+      queryClient.invalidateQueries({ queryKey: ["parties"] });
     },
   });
 
@@ -450,6 +453,22 @@ function ChapterSelection({
     });
   }
 
+  function handleOpenEditPlayer(player: Player) {
+    openOverlay("player.edit", {
+      player,
+      onEdit: (player) => editPlayer.mutateAsync(player),
+      onComplete: async (player) => {
+        console.log("Updated: ", player);
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["parties"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+      },
+      onCancel: (reason) => {
+        console.log("Player creation cancelled:", reason);
+      },
+    });
+  }
+
   return (
     <AnimatePresence mode="wait">
       {isLoading && (
@@ -472,10 +491,7 @@ function ChapterSelection({
                     playerId,
                   })
                 }
-                onEdit={(player: Player) => {
-                  setSelectedPlayer(player);
-                  openEditPlayerDrawer();
-                }}
+                onEdit={handleOpenEditPlayer}
                 onRemoveImmunity={(playerId, immunityId) =>
                   removeImmunityFromPlayerMutation.mutateAsync({
                     playerId,

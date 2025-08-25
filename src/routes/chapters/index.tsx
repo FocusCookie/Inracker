@@ -72,6 +72,7 @@ function RouteComponent() {
       }
       onCreateChapter={db.chapters.create}
       onCreatePlayer={db.players.create}
+      onEditPlayer={db.players.update}
       onAddPlayerToParty={(data) =>
         db.parties.addPlayerToParty(data.partyId, data.playerId)
       }

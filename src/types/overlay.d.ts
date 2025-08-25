@@ -14,6 +14,7 @@ export type OverlaySuccessMap = {
   "party.edit": { partyId: Party["id"] };
   "player.create": Player;
   "player.catalog": { playerId: Player["id"] };
+  "player.edit": Player;
   "resistance.create": DBResistance;
   "resistance.catalog": DBResistance;
   "immunity.create": DBImmunity;
@@ -51,6 +52,12 @@ export type OverlayMap = {
   "player.create": {
     onCreate: (player: TCreatePlayer) => Promise<Player>;
     onComplete: (result: OverlaySuccessMap["player.create"]) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "player.edit": {
+    player: Player;
+    onEdit: (player: Plyer) => Promise<Player>;
+    onComplete: (result: OverlaySuccessMap["player.edit"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
   "player.catalog": {
