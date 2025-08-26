@@ -176,11 +176,16 @@ function EditChapterDrawer({
 
   async function handleDeleteChapter() {
     try {
+      setIsLoading(true);
       await onDelete(chapter.id);
-      form.reset();
+      onComplete({ chapterId: chapter.id });
+      setClosingReason("success");
       onOpenChange(false);
+      form.reset();
     } catch (error) {
       console.log("Error while deleting chapter");
+    } finally {
+      setIsLoading(false);
     }
   }
 

@@ -62,6 +62,8 @@ type Props = {
     effectId: DBEffect["id"];
   }) => Promise<Effect>;
   onCreateChapter: (chapter: Omit<Chapter, "id">) => Promise<DBChapter>;
+  onEditChapter: (chapter: Chapter) => Promise<Chapter>;
+  onDeleteChapter: (id: Chapter["id"]) => Promise<void>;
   onCreatePlayer: (player: TCreatePlayer) => Promise<Player>;
   onEditPlayer: (player: Player) => Promise<Player>;
   onAddPlayerToParty: (data: {
@@ -94,6 +96,8 @@ function ChapterSelection({
   onRemoveResistanceFromPlayer,
   onRemoveEffectFromPlayer,
   onCreateChapter,
+  onEditChapter,
+  onDeleteChapter,
   onCreatePlayer,
   onEditPlayer,
   onAddPlayerToParty,
@@ -110,22 +114,15 @@ function ChapterSelection({
   const keysPressed = useRef<Record<string, boolean>>({});
   const openOverlay = useOverlayStore((s) => s.open);
 
-  const {
-    isAsideOpen,
-    openAside,
-    closeAside,
-    openEditChapterDrawer,
-    setCurrentChapter,
-  } = useChapterStore(
-    useShallow((state) => ({
-      isAsideOpen: state.isAsideOpen,
-      openAside: state.openAside,
-      closeAside: state.closeAside,
-      openCreateChapterDrawer: state.openCreateChapterDrawer,
-      openEditChapterDrawer: state.openEditChapterDrawer,
-      setCurrentChapter: state.setCurrentChapter,
-    })),
-  );
+  const { isAsideOpen, openAside, closeAside, setCurrentChapter } =
+    useChapterStore(
+      useShallow((state) => ({
+        isAsideOpen: state.isAsideOpen,
+        openAside: state.openAside,
+        closeAside: state.closeAside,
+        setCurrentChapter: state.setCurrentChapter,
+      })),
+    );
 
   const createPlayer = useMutationWithErrorToast({
     mutationFn: onCreatePlayer,
@@ -159,6 +156,17 @@ function ChapterSelection({
 
   const createChapterMutation = useMutationWithErrorToast({
     mutationFn: onCreateChapter,
+  });
+
+  const editChapterMutation = useMutationWithErrorToast({
+    mutationFn: onEditChapter,
+  });
+
+  const deleteChapterMutation = useMutationWithErrorToast({
+    mutationFn: onDeleteChapter,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chapters"] });
+    },
   });
 
   const addPlayerToPartyMutation = useMutationWithErrorToast({
@@ -428,7 +436,14 @@ function ChapterSelection({
   }
 
   function handleEditChapter(chapter: Chapter) {
-    openEditChapterDrawer(chapter);
+    openOverlay("chapter.edit", {
+      chapter,
+      onEdit: (chapter) => editChapterMutation.mutateAsync(chapter),
+      onDelete: (chapterId) => deleteChapterMutation.mutateAsync(chapterId),
+      onComplete: (_result) => {
+        queryClient.invalidateQueries({ queryKey: ["chapters"] });
+      },
+    });
   }
 
   function handlePlayChapter(chapter: Chapter["id"]) {

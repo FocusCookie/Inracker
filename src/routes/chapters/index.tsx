@@ -71,6 +71,8 @@ function RouteComponent() {
         db.players.removeEffectFromPlayer(data.playerId, data.effectId)
       }
       onCreateChapter={db.chapters.create}
+      onEditChapter={db.chapters.update}
+      onDeleteChapter={db.chapters.delete}
       onCreatePlayer={db.players.create}
       onEditPlayer={db.players.update}
       onAddPlayerToParty={(data) =>

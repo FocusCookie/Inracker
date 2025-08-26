@@ -9,7 +9,7 @@ export type CancelReason = "cancel" | "dismissed";
 
 export type OverlaySuccessMap = {
   "chapter.create": Chapter;
-  "chapter.edit": Chapter;
+  "chapter.edit": { chapterId: Chapter["id"] };
   "effect.create": Effect;
   "effect.catalog": Effect;
   "party.create": { partyId: Party["id"] };
@@ -33,7 +33,7 @@ export type OverlayMap = {
   "chapter.edit": {
     chapter: Chapter;
     onEdit: (chapter: Chapter) => Promise<Chapter>;
-    onDelete: (chapterId: Chapter["id"]) => Promise<Chapter>;
+    onDelete: (chapterId: Chapter["id"]) => Promise<void>;
     onComplete: (result: OverlaySuccessMap["chapter.edit"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
@@ -65,12 +65,12 @@ export type OverlayMap = {
   };
   "player.edit": {
     player: Player;
-    onEdit: (player: Plyer) => Promise<Player>;
+    onEdit: (player: Player) => Promise<Player>;
     onComplete: (result: OverlaySuccessMap["player.edit"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
   "player.catalog": {
-    onSelect: (partyId: Party["id"], playerId: Player["id"]) => Promis<void>;
+    onSelect: (partyId: Party["id"], playerId: Player["id"]) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
     partyId: Party["id"];
     excludedPlayers: Player[];

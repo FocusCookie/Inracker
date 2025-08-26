@@ -12,6 +12,7 @@ import CreateEffectDrawer from "../CreateEffectDrawer/CreateEffectDrawer";
 import EffectsCatalog from "../EffectsCatalog/EffectsCatalog";
 import CreateChapterDrawer from "../CreateChapterDrawer/CreateChapterDrawer";
 import EditPlayerDrawer from "../EditPlayerDrawer/EditPlayerDrawer";
+import EditChapterDrawer from "../EditChapterDrawer/EditChapterDrawer";
 
 type RuntimeOverlayProps = {
   open: boolean;
@@ -25,6 +26,7 @@ type OverlayComponent<K extends OverlayKind> = React.FC<
 
 const registry: Record<OverlayKind, OverlayComponent<any>> = {
   "chapter.create": CreateChapterDrawer,
+  "chapter.edit": EditChapterDrawer,
   "effect.create": CreateEffectDrawer,
   "effect.catalog": EffectsCatalog,
   "party.create": CreatePartyDrawer,
