@@ -5,7 +5,7 @@ import type { DBResistance, Resistance } from "@/types/resistances";
 import { DBEffect, Effect } from "./effect";
 import { Chapter } from "./chapters";
 
-export type CancelReason = "cancel" | "dismissed";
+export type CancelReason = "cancel" | "dismissed" | "closed";
 
 export type OverlaySuccessMap = {
   "chapter.create": Chapter;
@@ -21,6 +21,7 @@ export type OverlaySuccessMap = {
   "resistance.catalog": DBResistance;
   "immunity.create": DBImmunity;
   "immunity.catalog": DBImmunity;
+  settings: void;
 };
 
 export type OverlayMap = {
@@ -93,6 +94,7 @@ export type OverlayMap = {
     onSelect: (restistance: DBResistance) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
   };
+  settings: void;
 };
 
 export type OverlayKind = keyof OverlayMap;

@@ -13,6 +13,7 @@ import EffectsCatalog from "../EffectsCatalog/EffectsCatalog";
 import CreateChapterDrawer from "../CreateChapterDrawer/CreateChapterDrawer";
 import EditPlayerDrawer from "../EditPlayerDrawer/EditPlayerDrawer";
 import EditChapterDrawer from "../EditChapterDrawer/EditChapterDrawer";
+import SettingsDrawer from "../SettingsDrawer/SettingsDrawer";
 
 type RuntimeOverlayProps = {
   open: boolean;
@@ -38,6 +39,7 @@ const registry: Record<OverlayKind, OverlayComponent<any>> = {
   "resistance.create": CreateResistanceDrawer,
   "immunity.catalog": ImmunitiesCatalog,
   "resistance.catalog": ResistancesCatalog,
+  settings: SettingsDrawer,
 };
 
 export function OverlayHost() {

@@ -20,7 +20,6 @@ import { DBResistance, Resistance } from "@/types/resistances";
 import { DBToken, Token, TokenCoordinates } from "@/types/tokens";
 import TauriDatabase from "@tauri-apps/plugin-sql";
 import { deleteImage } from "./utils";
-import { effect } from "zod";
 
 const environment = import.meta.env.VITE_ENV;
 let dbInstance: TauriDatabase | null = null;
@@ -949,7 +948,7 @@ const updateChapterProperty = async <
 
   await db.execute(sql, [chapterId, value]);
 
-  const updated = await getDetailedChapterById(db, chapterId);
+  await getDetailedChapterById(db, chapterId);
 
   return getDetailedChapterById(db, chapterId);
 };
@@ -1855,15 +1854,7 @@ export const Database = {
     },
     getAllDetailed: async () => {
       const db = await connect();
-      const playersRaw = await getAllPlayers(db);
-      const detailedPlayers: Player[] = [];
-
-      for (const player of playersRaw) {
-        const detailedPlayer = await getDetailedPlayerById(db, player.id);
-        detailedPlayers.push(detailedPlayer);
-      }
-
-      return detailedPlayers;
+      return getAllDetailedPlayers(db);
     },
     create: async (player: TCreatePlayer) => {
       const db = await connect();

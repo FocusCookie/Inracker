@@ -2,5 +2,6 @@
   "deletionWarning": "Bist du sicher, dass du diesen Charakter löschen möchtest? Dies kann nicht rückgängig gemacht werden.",
   "edit": "Bearbeiten",
   "delete": "Löschen",
-  "deleteCharacter": "Lösche"
+  "deleteCharacter": "Lösche",
+  "level": "Level"
 }

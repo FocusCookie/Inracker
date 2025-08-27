@@ -2,7 +2,6 @@ import { storeImage } from "@/lib/utils";
 import { TCreatePlayer } from "@/types/player";
 import CreatePlayerForm from "../CreatePlayerForm/CreatePlayerForm";
 import Drawer from "../Drawer/Drawer";
-import { Button } from "../ui/button";
 import { TypographyH2 } from "../ui/typographyh2";
 import { DBImmunity } from "@/types/immunitiy";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
@@ -15,6 +14,7 @@ import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import { useCreatePlayer } from "@/hooks/useCreatePlayer";
 import db from "@/lib/database";
 import type { CancelReason, OverlayMap } from "@/types/overlay";
+import { Button } from "../ui/button";
 type OverlayProps = OverlayMap["player.create"];
 
 type RuntimeProps = {
@@ -33,6 +33,7 @@ export default function CreatePlayerDrawer({
   onExitComplete,
 }: Props) {
   const { t } = useTranslation("ComponentCreatePlayerDrawer");
+  const openOverlay = useOverlayStore((s) => s.open);
   const [isCreating, setIsCreating] = useState(false);
   const [closingReason, setClosingReason] = useState<
     null | "success" | CancelReason
@@ -48,8 +49,6 @@ export default function CreatePlayerDrawer({
     queryKey: ["resistances"],
     queryFn: () => db.resistances.getAll(),
   });
-
-  const openOverlay = useOverlayStore((s) => s.open);
 
   async function handleSubmit(values: any) {
     try {
@@ -76,6 +75,7 @@ export default function CreatePlayerDrawer({
         effects: [],
       };
 
+      console.log("create ", input);
       const created = await onCreate(input); // must return { id: number }
 
       onComplete(created);
@@ -174,11 +174,7 @@ export default function CreatePlayerDrawer({
       description={t("descriptionText")}
       title={t("title")}
       actions={
-        <Button
-          loading={isCreating}
-          disabled={isCreating}
-          onClick={form.handleSubmit(handleSubmit)}
-        >
+        <Button disabled={isCreating} onClick={form.handleSubmit(handleSubmit)}>
           {t("create")}
         </Button>
       }

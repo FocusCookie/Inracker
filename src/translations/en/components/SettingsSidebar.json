@@ -1,0 +1,12 @@
+{
+  "settings": "Settings",
+  "general": "General",
+  "players": "Players",
+  "opponents": "Opponents",
+  "statuses": "Statuses",
+  "effects": "Effects",
+  "immunities": "Immunities",
+  "resistances": "Resistances",
+  "cleanup": "Cleanup",
+  "close": "Close"
+}

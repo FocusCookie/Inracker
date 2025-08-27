@@ -138,7 +138,6 @@ function ChapterSelection({
   const editPlayer = useMutationWithErrorToast({
     mutationFn: onEditPlayer,
     onSuccess: (_player: Player) => {
-      console.log("invalidation");
       queryClient.invalidateQueries({ queryKey: ["players"] });
       queryClient.invalidateQueries({ queryKey: ["party"] });
       queryClient.invalidateQueries({ queryKey: ["parties"] });

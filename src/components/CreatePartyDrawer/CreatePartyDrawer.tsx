@@ -101,11 +101,7 @@ export default function CreatePartyDrawer({
       onExitComplete={onExitComplete}
       title={t("title")}
       actions={
-        <Button
-          loading={isCreating}
-          disabled={isCreating}
-          onClick={form.handleSubmit(handleSubmit)}
-        >
+        <Button disabled={isCreating} onClick={form.handleSubmit(handleSubmit)}>
           {t("create")}
         </Button>
       }

@@ -44,6 +44,7 @@ import EffectsCatalog from "../EffectsCatalog/EffectsCatalog";
 import EditEffectDrawer from "../EditEffectDrawer/EditEffectDrawer";
 import EditImmunityDrawer from "../EditImmunityDrawer/EditImmunityDrawer";
 import EditResistanceDrawer from "../EditResistanceDrawer/EditResistanceDrawer";
+import SettingsDrawer from "../SettingsDrawer/SettingsDrawer";
 
 type Props = {};
 
@@ -1125,8 +1126,16 @@ function GlobalModals({}: Props) {
         onCreate={createEffect.mutate}
       />
 
-      <SettingsDialog
+      <SettingsDrawer
         open={isSettingsDialogOpen}
+        onOpenChange={(state: boolean) =>
+          state ? openSettingsDialog() : closeSettingsDialog()
+        }
+        onExitComplete={() => {}}
+      />
+
+      <SettingsDialog
+        open={isSettingsDialogOpen && false}
         onOpenChange={(state: boolean) =>
           state ? openSettingsDialog() : closeSettingsDialog()
         }
