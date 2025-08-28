@@ -1,4 +1,4 @@
-import db from "@/lib/database";
+import defaultDb from "@/lib/database";
 import { SidebarProvider } from "../ui/sidebar";
 import SettingsSidebar, {
   SettingsCategory,
@@ -23,9 +23,9 @@ type RuntimeProps = {
   onExitComplete: () => void;
 };
 
-type Props = OverlayProps & RuntimeProps;
+type Props = OverlayProps & RuntimeProps & { database?: typeof defaultDb };
 
-function SettingsDrawer({ open, onOpenChange, onExitComplete }: Props) {
+function SettingsDrawer({ open, onOpenChange, onExitComplete, database = defaultDb }: Props) {
   const [activeCategory, setActiveCategory] =
     useState<SettingsCategory>("general");
   const [closingReason, setClosingReason] = useState<
@@ -34,22 +34,17 @@ function SettingsDrawer({ open, onOpenChange, onExitComplete }: Props) {
 
   const immunities = useQueryWithToast({
     queryKey: ["immunities"],
-    queryFn: () => db.immunitites.getAll(),
+    queryFn: () => database.immunitites.getAll(),
   });
 
   const resistances = useQueryWithToast({
     queryKey: ["resistances"],
-    queryFn: () => db.resistances.getAll(),
+    queryFn: () => database.resistances.getAll(),
   });
 
   const effects = useQueryWithToast({
     queryKey: ["effects"],
-    queryFn: () => db.effects.getAll(),
-  });
-
-  const players = useQueryWithToast({
-    queryKey: ["players"],
-    queryFn: () => db.players.getAllDetailed(),
+    queryFn: () => database.effects.getAll(),
   });
 
   function handleCloseDrawer() {
@@ -71,7 +66,7 @@ function SettingsDrawer({ open, onOpenChange, onExitComplete }: Props) {
         return <SettingsCategoryGeneral />;
 
       case "players":
-        return <SettingsCategoryPlayers />;
+        return <SettingsCategoryPlayers database={database} />;
 
       case "effects":
         return <SettingsCategoryEffects />;

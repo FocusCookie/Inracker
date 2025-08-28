@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import db from "@/lib/database";
+import defaultDb from "@/lib/database";
 import { Input } from "../ui/input";
 import { Player } from "@/types/player";
 import { useTranslation } from "react-i18next";
@@ -14,9 +14,11 @@ import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { MoonIcon } from "lucide-react";
 import { Button } from "../ui/button";
 
-type Props = {};
+type Props = {
+  database: typeof defaultDb;
+};
 
-function SettingsCategoryPlayers({}: Props) {
+function SettingsCategoryPlayers({ database = defaultDb }: Props) {
   const queryClient = useQueryClient();
   const { t } = useTranslation("ComponentSettingsCategoryPlayers");
   const openOverlay = useOverlayStore((s) => s.open);
@@ -24,11 +26,11 @@ function SettingsCategoryPlayers({}: Props) {
 
   const players = useQueryWithToast({
     queryKey: ["players"],
-    queryFn: () => db.players.getAllDetailed(),
+    queryFn: () => database.players.getAllDetailed(),
   });
 
   const createPlayer = useMutationWithErrorToast({
-    mutationFn: db.players.create,
+    mutationFn: database.players.create,
     onSuccess: (player: Player) => {
       queryClient.invalidateQueries({ queryKey: ["players"] });
       toast({
@@ -39,7 +41,7 @@ function SettingsCategoryPlayers({}: Props) {
   });
 
   const editPlayer = useMutationWithErrorToast({
-    mutationFn: db.players.update,
+    mutationFn: database.players.update,
     onSuccess: (_player: Player) => {
       queryClient.invalidateQueries({ queryKey: ["players"] });
       queryClient.invalidateQueries({ queryKey: ["party"] });
@@ -48,7 +50,7 @@ function SettingsCategoryPlayers({}: Props) {
   });
 
   const deletePlayer = useMutationWithErrorToast({
-    mutationFn: db.players.deletePlayerById,
+    mutationFn: database.players.deletePlayerById,
     onSuccess: (player: Player) => {
       queryClient.invalidateQueries({ queryKey: ["players"] });
       queryClient.invalidateQueries({ queryKey: ["party"] });
