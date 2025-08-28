@@ -1,5 +1,8 @@
 {
   "players": "Spieler",
-  "searchPlaceholder": "Suche nach einem bestimmten Spieler"
+  "searchPlaceholder": "Suche nach einem bestimmten Spieler",
+  "createPlayer": "Spieler erstellen",
+  "noPlayers": "Noch keine Spieler",
+  "noPlayersDescription": "Du hast noch keine Spieler erstellt. Erstelle jetzt deinen ersten."
 }
 

@@ -47,7 +47,7 @@ function PlayerCatalog({
     openOverlay("player.create", {
       onCreate: async (player) => {
         const created = await db.players.create(player);
-        return { id: created.id };
+        return created;
       },
       onComplete: () => {
         queryClient.invalidateQueries({ queryKey: ["players"] });

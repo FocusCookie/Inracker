@@ -71,13 +71,7 @@ function SettingsDrawer({ open, onOpenChange, onExitComplete }: Props) {
         return <SettingsCategoryGeneral />;
 
       case "players":
-        return (
-          <SettingsCategoryPlayers
-            players={players.data || []}
-            onDeletePlayer={db.players.deletePlayerById}
-            onEditPlayer={db.players.update}
-          />
-        );
+        return <SettingsCategoryPlayers />;
 
       case "effects":
         return <SettingsCategoryEffects />;
