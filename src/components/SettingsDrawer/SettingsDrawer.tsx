@@ -13,7 +13,6 @@ import SettingsCategoryEffects from "../SettingsCategoryEffects/SettingsCategory
 import SettingsCategoryImmunities from "../SettingsCategoryImmunities/SettingsCategoryImmunities";
 import SettingsCategoryResistances from "../SettingsCategoryResistances/SettingsCategoryResistances";
 import SettingsCategoryOpponents from "../SettingsCategoryOpponents/SettingsCategoryOpponents";
-import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 
 type OverlayProps = OverlayMap["settings"];
 
@@ -36,21 +35,6 @@ function SettingsDrawer({
   const [closingReason, setClosingReason] = useState<
     null | "success" | CancelReason
   >(null);
-
-  const immunities = useQueryWithToast({
-    queryKey: ["immunities"],
-    queryFn: () => database.immunitites.getAll(),
-  });
-
-  const resistances = useQueryWithToast({
-    queryKey: ["resistances"],
-    queryFn: () => database.resistances.getAll(),
-  });
-
-  const effects = useQueryWithToast({
-    queryKey: ["effects"],
-    queryFn: () => database.effects.getAll(),
-  });
 
   function handleCloseDrawer() {
     setClosingReason("closed");
@@ -77,7 +61,7 @@ function SettingsDrawer({
         return <SettingsCategoryEffects database={database} />;
 
       case "immunities":
-        return <SettingsCategoryImmunities />;
+        return <SettingsCategoryImmunities database={database} />;
 
       case "resistances":
         return <SettingsCategoryResistances />;
@@ -127,7 +111,7 @@ function SettingsDrawer({
                     />
 
                     <main className="flex h-full w-full justify-center">
-                      <div className="scrollable-y flex w-full max-w-[1024px] flex-col gap-4 overflow-y-scroll p-4">
+                      <div className="scrollable-y flex h-full w-full max-w-[1024px] flex-col gap-4 overflow-y-scroll p-4">
                         {showSettingsCategory(activeCategory)}
                       </div>
                     </main>

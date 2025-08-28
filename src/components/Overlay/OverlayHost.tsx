@@ -15,6 +15,7 @@ import EditPlayerDrawer from "../EditPlayerDrawer/EditPlayerDrawer";
 import EditChapterDrawer from "../EditChapterDrawer/EditChapterDrawer";
 import SettingsDrawer from "../SettingsDrawer/SettingsDrawer";
 import EditEffectDrawer from "../EditEffectDrawer/EditEffectDrawer";
+import EditImmunityDrawer from "../EditImmunityDrawer/EditImmunityDrawer";
 
 type RuntimeOverlayProps = {
   open: boolean;
@@ -32,6 +33,7 @@ const registry: Record<OverlayKind, OverlayComponent<any>> = {
   "effect.create": CreateEffectDrawer,
   "effect.catalog": EffectsCatalog,
   "effect.edit": EditEffectDrawer,
+  "immunity.edit": EditImmunityDrawer,
   "party.create": CreatePartyDrawer,
   "party.edit": PartyEditDrawer,
   "player.create": CreatePlayerDrawer,

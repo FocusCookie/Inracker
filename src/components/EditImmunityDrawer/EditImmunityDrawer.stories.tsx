@@ -11,8 +11,10 @@ const meta = {
   args: {
     open: true,
     onOpenChange: fn(),
-    isLoading: false,
     onEdit: fn(),
+    onComplete: fn(),
+    onCancel: fn(),
+    onExitComplete: fn(),
     immunity: {
       id: 1,
       name: "Fire Immunity",
@@ -33,16 +35,4 @@ type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
   // args: {},
-};
-
-export const Loading: Story = {
-  args: {
-    isLoading: true,
-  },
-};
-
-export const NoImmunity: Story = {
-  args: {
-    immunity: null,
-  },
 };

@@ -925,34 +925,6 @@ function GlobalModals({}: Props) {
     }
   }
 
-  function handleAddEffectToChar(effect: Effect) {
-    if (selectedPlayer) {
-      const isAlreadyAdded = selectedPlayer.effects.some(
-        (playerEffect) => playerEffect.id === effect.id,
-      );
-
-      if (!isAlreadyAdded) {
-        addEffectToPlayer.mutate({
-          playerId: selectedPlayer.id,
-          effectId: effect.id,
-        });
-
-        toast({
-          variant: "default",
-          title: `Added ${effect.icon} ${effect.name} to ${selectedPlayer!.name}`,
-        });
-
-        const updateSelectedPlayer = Object.assign({}, selectedPlayer);
-        updateSelectedPlayer.effects.push(effect);
-      } else {
-        toast({
-          variant: "default",
-          title: "Already Added",
-        });
-      }
-    }
-  }
-
   function handleRemoveEncounterOpponent(opponentId: EncounterOpponent["id"]) {
     deleteEncounterOpponentMutation.mutate(opponentId);
 
@@ -1002,16 +974,6 @@ function GlobalModals({}: Props) {
         onOpenOpponentsCatalog={() => openOpponentsCatalog()}
         selectedOpponents={selectedEncounterOpponents}
         onRemoveOpponent={handleRemoveEncounterOpponent}
-      />
-
-      <EditImmunityDrawer
-        immunity={selectedImmunity}
-        isLoading={updateImmunity.isPending}
-        open={isEditImmunityDrawerOpen}
-        onOpenChange={(state) =>
-          state ? openEditImmunityDrawer() : closeEditImmunityDrawer()
-        }
-        onEdit={updateImmunity.mutate}
       />
 
       <EditResistanceDrawer

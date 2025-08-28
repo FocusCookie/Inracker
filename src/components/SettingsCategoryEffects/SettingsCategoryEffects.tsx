@@ -115,7 +115,7 @@ function SettingsCategoryEffects({ database = defaultDb }: Props) {
             onChange={handleEffectSearchTerm}
           />
 
-          <div className="scrollable-y overflow-y-scroll p-0.5">
+          <div className="scrollable-y h-full overflow-y-scroll p-0.5">
             <div className="flex h-full max-h-96 flex-col gap-4">
               {effects.data
                 .filter((effect) =>

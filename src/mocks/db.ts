@@ -1,4 +1,5 @@
 import { Effect } from "@/types/effect";
+import { DBImmunity } from "@/types/immunitiy";
 import { Player, TCreatePlayer } from "@/types/player";
 
 const players: Player[] = [
@@ -56,6 +57,21 @@ const effects: Effect[] = [
     durationType: "rounds",
     type: "negative",
     value: 10,
+  },
+];
+
+const immunities: DBImmunity[] = [
+  {
+    id: 1,
+    name: "Fire Immunity",
+    icon: "🔥",
+    description: "Immune to fire damage.",
+  },
+  {
+    id: 2,
+    name: "Poison Immunity",
+    icon: "☠️",
+    description: "Immune to poison damage.",
   },
 ];
 
@@ -125,6 +141,38 @@ export const db = {
         effects.splice(index, 1);
       }
       return Promise.resolve(deletedEffect);
+    },
+  },
+  immunitites: {
+    getAll: async (): Promise<DBImmunity[]> => {
+      console.log("STORYBOOK MOCK: getAll immunities");
+      return Promise.resolve(immunities);
+    },
+    create: async (immunity: Omit<DBImmunity, "id">): Promise<DBImmunity> => {
+      console.log("STORYBOOK MOCK: create immunity", immunity);
+      const newImmunity: DBImmunity = {
+        ...immunity,
+        id: Math.max(...immunities.map(i => i.id)) + 1,
+      };
+      immunities.push(newImmunity);
+      return Promise.resolve(newImmunity);
+    },
+    update: async (immunity: DBImmunity): Promise<DBImmunity> => {
+      console.log("STORYBOOK MOCK: update immunity", immunity);
+      const index = immunities.findIndex((i) => i.id === immunity.id);
+      if (index !== -1) {
+        immunities[index] = immunity;
+      }
+      return Promise.resolve(immunity);
+    },
+    delete: async (immunityId: number): Promise<DBImmunity> => {
+      console.log("STORYBOOK MOCK: delete immunity", immunityId);
+      const index = immunities.findIndex((i) => i.id === immunityId);
+      const deletedImmunity = immunities[index];
+      if (index !== -1) {
+        immunities.splice(index, 1);
+      }
+      return Promise.resolve(deletedImmunity);
     },
   },
 };
