@@ -54,20 +54,10 @@ function GlobalModals({}: Props) {
   const queryClient = useQueryClient();
   const createPlayerForm = useCreatePlayer();
   const createOpponentForm = useCreateOpponent();
-  const editPlayerForm = useEditPlayer();
   const createEncounterForm = useCreateEncounter();
   const [selectedEncounterOpponents, setSelectedEncounterOpponents] = useState<
     EncounterOpponent[]
   >([]);
-
-  const { closeSettingsDialog, isSettingsDialogOpen, openSettingsDialog } =
-    useSettingsStore(
-      useShallow((state) => ({
-        isSettingsDialogOpen: state.isSettingsDialogOpen,
-        closeSettingsDialog: state.closeSettingsDialog,
-        openSettingsDialog: state.openSettingsDialog,
-      })),
-    );
 
   const {
     isCreateEncounterDrawerOpen,
@@ -980,37 +970,6 @@ function GlobalModals({}: Props) {
 
   return (
     <>
-      {party.data && players.data && (
-        <PlayerCatalog
-          partyId={party.data.id}
-          open={isPlayersCatalogOpen}
-          onOpenChange={handlePlayersCatalogOpen}
-          onAdd={(partyId, playerId) =>
-            addPlayerToParty.mutate({ partyId, playerId })
-          }
-          excludedPlayers={party.data.players}
-          players={players.data}
-        />
-      )}
-
-      {immunities.data && resistances.data && (
-        <CreatePlayerDrawer
-          form={createPlayerForm}
-          open={isCreatePlayerDrawerOpen}
-          loading={createPlayer.isPending}
-          immunities={immunities.data || []}
-          resistances={resistances.data || []}
-          onOpenChange={(state) =>
-            state ? openCreatePlayerDrawer() : closeCreatePlayerDrawer()
-          }
-          onCreate={createPlayer.mutate}
-          onOpenImmunityCatalog={openImmunititesCatalog}
-          onOpenResistanceCatalog={openResistancesCatalog}
-          onCreateImmunity={openCreateImmunityDrawer}
-          onCreateResistance={openCreateResistanceDrawer}
-        />
-      )}
-
       {immunities.data && resistances.data && (
         <CreateOpponentDrawer
           form={createOpponentForm}
@@ -1029,51 +988,6 @@ function GlobalModals({}: Props) {
         />
       )}
 
-      {currentParty && (
-        <CreateChapterDrawer
-          isCreating={createChapterMutation.isPending}
-          open={isCreateChapterDrawerOpen && !!currentParty}
-          onOpenChange={(state: boolean) =>
-            state ? openCreateChapterDrawer() : closeCreateChapterDrawer()
-          }
-          onCreate={createChapterMutation.mutate}
-          partyId={currentParty}
-        />
-      )}
-
-      {immunities.data && (
-        <ImmunitiesCatalog
-          immunities={immunities.data}
-          open={isImmunitiesCatalogOpen}
-          onOpenChange={(state: boolean) =>
-            state ? openImmunititesCatalog() : closeImmunitiesCatalog()
-          }
-          onAdd={handleAddImmunity}
-        />
-      )}
-
-      {resistances.data && (
-        <ResistancesCatalog
-          resistances={resistances.data}
-          open={isResistanceCatalogOpen}
-          onOpenChange={(state: boolean) =>
-            state ? openResistancesCatalog() : closeResistancesCatalog()
-          }
-          onAdd={handleAddResistance}
-        />
-      )}
-
-      {effects.data && (
-        <EffectsCatalog
-          effects={effects.data || []}
-          open={isEffectsCatalogOpen}
-          onOpenChange={(state: boolean) =>
-            state ? openEffectsCatalog() : closeEffectsCatalog()
-          }
-          onAdd={handleAddEffectToChar}
-        />
-      )}
-
       <CreateEncounterDrawer
         form={createEncounterForm}
         opponents={opponents.data || []}
@@ -1088,95 +1002,6 @@ function GlobalModals({}: Props) {
         onOpenOpponentsCatalog={() => openOpponentsCatalog()}
         selectedOpponents={selectedEncounterOpponents}
         onRemoveOpponent={handleRemoveEncounterOpponent}
-      />
-
-      <OpponentsCatalog
-        open={isOpponentsCatalogOpen}
-        onOpenChange={(state) =>
-          state ? openOpponentsCatalog() : closeOpponentsCatalog()
-        }
-        onAdd={handleAddOpponentToEncounter}
-        opponents={opponents.data || []}
-      />
-
-      <CreateImmunityDrawer
-        isCreating={createImmunity.isPending}
-        open={isCreateImmunityDrawerOpen}
-        onOpenChange={(state: boolean) =>
-          state ? openCreateImmunityDrawer() : closeCreateImmunityDrawer()
-        }
-        onCreate={createImmunity.mutate}
-      />
-
-      <CreateResistanceDrawer
-        isCreating={createResistance.isPending}
-        open={isCreateResistanceDrawerOpen}
-        onOpenChange={(state: boolean) =>
-          state ? openCreateResistanceDrawer() : closeCreateResistanceDrawer()
-        }
-        onCreate={createResistance.mutate}
-      />
-
-      <CreateEffectDrawer
-        isCreating={createEffect.isPending}
-        open={isCreateEffectDrawerOpen}
-        onOpenChange={(state: boolean) =>
-          state ? openCreateEffectDrawer() : closeCreateEffectDrawer()
-        }
-        onCreate={createEffect.mutate}
-      />
-
-      <SettingsDrawer
-        open={isSettingsDialogOpen}
-        onOpenChange={(state: boolean) =>
-          state ? openSettingsDialog() : closeSettingsDialog()
-        }
-        onExitComplete={() => {}}
-      />
-
-      <SettingsDialog
-        open={isSettingsDialogOpen && false}
-        onOpenChange={(state: boolean) =>
-          state ? openSettingsDialog() : closeSettingsDialog()
-        }
-        players={players.data || []}
-        effects={effects.data || []}
-        immunities={immunities.data || []}
-        resistances={resistances.data || []}
-        onDeletePlayer={deletePlayer.mutate}
-        onDeleteEffect={deleteEffect.mutate}
-        onDeleteImmunity={deleteImmunity.mutate}
-        onDeleteResistance={deleteResistance.mutate}
-      />
-
-      <EditChapterDrawer
-        chapter={editingChapter}
-        loading={updateChapterMutation.isPending || deleteChapter.isPending}
-        open={isEditChapterDrawerOpen}
-        onOpenChange={closeEditChapterDrawer}
-        onSave={updateChapterMutation.mutate}
-        onDelete={deleteChapter.mutate}
-      />
-
-      <EditPlayerDrawer
-        player={selectedPlayer}
-        open={isEditPlayerDrawerOpen}
-        loading={updatePlayer.isPending}
-        form={editPlayerForm}
-        onOpenChange={(state: boolean) =>
-          state ? openEditPlayerDrawer() : closeEditPlayerDrawer()
-        }
-        onSave={updatePlayer.mutate}
-      />
-
-      <EditEffectDrawer
-        effect={selectedEffect}
-        isLoading={updateEffect.isPending}
-        open={isEditingEffectDrawerOpen}
-        onOpenChange={(state) =>
-          state ? openEditEffectDrawer() : closeEditEffectDrawer()
-        }
-        onEdit={updateEffect.mutate}
       />
 
       <EditImmunityDrawer

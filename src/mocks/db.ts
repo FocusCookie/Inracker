@@ -1,4 +1,5 @@
-import { Player, TCreatePlayer } from "../types/player";
+import { Effect } from "@/types/effect";
+import { Player, TCreatePlayer } from "@/types/player";
 
 const players: Player[] = [
   {
@@ -32,6 +33,29 @@ const players: Player[] = [
     immunities: [],
     resistances: [],
     image: null,
+  },
+];
+
+const effects: Effect[] = [
+  {
+    id: 1,
+    name: "Blessing of Might",
+    icon: "💪",
+    description: "Increases attack power.",
+    duration: 2,
+    durationType: "rounds",
+    type: "positive",
+    value: 10,
+  },
+  {
+    id: 2,
+    name: "Curse of Weakness",
+    icon: "😞",
+    description: "Decreases attack power.",
+    duration: 2,
+    durationType: "rounds",
+    type: "negative",
+    value: 10,
   },
 ];
 
@@ -69,6 +93,38 @@ export const db = {
         players.splice(index, 1);
       }
       return Promise.resolve(deletedPlayer);
+    },
+  },
+  effects: {
+    getAll: async (): Promise<Effect[]> => {
+      console.log("STORYBOOK MOCK: getAll effects");
+      return Promise.resolve(effects);
+    },
+    create: async (effect: Omit<Effect, "id">): Promise<Effect> => {
+      console.log("STORYBOOK MOCK: create effect", effect);
+      const newEffect: Effect = {
+        ...effect,
+        id: Math.max(...effects.map(e => e.id)) + 1,
+      };
+      effects.push(newEffect);
+      return Promise.resolve(newEffect);
+    },
+    update: async (effect: Effect): Promise<Effect> => {
+      console.log("STORYBOOK MOCK: update effect", effect);
+      const index = effects.findIndex((e) => e.id === effect.id);
+      if (index !== -1) {
+        effects[index] = effect;
+      }
+      return Promise.resolve(effect);
+    },
+    delete: async (effectId: number): Promise<Effect> => {
+      console.log("STORYBOOK MOCK: delete effect", effectId);
+      const index = effects.findIndex((e) => e.id === effectId);
+      const deletedEffect = effects[index];
+      if (index !== -1) {
+        effects.splice(index, 1);
+      }
+      return Promise.resolve(deletedEffect);
     },
   },
 };

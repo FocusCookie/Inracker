@@ -1,4 +1,4 @@
-import defaultDb from "@/lib/database";
+import db from "@/lib/database";
 import { SidebarProvider } from "../ui/sidebar";
 import SettingsSidebar, {
   SettingsCategory,
@@ -23,9 +23,14 @@ type RuntimeProps = {
   onExitComplete: () => void;
 };
 
-type Props = OverlayProps & RuntimeProps & { database?: typeof defaultDb };
+type Props = OverlayProps & RuntimeProps & { database?: typeof db };
 
-function SettingsDrawer({ open, onOpenChange, onExitComplete, database = defaultDb }: Props) {
+function SettingsDrawer({
+  open,
+  onOpenChange,
+  onExitComplete,
+  database = db,
+}: Props) {
   const [activeCategory, setActiveCategory] =
     useState<SettingsCategory>("general");
   const [closingReason, setClosingReason] = useState<
@@ -69,7 +74,7 @@ function SettingsDrawer({ open, onOpenChange, onExitComplete, database = default
         return <SettingsCategoryPlayers database={database} />;
 
       case "effects":
-        return <SettingsCategoryEffects />;
+        return <SettingsCategoryEffects database={database} />;
 
       case "immunities":
         return <SettingsCategoryImmunities />;

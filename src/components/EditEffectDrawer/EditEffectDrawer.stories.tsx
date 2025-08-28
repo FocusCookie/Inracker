@@ -17,10 +17,12 @@ const meta = {
       durationType: "rounds",
       value: 10,
     },
-    isLoading: false,
     open: true,
     onOpenChange: fn(),
     onEdit: fn(),
+    onComplete: fn(),
+    onCancel: fn(),
+    onExitComplete: fn(),
   },
 } satisfies Meta<typeof EditEffectDrawer>;
 

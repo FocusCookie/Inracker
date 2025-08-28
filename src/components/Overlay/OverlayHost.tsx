@@ -14,6 +14,7 @@ import CreateChapterDrawer from "../CreateChapterDrawer/CreateChapterDrawer";
 import EditPlayerDrawer from "../EditPlayerDrawer/EditPlayerDrawer";
 import EditChapterDrawer from "../EditChapterDrawer/EditChapterDrawer";
 import SettingsDrawer from "../SettingsDrawer/SettingsDrawer";
+import EditEffectDrawer from "../EditEffectDrawer/EditEffectDrawer";
 
 type RuntimeOverlayProps = {
   open: boolean;
@@ -30,6 +31,7 @@ const registry: Record<OverlayKind, OverlayComponent<any>> = {
   "chapter.edit": EditChapterDrawer,
   "effect.create": CreateEffectDrawer,
   "effect.catalog": EffectsCatalog,
+  "effect.edit": EditEffectDrawer,
   "party.create": CreatePartyDrawer,
   "party.edit": PartyEditDrawer,
   "player.create": CreatePlayerDrawer,

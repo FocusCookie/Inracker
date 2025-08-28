@@ -12,6 +12,7 @@ export type OverlaySuccessMap = {
   "chapter.edit": { chapterId: Chapter["id"] };
   "effect.create": Effect;
   "effect.catalog": Effect;
+  "effect.edit": Effect;
   "party.create": { partyId: Party["id"] };
   "party.edit": { partyId: Party["id"] };
   "player.create": Player;
@@ -41,6 +42,12 @@ export type OverlayMap = {
   "effect.create": {
     onCreate: (effect: Omit<Effect, "id">) => Promise<Effect>;
     onComplete: (result: OverlaySuccessMap["effect.create"]) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "effect.edit": {
+    effect: Effect;
+    onEdit: (effect: Effect) => Promise<Effect>;
+    onComplete?: (result: OverlaySuccessMap["effect.edit"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
   "effect.catalog": {
