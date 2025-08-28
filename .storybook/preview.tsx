@@ -12,7 +12,9 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+const queryClient = new QueryClient();
 const rootRoute = createRootRoute();
 const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: "/" });
 const memoryHistory = createMemoryHistory({ initialEntries: ["/"] });
@@ -36,7 +38,7 @@ export const globalTypes = {
   },
 };
 
-const withI18next = (Story, context) => {
+const withI18next = (Story: any, context: any) => {
   const { locale } = context.globals;
 
   useEffect(() => {
@@ -52,7 +54,7 @@ const withI18next = (Story, context) => {
   );
 };
 
-const withRouter = (Story, context) => {
+const withRouter = (Story: any, context: any) => {
   return (
     <RouterProvider
       router={router}
@@ -61,8 +63,17 @@ const withRouter = (Story, context) => {
   );
 };
 
+const withTanstackQuery = (Story: any, context: any) => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Story {...context} />
+    </QueryClientProvider>
+  );
+};
+
 const preview: Preview = {
   decorators: [
+    withTanstackQuery,
     withI18next,
     withRouter,
     (Story) => <div className="h-full w-full bg-black">{Story()}</div>,
