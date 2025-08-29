@@ -64,7 +64,7 @@ function SettingsDrawer({
         return <SettingsCategoryImmunities database={database} />;
 
       case "resistances":
-        return <SettingsCategoryResistances />;
+        return <SettingsCategoryResistances database={database} />;
 
       case "opponents":
         return <SettingsCategoryOpponents />;

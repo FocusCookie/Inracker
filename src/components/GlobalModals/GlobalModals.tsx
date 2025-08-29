@@ -975,16 +975,6 @@ function GlobalModals({}: Props) {
         selectedOpponents={selectedEncounterOpponents}
         onRemoveOpponent={handleRemoveEncounterOpponent}
       />
-
-      <EditResistanceDrawer
-        resistance={selectedResistance}
-        isLoading={updateResistance.isPending}
-        open={isEditResistanceDrawerOpen}
-        onOpenChange={(state) =>
-          state ? openEditResistanceDrawer() : closeEditResistanceDrawer()
-        }
-        onEdit={updateResistance.mutate}
-      />
     </>
   );
 }

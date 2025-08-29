@@ -20,6 +20,7 @@ export type OverlaySuccessMap = {
   "player.edit": Player;
   "resistance.create": DBResistance;
   "resistance.catalog": DBResistance;
+  "resistance.edit": DBResistance;
   "immunity.create": DBImmunity;
   "immunity.catalog": DBImmunity;
   "immunity.edit": DBImmunity;
@@ -106,6 +107,12 @@ export type OverlayMap = {
   };
   "resistance.catalog": {
     onSelect: (restistance: DBResistance) => Promise<void>;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "resistance.edit": {
+    resistance: DBResistance;
+    onEdit: (resistance: DBResistance) => Promise<DBResistance>;
+    onComplete?: (result: OverlaySuccessMap["resistance.edit"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
   settings: void;
