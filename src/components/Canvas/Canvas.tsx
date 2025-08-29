@@ -25,9 +25,9 @@ type Props = {
   temporaryElement?: CanvasElement;
   players: Player[];
   opponents: Opponent[];
-  selectedPlayer: Player | null;
+  selectedToken: Token | null;
   tokens: Token[];
-  onPlayerSelect: (player: Player | null) => void;
+  onTokenSelect: (token: Token | null) => void;
   onDrawed: (element: Omit<CanvasElement, "id">) => void;
   onTokenMove: (token: Token) => void;
 };
@@ -52,10 +52,10 @@ function Canvas({
   temporaryElement,
   players,
   opponents,
-  selectedPlayer,
+  selectedToken,
   tokens,
   onTokenMove,
-  onPlayerSelect,
+  onTokenSelect,
   onDrawed,
 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -108,7 +108,6 @@ function Canvas({
   const initialCTM = useRef<DOMMatrix | null>(null);
   const tempRectRef = useRef<SVGRectElement | null>(null);
   const drawStartPos = useRef<{ x: number; y: number } | null>(null);
-  const selectedPlayerRef = useRef<Player | null>(selectedPlayer);
   const isDraggingToken = useRef<boolean>(false);
   const dragTokenStartPos = useRef<{ x: number; y: number } | null>(null);
   const dragElementStartPos = useRef<{ x: number; y: number } | null>(null);
@@ -122,16 +121,9 @@ function Canvas({
     x: 0,
     y: 0,
   });
-  const [playersTokenState, setPlayersTokenState] = useState<
-    Array<{
-      id: Player["id"];
-      visible: boolean;
-    }>
-  >(
-    players.map((player) => {
-      return { id: player.id, visible: true };
-    }),
-  );
+  const [tokenVisibility, setTokenVisibility] = useState<
+    Record<string, boolean>
+  >({});
 
   useEffect(() => {
     setCurrentColor(TEMP_DEFAULT_COLOR);
@@ -159,18 +151,14 @@ function Canvas({
   }, [background]);
 
   useEffect(() => {
-    selectedPlayerRef.current = selectedPlayer;
-  }, [selectedPlayer]);
-
-  useEffect(() => {
     window.addEventListener("keydown", showPaneCursor);
     window.addEventListener("keyup", hidePaneCursor);
-    window.addEventListener("keydown", unselectSelectedPlayer);
+    window.addEventListener("keydown", unselectSelectedToken);
 
     return () => {
       window.removeEventListener("keydown", showPaneCursor);
       window.removeEventListener("keyup", hidePaneCursor);
-      window.removeEventListener("keydown", unselectSelectedPlayer);
+      window.removeEventListener("keydown", unselectSelectedToken);
     };
   }, []);
 
@@ -456,7 +444,6 @@ function Canvas({
     draggedToken.current = null;
     dragTokenStartPos.current = null;
     temporaryTokenPosition.current = null;
-    isDraggingToken.current = false;
 
     forceUpdate({});
 
@@ -544,31 +531,34 @@ function Canvas({
     window.removeEventListener("mouseup", handleTempElementDragEnd);
   };
 
-  function handleMouseUpOnPlayerToken(player: Player) {
+  function handleTokenClick(token: Token) {
     if (isDraggingToken.current) {
       isDraggingToken.current = false;
-    } else if (selectedPlayer && selectedPlayer.id === player.id) {
-      onPlayerSelect(null);
+      return;
+    }
+
+    if (selectedToken && selectedToken.id === token.id) {
+      onTokenSelect(null);
     } else {
-      onPlayerSelect(player);
+      onTokenSelect(token);
     }
   }
 
-  function unselectSelectedPlayer(event: KeyboardEvent) {
+  function unselectSelectedToken(event: KeyboardEvent) {
     if (event.key === "Escape") {
-      onPlayerSelect(null);
+      onTokenSelect(null);
     }
   }
 
   useEffect(() => {
     window.addEventListener("keydown", showPaneCursor);
     window.addEventListener("keyup", hidePaneCursor);
-    window.addEventListener("keydown", unselectSelectedPlayer);
+    window.addEventListener("keydown", unselectSelectedToken);
 
     return () => {
       window.removeEventListener("keydown", showPaneCursor);
       window.removeEventListener("keyup", hidePaneCursor);
-      window.removeEventListener("keydown", unselectSelectedPlayer);
+      window.removeEventListener("keydown", unselectSelectedToken);
     };
   }, []);
 
@@ -589,23 +579,13 @@ function Canvas({
     }
   }, [temporaryElement]);
 
-  function togglePlayerToken(player: Player) {
-    const update = [...playersTokenState];
-    const playerStateIndex = update.findIndex(
-      (playerState) => playerState.id === player.id,
-    );
+  function toggleToken(token: Token) {
+    const newVisibility = !(tokenVisibility[token.id] ?? true);
+    setTokenVisibility((prev) => ({ ...prev, [token.id]: newVisibility }));
 
-    update[playerStateIndex].visible = !update[playerStateIndex].visible;
-
-    if (
-      !update[playerStateIndex].visible &&
-      selectedPlayer &&
-      selectedPlayer.id === player.id
-    ) {
-      onPlayerSelect(null);
+    if (!newVisibility && selectedToken && token.id === selectedToken.id) {
+      onTokenSelect(null);
     }
-
-    setPlayersTokenState(update);
   }
 
   return (
@@ -757,22 +737,13 @@ function Canvas({
           </g>
         )}
 
-        {selectedPlayer && (
+        {selectedToken && (
           <circle
             id="selection-ring"
-            cx={
-              // @ts-expect-error
-              tokens.find((token) => token.entity === selectedPlayer.id)
-                .coordinates.x + 50
-            }
-            cy={
-              // @ts-expect-error
-              tokens.find((token) => token.entity === selectedPlayer.id)
-                .coordinates.y + 50
-            }
+            cx={selectedToken.coordinates.x + 50}
+            cy={selectedToken.coordinates.y + 50}
             r={65}
             stroke="white"
-            //            stroke="#FA00FF" pink
             stroke-width="10"
             className="animate-pulse"
           />
@@ -794,15 +765,9 @@ function Canvas({
               <image
                 className={cn(
                   "hover:cursor-pointer",
-                  Boolean(
-                    playersTokenState.find(
-                      (playerToken) => playerToken.id === token.entity,
-                    )?.visible,
-                  )
-                    ? "visible"
-                    : "hidden",
-                  selectedPlayer &&
-                    token.entity === selectedPlayer.id &&
+                  (tokenVisibility[token.id] ?? true) ? "visible" : "hidden",
+                  selectedToken &&
+                    token.id === selectedToken.id &&
                     "border-2 border-red-500",
                 )}
                 key={"player-" + token.id}
@@ -817,7 +782,7 @@ function Canvas({
                   cursor: isDrawing || isPanning ? "default" : "move",
                 }}
                 onMouseDown={(e) => handleTokenDragStart(e, token)}
-                onClick={() => handleMouseUpOnPlayerToken(player)}
+                onClick={() => handleTokenClick(token)}
               />
             );
           }
@@ -825,6 +790,13 @@ function Canvas({
           if (opponent) {
             return (
               <image
+                className={cn(
+                  "hover:cursor-pointer",
+                  (tokenVisibility[token.id] ?? true) ? "visible" : "hidden",
+                  selectedToken &&
+                    token.id === selectedToken.id &&
+                    "border-2 border-red-500",
+                )}
                 key={"opponent-" + token.id}
                 data-token-id={token.id}
                 href={opponent.image === "" ? undefined : opponent.image}
@@ -837,6 +809,7 @@ function Canvas({
                   cursor: isDrawing || isPanning ? "default" : "move",
                 }}
                 onMouseDown={(e) => handleTokenDragStart(e, token)}
+                onClick={() => handleTokenClick(token)}
               />
             );
           }
@@ -858,34 +831,75 @@ function Canvas({
         </button>
 
         <div className="flex flex-col gap-2">
-          {players.map((player) => (
-            <button
-              key={`player-${player.id}-token-state`}
-              onClick={() => togglePlayerToken(player)}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
-            >
-              <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
-                {player.image && player.image !== "" ? (
-                  <img
-                    className="col-start-1 col-end-1 row-start-1 row-end-2"
-                    src={player.image}
-                    alt={`Picture of Player ${player.name}`}
-                  />
-                ) : (
-                  <span className="col-start-1 col-end-1 row-start-1 row-end-2">
-                    {player.icon}
-                  </span>
-                )}
+          {players.map((player) => {
+            const token = tokens.find(
+              (t) => t.type === "player" && t.entity === player.id,
+            );
+            if (!token) return null;
+            return (
+              <button
+                key={`player-${player.id}-token-state`}
+                onClick={() => toggleToken(token)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+              >
+                <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
+                  {player.image && player.image !== "" ? (
+                    <img
+                      className="col-start-1 col-end-1 row-start-1 row-end-2"
+                      src={player.image}
+                      alt={`Picture of Player ${player.name}`}
+                    />
+                  ) : (
+                    <span className="col-start-1 col-end-1 row-start-1 row-end-2">
+                      {player.icon}
+                    </span>
+                  )}
 
-                {!playersTokenState.find((state) => state.id === player.id)
-                  ?.visible && (
-                  <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
-                    <EyeNoneIcon className="h-4 w-4 text-white" />
-                  </div>
-                )}
-              </div>
-            </button>
-          ))}
+                  {!(tokenVisibility[token.id] ?? true) && (
+                    <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                      <EyeNoneIcon className="h-4 w-4 text-white" />
+                    </div>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {opponents.map((opponent) => {
+            const token = tokens.find(
+              (t) => t.type === "opponent" && t.entity === opponent.id,
+            );
+            if (!token) return null;
+            return (
+              <button
+                key={`opponent-${opponent.id}-token-state`}
+                onClick={() => toggleToken(token)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+              >
+                <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
+                  {opponent.image && opponent.image !== "" ? (
+                    <img
+                      className="col-start-1 col-end-1 row-start-1 row-end-2"
+                      src={opponent.image}
+                      alt={`Picture of Opponent ${opponent.name}`}
+                    />
+                  ) : (
+                    <span className="col-start-1 col-end-1 row-start-1 row-end-2">
+                      {opponent.icon}
+                    </span>
+                  )}
+
+                  {!(tokenVisibility[token.id] ?? true) && (
+                    <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                      <EyeNoneIcon className="h-4 w-4 text-white" />
+                    </div>
+                  )}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 

@@ -38,7 +38,7 @@ export const Route = createFileRoute("/play/")({
 function RouteComponent() {
   const queryClient = useQueryClient();
   const openOverlay = useOverlayStore((s) => s.open);
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
   const [isAsideOpen, setIsAsideOpen] = useState<boolean>(false);
   const { partyId, chapterId } = useSearch({ from: "/play/" });
 
@@ -176,10 +176,9 @@ function RouteComponent() {
               // TODO: fix ts issue, no clue why any is detected for the opponentsQuery.data
               // @ts-ignore
               opponents={opponentsQuery.data}
-              selectedPlayer={selectedPlayer}
-              onPlayerSelect={setSelectedPlayer}
+              selectedToken={selectedToken}
+              onTokenSelect={setSelectedToken}
               onDrawed={handleCreateEncounter}
-              onTokenMove={updateTokenMutation.mutate}
               onTokenMove={updateTokenMutation.mutate}
             />
           )}
