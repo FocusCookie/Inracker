@@ -102,7 +102,27 @@ function RouteComponent() {
     mutationFn: (encounter: Encounter) => {
       return db.encounters.update(encounter);
     },
-    onSuccess: () => {
+    onMutate: async (updatedEncounter: Encounter) => {
+      await queryClient.cancelQueries({ queryKey: ["encounters"] });
+      const previousEncounters = queryClient.getQueryData<Encounter[]>([
+        "encounters",
+      ]);
+      queryClient.setQueryData<Encounter[]>(["encounters"], (old) => {
+        if (!old) return [];
+        return old.map((enc) =>
+          enc.id === updatedEncounter.id ? updatedEncounter : enc,
+        );
+      });
+      return { previousEncounters };
+    },
+    onError: (err, newEncounter, context) => {
+      if (context?.previousEncounters) {
+        queryClient.setQueryData([
+          "encounters",
+        ], context.previousEncounters);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["encounters"] });
     },
   });

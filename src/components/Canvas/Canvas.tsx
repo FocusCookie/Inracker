@@ -590,7 +590,7 @@ function Canvas({
     if (elementG) {
       elementG.setAttribute(
         "transform",
-        `translate(${newPosition.x - draggedElement.current.x}, ${newPosition.y - draggedElement.current.y})`,
+        `translate(${newPosition.x}, ${newPosition.y})`,
       );
     }
   };
@@ -605,21 +605,10 @@ function Canvas({
       onElementMove(updatedElement);
     }
 
-    if (draggedElement.current) {
-      const elementG = svgRef.current.querySelector(
-        `[data-element-id="${draggedElement.current.id}"]`,
-      );
-      if (elementG) {
-        elementG.setAttribute("transform", "translate(0,0)");
-      }
-    }
-
     draggedElement.current = null;
     dragElementStartPos.current = null;
     temporaryElementPosition.current = null;
     isDragging.current = false;
-
-    forceUpdate({});
 
     window.removeEventListener("mousemove", handleElementDragMove);
     window.removeEventListener("mouseup", handleElementDragEnd);
@@ -735,12 +724,13 @@ function Canvas({
             className="hover:cursor-move"
             key={"element-" + index}
             data-element-id={element.id}
+            transform={`translate(${element.x}, ${element.y})`}
             onMouseDown={(e) => handleElementDragStart(e, element)}
           >
             <g className="hover:cursor-pointer" onClick={element.onClick}>
               <rect
-                x={element.x}
-                y={element.y}
+                x={0}
+                y={0}
                 width={element.width}
                 height={element.height}
                 fill={element.color}
@@ -754,8 +744,8 @@ function Canvas({
 
               {/* Header rectangle */}
               <rect
-                x={element.x}
-                y={element.y}
+                x={0}
+                y={0}
                 width={element.width}
                 height={60}
                 fill={element.color}
@@ -767,7 +757,7 @@ function Canvas({
               />
 
               {/* Icon */}
-              <g transform={`translate(${element.x + 6}, ${element.y + 30})`}>
+              <g transform={`translate(6, 30)`}>
                 <text
                   className="font-sans text-4xl font-bold shadow-sm select-none"
                   dominantBaseline="middle"
@@ -778,9 +768,7 @@ function Canvas({
 
               {/* Text */}
               {element.name && (
-                <g
-                  transform={`translate(${element.x + 60}, ${element.y + 30})`}
-                >
+                <g transform={`translate(60, 30)`}>
                   <defs>
                     <clipPath id={`text-clip-${index}`}>
                       <rect
