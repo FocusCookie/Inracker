@@ -1,3 +1,7 @@
 {
-    
+  "resistances": "Resistances",
+  "createResistance": "Create Resistance",
+  "noResistances": "No Resistances",
+  "noResistancesDescription": "You have not created any resistances yet. Create one to get started.",
+  "searchPlaceholder": "Search for resistances..."
 }

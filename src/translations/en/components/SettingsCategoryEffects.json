@@ -1,3 +1,7 @@
 {
-    
+  "effects": "Effects",
+  "createEffect": "Create Effect",
+  "noEffects": "No Effects",
+  "noEffectsDescription": "You have not created any effects yet. Create one to get started.",
+  "searchPlaceholder": "Search for effects..."
 }
