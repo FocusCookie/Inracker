@@ -959,22 +959,6 @@ function GlobalModals({}: Props) {
           onCreateResistance={openCreateResistanceDrawer}
         />
       )}
-
-      <CreateEncounterDrawer
-        form={createEncounterForm}
-        opponents={opponents.data || []}
-        element={currentEncounterElement}
-        onCreate={handleCreateEncounter}
-        isCreating={false}
-        open={isCreateEncounterDrawerOpen}
-        onOpenChange={handleEncounterDrawerOpenChange}
-        onCreateOpponent={() => {
-          openCreateOpponentDrawer();
-        }}
-        onOpenOpponentsCatalog={() => openOpponentsCatalog()}
-        selectedOpponents={selectedEncounterOpponents}
-        onRemoveOpponent={handleRemoveEncounterOpponent}
-      />
     </>
   );
 }

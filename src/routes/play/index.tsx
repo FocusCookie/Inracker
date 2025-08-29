@@ -18,6 +18,10 @@ import { TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tooltip, TooltipContent } from "@radix-ui/react-tooltip";
 import { Button } from "@/components/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
+import { CancelReason } from "@/types/overlay";
+import { useOverlayStore } from "@/stores/useOverlayStore";
+import { TCreateEncounter } from "@/schemas/createEncounter";
+import { Encounter } from "@/types/encounter";
 
 export const Route = createFileRoute("/play/")({
   component: RouteComponent,
@@ -25,6 +29,7 @@ export const Route = createFileRoute("/play/")({
 
 function RouteComponent() {
   const queryClient = useQueryClient();
+  const openOverlay = useOverlayStore((s) => s.open);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [isAsideOpen, setIsAsideOpen] = useState<boolean>(false);
 
@@ -76,7 +81,6 @@ function RouteComponent() {
     queryKey: ["encounters", `${currentParty}-${currentChapter}`],
     queryFn: () =>
       db.encounters.getDetailedByIds(chapterQuery.data?.encounters || []),
-    enabled: !!chapterQuery.data?.encounters,
     refetchOnMount: "always",
     refetchOnWindowFocus: "always",
   });
@@ -96,9 +100,26 @@ function RouteComponent() {
     },
   });
 
-  function handleDrawEncounter(element: CanvasElement) {
-    setCurrentEncounterElement(element);
-    openCreateEncounterDrawer();
+  function handleCreateEncounter(element: CanvasElement) {
+    openOverlay("encounter.create", {
+      onCreate: async (encounter) => {
+        const encounterWithElement: Omit<Encounter, "id"> = {
+          ...encounter,
+          element,
+        };
+        const created = await db.encounters.create(encounterWithElement);
+        return created;
+      },
+      onComplete: (encounter) => {
+        console.log("created encounter ", encounter);
+        queryClient.invalidateQueries({ queryKey: ["parties"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["encounters"] });
+      },
+      onCancel: (reason: CancelReason) => {
+        console.log("Opponent creation cancelled:", reason);
+      },
+    });
   }
 
   function handleAsideToggle() {
@@ -155,7 +176,7 @@ function RouteComponent() {
               players={partyQuery.data.players}
               selectedPlayer={selectedPlayer}
               onPlayerSelect={setSelectedPlayer}
-              onDrawed={handleDrawEncounter}
+              onDrawed={handleCreateEncounter}
               onPlayerMove={updateTokenMutation.mutate}
             />
           )}

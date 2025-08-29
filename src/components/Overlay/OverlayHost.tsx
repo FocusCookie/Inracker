@@ -17,6 +17,7 @@ import SettingsDrawer from "../SettingsDrawer/SettingsDrawer";
 import EditEffectDrawer from "../EditEffectDrawer/EditEffectDrawer";
 import EditImmunityDrawer from "../EditImmunityDrawer/EditImmunityDrawer";
 import EditResistanceDrawer from "../EditResistanceDrawer/EditResistanceDrawer";
+import CreateEncounterDrawer from "../CreateEncounterDrawer/CreateEncounterDrawer";
 
 type RuntimeOverlayProps = {
   open: boolean;
@@ -45,6 +46,7 @@ const registry: Record<OverlayKind, OverlayComponent<any>> = {
   "immunity.catalog": ImmunitiesCatalog,
   "resistance.catalog": ResistancesCatalog,
   "resistance.edit": EditResistanceDrawer,
+  "encounter.create": CreateEncounterDrawer,
   settings: SettingsDrawer,
 };
 
