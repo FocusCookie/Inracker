@@ -191,10 +191,10 @@ function CreateEncounterDrawer({
       onOpenChange={handleOpenChange}
       onExitComplete={onExitComplete}
       title={t("title")}
-      description={t("description")}
+      description={t("drawerDescription")}
       actions={
         <Button disabled={isCreating} onClick={form.handleSubmit(onSubmit)}>
-          {t("create")}
+          {t("createButton")}
         </Button>
       }
       cancelTrigger={
@@ -611,7 +611,7 @@ function CreateEncounterDrawer({
                             variant="ghost"
                             onClick={handleCreateOpponent}
                           >
-                            {t("create")}
+                            {t("createOpponent")}
                           </Button>
 
                           <Button

@@ -710,7 +710,7 @@ function EditEncounterDrawer({
                             variant="ghost"
                             onClick={handleCreateOpponent}
                           >
-                            {t("create")}
+                            {t("createOpponent")}
                           </Button>
                           <Button type="button">{t("catalog")}</Button>
                         </div>

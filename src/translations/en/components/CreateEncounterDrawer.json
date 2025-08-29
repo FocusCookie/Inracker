@@ -41,5 +41,7 @@
   "createOpponent": "Create Opponent",
   "create": "Create",
   "cancel": "Cancel",
-  "catalog": "Catalog"
+  "catalog": "Catalog",
+  "drawerDescription": "Create a new encounter.",
+  "createButton": "Create"
 }

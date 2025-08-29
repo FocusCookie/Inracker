@@ -41,5 +41,7 @@
   "createOpponent": "Gegner erstellen",
   "create": "Erstellen",
   "cancel": "Abbrechen",
-  "catalog": "Katalog"
+  "catalog": "Katalog",
+  "drawerDescription": "Erstelle eine neue Begegnung.",
+  "createButton": "Erstellen"
 }
