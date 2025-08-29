@@ -31,6 +31,10 @@ import Drawer from "../Drawer/Drawer";
 import db from "@/lib/database";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import { TCreateEncounter } from "@/schemas/createEncounter";
+import { useOverlayStore } from "@/stores/useOverlayStore";
+import { Token } from "@/types/tokens";
+import { useSearch } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 
 type OverlayProps = OverlayMap["encounter.create"];
 
@@ -50,12 +54,15 @@ function CreateEncounterDrawer({
   onCancel,
 }: Props) {
   const { t } = useTranslation("ComponentCreateEncounterDrawer");
+  const queryClient = useQueryClient();
+  const openOverlay = useOverlayStore((s) => s.open);
   const [type, setType] = useState<Encounter["type"]>("note");
   const [isCreating, setIsCreating] = useState(false);
   const [closingReason, setClosingReason] = useState<
     null | "success" | CancelReason
   >(null);
   const form = useCreateEncounter();
+  const { chapterId } = useSearch({ from: "/play/" });
 
   const opponents = useQueryWithToast({
     queryKey: ["opponents"],
@@ -75,6 +82,8 @@ function CreateEncounterDrawer({
     try {
       setIsCreating(true);
 
+      //TODO: fix the ts issue because here the color and icon is only to pass it to the parent which makes use of it for the element
+      // @ts-ignore
       const created = await onCreate(values);
 
       onComplete(created);
@@ -120,17 +129,35 @@ function CreateEncounterDrawer({
     form.setValue("opponents", updatedOpponents);
   };
 
-  /*
   function handleCreateOpponent() {
     openOverlay("opponent.create", {
       onCreate: async (opponent) => {
         const createdOpponent = await db.opponents.create(opponent);
+
+        if (chapterId === null)
+          throw new Error(
+            "Chapter id is missing in creating the token for the opponent",
+          );
+
+        const token: Omit<Token, "id"> = {
+          type: "opponent",
+          // @ts-ignore
+          entity: createdOpponent.id,
+          coordinates: { x: 0, y: 0 },
+          chapter: chapterId,
+        };
+
+        await db.tokens.create(token);
+
         return createdOpponent;
       },
       onComplete: (opponent) => {
         const currentOpponents = form.getValues("opponents") || [];
         form.setValue("opponents", [...currentOpponents, opponent.id]);
         opponents.refetch();
+
+        queryClient.invalidateQueries({ queryKey: ["opponents"] });
+        queryClient.invalidateQueries({ queryKey: ["tokens"] });
       },
       onCancel: (reason) => {
         console.log("Opponent creation cancelled:", reason);
@@ -138,6 +165,7 @@ function CreateEncounterDrawer({
     });
   }
 
+  /*
   function handleOpenOpponentsCatalog() {
     openOverlay("opponent.catalog", {
       onSelect: async (opponent) => {
@@ -580,7 +608,7 @@ function CreateEncounterDrawer({
                           <Button
                             type="button"
                             variant="ghost"
-                            // onClick={handleCreateOpponent}
+                            onClick={handleCreateOpponent}
                           >
                             {t("create")}
                           </Button>

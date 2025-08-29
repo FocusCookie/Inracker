@@ -64,18 +64,26 @@ function RouteComponent() {
 
   const chapterQuery = useQueryWithToast({
     queryKey: ["chapter"],
-    queryFn: () => db.chapters.getByIdDetailed(chapterId!),
+    queryFn: () => db.chapters.getByIdDetailed(chapterId),
     enabled: !!chapterId,
   });
 
   const encountersQuery = useQueryWithToast({
     queryKey: ["encounters"],
     queryFn: () => db.encounters.getDetailedEncountersByChapterId(chapterId),
+    enabled: !!chapterId,
   });
 
   const tokensQuery = useQueryWithToast({
     queryKey: ["tokens"],
     queryFn: () => db.tokens.getChapterTokens(partyId, chapterId),
+    enabled: !!chapterId && !!partyId,
+  });
+
+  const opponentsQuery = useQueryWithToast({
+    queryKey: ["opponents"],
+    queryFn: () => db.opponents.getAllDetailed(),
+    enabled: !!chapterId && !!partyId,
   });
 
   const updateTokenMutation = useMutationWithErrorToast({
@@ -92,6 +100,8 @@ function RouteComponent() {
       onCreate: async (encounter) => {
         const encounterWithElement: Omit<Encounter, "id"> = {
           ...encounter,
+          // TODO: fix the ts issure here because i use temporary the encounter. icon & color to pass it to here
+          // @ts-ignore
           element: { ...element, color: encounter.color, icon: encounter.icon },
         };
         const created = await db.encounters.create(encounterWithElement);
@@ -163,10 +173,14 @@ function RouteComponent() {
               temporaryElement={currentEncounterElement || undefined}
               tokens={tokensQuery.data || []}
               players={partyQuery.data.players}
+              // TODO: fix ts issue, no clue why any is detected for the opponentsQuery.data
+              // @ts-ignore
+              opponents={opponentsQuery.data}
               selectedPlayer={selectedPlayer}
               onPlayerSelect={setSelectedPlayer}
               onDrawed={handleCreateEncounter}
-              onPlayerMove={updateTokenMutation.mutate}
+              onTokenMove={updateTokenMutation.mutate}
+              onTokenMove={updateTokenMutation.mutate}
             />
           )}
       </AnimatePresence>

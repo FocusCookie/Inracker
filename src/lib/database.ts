@@ -1324,7 +1324,7 @@ const getAllDetailedOpponents = async (
     detailedOpponents.push(detailedOpponent);
   }
 
-  return detailedOpponents;
+  return detailedOpponents as unknown as Opponent[];
 };
 
 const getDetailedOpponentById = async (
@@ -2104,7 +2104,7 @@ export const Database = {
       const db = await connect();
       return getDetailedOpponentById(db, id);
     },
-    getAllDetailed: async () => {
+    getAllDetailed: async (): Promise<Opponent[]> => {
       const db = await connect();
       return getAllDetailedOpponents(db);
     },

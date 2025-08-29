@@ -7,10 +7,12 @@ export const createOpponentSchema = z.object({
   }),
   icon: z.string().emoji(),
   details: z.string(),
-  maxHealth: z.coerce.number(),
+  max_health: z.coerce.number(),
   level: z.coerce.number(),
   labels: z.array(z.string().min(1)),
-  picture: z.instanceof(File).or(z.string()),
+  image: z.instanceof(File).or(z.string()),
   resistances: z.array(z.coerce.number()),
   immunities: z.array(z.coerce.number()),
 });
+
+export type TCreateOpponent = z.infer<typeof createOpponentSchema>;

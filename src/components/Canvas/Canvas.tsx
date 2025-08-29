@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { useEncounterStore } from "@/stores/useEncounterStore";
+import { Opponent } from "@/types/opponents";
 import { Player } from "@/types/player";
 import { Token } from "@/types/tokens";
 import {
@@ -23,11 +24,12 @@ type Props = {
   elements: ClickableCanvasElement[];
   temporaryElement?: CanvasElement;
   players: Player[];
+  opponents: Opponent[];
   selectedPlayer: Player | null;
   tokens: Token[];
   onPlayerSelect: (player: Player | null) => void;
   onDrawed: (element: Omit<CanvasElement, "id">) => void;
-  onPlayerMove: (token: Token) => void;
+  onTokenMove: (token: Token) => void;
 };
 
 export type CanvasElement = {
@@ -49,9 +51,10 @@ function Canvas({
   elements,
   temporaryElement,
   players,
+  opponents,
   selectedPlayer,
   tokens,
-  onPlayerMove,
+  onTokenMove,
   onPlayerSelect,
   onDrawed,
 }: Props) {
@@ -74,7 +77,6 @@ function Canvas({
     })),
   );
 
-  // Use a ref to track the actual current viewBox
   const currentViewBoxRef = useRef<{
     x: number;
     y: number;
@@ -87,7 +89,6 @@ function Canvas({
     height: 1000,
   });
 
-  // State for React rendering
   const [viewBox, setViewBox] = useState<{
     x: number;
     y: number;
@@ -107,15 +108,12 @@ function Canvas({
   const initialCTM = useRef<DOMMatrix | null>(null);
   const tempRectRef = useRef<SVGRectElement | null>(null);
   const drawStartPos = useRef<{ x: number; y: number } | null>(null);
-  const draggedPlayer = useRef<Player | null>(null);
   const selectedPlayerRef = useRef<Player | null>(selectedPlayer);
   const isDraggingToken = useRef<boolean>(false);
   const dragTokenStartPos = useRef<{ x: number; y: number } | null>(null);
   const dragElementStartPos = useRef<{ x: number; y: number } | null>(null);
-  const temporaryPlayerPosition = useRef<{
-    playerId: number;
-    coordinates: { x: number; y: number };
-  } | null>(null);
+  const draggedToken = useRef<Token | null>(null);
+  const temporaryTokenPosition = useRef<{ x: number; y: number } | null>(null);
   const temporaryTempElementPosition = useRef<{ x: number; y: number } | null>(
     null,
   );
@@ -146,7 +144,6 @@ function Canvas({
       tmp.onload = () => {
         backgroundImage.current = tmp;
 
-        // Update viewBox to fit the background image
         const newViewBox = {
           x: -tmp.naturalWidth / 2,
           y: -tmp.naturalHeight / 2,
@@ -178,7 +175,10 @@ function Canvas({
   }, []);
 
   const transformScreenCoordsToSvgCoords = (
-    event: MouseEvent | React.MouseEvent<SVGSVGElement>,
+    event:
+      | MouseEvent
+      | React.MouseEvent<SVGSVGElement>
+      | React.MouseEvent<SVGImageElement>,
   ) => {
     if (!svgRef.current || !initialCTM.current) return { x: 0, y: 0 };
 
@@ -229,7 +229,6 @@ function Canvas({
       const coords = transformScreenCoordsToSvgCoords(event);
       drawStartPos.current = coords;
 
-      // create temporary rect
       const rect = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "rect",
@@ -292,20 +291,16 @@ function Canvas({
     const delta = direction === "in" ? ZOOM_DELTA : -ZOOM_DELTA;
     const newZoom = Math.max(MIN_ZOOM, Math.min(zoom + delta, MAX_ZOOM));
 
-    // Get current center of the view from the ref
     const { x, y, width, height } = currentViewBoxRef.current;
     const currentCenterX = x + width / 2;
     const currentCenterY = y + height / 2;
 
-    // Calculate new dimensions
     const newWidth = (width * zoom) / newZoom;
     const newHeight = (height * zoom) / newZoom;
 
-    // Calculate new top-left corner while maintaining the center point
     const newX = currentCenterX - newWidth / 2;
     const newY = currentCenterY - newHeight / 2;
 
-    // Update both ref and state
     const newViewBox = {
       x: newX,
       y: newY,
@@ -327,7 +322,7 @@ function Canvas({
   }
 
   function showPaneCursor(event: KeyboardEvent) {
-    if (event.repeat) return; // if key is hold return immidiatly
+    if (event.repeat) return;
 
     if (!isPanning && event.code === "Space") {
       setIsPanning(true);
@@ -385,7 +380,6 @@ function Canvas({
         });
       }
 
-      // delete temporary rect
       tempRectRef.current.remove();
       tempRectRef.current = null;
       drawStartPos.current = null;
@@ -396,12 +390,11 @@ function Canvas({
     window.removeEventListener("mouseup", handleDrawEnd);
   };
 
-  const handlePlayerDragStart = (
+  const handleTokenDragStart = (
     event: React.MouseEvent<SVGImageElement>,
-    player: Player,
+    token: Token,
   ) => {
-    const playerToken = tokens.find((token) => token.entity === player.id);
-    if (isDrawing || isPanning || !playerToken) return;
+    if (isDrawing || isPanning) return;
 
     const svg = svgRef.current;
     if (!svg) return;
@@ -410,17 +403,65 @@ function Canvas({
     if (!CTM) return;
     initialCTM.current = CTM;
 
-    // @ts-ignore
     const coords = transformScreenCoordsToSvgCoords(event);
 
     dragTokenStartPos.current = {
-      x: coords.x - playerToken.coordinates.x,
-      y: coords.y - playerToken.coordinates.y,
+      x: coords.x - token.coordinates.x,
+      y: coords.y - token.coordinates.y,
     };
-    draggedPlayer.current = player;
+    draggedToken.current = token;
 
-    window.addEventListener("mousemove", handlePlayerDragMove);
-    window.addEventListener("mouseup", handlePlayerDragEnd);
+    window.addEventListener("mousemove", handleTokenDragMove);
+    window.addEventListener("mouseup", handleTokenDragEnd);
+  };
+
+  const handleTokenDragMove = (event: MouseEvent) => {
+    if (
+      !draggedToken.current ||
+      !dragTokenStartPos.current ||
+      !initialCTM.current ||
+      !svgRef.current
+    )
+      return;
+
+    isDraggingToken.current = true;
+    const currentPos = transformScreenCoordsToSvgCoords(event);
+
+    const newPosition = {
+      x: currentPos.x - dragTokenStartPos.current.x,
+      y: currentPos.y - dragTokenStartPos.current.y,
+    };
+
+    temporaryTokenPosition.current = newPosition;
+
+    const tokenImage = svgRef.current.querySelector(
+      `[data-token-id="${draggedToken.current.id}"]`,
+    );
+
+    if (tokenImage) {
+      tokenImage.setAttribute("x", newPosition.x.toString());
+      tokenImage.setAttribute("y", newPosition.y.toString());
+    }
+  };
+
+  const handleTokenDragEnd = () => {
+    if (draggedToken.current && temporaryTokenPosition.current) {
+      const updatedToken = {
+        ...draggedToken.current,
+        coordinates: temporaryTokenPosition.current,
+      };
+      onTokenMove(updatedToken);
+    }
+
+    draggedToken.current = null;
+    dragTokenStartPos.current = null;
+    temporaryTokenPosition.current = null;
+    isDraggingToken.current = false;
+
+    forceUpdate({});
+
+    window.removeEventListener("mousemove", handleTokenDragMove);
+    window.removeEventListener("mouseup", handleTokenDragEnd);
   };
 
   const handeTempElementDragStart = (
@@ -467,7 +508,6 @@ function Canvas({
       y: currentPos.y - dragElementStartPos.current.y,
     };
 
-    // Store the position for when we need to update React state
     temporaryTempElementPosition.current = Object.assign({}, newPosition);
 
     const element = svgRef.current.querySelector("#temp-element");
@@ -482,8 +522,6 @@ function Canvas({
         `translate(${newPosition.x + 16}, ${newPosition.y + 40})`,
       );
     }
-
-    // Don't call forceUpdate here - we'll only update React state when the drag ends
   };
 
   const handleTempElementDragEnd = () => {
@@ -502,69 +540,8 @@ function Canvas({
 
     forceUpdate({});
 
-    window.removeEventListener("mousemove", handlePlayerDragMove);
-    window.removeEventListener("mouseup", handlePlayerDragEnd);
-  };
-
-  const handlePlayerDragMove = (event: MouseEvent) => {
-    if (
-      !draggedPlayer.current ||
-      !dragTokenStartPos.current ||
-      !initialCTM.current ||
-      !svgRef.current
-    )
-      return;
-
-    isDraggingToken.current = true;
-    const currentPos = transformScreenCoordsToSvgCoords(event);
-
-    const newPosition = {
-      x: currentPos.x - dragTokenStartPos.current.x,
-      y: currentPos.y - dragTokenStartPos.current.y,
-    };
-
-    // Store the position for when we need to update React state
-    temporaryPlayerPosition.current = {
-      playerId: draggedPlayer.current.id,
-      coordinates: newPosition,
-    };
-
-    // Find the actual SVG image element for this player and update it directly
-    const playerImage = svgRef.current.querySelector(
-      `[data-player-id="${draggedPlayer.current.id}"]`,
-    );
-    if (playerImage) {
-      playerImage.setAttribute("x", newPosition.x.toString());
-      playerImage.setAttribute("y", newPosition.y.toString());
-    }
-
-    // Don't call forceUpdate here - we'll only update React state when the drag ends
-  };
-
-  const handlePlayerDragEnd = () => {
-    if (draggedPlayer.current && temporaryPlayerPosition.current) {
-      const updatedPlayer = {
-        ...draggedPlayer.current,
-      };
-
-      const updatedToken = tokens.find(
-        (token) => token.entity === updatedPlayer.id,
-      );
-
-      if (updatedToken) {
-        updatedToken.coordinates = temporaryPlayerPosition.current.coordinates;
-        onPlayerMove(updatedToken);
-      }
-    }
-
-    draggedPlayer.current = null;
-    dragTokenStartPos.current = null;
-    temporaryPlayerPosition.current = null;
-
-    forceUpdate({});
-
-    window.removeEventListener("mousemove", handlePlayerDragMove);
-    window.removeEventListener("mouseup", handlePlayerDragEnd);
+    window.removeEventListener("mousemove", handleTempElementDragMove);
+    window.removeEventListener("mouseup", handleTempElementDragEnd);
   };
 
   function handleMouseUpOnPlayerToken(player: Player) {
@@ -802,10 +779,18 @@ function Canvas({
         )}
 
         {tokens.map((token) => {
-          const player = players.find((player) => player.id === token.entity);
+          const player = players.find(
+            (player) => token.type === "player" && player.id === token.entity,
+          );
+          const opponent = opponents.find(
+            (opponent) =>
+              token.type === "opponent" && opponent.id === token.entity,
+          );
 
-          return (
-            player && (
+          console.log({ token });
+
+          if (player) {
+            return (
               <image
                 className={cn(
                   "hover:cursor-pointer",
@@ -820,10 +805,9 @@ function Canvas({
                     token.entity === selectedPlayer.id &&
                     "border-2 border-red-500",
                 )}
-                key={"player-" + token.entity}
-                data-player-id={player.id} // Add this attribute for direct DOM manipulation
-                // @ts-ignore
-                href={player.image}
+                key={"player-" + token.id}
+                data-token-id={token.id}
+                href={!player.image ? undefined : player.image}
                 width={100}
                 height={100}
                 x={token.coordinates.x}
@@ -832,11 +816,32 @@ function Canvas({
                 style={{
                   cursor: isDrawing || isPanning ? "default" : "move",
                 }}
-                onMouseDown={(e) => handlePlayerDragStart(e, player)}
+                onMouseDown={(e) => handleTokenDragStart(e, token)}
                 onClick={() => handleMouseUpOnPlayerToken(player)}
               />
-            )
-          );
+            );
+          }
+
+          if (opponent) {
+            return (
+              <image
+                key={"opponent-" + token.id}
+                data-token-id={token.id}
+                href={opponent.image === "" ? undefined : opponent.image}
+                width={100}
+                height={100}
+                x={token.coordinates.x}
+                y={token.coordinates.y}
+                preserveAspectRatio="xMidYMid"
+                style={{
+                  cursor: isDrawing || isPanning ? "default" : "move",
+                }}
+                onMouseDown={(e) => handleTokenDragStart(e, token)}
+              />
+            );
+          }
+
+          return null;
         })}
       </svg>
 
@@ -852,34 +857,36 @@ function Canvas({
           )}
         </button>
 
-        {players.map((player) => (
-          <button
-            key={`player-${player.id}-token-state`}
-            onClick={() => togglePlayerToken(player)}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
-          >
-            <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
-              {player.image && player.image !== "" ? (
-                <img
-                  className="col-start-1 col-end-1 row-start-1 row-end-2"
-                  src={player.image}
-                  alt={`Picture of Player ${player.name}`}
-                />
-              ) : (
-                <span className="col-start-1 col-end-1 row-start-1 row-end-2">
-                  {player.icon}
-                </span>
-              )}
+        <div className="flex flex-col gap-2">
+          {players.map((player) => (
+            <button
+              key={`player-${player.id}-token-state`}
+              onClick={() => togglePlayerToken(player)}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+            >
+              <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
+                {player.image && player.image !== "" ? (
+                  <img
+                    className="col-start-1 col-end-1 row-start-1 row-end-2"
+                    src={player.image}
+                    alt={`Picture of Player ${player.name}`}
+                  />
+                ) : (
+                  <span className="col-start-1 col-end-1 row-start-1 row-end-2">
+                    {player.icon}
+                  </span>
+                )}
 
-              {!playersTokenState.find((state) => state.id === player.id)
-                ?.visible && (
-                <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
-                  <EyeNoneIcon className="h-4 w-4 text-white" />
-                </div>
-              )}
-            </div>
-          </button>
-        ))}
+                {!playersTokenState.find((state) => state.id === player.id)
+                  ?.visible && (
+                  <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                    <EyeNoneIcon className="h-4 w-4 text-white" />
+                  </div>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="absolute bottom-4 left-4 flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">

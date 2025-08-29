@@ -14,11 +14,11 @@ export const useCreateOpponent = () => {
     defaultValues: {
       details: detailsTemplate[language],
       level: 1,
-      maxHealth: 10,
+      max_health: 10,
       name: "",
       icon: "🧙",
       labels: [],
-      picture: "",
+      image: "",
       resistances: [],
       immunities: [],
     },

@@ -108,7 +108,7 @@ export default function CreateResistanceDrawer({
       onExitComplete={onExitComplete}
       title={t("title")}
       actions={
-        <Button loading={isCreating} onClick={form.handleSubmit(handleSubmit)}>
+        <Button disabled={isCreating} onClick={form.handleSubmit(handleSubmit)}>
           {t("create")}
         </Button>
       }

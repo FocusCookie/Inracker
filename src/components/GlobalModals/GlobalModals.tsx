@@ -756,23 +756,7 @@ function GlobalModals({}: Props) {
 
   return (
     <>
-      {immunities.data && resistances.data && (
-        <CreateOpponentDrawer
-          form={createOpponentForm}
-          open={isCreateOpponentDrawerOpen}
-          loading={false} //TODO mutation isLoading
-          immunities={immunities.data || []}
-          resistances={resistances.data || []}
-          onOpenChange={(state) =>
-            state ? openCreateOpponentDrawer() : closeCreateOpponentDrawer()
-          }
-          onCreate={createOpponentMutation.mutate}
-          onOpenImmunityCatalog={openImmunititesCatalog}
-          onOpenResistanceCatalog={openResistancesCatalog}
-          onCreateImmunity={openCreateImmunityDrawer}
-          onCreateResistance={openCreateResistanceDrawer}
-        />
-      )}
+      
     </>
   );
 }

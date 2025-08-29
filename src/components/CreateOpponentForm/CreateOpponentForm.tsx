@@ -1,6 +1,5 @@
 import { TrashIcon } from "@radix-ui/react-icons";
-import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import React, { useState } from "react";
 import IconPicker from "../IconPicker/IconPicker";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
@@ -15,8 +14,8 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
-import { TypographyH2 } from "../ui/typographyh2";
 import LabelInput from "../LabelInput/LabelInput";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   disabled: boolean;
@@ -52,7 +51,7 @@ const CreateOpponentForm: CreateOpponentDrawerCompound = ({
   );
 
   function handleResetPicture() {
-    form.setValue("picture", "");
+    form.setValue("image", "");
     setRefreshKey((c) => c + 1);
     setPicturePreview("");
   }
@@ -63,7 +62,7 @@ const CreateOpponentForm: CreateOpponentDrawerCompound = ({
 
     if (file) {
       setPicturePreview(URL.createObjectURL(file));
-      form.setValue("picture", file);
+      form.setValue("image", file);
     }
   }
 
@@ -116,7 +115,7 @@ const CreateOpponentForm: CreateOpponentDrawerCompound = ({
               />
               <FormField
                 control={form.control}
-                name="maxHealth"
+                name="max_health"
                 render={({ field }: { field: any }) => (
                   <FormItem className="w-1/2 px-0.5">
                     <FormLabel>{t("health")}</FormLabel>
