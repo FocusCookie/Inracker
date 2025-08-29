@@ -3,8 +3,8 @@ import type { Player, TCreatePlayer } from "@/types/player";
 import type { DBImmunity, Immunity } from "@/types/immunitiy";
 import type { DBResistance, Resistance } from "@/types/resistances";
 import { DBEffect, Effect } from "./effect";
-import { Chapter } from "./chapters";
-import { Encounter, TCreateEncounter } from "./encounter";
+import { Chapter, DBChapter } from "./chapters";
+import { Encounter } from "./encounter";
 
 export type CancelReason = "cancel" | "dismissed" | "closed";
 
@@ -39,7 +39,7 @@ export type OverlayMap = {
   "chapter.edit": {
     chapter: Chapter;
     onEdit: (chapter: Chapter) => Promise<Chapter>;
-    onDelete: (chapterId: Chapter["id"]) => Promise<void>;
+    onDelete: (chapterId: Chapter["id"]) => Promise<DBChapter>;
     onComplete: (result: OverlaySuccessMap["chapter.edit"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
@@ -59,7 +59,7 @@ export type OverlayMap = {
     onCancel?: (reason: CancelReason) => void;
   };
   "encounter.create": {
-    onCreate: (encounter: TCreateEncounter) => Promise<Encounter>;
+    onCreate: (encounter: Omit<Encounter["id"]>) => Promise<Encounter>;
     onComplete: (result: OverlaySuccessMap["encounter.create"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };

@@ -22,8 +22,6 @@ import ImmunitiesCatalog from "../ImmunitiesCatalog/ImmunitiesCatalog";
 import PlayerCatalog from "../PlayerCatalog/PlayerCatalog";
 import ResistancesCatalog from "../ResistancesCatalog/ResistancesCatalog";
 import SettingsDialog from "../SettingsDialog/SettingsDialog";
-import { useChapterStore } from "@/stores/useChapterStore";
-import { usePartyStore } from "@/stores/usePartySTore";
 import { Chapter, DBChapter } from "@/types/chapters";
 import CreateChapterDrawer from "../CreateChapterDrawer/CreateChapterDrawer";
 import EditChapterDrawer from "../EditChapterDrawer/EditChapterDrawer";
@@ -80,26 +78,6 @@ function GlobalModals({}: Props) {
       setCurrentIcon: state.setCurrentIcon,
       setResetCount: state.setResetCount,
       resetCount: state.resetCount,
-    })),
-  );
-
-  const {
-    editingChapter,
-    isEditChapterDrawerOpen,
-    isCreateChapterDrawerOpen,
-    closeEditChapterDrawer,
-    closeCreateChapterDrawer,
-    openCreateChapterDrawer,
-    currentChapter,
-  } = useChapterStore(
-    useShallow((state) => ({
-      isCreateChapterDrawerOpen: state.isCreateChapterDrawerOpen,
-      isEditChapterDrawerOpen: state.isEditChapterDrawerOpen,
-      editingChapter: state.editingChapter,
-      closeCreateChapterDrawer: state.closeCreateChapterDrawer,
-      openCreateChapterDrawer: state.openCreateChapterDrawer,
-      closeEditChapterDrawer: state.closeEditChapterDrawer,
-      currentChapter: state.currentChapter,
     })),
   );
 
@@ -169,26 +147,6 @@ function GlobalModals({}: Props) {
       setIsUpdatingOpponent: state.setIsUpdatingOpponent,
       openOpponentsCatalog: state.openOpponentsCatalog,
       closeOpponentsCatalog: state.closeOpponentsCatalog,
-    })),
-  );
-
-  const {
-    currentParty,
-    isCreateDrawerOpen,
-    isEditDrawerOpen,
-    editingParty,
-    openCreateDrawer,
-    closeCreateDrawer,
-    closeEditDrawer,
-  } = usePartyStore(
-    useShallow((state) => ({
-      currentParty: state.currentParty,
-      isCreateDrawerOpen: state.isCreateDrawerOpen,
-      isEditDrawerOpen: state.isEditDrawerOpen,
-      editingParty: state.editingParty,
-      closeCreateDrawer: state.closeCreateDrawer,
-      openCreateDrawer: state.openCreateDrawer,
-      closeEditDrawer: state.closeEditDrawer,
     })),
   );
 
@@ -283,12 +241,6 @@ function GlobalModals({}: Props) {
   const players = useQueryWithToast({
     queryKey: ["players"],
     queryFn: () => db.players.getAllDetailed(),
-  });
-
-  const party = useQueryWithToast({
-    queryKey: ["party"],
-    queryFn: () => db.parties.getDetailedById(currentParty!),
-    enabled: !!currentParty,
   });
 
   const immunities = useQueryWithToast({
@@ -538,72 +490,6 @@ function GlobalModals({}: Props) {
     },
   });
 
-  const createChapterMutation = useMutationWithErrorToast({
-    mutationFn: (chapter: Omit<Chapter, "id">) => {
-      return db.chapters.create(chapter);
-    },
-    onSuccess: (chapter: DBChapter) => {
-      queryClient.invalidateQueries({ queryKey: ["chapters"] });
-      closeCreateChapterDrawer();
-
-      toast({
-        variant: "default",
-        title: `Created ${chapter.icon} ${chapter.name}`,
-      });
-    },
-  });
-
-  const updateChapterMutation = useMutationWithErrorToast({
-    mutationFn: (chapter: Chapter) => {
-      return db.chapters.update(chapter);
-    },
-    onSuccess: (chapter: Chapter) => {
-      queryClient.invalidateQueries({ queryKey: ["chapters"] });
-      queryClient.invalidateQueries({ queryKey: ["chapter"] });
-
-      closeEditChapterDrawer();
-
-      toast({
-        variant: "default",
-        title: `Updated ${chapter.icon} ${chapter.name}`,
-      });
-    },
-  });
-
-  const deleteChapter = useMutationWithErrorToast({
-    mutationFn: (id: Chapter["id"]) => {
-      return db.chapters.delete(id);
-    },
-    onSuccess: (deletedChapter: DBChapter) => {
-      queryClient.invalidateQueries({ queryKey: ["chapters"] });
-      queryClient.invalidateQueries({ queryKey: ["chapter"] });
-
-      toast({
-        variant: "default",
-        title: `Deleted ${deletedChapter.icon} ${deletedChapter.name}`,
-      });
-    },
-  });
-
-  const deletePlayer = useMutationWithErrorToast({
-    mutationFn: (id: Player["id"]) => {
-      return db.players.deletePlayerById(id);
-    },
-    onSuccess: (deletedPlayer: Player) => {
-      queryClient.invalidateQueries({ queryKey: ["parties"] });
-      queryClient.invalidateQueries({ queryKey: ["party"] });
-      queryClient.invalidateQueries({ queryKey: ["players"] });
-
-      toast({
-        variant: "default",
-        title: `Deleted ${deletedPlayer.icon} ${deletedPlayer.name}`,
-      });
-    },
-    onSettled: () => {
-      closeEditDrawer();
-    },
-  });
-
   const deleteEffect = useMutationWithErrorToast({
     mutationFn: (id: Effect["id"]) => {
       return db.effects.delete(id);
@@ -691,38 +577,6 @@ function GlobalModals({}: Props) {
       queryClient.invalidateQueries({
         queryKey: ["encounterOpponents"],
       });
-    },
-  });
-
-  const createEncounterMutation = useMutationWithErrorToast({
-    mutationFn: (encounter: Omit<Encounter, "id">) => {
-      return db.encounters
-        .create(encounter)
-        .then((createdEncounter: Encounter) => {
-          if (currentChapter) {
-            return db.chapters
-              .addEncounter(currentChapter, createdEncounter.id)
-              .then(() => createdEncounter);
-          }
-          return createdEncounter;
-        });
-    },
-    onSuccess: () => {
-      closeEncounterDrawer();
-      createEncounterForm.form.reset();
-
-      setCurrentElement(null);
-      setCurrentColor("#FFFFFF");
-      setCurrentIcon("📝");
-      setResetCount(resetCount + 1);
-
-      //TODO: Make a more specific invalidation this causes a lot of re-fetches and a tiny flicker
-      queryClient.removeQueries();
-
-      setCurrentElement(null);
-      setCurrentColor("#FFFFFF");
-      setCurrentIcon("📝");
-      setResetCount(resetCount + 1);
     },
   });
 
@@ -892,52 +746,12 @@ function GlobalModals({}: Props) {
     }
   }
 
-  async function handleAddOpponentToEncounter(opponentId: Opponent["id"]) {
-    // @ts-expect-error
-    const opponent = opponents.data.find(
-      (opponent) => opponent.id === opponentId,
-    );
-
-    if (opponent) {
-      const encounterOpponent = Object.assign(opponent, {
-        immunities: opponent.immunities.map((im: DBImmunity) => im.id),
-        resistances: opponent.resistances.map((res: DBResistance) => res.id),
-        effects: opponent.effects.map((effect: DBEffect) => effect.id),
-        blueprint: opponent.id,
-      });
-
-      delete encounterOpponent.id;
-
-      const createdEncounterOpponent =
-        await createEncounterOpponentMutation.mutateAsync(opponent);
-
-      createEncounterForm.form.setValue("opponents", [
-        ...createEncounterForm.form.getValues("opponents"),
-        createdEncounterOpponent.id,
-      ]);
-
-      setSelectedEncounterOpponents((prev) => [
-        ...prev,
-        createdEncounterOpponent,
-      ]);
-
-      closeOpponentsCatalog();
-    }
-  }
-
   function handleRemoveEncounterOpponent(opponentId: EncounterOpponent["id"]) {
     deleteEncounterOpponentMutation.mutate(opponentId);
 
     setSelectedEncounterOpponents((prev) =>
       prev.filter((opponent) => opponent.id !== opponentId),
     );
-  }
-
-  function handleCreateEncounter(encounter: Omit<Encounter, "id">) {
-    createEncounterMutation.mutate(encounter);
-
-    setSelectedEncounterOpponents([]);
-    createEncounterForm.form.reset();
   }
 
   return (

@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/tooltip";
 import { TypographyH1 } from "@/components/ui/typographyH1";
 import { TypographyP } from "@/components/ui/typographyP";
-import { useChapterStore } from "@/stores/useChapterStore";
 import { Chapter, DBChapter } from "@/types/chapters";
 import { DBEffect, Effect } from "@/types/effect";
 import { DBImmunity, Immunity } from "@/types/immunitiy";
@@ -33,10 +32,9 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { RiArrowLeftBoxLine, RiUserAddFill } from "react-icons/ri";
-import { useShallow } from "zustand/shallow";
 import { useOverlayStore } from "@/stores/useOverlayStore";
 import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { toast } from "@/hooks/use-toast";
@@ -63,7 +61,7 @@ type Props = {
   }) => Promise<Effect>;
   onCreateChapter: (chapter: Omit<Chapter, "id">) => Promise<DBChapter>;
   onEditChapter: (chapter: Chapter) => Promise<Chapter>;
-  onDeleteChapter: (id: Chapter["id"]) => Promise<void>;
+  onDeleteChapter: (id: Chapter["id"]) => Promise<DBChapter>;
   onCreatePlayer: (player: TCreatePlayer) => Promise<Player>;
   onEditPlayer: (player: Player) => Promise<Player>;
   onAddPlayerToParty: (data: {
@@ -113,16 +111,7 @@ function ChapterSelection({
   const { t } = useTranslation("PageChapterSelection");
   const keysPressed = useRef<Record<string, boolean>>({});
   const openOverlay = useOverlayStore((s) => s.open);
-
-  const { isAsideOpen, openAside, closeAside, setCurrentChapter } =
-    useChapterStore(
-      useShallow((state) => ({
-        isAsideOpen: state.isAsideOpen,
-        openAside: state.openAside,
-        closeAside: state.closeAside,
-        setCurrentChapter: state.setCurrentChapter,
-      })),
-    );
+  const [isAsideOpen, setIsAsideOpen] = useState(false);
 
   const createPlayer = useMutationWithErrorToast({
     mutationFn: onCreatePlayer,
@@ -163,7 +152,10 @@ function ChapterSelection({
 
   const deleteChapterMutation = useMutationWithErrorToast({
     mutationFn: onDeleteChapter,
-    onSuccess: () => {
+    onSuccess: (chapter) => {
+      toast({
+        title: `Deleted ${chapter.icon} ${chapter.name}`,
+      });
       queryClient.invalidateQueries({ queryKey: ["chapters"] });
     },
   });
@@ -240,9 +232,9 @@ function ChapterSelection({
 
       if (keysPressed.current["Meta"] && event.key.toLowerCase() === "s") {
         if (isAsideOpen) {
-          closeAside();
+          setIsAsideOpen(false);
         } else {
-          openAside();
+          setIsAsideOpen(true);
         }
       }
     };
@@ -261,11 +253,7 @@ function ChapterSelection({
   }, [isAsideOpen]);
 
   function handleAsideToggle() {
-    if (isAsideOpen) {
-      closeAside();
-    } else {
-      openAside();
-    }
+    setIsAsideOpen(!isAsideOpen);
   }
 
   function handleExitParty() {
@@ -445,13 +433,16 @@ function ChapterSelection({
     });
   }
 
-  function handlePlayChapter(chapter: Chapter["id"]) {
-    setCurrentChapter(chapter);
+  function handlePlayChapter(chapterId: Chapter["id"]) {
     queryClient.invalidateQueries({ queryKey: ["chapter"] });
     queryClient.invalidateQueries({ queryKey: ["encounters"] });
 
     navigate({
       to: `/play`,
+      search: {
+        partyId: party.id,
+        chapterId,
+      },
     });
   }
 

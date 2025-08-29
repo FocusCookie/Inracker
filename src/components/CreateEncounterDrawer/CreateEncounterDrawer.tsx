@@ -20,17 +20,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { TrashIcon } from "@radix-ui/react-icons";
-import { useEncounterStore } from "@/stores/useEncounterStore";
-import { useShallow } from "zustand/shallow";
 import IconPicker from "../IconPicker/IconPicker";
 import OpponentCard from "../OpponentCard/OpponentCard";
 import { EncounterOpponent, Opponent } from "@/types/opponents";
 import type { CancelReason, OverlayMap } from "@/types/overlay";
 import { useCreateEncounter } from "@/hooks/useCreateEncounter";
 import Drawer from "../Drawer/Drawer";
-import { useOverlayStore } from "@/stores/useOverlayStore";
 import db from "@/lib/database";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import { TCreateEncounter } from "@/schemas/createEncounter";
@@ -54,16 +51,6 @@ function CreateEncounterDrawer({
 }: Props) {
   const { t } = useTranslation("ComponentCreateEncounterDrawer");
   const [type, setType] = useState<Encounter["type"]>("note");
-  const { setCurrentIcon, setCurrentColor, setResetCount, setCurrentElement } =
-    useEncounterStore(
-      useShallow((state) => ({
-        setCurrentColor: state.setCurrentColor,
-        setCurrentIcon: state.setCurrentIcon,
-        setResetCount: state.setResetCount,
-        setCurrentElement: state.setCurrentElement,
-      })),
-    );
-  const openOverlay = useOverlayStore((s) => s.open);
   const [isCreating, setIsCreating] = useState(false);
   const [closingReason, setClosingReason] = useState<
     null | "success" | CancelReason
@@ -75,22 +62,13 @@ function CreateEncounterDrawer({
     queryFn: () => db.opponents.getAllDetailed(),
   });
 
-  const elementColorInput = form.watch("color");
-
   const { fields, remove, append } = useFieldArray({
     control: form.control,
     name: "difficulties",
   });
 
-  useEffect(() => {
-    if (!!elementColorInput) {
-      setCurrentColor(elementColorInput);
-    }
-  }, [elementColorInput]);
-
   function handleIconSelect(icon: string) {
     form.setValue("icon", icon);
-    setCurrentIcon(icon);
   }
 
   async function onSubmit(values: TCreateEncounter) {
@@ -102,6 +80,7 @@ function CreateEncounterDrawer({
       onComplete(created);
       setClosingReason("success");
       onOpenChange(false);
+
       form.reset();
     } finally {
       setIsCreating(false);
@@ -109,13 +88,9 @@ function CreateEncounterDrawer({
   }
 
   function handleCancelation() {
-    onCancel?.("cancel");
     setClosingReason("cancel");
+    onCancel?.("cancel");
     onOpenChange(false);
-    setResetCount(Date.now());
-    setCurrentColor("#ffffff");
-    setCurrentIcon("📝");
-    setCurrentElement(null);
     form.reset();
   }
 

@@ -1,7 +1,5 @@
 import PlayLayout from "@/components/PlayLayout/PlayLayout";
-import { useChapterStore } from "@/stores/useChapterStore";
-import { usePartyStore } from "@/stores/usePartySTore";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useShallow } from "zustand/shallow";
 import db from "@/lib/database";
 import { AnimatePresence } from "framer-motion";
@@ -20,11 +18,21 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { CancelReason } from "@/types/overlay";
 import { useOverlayStore } from "@/stores/useOverlayStore";
-import { TCreateEncounter } from "@/schemas/createEncounter";
 import { Encounter } from "@/types/encounter";
+
+type PlaySearch = {
+  partyId: number | null;
+  chapterId: number | null;
+};
 
 export const Route = createFileRoute("/play/")({
   component: RouteComponent,
+  validateSearch: (search: Record<string, unknown>): PlaySearch => {
+    return {
+      partyId: Number(search?.partyId || null),
+      chapterId: Number(search?.chapterId || null),
+    };
+  },
 });
 
 function RouteComponent() {
@@ -32,6 +40,9 @@ function RouteComponent() {
   const openOverlay = useOverlayStore((s) => s.open);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [isAsideOpen, setIsAsideOpen] = useState<boolean>(false);
+  const { partyId, chapterId } = useSearch({ from: "/play/" });
+
+  if (!partyId || !chapterId) throw new Error("No Chapter or Party id");
 
   const { isCreateEncounterDrawerOpen } = useEncounterStore(
     useShallow((state) => ({
@@ -39,56 +50,32 @@ function RouteComponent() {
     })),
   );
 
-  const {
-    currentEncounterElement,
-    setCurrentEncounterElement,
-    openCreateEncounterDrawer,
-  } = useEncounterStore(
+  const { currentEncounterElement } = useEncounterStore(
     useShallow((state) => ({
       currentEncounterElement: state.currentElement,
-      setCurrentEncounterElement: state.setCurrentElement,
-      openCreateEncounterDrawer: state.openCreateEncounterDrawer,
-    })),
-  );
-
-  const { currentParty } = usePartyStore(
-    useShallow((state) => ({
-      currentParty: state.currentParty,
-    })),
-  );
-
-  const { currentChapter } = useChapterStore(
-    useShallow((state) => ({
-      currentChapter: state.currentChapter,
     })),
   );
 
   const partyQuery = useQueryWithToast({
-    queryKey: ["party", `party-${currentParty}`],
-    queryFn: () => db.parties.getDetailedById(currentParty!),
-    enabled: !!currentParty,
+    queryKey: ["party"],
+    queryFn: () => db.parties.getDetailedById(partyId!),
+    enabled: !!partyId,
   });
 
   const chapterQuery = useQueryWithToast({
-    queryKey: ["chapter", `chapter-${currentChapter}`],
-    queryFn: () => db.chapters.getByIdDetailed(currentChapter!),
-    enabled: !!currentChapter,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: "always",
+    queryKey: ["chapter"],
+    queryFn: () => db.chapters.getByIdDetailed(chapterId!),
+    enabled: !!chapterId,
   });
 
   const encountersQuery = useQueryWithToast({
-    queryKey: ["encounters", `${currentParty}-${currentChapter}`],
-    queryFn: () =>
-      db.encounters.getDetailedByIds(chapterQuery.data?.encounters || []),
-    refetchOnMount: "always",
-    refetchOnWindowFocus: "always",
+    queryKey: ["encounters"],
+    queryFn: () => db.encounters.getDetailedEncountersByChapterId(chapterId),
   });
 
   const tokensQuery = useQueryWithToast({
     queryKey: ["tokens"],
-    // @ts-expect-error
-    queryFn: () => db.tokens.getChapterTokens(currentParty, currentChapter),
+    queryFn: () => db.tokens.getChapterTokens(partyId, chapterId),
   });
 
   const updateTokenMutation = useMutationWithErrorToast({
@@ -105,15 +92,17 @@ function RouteComponent() {
       onCreate: async (encounter) => {
         const encounterWithElement: Omit<Encounter, "id"> = {
           ...encounter,
-          element,
+          element: { ...element, color: encounter.color, icon: encounter.icon },
         };
         const created = await db.encounters.create(encounterWithElement);
+        // @ts-expect-error
+        await db.chapters.addEncounter(chapterId, created.id);
         return created;
       },
       onComplete: (encounter) => {
         console.log("created encounter ", encounter);
-        queryClient.invalidateQueries({ queryKey: ["parties"] });
         queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["chapter"] });
         queryClient.invalidateQueries({ queryKey: ["encounters"] });
       },
       onCancel: (reason: CancelReason) => {

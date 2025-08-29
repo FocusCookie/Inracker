@@ -1202,6 +1202,20 @@ const getDetailedEncountersByIds = async (
   return encounters.map((enc) => enc.value) as unknown as Encounter[];
 };
 
+const getDetailedEncountersByChapterId = async (
+  db: TauriDatabase,
+  chapterId: Chapter["id"],
+): Promise<Encounter[]> => {
+  const chapter = await getDetailedChapterById(db, chapterId);
+  const encounterPromises = chapter.encounters.map((id) =>
+    getDetailedEncounterById(db, id),
+  );
+  const encounters = await Promise.allSettled(encounterPromises);
+
+  //@ts-ignore
+  return encounters.map((enc) => enc.value) as unknown as Encounter[];
+};
+
 const createEncounter = async (
   db: TauriDatabase,
   encounter: Omit<Encounter, "id">,
@@ -2058,6 +2072,10 @@ export const Database = {
     getDetailedEncountersByIds: async (ids: Array<Encounter["id"]>) => {
       const db = await connect();
       return getDetailedEncountersByIds(db, ids);
+    },
+    getDetailedEncountersByChapterId: async (chapterId: Chapter["id"]) => {
+      const db = await connect();
+      return getDetailedEncountersByChapterId(db, chapterId);
     },
     delete: async (id: Encounter["id"]) => {
       const db = await connect();

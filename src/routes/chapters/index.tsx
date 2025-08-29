@@ -1,11 +1,9 @@
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
 import ChapterSelection from "@/pages/ChapterSelection/ChapterSelection";
-import { useChapterStore } from "@/stores/useChapterStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { useShallow } from "zustand/shallow";
 
 type ChapterSearch = {
   partyId: number | null;
@@ -23,14 +21,7 @@ export const Route = createFileRoute("/chapters/")({
 function RouteComponent() {
   const queryClient = useQueryClient();
 
-  const { setCurrentChapter } = useChapterStore(
-    useShallow((state) => ({
-      setCurrentChapter: state.setCurrentChapter,
-    })),
-  );
-
   useEffect(() => {
-    setCurrentChapter(null);
     queryClient.invalidateQueries({
       queryKey: ["encounters"],
     });
