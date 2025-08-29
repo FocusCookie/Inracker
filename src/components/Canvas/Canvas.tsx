@@ -118,7 +118,6 @@ function Canvas({
   const temporaryTempElementPosition = useRef<{ x: number; y: number } | null>(
     null,
   );
-  const [, forceUpdate] = useState({});
   const viewBoxStartOnPanStart = useRef<{ x: number; y: number }>({
     x: 0,
     y: 0,
@@ -454,8 +453,6 @@ function Canvas({
     dragTokenStartPos.current = null;
     temporaryTokenPosition.current = null;
 
-    forceUpdate({});
-
     window.removeEventListener("mousemove", handleTokenDragMove);
     window.removeEventListener("mouseup", handleTokenDragEnd);
   };
@@ -478,9 +475,6 @@ function Canvas({
       x: coords.x - temporaryElement.x,
       y: coords.y - temporaryElement.y,
     };
-
-    window.removeEventListener("mousemove", handleTempElementDragMove);
-    window.removeEventListener("mouseup", handleTempElementDragEnd);
 
     window.addEventListener("mousemove", handleTempElementDragMove);
     window.addEventListener("mouseup", handleTempElementDragEnd);
@@ -531,9 +525,6 @@ function Canvas({
     }
 
     dragTempElementStartPos.current = null;
-    isDragging.current = false;
-
-    forceUpdate({});
 
     window.removeEventListener("mousemove", handleTempElementDragMove);
     window.removeEventListener("mouseup", handleTempElementDragEnd);
@@ -608,11 +599,18 @@ function Canvas({
     draggedElement.current = null;
     dragElementStartPos.current = null;
     temporaryElementPosition.current = null;
-    isDragging.current = false;
 
     window.removeEventListener("mousemove", handleElementDragMove);
     window.removeEventListener("mouseup", handleElementDragEnd);
   };
+
+  function handleElementClick(elementOnClick: () => void) {
+    if (isDragging.current) {
+      isDragging.current = false;
+      return;
+    }
+    elementOnClick();
+  }
 
   function handleTokenClick(token: Token) {
     if (isDragging.current) {
@@ -727,7 +725,10 @@ function Canvas({
             transform={`translate(${element.x}, ${element.y})`}
             onMouseDown={(e) => handleElementDragStart(e, element)}
           >
-            <g className="hover:cursor-pointer" onClick={element.onClick}>
+            <g
+              className="hover:cursor-pointer"
+              onClick={() => handleElementClick(element.onClick)}
+            >
               <rect
                 x={0}
                 y={0}

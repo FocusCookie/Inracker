@@ -14,7 +14,6 @@ export type DBEncounter = {
   element: string;
   name: string;
   color: string;
-  type: string;
   passed: number;
   experience: number | null;
   /** array of strings */
@@ -25,6 +24,7 @@ export type DBEncounter = {
   difficulties: string | null;
   opponents: string | null;
   skill: string | null;
+  type: EncounterType;
 };
 
 export type Encounter = Prettify<
@@ -34,7 +34,7 @@ export type Encounter = Prettify<
   > & {
     images: string[] | null;
     difficulties: EncounterDifficulty[] | null;
-    opponents: string[] | null;
+    opponents: number[] | null;
     passed: boolean;
     element: CanvasElement;
   }

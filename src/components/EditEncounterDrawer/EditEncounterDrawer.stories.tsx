@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
 // import { fn } from "@storybook/test";
 
-import GlobalModals from "./GlobalModals";
+import EditEncounterDrawer from "./EditEncounterDrawer";
 
 const meta = {
-  title: "Components/GlobalModals",
-  component: GlobalModals,
+  title: "Components/EditEncounterDrawer",
+  component: EditEncounterDrawer,
   args: {},
-} satisfies Meta<typeof GlobalModals>;
+} satisfies Meta<typeof EditEncounterDrawer>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

@@ -9,7 +9,6 @@ import Canvas, {
   CanvasElement,
   ClickableCanvasElement,
 } from "@/components/Canvas/Canvas";
-import { Player } from "@/types/player";
 import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { useQueryClient } from "@tanstack/react-query";
 import { Token } from "@/types/tokens";
@@ -115,27 +114,55 @@ function RouteComponent() {
       });
       return { previousEncounters };
     },
-    onError: (err, newEncounter, context) => {
-      if (context?.previousEncounters) {
-        queryClient.setQueryData([
-          "encounters",
-        ], context.previousEncounters);
-      }
-    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["encounters"] });
     },
   });
 
-  function handleElementMove(element: ClickableCanvasElement & { id: any }) {
+  const deleteEncounterMutation = useMutationWithErrorToast({
+    mutationFn: async (encounterId: number) => {
+      if (!chapterId) return;
+      await db.chapters.removeEncounter(chapterId, encounterId);
+      return db.encounters.delete(encounterId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["encounters"] });
+      queryClient.invalidateQueries({ queryKey: ["chapter"] });
+    },
+  });
+
+  function handleElementClick(encounter: Encounter) {
+    openOverlay("encounter.edit", {
+      encounter,
+      onEdit: async (updatedEncounter) => {
+        console.log({ updatedEncounter });
+        await updateEncounterMutation.mutateAsync(updatedEncounter);
+        return updatedEncounter;
+      },
+      onComplete: (encounter) => {
+        console.log("deleted encounter ", encounter);
+      },
+      onDelete: async (encounterId) => {
+        deleteEncounterMutation.mutate(encounterId);
+      },
+      onCancel: (reason) => {
+        console.log("Encounter edit cancelled:", reason);
+      },
+    });
+  }
+
+  async function handleElementMove(
+    element: ClickableCanvasElement & { id: any },
+  ) {
     const encounter = encountersQuery.data?.find((e) => e.id === element.id);
+
     if (encounter) {
       const { id, name, onClick, ...elementData } = element;
       const updatedEncounter = {
         ...encounter,
         element: { ...encounter.element, ...elementData },
       };
-      updateEncounterMutation.mutate(updatedEncounter);
+      await updateEncounterMutation.mutateAsync(updatedEncounter);
     }
   }
 
@@ -211,7 +238,7 @@ function RouteComponent() {
                   id: enc.id,
                   ...enc.element,
                   name: enc.name,
-                  onClick: () => console.log("click"),
+                  onClick: () => handleElementClick(enc),
                 })) || []
               }
               temporaryElement={currentEncounterElement || undefined}

@@ -155,21 +155,13 @@ function PartyEditDrawer({
       title={t("title")}
       actions={
         <div className="flex gap-4">
-          <Button
-            loading={isLoading}
-            disabled={isLoading}
-            onClick={form.handleSubmit(onSubmit)}
-          >
+          <Button disabled={isLoading} onClick={form.handleSubmit(onSubmit)}>
             {t("save")}
           </Button>
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button
-                variant="destructive"
-                loading={isLoading}
-                disabled={isLoading}
-              >
+              <Button variant="destructive" disabled={isLoading}>
                 {t("delete")}
               </Button>
             </AlertDialogTrigger>

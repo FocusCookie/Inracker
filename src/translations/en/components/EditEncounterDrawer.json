@@ -1,0 +1,21 @@
+{
+  "title": "Edit Encounter",
+  "titleDescription": "Make changes to your encounter here. Click save when you're done.",
+  "name": "Name",
+  "namePlaceholder": "Name of the encounter",
+  "nameValidation": "Name must be at least 2 characters.",
+  "description": "Description",
+  "icon": "Icon",
+  "color": "Color",
+  "status": "Status",
+  "statusPlaceholder": "Select a status",
+  "draft": "Draft",
+  "ongoing": "Ongoing",
+  "completed": "Completed",
+  "save": "Save changes",
+  "delete": "Delete",
+  "cancel": "Cancel",
+  "areYouSure": "Are you absolutely sure?",
+  "deleteNote": "This action cannot be undone. This will permanently delete the encounter.",
+  "yesDelete": "Yes, delete encounter"
+}

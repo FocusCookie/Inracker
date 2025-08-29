@@ -1995,6 +1995,17 @@ export const Database = {
         : [encounterId];
       return updateChapterProperty(db, chapterId, "encounters", encounters);
     },
+    removeEncounter: async (
+      chapterId: Chapter["id"],
+      encounterId: Encounter["id"],
+    ) => {
+      const db = await connect();
+      const chapter = await getDetailedChapterById(db, chapterId);
+      const encounters = chapter.encounters
+        ? chapter.encounters.filter((id) => id !== encounterId)
+        : [];
+      return updateChapterProperty(db, chapterId, "encounters", encounters);
+    },
     delete: async (id: Chapter["id"]) => {
       const db = await connect();
       return deleteChapterById(db, id);

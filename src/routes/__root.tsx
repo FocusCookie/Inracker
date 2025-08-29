@@ -1,4 +1,3 @@
-import GlobalModals from "@/components/GlobalModals/GlobalModals";
 import { OverlayHost } from "@/components/Overlay/OverlayHost";
 import SettingsButton from "@/components/SettingsButton/SettingsButton";
 import { createRootRoute, Outlet } from "@tanstack/react-router";
@@ -10,8 +9,6 @@ export const Route = createRootRoute({
       <Outlet />
 
       <SettingsButton />
-
-      <GlobalModals />
 
       <OverlayHost />
 

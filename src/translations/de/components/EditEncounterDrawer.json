@@ -1,0 +1,21 @@
+{
+  "title": "Begegnung bearbeiten",
+  "titleDescription": "Nehmen Sie hier Änderungen an Ihrer Begegnung vor. Klicken Sie auf ‚Speichern‘, wenn Sie fertig sind.",
+  "name": "Name",
+  "namePlaceholder": "Name der Begegnung",
+  "nameValidation": "Der Name muss mindestens 2 Zeichen lang sein.",
+  "description": "Beschreibung",
+  "icon": "Symbol",
+  "color": "Farbe",
+  "status": "Status",
+  "statusPlaceholder": "Wählen Sie einen Status",
+  "draft": "Entwurf",
+  "ongoing": "Laufend",
+  "completed": "Abgeschlossen",
+  "save": "Änderungen speichern",
+  "delete": "Löschen",
+  "cancel": "Abbrechen",
+  "areYouSure": "Sind Sie sich absolut sicher?",
+  "deleteNote": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird die Begegnung dauerhaft gelöscht.",
+  "yesDelete": "Ja, Begegnung löschen"
+}

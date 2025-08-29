@@ -1,3 +1,11 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { z } from "zod";
+import Drawer from "../Drawer/Drawer";
+import IconPicker from "../IconPicker/IconPicker";
+import { Button } from "../ui/button";
 import {
   Form,
   FormControl,
@@ -5,14 +13,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Controller, useFieldArray } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { Button } from "../ui/button";
-import { Encounter } from "@/types/encounter";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+} from "../ui/form";
+import { Input } from "../ui/input";
 import {
   Select,
   SelectContent,
@@ -20,53 +22,95 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { useState } from "react";
+import { Textarea } from "../ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
+import { CancelReason, OverlayMap } from "@/types/overlay";
+import { Encounter } from "@/types/encounter";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { TrashIcon } from "@radix-ui/react-icons";
-import IconPicker from "../IconPicker/IconPicker";
-import OpponentCard from "../OpponentCard/OpponentCard";
-import { EncounterOpponent, Opponent } from "@/types/opponents";
-import type { CancelReason, OverlayMap } from "@/types/overlay";
-import { useCreateEncounter } from "@/hooks/useCreateEncounter";
-import Drawer from "../Drawer/Drawer";
-import db from "@/lib/database";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
-import { TCreateEncounter } from "@/schemas/createEncounter";
+import db from "@/lib/database";
+import { EncounterOpponent, Opponent } from "@/types/opponents";
+import OpponentCard from "../OpponentCard/OpponentCard";
 import { useOverlayStore } from "@/stores/useOverlayStore";
-import { Token } from "@/types/tokens";
-import { useSearch } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
+import { Token } from "@/types/tokens";
 
-type OverlayProps = OverlayMap["encounter.create"];
+type OverlayProps = OverlayMap["encounter.edit"];
 
 type RuntimeProps = {
   open: boolean;
   onOpenChange: (state: boolean) => void;
-  onExitComplete: () => void;
+  onExitComplete: () => void; // host removes after exit
 };
+
 type Props = OverlayProps & RuntimeProps;
 
-function CreateEncounterDrawer({
+function EditEncounterDrawer({
+  encounter,
   open,
   onOpenChange,
   onExitComplete,
-  onCreate,
   onComplete,
   onCancel,
+  onDelete,
+  onEdit,
 }: Props) {
-  const { t } = useTranslation("ComponentCreateEncounterDrawer");
+  const { t } = useTranslation("ComponentEditEncounterDrawer");
   const queryClient = useQueryClient();
   const openOverlay = useOverlayStore((s) => s.open);
+  const { chapterId } = useSearch({ from: "/play/" });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [type, setType] = useState<Encounter["type"]>("note");
-  const [isCreating, setIsCreating] = useState(false);
   const [closingReason, setClosingReason] = useState<
     null | "success" | CancelReason
   >(null);
-  const form = useCreateEncounter();
-  const { chapterId } = useSearch({ from: "/play/" });
 
-  const opponents = useQueryWithToast({
+  const opponentsQuery = useQueryWithToast({
     queryKey: ["opponents"],
     queryFn: () => db.opponents.getAllDetailed(),
+  });
+
+  const formSchema = z.object({
+    name: z.string().min(2, { message: t("nameValidation") }),
+    description: z.string(),
+    icon: z.string().emoji(),
+    color: z.string(),
+    type: z.enum(["note", "roll", "fight"]),
+    experience: z.number().optional(),
+    dice: z.number().optional(),
+    skill: z.string().optional(),
+    difficulties: z
+      .array(z.object({ value: z.number(), description: z.string() }))
+      .optional(),
+    opponents: z.array(z.number()).optional(),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: encounter.name,
+      description: encounter.description || "",
+      icon: encounter.element.icon,
+      color: encounter.element.color,
+      type: encounter.type,
+      experience: encounter.experience || 0,
+      dice: encounter.dice || 20,
+      skill: encounter.skill || "",
+      difficulties: [],
+      opponents: [],
+    },
   });
 
   const { fields, remove, append } = useFieldArray({
@@ -74,33 +118,56 @@ function CreateEncounterDrawer({
     name: "difficulties",
   });
 
-  function handleIconSelect(icon: string) {
-    form.setValue("icon", icon);
-  }
+  useEffect(() => {
+    if (encounter) {
+      form.reset({
+        name: encounter.name,
+        description: encounter.description || "",
+        icon: encounter.element.icon,
+        color: encounter.element.color,
+        type: encounter.type,
+        experience: encounter.experience || 0,
+        dice: encounter.dice || undefined,
+        skill: encounter.skill || "",
+        difficulties: encounter.difficulties || [],
+        opponents: encounter.opponents || [],
+      });
+      setType(encounter.type);
+    }
+  }, [encounter, form]);
 
-  async function onSubmit(values: TCreateEncounter) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      setIsCreating(true);
+      if (JSON.stringify(encounter) === JSON.stringify(values))
+        console.log("NO DIFFERENCE!");
+      console.log("DIFFEREN!!!");
+      setIsLoading(true);
+      const updatedEncounter = await onEdit({
+        ...encounter,
+        ...values,
+        element: {
+          ...encounter.element,
+          icon: values.icon,
+          color: values.color,
+        },
+      });
 
-      //TODO: fix the ts issue because here the color and icon is only to pass it to the parent which makes use of it for the element
-      // @ts-ignore
-      const created = await onCreate(values);
-
-      onComplete(created);
+      if (onComplete) onComplete(updatedEncounter);
       setClosingReason("success");
       onOpenChange(false);
 
       form.reset();
+    } catch (error) {
+      console.log("Error while updating an encounter", error);
     } finally {
-      setIsCreating(false);
+      setIsLoading(false);
     }
   }
 
-  function handleCancelation() {
-    setClosingReason("cancel");
+  function handleCancelClick() {
     onCancel?.("cancel");
+    setClosingReason("cancel");
     onOpenChange(false);
-    form.reset();
   }
 
   function handleOpenChange(state: boolean) {
@@ -108,8 +175,29 @@ function CreateEncounterDrawer({
       onCancel?.("dismissed");
       setClosingReason("dismissed");
     }
-
     onOpenChange(state);
+  }
+
+  function handleIconSelect(icon: string) {
+    form.setValue("icon", icon);
+  }
+
+  async function handleDeleteEncounter() {
+    try {
+      setIsLoading(true);
+      await onDelete(encounter.id);
+
+      if (onComplete) onComplete(encounter);
+
+      setClosingReason("success");
+      onOpenChange(false);
+
+      form.reset();
+    } catch (error) {
+      console.log("Error while deleting encounter", error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   function handleAddDifficulty() {
@@ -121,41 +209,59 @@ function CreateEncounterDrawer({
     setType(value);
   }
 
-  const handleRemoveOpponent = (id: EncounterOpponent["id"]) => {
+  async function handleRemoveOpponent(id: EncounterOpponent["id"]) {
     const currentOpponents = form.getValues("opponents") || [];
     const updatedOpponents = currentOpponents.filter(
       (opponentId: number) => opponentId !== id,
     );
+
     form.setValue("opponents", updatedOpponents);
-  };
+
+    const formValues = form.getValues();
+
+    try {
+      setIsLoading(true);
+      const updatedEncounter = await onEdit({
+        ...encounter,
+        ...formValues,
+        opponents: updatedOpponents, // Make sure to use the just-updated list
+        element: {
+          ...encounter.element,
+          icon: formValues.icon,
+          color: formValues.color,
+        },
+      });
+
+      if (onComplete) onComplete(updatedEncounter);
+    } catch (error) {
+      console.error("Failed to remove opponent from encounter", error);
+      form.setValue("opponents", currentOpponents); // Revert on error
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   function handleCreateOpponent() {
     openOverlay("opponent.create", {
       onCreate: async (opponent) => {
         const createdOpponent = await db.opponents.create(opponent);
-
         if (chapterId === null)
           throw new Error(
             "Chapter id is missing in creating the token for the opponent",
           );
-
         const token: Omit<Token, "id"> = {
           type: "opponent",
-          // @ts-ignore
           entity: createdOpponent.id,
           coordinates: { x: 0, y: 0 },
           chapter: chapterId,
         };
-
         await db.tokens.create(token);
-
         return createdOpponent;
       },
       onComplete: (opponent) => {
         const currentOpponents = form.getValues("opponents") || [];
         form.setValue("opponents", [...currentOpponents, opponent.id]);
-        opponents.refetch();
-
+        opponentsQuery.refetch();
         queryClient.invalidateQueries({ queryKey: ["opponents"] });
         queryClient.invalidateQueries({ queryKey: ["tokens"] });
       },
@@ -165,43 +271,50 @@ function CreateEncounterDrawer({
     });
   }
 
-  /*
-  function handleOpenOpponentsCatalog() {
-    openOverlay("opponent.catalog", {
-      onSelect: async (opponent) => {
-        const currentOpponents = form.getValues("opponents") || [];
-        form.setValue("opponents", [...currentOpponents, opponent.id]);
-      },
-      onCancel: (reason) => {
-        console.log("Opponent catalog cancelled:", reason);
-      },
-    });
-  }
-  */
-
   const selectedOpponents =
     form
       .watch("opponents")
-      ?.map((id: number) => opponents.data?.find((op) => op.id === id))
+      ?.map((id: number) => opponentsQuery.data?.find((op) => op.id === id))
       .filter((opponent): opponent is Opponent => opponent !== undefined) || [];
 
   return (
     <Drawer
+      onExitComplete={onExitComplete}
+      description={t("titleDescription")}
       open={open}
       onOpenChange={handleOpenChange}
-      onExitComplete={onExitComplete}
       title={t("title")}
-      description={t("description")}
       actions={
-        <Button disabled={isCreating} onClick={form.handleSubmit(onSubmit)}>
-          {t("create")}
-        </Button>
+        <>
+          <Button onClick={form.handleSubmit(onSubmit)}>{t("save")}</Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" disabled={isLoading}>
+                {t("delete")}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("areYouSure")}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("deleteNote")}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex gap-4">
+                <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteEncounter}>
+                  {t("yesDelete")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
       }
       cancelTrigger={
         <Button
-          disabled={isCreating}
+          disabled={isLoading}
           variant="ghost"
-          onClick={handleCancelation}
+          onClick={handleCancelClick}
         >
           {t("cancel")}
         </Button>
@@ -219,12 +332,11 @@ function CreateEncounterDrawer({
                   <FormLabel>{t("icon")}</FormLabel>
                   <IconPicker
                     initialIcon={form.getValues("icon")}
-                    disabled={isCreating}
+                    disabled={isLoading}
                     onIconClick={handleIconSelect}
                   />
                   <FormMessage />
                 </div>
-
                 <FormField
                   control={form.control}
                   name="name"
@@ -233,7 +345,7 @@ function CreateEncounterDrawer({
                       <FormLabel>{t("name")}</FormLabel>
                       <FormControl>
                         <Input
-                          disabled={isCreating}
+                          disabled={isLoading}
                           placeholder={t("namePlaceholder")}
                           {...field}
                         />
@@ -407,7 +519,6 @@ function CreateEncounterDrawer({
                     </FormItem>
                   )}
                 />
-
                 {(type === "roll" || type === "fight") && (
                   <FormField
                     control={form.control}
@@ -418,7 +529,7 @@ function CreateEncounterDrawer({
                         <FormControl>
                           <Input
                             type="number"
-                            disabled={isCreating}
+                            disabled={isLoading}
                             {...field}
                             onChange={(e) => {
                               const parsedValue = e.target.value
@@ -443,7 +554,7 @@ function CreateEncounterDrawer({
                     <FormLabel>{t("description")}</FormLabel>
                     <FormControl>
                       <Textarea
-                        disabled={isCreating}
+                        disabled={isLoading}
                         placeholder={t("descriptionPlaceholder")}
                         {...field}
                       />
@@ -455,12 +566,11 @@ function CreateEncounterDrawer({
 
               <div className="flex flex-col gap-1">
                 <FormLabel>{t("type")}</FormLabel>
-
                 <Tabs
                   onValueChange={(v) =>
                     handleTypeChange(v as "roll" | "note" | "fight")
                   }
-                  defaultValue="note"
+                  value={type}
                   className="w-full"
                 >
                   <TabsList className="grid w-full grid-cols-3 gap-2">
@@ -470,14 +580,12 @@ function CreateEncounterDrawer({
                     >
                       {t("note")}
                     </TabsTrigger>
-
                     <TabsTrigger
                       className="hover:cursor-pointer hover:bg-white/80"
                       value="roll"
                     >
                       {t("roll")}
                     </TabsTrigger>
-
                     <TabsTrigger
                       className="hover:cursor-pointer hover:bg-white/80"
                       value="fight"
@@ -485,7 +593,6 @@ function CreateEncounterDrawer({
                       {t("fight")}
                     </TabsTrigger>
                   </TabsList>
-
                   <TabsContent
                     value="roll"
                     className="flex flex-col gap-4 py-4"
@@ -493,7 +600,6 @@ function CreateEncounterDrawer({
                     <div className="flex gap-2 px-0.5">
                       <div className="flex flex-col gap-1">
                         <FormLabel>{t("dice")}</FormLabel>
-
                         <FormField
                           control={form.control}
                           name="dice"
@@ -528,17 +634,15 @@ function CreateEncounterDrawer({
                           )}
                         />
                       </div>
-
                       <FormField
                         control={form.control}
                         name="skill"
                         render={({ field }) => (
                           <FormItem className="flex w-full flex-col gap-1 px-0.5">
                             <FormLabel>{t("skill")}</FormLabel>
-
                             <FormControl>
                               <Input
-                                disabled={isCreating}
+                                disabled={isLoading}
                                 placeholder={t("skillPlaceholder")}
                                 {...field}
                               />
@@ -548,10 +652,8 @@ function CreateEncounterDrawer({
                         )}
                       />
                     </div>
-
                     <div className="flex flex-col items-start gap-2 px-0.5">
                       <FormLabel>{t("difficulties")}</FormLabel>
-
                       {fields.map((field, index) => (
                         <div className="flex w-full gap-2" key={field.id}>
                           <Controller
@@ -570,7 +672,6 @@ function CreateEncounterDrawer({
                               />
                             )}
                           />
-
                           <Controller
                             control={form.control}
                             name={`difficulties.${index}.description`}
@@ -578,7 +679,6 @@ function CreateEncounterDrawer({
                               <Input {...field} type="text" className="grow" />
                             )}
                           />
-
                           <Button
                             type="button"
                             variant="secondary"
@@ -600,7 +700,6 @@ function CreateEncounterDrawer({
                       </div>
                     </div>
                   </TabsContent>
-
                   <TabsContent value="fight">
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between gap-2 pt-4">
@@ -613,25 +712,25 @@ function CreateEncounterDrawer({
                           >
                             {t("create")}
                           </Button>
-
-                          <Button
-                            type="button"
-                            // onClick={handleOpenOpponentsCatalog}
-                          >
-                            {t("catalog")}
-                          </Button>
+                          <Button type="button">{t("catalog")}</Button>
                         </div>
                       </div>
 
                       <div className="flex flex-col gap-4">
                         {selectedOpponents.map(
                           (opponent: EncounterOpponent) => (
-                            <OpponentCard
+                            <div
                               key={`encounter-opponent-${opponent.id}`}
-                              opponent={opponent}
-                              onRemove={handleRemoveOpponent}
-                              onEdit={undefined}
-                            />
+                              className="flex items-center gap-2"
+                            >
+                              <div className="grow">
+                                <OpponentCard
+                                  opponent={opponent}
+                                  onRemove={handleRemoveOpponent}
+                                  onEdit={undefined}
+                                />
+                              </div>
+                            </div>
                           ),
                         )}
                       </div>
@@ -647,4 +746,4 @@ function CreateEncounterDrawer({
   );
 }
 
-export default CreateEncounterDrawer;
+export default EditEncounterDrawer;

@@ -1,5 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentEditEncounterDrawerEN from "@/translations/en/components/EditEncounterDrawer.json";
+import ComponentEditEncounterDrawerDE from "@/translations/de/components/EditEncounterDrawer.json"; 
 import ComponentSettingsCategoryOpponentsEN from "@/translations/en/components/SettingsCategoryOpponents.json";
 import ComponentSettingsCategoryOpponentsDE from "@/translations/de/components/SettingsCategoryOpponents.json"; 
 import ComponentSettingsCategoryResistancesEN from "@/translations/en/components/SettingsCategoryResistances.json";
@@ -91,6 +93,7 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentEditEncounterDrawer: ComponentEditEncounterDrawerEN,
     ComponentSettingsCategoryOpponents: ComponentSettingsCategoryOpponentsEN,
     ComponentSettingsCategoryResistances: ComponentSettingsCategoryResistancesEN,
     ComponentSettingsCategoryImmunities: ComponentSettingsCategoryImmunitiesEN,
@@ -141,6 +144,7 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentEditEncounterDrawer: ComponentEditEncounterDrawerDE,
     ComponentSettingsCategoryOpponents: ComponentSettingsCategoryOpponentsDE,
     ComponentSettingsCategoryResistances: ComponentSettingsCategoryResistancesDE,
     ComponentSettingsCategoryImmunities: ComponentSettingsCategoryImmunitiesDE,
