@@ -21,7 +21,7 @@ const TEMP_DEFAULT_ICON = "📝";
 
 type Props = {
   background?: string;
-  elements: ClickableCanvasElement[];
+  elements: (ClickableCanvasElement & { id: any })[];
   temporaryElement?: CanvasElement;
   players: Player[];
   opponents: Opponent[];
@@ -30,6 +30,7 @@ type Props = {
   onTokenSelect: (token: Token | null) => void;
   onDrawed: (element: Omit<CanvasElement, "id">) => void;
   onTokenMove: (token: Token) => void;
+  onElementMove: (element: ClickableCanvasElement & { id: any }) => void;
 };
 
 export type CanvasElement = {
@@ -57,6 +58,7 @@ function Canvas({
   onTokenMove,
   onTokenSelect,
   onDrawed,
+  onElementMove,
 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const backgroundImage = useRef<HTMLImageElement | null>(null);
@@ -108,9 +110,9 @@ function Canvas({
   const initialCTM = useRef<DOMMatrix | null>(null);
   const tempRectRef = useRef<SVGRectElement | null>(null);
   const drawStartPos = useRef<{ x: number; y: number } | null>(null);
-  const isDraggingToken = useRef<boolean>(false);
+  const isDragging = useRef<boolean>(false);
   const dragTokenStartPos = useRef<{ x: number; y: number } | null>(null);
-  const dragElementStartPos = useRef<{ x: number; y: number } | null>(null);
+  const dragTempElementStartPos = useRef<{ x: number; y: number } | null>(null);
   const draggedToken = useRef<Token | null>(null);
   const temporaryTokenPosition = useRef<{ x: number; y: number } | null>(null);
   const temporaryTempElementPosition = useRef<{ x: number; y: number } | null>(
@@ -124,6 +126,12 @@ function Canvas({
   const [tokenVisibility, setTokenVisibility] = useState<
     Record<string, boolean>
   >({});
+
+  const draggedElement = useRef<(ClickableCanvasElement & { id: any }) | null>(
+    null,
+  );
+  const dragElementStartPos = useRef<{ x: number; y: number } | null>(null);
+  const temporaryElementPosition = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     setCurrentColor(TEMP_DEFAULT_COLOR);
@@ -166,7 +174,8 @@ function Canvas({
     event:
       | MouseEvent
       | React.MouseEvent<SVGSVGElement>
-      | React.MouseEvent<SVGImageElement>,
+      | React.MouseEvent<SVGImageElement>
+      | React.MouseEvent<SVGGElement>,
   ) => {
     if (!svgRef.current || !initialCTM.current) return { x: 0, y: 0 };
 
@@ -412,7 +421,7 @@ function Canvas({
     )
       return;
 
-    isDraggingToken.current = true;
+    isDragging.current = true;
     const currentPos = transformScreenCoordsToSvgCoords(event);
 
     const newPosition = {
@@ -451,7 +460,7 @@ function Canvas({
     window.removeEventListener("mouseup", handleTokenDragEnd);
   };
 
-  const handeTempElementDragStart = (
+  const handleTempElementDragStart = (
     event: React.MouseEvent<SVGRectElement>,
   ) => {
     if (isDrawing || isPanning || !temporaryElement) return;
@@ -463,10 +472,9 @@ function Canvas({
     if (!CTM) return;
     initialCTM.current = CTM;
 
-    // @ts-ignore
     const coords = transformScreenCoordsToSvgCoords(event);
 
-    dragElementStartPos.current = {
+    dragTempElementStartPos.current = {
       x: coords.x - temporaryElement.x,
       y: coords.y - temporaryElement.y,
     };
@@ -481,18 +489,18 @@ function Canvas({
   const handleTempElementDragMove = (event: MouseEvent) => {
     if (
       !temporaryElement ||
-      !dragElementStartPos.current ||
+      !dragTempElementStartPos.current ||
       !initialCTM.current ||
       !svgRef.current
     )
       return;
 
-    isDraggingToken.current = true;
+    isDragging.current = true;
     const currentPos = transformScreenCoordsToSvgCoords(event);
 
     const newPosition = {
-      x: currentPos.x - dragElementStartPos.current.x,
-      y: currentPos.y - dragElementStartPos.current.y,
+      x: currentPos.x - dragTempElementStartPos.current.x,
+      y: currentPos.y - dragTempElementStartPos.current.y,
     };
 
     temporaryTempElementPosition.current = Object.assign({}, newPosition);
@@ -522,8 +530,8 @@ function Canvas({
       onDrawed(update);
     }
 
-    dragElementStartPos.current = null;
-    isDraggingToken.current = false;
+    dragTempElementStartPos.current = null;
+    isDragging.current = false;
 
     forceUpdate({});
 
@@ -531,9 +539,95 @@ function Canvas({
     window.removeEventListener("mouseup", handleTempElementDragEnd);
   };
 
+  const handleElementDragStart = (
+    event: React.MouseEvent<SVGGElement>,
+    element: ClickableCanvasElement & { id: any },
+  ) => {
+    if (isDrawing || isPanning) return;
+
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    const CTM = svg.getScreenCTM();
+    if (!CTM) return;
+    initialCTM.current = CTM;
+
+    const coords = transformScreenCoordsToSvgCoords(event);
+
+    dragElementStartPos.current = {
+      x: coords.x - element.x,
+      y: coords.y - element.y,
+    };
+    draggedElement.current = element;
+
+    window.addEventListener("mousemove", handleElementDragMove);
+    window.addEventListener("mouseup", handleElementDragEnd);
+  };
+
+  const handleElementDragMove = (event: MouseEvent) => {
+    if (
+      !draggedElement.current ||
+      !dragElementStartPos.current ||
+      !initialCTM.current ||
+      !svgRef.current
+    )
+      return;
+
+    isDragging.current = true;
+    const currentPos = transformScreenCoordsToSvgCoords(event);
+
+    const newPosition = {
+      x: currentPos.x - dragElementStartPos.current.x,
+      y: currentPos.y - dragElementStartPos.current.y,
+    };
+
+    temporaryElementPosition.current = newPosition;
+
+    const elementG = svgRef.current.querySelector(
+      `[data-element-id="${draggedElement.current.id}"]`,
+    );
+
+    if (elementG) {
+      elementG.setAttribute(
+        "transform",
+        `translate(${newPosition.x - draggedElement.current.x}, ${newPosition.y - draggedElement.current.y})`,
+      );
+    }
+  };
+
+  const handleElementDragEnd = () => {
+    if (draggedElement.current && temporaryElementPosition.current) {
+      const updatedElement = {
+        ...draggedElement.current,
+        x: temporaryElementPosition.current.x,
+        y: temporaryElementPosition.current.y,
+      };
+      onElementMove(updatedElement);
+    }
+
+    if (draggedElement.current) {
+      const elementG = svgRef.current.querySelector(
+        `[data-element-id="${draggedElement.current.id}"]`,
+      );
+      if (elementG) {
+        elementG.setAttribute("transform", "translate(0,0)");
+      }
+    }
+
+    draggedElement.current = null;
+    dragElementStartPos.current = null;
+    temporaryElementPosition.current = null;
+    isDragging.current = false;
+
+    forceUpdate({});
+
+    window.removeEventListener("mousemove", handleElementDragMove);
+    window.removeEventListener("mouseup", handleElementDragEnd);
+  };
+
   function handleTokenClick(token: Token) {
-    if (isDraggingToken.current) {
-      isDraggingToken.current = false;
+    if (isDragging.current) {
+      isDragging.current = false;
       return;
     }
 
@@ -638,77 +732,82 @@ function Canvas({
 
         {elements.map((element, index) => (
           <g
-            className="hover:cursor-pointer"
+            className="hover:cursor-move"
             key={"element-" + index}
-            onClick={element.onClick}
+            data-element-id={element.id}
+            onMouseDown={(e) => handleElementDragStart(e, element)}
           >
-            <rect
-              x={element.x}
-              y={element.y}
-              width={element.width}
-              height={element.height}
-              fill={element.color}
-              fillOpacity={0.25}
-              stroke={element.color}
-              strokeWidth={4}
-              rx={4}
-              ry={4}
-              filter="url(#subtleDropShadow)"
-            />
+            <g className="hover:cursor-pointer" onClick={element.onClick}>
+              <rect
+                x={element.x}
+                y={element.y}
+                width={element.width}
+                height={element.height}
+                fill={element.color}
+                fillOpacity={0.25}
+                stroke={element.color}
+                strokeWidth={4}
+                rx={4}
+                ry={4}
+                filter="url(#subtleDropShadow)"
+              />
 
-            {/* Header rectangle */}
-            <rect
-              x={element.x}
-              y={element.y}
-              width={element.width}
-              height={60}
-              fill={element.color}
-              fillOpacity={0.8}
-              stroke={element.color}
-              strokeWidth={4}
-              rx={4}
-              ry={4}
-            />
+              {/* Header rectangle */}
+              <rect
+                x={element.x}
+                y={element.y}
+                width={element.width}
+                height={60}
+                fill={element.color}
+                fillOpacity={0.8}
+                stroke={element.color}
+                strokeWidth={4}
+                rx={4}
+                ry={4}
+              />
 
-            {/* Icon */}
-            <g transform={`translate(${element.x + 6}, ${element.y + 30})`}>
-              <text
-                className="font-sans text-4xl font-bold shadow-sm select-none"
-                dominantBaseline="middle"
-              >
-                {element.icon}
-              </text>
-            </g>
-
-            {/* Text */}
-            {element.name && (
-              <g transform={`translate(${element.x + 60}, ${element.y + 30})`}>
-                <defs>
-                  <clipPath id={`text-clip-${index}`}>
-                    <rect
-                      x="0"
-                      y="-12"
-                      width={element.width - 66}
-                      height="24"
-                    />
-                  </clipPath>
-                </defs>
+              {/* Icon */}
+              <g transform={`translate(${element.x + 6}, ${element.y + 30})`}>
                 <text
-                  className="font-sans text-lg font-medium text-white select-none"
+                  className="font-sans text-4xl font-bold shadow-sm select-none"
                   dominantBaseline="middle"
-                  clipPath={`url(#text-clip-${index})`}
                 >
-                  {element.name}
+                  {element.icon}
                 </text>
               </g>
-            )}
+
+              {/* Text */}
+              {element.name && (
+                <g
+                  transform={`translate(${element.x + 60}, ${element.y + 30})`}
+                >
+                  <defs>
+                    <clipPath id={`text-clip-${index}`}>
+                      <rect
+                        x="0"
+                        y="-12"
+                        width={element.width - 66}
+                        height="24"
+                      />
+                    </clipPath>
+                  </defs>
+                  <text
+                    className="font-sans text-lg font-medium text-white select-none"
+                    dominantBaseline="middle"
+                    clipPath={`url(#text-clip-${index})`}
+                  >
+                    {element.name}
+                  </text>
+                </g>
+              )}
+            </g>
           </g>
         ))}
 
         {temporaryElement && (
           <g className="hover:cursor-move">
             <rect
-              onMouseDown={handeTempElementDragStart}
+              onMouseDown={handleTempElementDragStart}
               id="temp-element"
               x={temporaryElement.x}
               y={temporaryElement.y}

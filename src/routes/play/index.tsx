@@ -5,7 +5,10 @@ import db from "@/lib/database";
 import { AnimatePresence } from "framer-motion";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import Loader from "@/components/Loader/Loader";
-import Canvas, { CanvasElement } from "@/components/Canvas/Canvas";
+import Canvas, {
+  CanvasElement,
+  ClickableCanvasElement,
+} from "@/components/Canvas/Canvas";
 import { Player } from "@/types/player";
 import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -95,6 +98,27 @@ function RouteComponent() {
     },
   });
 
+  const updateEncounterMutation = useMutationWithErrorToast({
+    mutationFn: (encounter: Encounter) => {
+      return db.encounters.update(encounter);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["encounters"] });
+    },
+  });
+
+  function handleElementMove(element: ClickableCanvasElement & { id: any }) {
+    const encounter = encountersQuery.data?.find((e) => e.id === element.id);
+    if (encounter) {
+      const { id, name, onClick, ...elementData } = element;
+      const updatedEncounter = {
+        ...encounter,
+        element: { ...encounter.element, ...elementData },
+      };
+      updateEncounterMutation.mutate(updatedEncounter);
+    }
+  }
+
   function handleCreateEncounter(element: CanvasElement) {
     openOverlay("encounter.create", {
       onCreate: async (encounter) => {
@@ -164,22 +188,21 @@ function RouteComponent() {
               background={chapterQuery.data.battlemap || undefined}
               elements={
                 encountersQuery.data?.map((enc) => ({
+                  id: enc.id,
                   ...enc.element,
                   name: enc.name,
                   onClick: () => console.log("click"),
                 })) || []
               }
-              //TODO: add the encounters to the canvas
               temporaryElement={currentEncounterElement || undefined}
               tokens={tokensQuery.data || []}
               players={partyQuery.data.players}
-              // TODO: fix ts issue, no clue why any is detected for the opponentsQuery.data
-              // @ts-ignore
-              opponents={opponentsQuery.data}
+              opponents={opponentsQuery.data || []}
               selectedToken={selectedToken}
               onTokenSelect={setSelectedToken}
               onDrawed={handleCreateEncounter}
               onTokenMove={updateTokenMutation.mutate}
+              onElementMove={handleElementMove}
             />
           )}
       </AnimatePresence>
