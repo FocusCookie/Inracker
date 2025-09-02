@@ -12,6 +12,12 @@ import {
 } from "@radix-ui/react-icons";
 import { useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/shallow";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
@@ -44,7 +50,8 @@ export type CanvasElement = {
 };
 
 export type ClickableCanvasElement = CanvasElement & {
-  onClick: () => void;
+  onClick?: () => void;
+  onEdit?: () => void;
 };
 
 function Canvas({
@@ -133,7 +140,9 @@ function Canvas({
     null,
   );
   const dragElementStartPos = useRef<{ x: number; y: number } | null>(null);
-  const temporaryElementPosition = useRef<{ x: number; y: number } | null>(null);
+  const temporaryElementPosition = useRef<{ x: number; y: number } | null>(
+    null,
+  );
 
   useEffect(() => {
     setCurrentColor(TEMP_DEFAULT_COLOR);
@@ -199,6 +208,8 @@ function Canvas({
   const handleMouseDown = (
     event: React.MouseEvent<SVGSVGElement, MouseEvent>,
   ) => {
+    // Only react to left mouse button (0)
+    if (event.button !== 0) return;
     if (isPanning && svgRef.current) {
       const svg = svgRef.current;
 
@@ -399,6 +410,8 @@ function Canvas({
     event: React.MouseEvent<SVGImageElement>,
     token: Token,
   ) => {
+    // Only start drag on left button
+    if (event.button !== 0) return;
     if (isDrawing || isPanning) return;
 
     const svg = svgRef.current;
@@ -469,6 +482,8 @@ function Canvas({
   const handleTempElementDragStart = (
     event: React.MouseEvent<SVGRectElement>,
   ) => {
+    // Only start drag on left button
+    if (event.button !== 0) return;
     if (isDrawing || isPanning || !temporaryElement) return;
 
     const svg = svgRef.current;
@@ -543,6 +558,8 @@ function Canvas({
     event: React.MouseEvent<SVGGElement>,
     element: ClickableCanvasElement & { id: any },
   ) => {
+    // Only start drag on left button
+    if (event.button !== 0) return;
     if (isDrawing || isPanning) return;
 
     const svg = svgRef.current;
@@ -613,12 +630,12 @@ function Canvas({
     window.removeEventListener("mouseup", handleElementDragEnd);
   };
 
-  function handleElementClick(elementOnClick: () => void) {
+  function handleElementClick(elementOnClick: () => void | undefined) {
     if (isDragging.current) {
       isDragging.current = false;
       return;
     }
-    elementOnClick();
+    if (elementOnClick) elementOnClick();
   }
 
   function handleTokenClick(token: Token) {
@@ -728,79 +745,107 @@ function Canvas({
         )}
 
         {elements.map((element, index) => (
-          <g
-            className="hover:cursor-move"
-            key={"element-" + index}
-            data-element-id={element.id}
-            transform={`translate(${element.x}, ${element.y})`}
-            onMouseDown={(e) => handleElementDragStart(e, element)}
-          >
-            <g
-              className="hover:cursor-pointer"
-              onClick={() => handleElementClick(element.onClick)}
-            >
-              <rect
-                x={0}
-                y={0}
-                width={element.width}
-                height={element.height}
-                fill={element.color}
-                fillOpacity={0.25}
-                stroke={element.color}
-                strokeWidth={4}
-                rx={4}
-                ry={4}
-                filter="url(#subtleDropShadow)"
-              />
+          <ContextMenu key={"element-" + index} modal={false}>
+            <ContextMenuTrigger asChild>
+              <g
+                className="group hover:animate-pulse hover:cursor-move focus:outline-none"
+                data-element-id={element.id}
+                transform={`translate(${element.x}, ${element.y})`}
+                onMouseDown={(e) => handleElementDragStart(e, element)}
+                tabIndex={0}
+                role="button"
+                aria-label={
+                  element.name ? `Open ${element.name}` : "Open canvas element"
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    // @ts-ignore TODO: fix this ts issue
+                    handleElementClick(element.onClick);
+                  }
+                }}
+              >
+                <g className="hover:cursor-pointer">
+                  <rect
+                    x={0}
+                    y={0}
+                    width={element.width}
+                    height={element.height}
+                    fill={element.color}
+                    fillOpacity={0.25}
+                    stroke={element.color}
+                    strokeWidth={4}
+                    rx={4}
+                    ry={4}
+                    filter="url(#subtleDropShadow)"
+                  />
 
-              {/* Header rectangle */}
-              <rect
-                x={0}
-                y={0}
-                width={element.width}
-                height={60}
-                fill={element.color}
-                fillOpacity={0.8}
-                stroke={element.color}
-                strokeWidth={4}
-                rx={4}
-                ry={4}
-              />
+                  {/* Header rectangle */}
+                  <rect
+                    x={0}
+                    y={0}
+                    width={element.width}
+                    height={60}
+                    fill={element.color}
+                    fillOpacity={0.8}
+                    stroke={element.color}
+                    strokeWidth={4}
+                    rx={4}
+                    ry={4}
+                  />
 
-              {/* Icon */}
-              <g transform={`translate(6, 30)`}>
-                <text
-                  className="font-sans text-4xl font-bold shadow-sm select-none"
-                  dominantBaseline="middle"
-                >
-                  {element.icon}
-                </text>
-              </g>
+                  {/* Icon */}
+                  <g transform={`translate(6, 30)`}>
+                    <text
+                      className="font-sans text-4xl font-bold shadow-sm select-none"
+                      dominantBaseline="middle"
+                    >
+                      {element.icon}
+                    </text>
+                  </g>
 
-              {/* Text */}
-              {element.name && (
-                <g transform={`translate(60, 30)`}>
-                  <defs>
-                    <clipPath id={`text-clip-${index}`}>
-                      <rect
-                        x="0"
-                        y="-12"
-                        width={element.width - 66}
-                        height="24"
-                      />
-                    </clipPath>
-                  </defs>
-                  <text
-                    className="font-sans text-lg font-medium text-white select-none"
-                    dominantBaseline="middle"
-                    clipPath={`url(#text-clip-${index})`}
-                  >
-                    {element.name}
-                  </text>
+                  {/* Text */}
+                  {element.name && (
+                    <g transform={`translate(60, 30)`}>
+                      <defs>
+                        <clipPath id={`text-clip-${index}`}>
+                          <rect
+                            x="0"
+                            y="-12"
+                            width={element.width - 66}
+                            height="24"
+                          />
+                        </clipPath>
+                      </defs>
+                      <text
+                        className="font-sans text-lg font-medium text-white select-none"
+                        dominantBaseline="middle"
+                        clipPath={`url(#text-clip-${index})`}
+                      >
+                        {element.name}
+                      </text>
+                    </g>
+                  )}
                 </g>
-              )}
-            </g>
-          </g>
+
+                <rect
+                  x={0}
+                  y={0}
+                  width={element.width}
+                  height={element.height}
+                  rx={4}
+                  ry={4}
+                  fill="none"
+                  stroke="white"
+                  strokeWidth={8}
+                  className="pointer-events-none opacity-0 group-focus:opacity-100 group-focus-visible:opacity-100"
+                />
+              </g>
+            </ContextMenuTrigger>
+            <ContextMenuContent className="w-52">
+              <ContextMenuItem onClick={element.onEdit}>Edit</ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
         ))}
 
         {temporaryElement && (
@@ -856,59 +901,83 @@ function Canvas({
               token.type === "opponent" && opponent.id === token.entity,
           );
 
-          console.log({ token });
-
           if (player) {
             return (
-              <image
-                className={cn(
-                  "hover:cursor-pointer",
-                  (tokenVisibility[token.id] ?? true) ? "visible" : "hidden",
-                  selectedToken &&
-                    token.id === selectedToken.id &&
-                    "border-2 border-red-500",
-                )}
-                key={"player-" + token.id}
-                data-token-id={token.id}
-                href={!player.image ? undefined : player.image}
-                width={100}
-                height={100}
-                x={token.coordinates.x}
-                y={token.coordinates.y}
-                preserveAspectRatio="xMidYMid"
-                style={{
-                  cursor: isDrawing || isPanning ? "default" : "move",
-                }}
-                onMouseDown={(e) => handleTokenDragStart(e, token)}
-                onClick={() => handleTokenClick(token)}
-              />
+              <ContextMenu key={"player-" + token.id}>
+                <ContextMenuTrigger asChild>
+                  <image
+                    className={cn(
+                      "hover:cursor-pointer",
+                      (tokenVisibility[token.id] ?? true)
+                        ? "visible"
+                        : "hidden",
+                      selectedToken &&
+                        token.id === selectedToken.id &&
+                        "border-2 border-red-500",
+                    )}
+                    data-token-id={token.id}
+                    href={!player.image ? undefined : player.image}
+                    width={100}
+                    height={100}
+                    x={token.coordinates.x}
+                    y={token.coordinates.y}
+                    preserveAspectRatio="xMidYMid"
+                    style={{
+                      cursor: isDrawing || isPanning ? "default" : "move",
+                    }}
+                    onMouseDown={(e) => handleTokenDragStart(e, token)}
+                    onClick={() => handleTokenClick(token)}
+                  />
+                </ContextMenuTrigger>
+                <ContextMenuContent className="w-40">
+                  <ContextMenuItem onClick={() => onTokenSelect(token)}>
+                    Select
+                  </ContextMenuItem>
+                  <ContextMenuItem onClick={() => toggleToken(token)}>
+                    {(tokenVisibility[token.id] ?? true) ? "Hide" : "Show"}
+                  </ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
             );
           }
 
           if (opponent) {
             return (
-              <image
-                className={cn(
-                  "hover:cursor-pointer",
-                  (tokenVisibility[token.id] ?? true) ? "visible" : "hidden",
-                  selectedToken &&
-                    token.id === selectedToken.id &&
-                    "border-2 border-red-500",
-                )}
-                key={"opponent-" + token.id}
-                data-token-id={token.id}
-                href={opponent.image === "" ? undefined : opponent.image}
-                width={100}
-                height={100}
-                x={token.coordinates.x}
-                y={token.coordinates.y}
-                preserveAspectRatio="xMidYMid"
-                style={{
-                  cursor: isDrawing || isPanning ? "default" : "move",
-                }}
-                onMouseDown={(e) => handleTokenDragStart(e, token)}
-                onClick={() => handleTokenClick(token)}
-              />
+              <ContextMenu key={"opponent-" + token.id}>
+                <ContextMenuTrigger asChild>
+                  <image
+                    className={cn(
+                      "hover:cursor-pointer",
+                      (tokenVisibility[token.id] ?? true)
+                        ? "visible"
+                        : "hidden",
+                      selectedToken &&
+                        token.id === selectedToken.id &&
+                        "border-2 border-red-500",
+                    )}
+                    data-token-id={token.id}
+                    href={opponent.image === "" ? undefined : opponent.image}
+                    width={100}
+                    height={100}
+                    x={token.coordinates.x}
+                    y={token.coordinates.y}
+                    preserveAspectRatio="xMidYMid"
+                    style={{
+                      cursor: isDrawing || isPanning ? "default" : "move",
+                    }}
+                    onMouseDown={(e) => handleTokenDragStart(e, token)}
+                    onClick={() => handleTokenClick(token)}
+                  />
+                </ContextMenuTrigger>
+                <ContextMenuContent className="w-40">
+                  <ContextMenuItem onClick={() => onTokenSelect(token)}>
+                    Select
+                  </ContextMenuItem>
+                  <ContextMenuItem onClick={() => toggleToken(token)}>
+                    {(tokenVisibility[token.id] ?? true) ? "Hide" : "Show"}
+                  </ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
             );
           }
 
