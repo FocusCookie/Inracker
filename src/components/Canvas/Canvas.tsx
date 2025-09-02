@@ -108,6 +108,9 @@ function Canvas({
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const panStartPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const initialCTM = useRef<DOMMatrix | null>(null);
+  // Coalesce pan updates to one rAF callback
+  const panRafId = useRef<number | null>(null);
+  const panNextViewBox = useRef<{ x: number; y: number } | null>(null);
   const tempRectRef = useRef<SVGRectElement | null>(null);
   const drawStartPos = useRef<{ x: number; y: number } | null>(null);
   const isDragging = useRef<boolean>(false);
@@ -259,6 +262,7 @@ function Canvas({
     const newX = viewBoxStartOnPanStart.current.x - dx;
     const newY = viewBoxStartOnPanStart.current.y - dy;
 
+    // Track latest viewBox target and coalesce updates into a single rAF
     currentViewBoxRef.current = {
       x: newX,
       y: newY,
@@ -266,18 +270,23 @@ function Canvas({
       height: currentViewBoxRef.current.height,
     };
 
-    requestAnimationFrame(() => {
-      if (svgRef.current) {
+    panNextViewBox.current = { x: newX, y: newY };
+    if (panRafId.current == null) {
+      panRafId.current = requestAnimationFrame(() => {
+        panRafId.current = null;
+        if (!svgRef.current || !panNextViewBox.current) return;
+        const { x, y } = panNextViewBox.current;
         svgRef.current.setAttribute(
           "viewBox",
-          `${newX} ${newY} ${currentViewBoxRef.current.width} ${currentViewBoxRef.current.height}`,
+          `${x} ${y} ${currentViewBoxRef.current.width} ${currentViewBoxRef.current.height}`,
         );
-      }
-    });
+      });
+    }
   };
 
   const handleMouseUp = () => {
     setViewBox(currentViewBoxRef.current);
+    panNextViewBox.current = null;
 
     window.removeEventListener("mousemove", handleMouseMove);
     window.removeEventListener("mouseup", handleMouseUp);
@@ -691,7 +700,7 @@ function Canvas({
 
         {backgroundImage.current && (
           <defs>
-            <mask id="roundedImageMask">
+            <clipPath id="roundedImageClip">
               <rect
                 x={-backgroundImage.current.naturalWidth / 2}
                 y={-backgroundImage.current.naturalHeight / 2}
@@ -699,9 +708,8 @@ function Canvas({
                 height={backgroundImage.current.naturalHeight}
                 rx={8}
                 ry={8}
-                fill="white"
               />
-            </mask>
+            </clipPath>
           </defs>
         )}
 
@@ -713,7 +721,9 @@ function Canvas({
             x={-backgroundImage.current.naturalWidth / 2}
             y={-backgroundImage.current.naturalHeight / 2}
             preserveAspectRatio="xMidYMid"
-            mask="url(#roundedImageMask)"
+            clipPath="url(#roundedImageClip)"
+            pointerEvents="none"
+            style={{ imageRendering: zoom >= 2 ? "pixelated" : "auto" }}
           />
         )}
 
