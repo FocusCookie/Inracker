@@ -188,6 +188,7 @@ function CreateEncounterDrawer({
   return (
     <Drawer
       open={open}
+      noBackgdrop
       onOpenChange={handleOpenChange}
       onExitComplete={onExitComplete}
       title={t("title")}

@@ -279,6 +279,7 @@ function EditEncounterDrawer({
 
   return (
     <Drawer
+      modal={false}
       onExitComplete={onExitComplete}
       description={t("titleDescription")}
       open={open}

@@ -1,6 +1,5 @@
 import PlayLayout from "@/components/PlayLayout/PlayLayout";
 import { createFileRoute, useSearch } from "@tanstack/react-router";
-import { useShallow } from "zustand/shallow";
 import db from "@/lib/database";
 import { AnimatePresence } from "framer-motion";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
@@ -13,7 +12,6 @@ import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { useQueryClient } from "@tanstack/react-query";
 import { Token } from "@/types/tokens";
 import { useState } from "react";
-import { useEncounterStore } from "@/stores/useEncounterStore";
 import { TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tooltip, TooltipContent } from "@radix-ui/react-tooltip";
 import { Button } from "@/components/ui/button";
@@ -40,23 +38,16 @@ export const Route = createFileRoute("/play/")({
 function RouteComponent() {
   const queryClient = useQueryClient();
   const openOverlay = useOverlayStore((s) => s.open);
+  const [tempElement, setTempElement] = useState<undefined | CanvasElement>(
+    undefined,
+  );
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
   const [isAsideOpen, setIsAsideOpen] = useState<boolean>(false);
   const { partyId, chapterId } = useSearch({ from: "/play/" });
+  const [isCreateEncounterDrawerOpen, setIsCreateEncounterDrawerOpen] =
+    useState<boolean>(false);
 
   if (!partyId || !chapterId) throw new Error("No Chapter or Party id");
-
-  const { isCreateEncounterDrawerOpen } = useEncounterStore(
-    useShallow((state) => ({
-      isCreateEncounterDrawerOpen: state.isCreateEncounterDrawerOpen,
-    })),
-  );
-
-  const { currentEncounterElement } = useEncounterStore(
-    useShallow((state) => ({
-      currentEncounterElement: state.currentElement,
-    })),
-  );
 
   const partyQuery = useQueryWithToast({
     queryKey: ["party"],
@@ -181,15 +172,25 @@ function RouteComponent() {
         return created;
       },
       onComplete: (encounter) => {
+        setIsCreateEncounterDrawerOpen(false);
+        setTempElement(undefined);
         console.log("created encounter ", encounter);
         queryClient.invalidateQueries({ queryKey: ["party"] });
         queryClient.invalidateQueries({ queryKey: ["chapter"] });
         queryClient.invalidateQueries({ queryKey: ["encounters"] });
       },
       onCancel: (reason: CancelReason) => {
+        setIsCreateEncounterDrawerOpen(false);
+        setTempElement(undefined);
         console.log("Opponent creation cancelled:", reason);
       },
     });
+  }
+
+  function handeOpenCreateElementDrawer(element: CanvasElement) {
+    setIsCreateEncounterDrawerOpen(true);
+    setTempElement(element);
+    handleCreateEncounter(element);
   }
 
   function handleAsideToggle() {
@@ -238,16 +239,16 @@ function RouteComponent() {
                   id: enc.id,
                   ...enc.element,
                   name: enc.name,
-                  onClick: () => handleElementClick(enc),
+                  onEdit: () => handleElementClick(enc),
                 })) || []
               }
-              temporaryElement={currentEncounterElement || undefined}
+              temporaryElement={tempElement}
               tokens={tokensQuery.data || []}
               players={partyQuery.data.players}
               opponents={opponentsQuery.data || []}
               selectedToken={selectedToken}
               onTokenSelect={setSelectedToken}
-              onDrawed={handleCreateEncounter}
+              onDrawed={handeOpenCreateElementDrawer}
               onTokenMove={updateTokenMutation.mutate}
               onElementMove={handleElementMove}
             />
