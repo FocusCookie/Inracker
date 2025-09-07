@@ -887,7 +887,7 @@ function Canvas({
             cy={selectedToken.coordinates.y + 50}
             r={65}
             stroke="white"
-            stroke-width="10"
+            strokeWidth={10}
             className="animate-pulse"
           />
         )}
@@ -905,29 +905,55 @@ function Canvas({
             return (
               <ContextMenu key={"player-" + token.id}>
                 <ContextMenuTrigger asChild>
-                  <image
+                  <g
                     className={cn(
-                      "hover:cursor-pointer",
+                      "group focus:outline-none focus-visible:outline-none",
                       (tokenVisibility[token.id] ?? true)
                         ? "visible"
                         : "hidden",
-                      selectedToken &&
-                        token.id === selectedToken.id &&
-                        "border-2 border-red-500",
                     )}
-                    data-token-id={token.id}
-                    href={!player.image ? undefined : player.image}
-                    width={100}
-                    height={100}
-                    x={token.coordinates.x}
-                    y={token.coordinates.y}
-                    preserveAspectRatio="xMidYMid"
-                    style={{
-                      cursor: isDrawing || isPanning ? "default" : "move",
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Token of player ${player.name}`}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleTokenClick(token);
+                      }
                     }}
-                    onMouseDown={(e) => handleTokenDragStart(e, token)}
-                    onClick={() => handleTokenClick(token)}
-                  />
+                  >
+                    <image
+                      className={cn(
+                        "hover:cursor-pointer",
+                        selectedToken &&
+                          token.id === selectedToken.id &&
+                          "border-2 border-red-500",
+                      )}
+                      data-token-id={token.id}
+                      href={!player.image ? undefined : player.image}
+                      width={100}
+                      height={100}
+                      x={token.coordinates.x}
+                      y={token.coordinates.y}
+                      preserveAspectRatio="xMidYMid"
+                      style={{
+                        cursor: isDrawing || isPanning ? "default" : "move",
+                        clipPath: "circle(40%)",
+                      }}
+                      onMouseDown={(e) => handleTokenDragStart(e, token)}
+                      onClick={() => handleTokenClick(token)}
+                    />
+
+                    <circle
+                      cx={token.coordinates.x + 50}
+                      cy={token.coordinates.y + 50}
+                      r={52}
+                      fill="none"
+                      stroke="white"
+                      strokeWidth={4}
+                      className="pointer-events-none opacity-0 group-focus:opacity-100 group-focus-visible:opacity-100"
+                    />
+                  </g>
                 </ContextMenuTrigger>
                 <ContextMenuContent className="w-40">
                   <ContextMenuItem onClick={() => onTokenSelect(token)}>
@@ -945,29 +971,55 @@ function Canvas({
             return (
               <ContextMenu key={"opponent-" + token.id}>
                 <ContextMenuTrigger asChild>
-                  <image
+                  <g
                     className={cn(
-                      "hover:cursor-pointer",
+                      "group outline-4 focus:outline-none focus-visible:outline-none",
                       (tokenVisibility[token.id] ?? true)
                         ? "visible"
                         : "hidden",
-                      selectedToken &&
-                        token.id === selectedToken.id &&
-                        "border-2 border-red-500",
                     )}
-                    data-token-id={token.id}
-                    href={opponent.image === "" ? undefined : opponent.image}
-                    width={100}
-                    height={100}
-                    x={token.coordinates.x}
-                    y={token.coordinates.y}
-                    preserveAspectRatio="xMidYMid"
-                    style={{
-                      cursor: isDrawing || isPanning ? "default" : "move",
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Token of opponent ${opponent.name}`}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleTokenClick(token);
+                      }
                     }}
-                    onMouseDown={(e) => handleTokenDragStart(e, token)}
-                    onClick={() => handleTokenClick(token)}
-                  />
+                  >
+                    <image
+                      className={cn(
+                        "hover:cursor-pointer",
+                        selectedToken &&
+                          token.id === selectedToken.id &&
+                          "border-2 border-red-500",
+                      )}
+                      data-token-id={token.id}
+                      href={opponent.image === "" ? undefined : opponent.image}
+                      width={100}
+                      height={100}
+                      x={token.coordinates.x}
+                      y={token.coordinates.y}
+                      preserveAspectRatio="xMidYMid"
+                      style={{
+                        cursor: isDrawing || isPanning ? "default" : "move",
+                        clipPath: "circle(40%)",
+                      }}
+                      onMouseDown={(e) => handleTokenDragStart(e, token)}
+                      onClick={() => handleTokenClick(token)}
+                    />
+
+                    <circle
+                      cx={token.coordinates.x + 50}
+                      cy={token.coordinates.y + 50}
+                      r={52}
+                      fill="none"
+                      stroke="white"
+                      strokeWidth={4}
+                      className="pointer-events-none opacity-0 group-focus:opacity-100 group-focus-visible:opacity-100"
+                    />
+                  </g>
                 </ContextMenuTrigger>
                 <ContextMenuContent className="w-40">
                   <ContextMenuItem onClick={() => onTokenSelect(token)}>
