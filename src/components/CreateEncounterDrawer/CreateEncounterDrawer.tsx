@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { TrashIcon } from "@radix-ui/react-icons";
 import IconPicker from "../IconPicker/IconPicker";
 import OpponentCard from "../OpponentCard/OpponentCard";
@@ -35,6 +35,8 @@ import { useOverlayStore } from "@/stores/useOverlayStore";
 import { Token } from "@/types/tokens";
 import { useSearch } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEncounterStore } from "@/stores/useEncounterStore";
+import { useShallow } from "zustand/shallow";
 
 type OverlayProps = OverlayMap["encounter.create"];
 
@@ -64,6 +66,14 @@ function CreateEncounterDrawer({
   const form = useCreateEncounter();
   const { chapterId } = useSearch({ from: "/play/" });
 
+  const { setCurrentColor, setCurrentIcon, setCurrenTitle } = useEncounterStore(
+    useShallow((state) => ({
+      setCurrentColor: state.setCurrentColor,
+      setCurrentIcon: state.setCurrentIcon,
+      setCurrenTitle: state.setCurrentTitle,
+    })),
+  );
+
   const opponents = useQueryWithToast({
     queryKey: ["opponents"],
     queryFn: () => db.opponents.getAllDetailed(),
@@ -76,6 +86,7 @@ function CreateEncounterDrawer({
 
   function handleIconSelect(icon: string) {
     form.setValue("icon", icon);
+    setCurrentIcon(icon);
   }
 
   async function onSubmit(values: TCreateEncounter) {
@@ -185,6 +196,20 @@ function CreateEncounterDrawer({
       ?.map((id: number) => opponents.data?.find((op) => op.id === id))
       .filter((opponent): opponent is Opponent => opponent !== undefined) || [];
 
+  function handleColorChange(value: string) {
+    form.setValue("color", value);
+    setCurrentColor(value);
+  }
+
+  function handleTitleChange(event: ChangeEvent<HTMLInputElement>) {
+    const { value } = event.target;
+
+    console.log({ value });
+
+    form.setValue("name", value);
+    setCurrenTitle(value);
+  }
+
   return (
     <Drawer
       open={open}
@@ -237,6 +262,7 @@ function CreateEncounterDrawer({
                           disabled={isCreating}
                           placeholder={t("namePlaceholder")}
                           {...field}
+                          onChange={handleTitleChange}
                         />
                       </FormControl>
                       <FormMessage />
@@ -254,7 +280,7 @@ function CreateEncounterDrawer({
                       <FormLabel>{t("color")}</FormLabel>
                       <FormControl>
                         <Select
-                          onValueChange={(val) => field.onChange(val)}
+                          onValueChange={handleColorChange}
                           value={field.value}
                         >
                           <SelectTrigger className="w-full">

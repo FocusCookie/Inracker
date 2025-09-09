@@ -74,6 +74,8 @@ function Canvas({
     currentColor,
     setCurrentColor,
     currentIcon,
+    currentTitle,
+    setCurrentTitle,
     setCurrentIcon,
     resetCount,
   } = useEncounterStore(
@@ -82,6 +84,8 @@ function Canvas({
       currentColor: state.currentColor,
       setCurrentColor: state.setCurrentColor,
       setCurrentIcon: state.setCurrentIcon,
+      setCurrentTitle: state.setCurrentTitle,
+      currentTitle: state.currentTitle,
       resetCount: state.resetCount,
     })),
   );
@@ -147,6 +151,7 @@ function Canvas({
   useEffect(() => {
     setCurrentColor(TEMP_DEFAULT_COLOR);
     setCurrentIcon(TEMP_DEFAULT_ICON);
+    setCurrentTitle("");
   }, []);
 
   useEffect(() => {
@@ -525,6 +530,8 @@ function Canvas({
 
     const element = svgRef.current.querySelector("#temp-element");
     const icon = svgRef.current.querySelector("#temp-element-icon");
+    const header = svgRef.current.querySelector("#temp-element-header");
+    const name = svgRef.current.querySelector("#temp-element-name");
 
     if (element && icon) {
       element.setAttribute("x", newPosition.x.toString());
@@ -532,8 +539,20 @@ function Canvas({
 
       icon.setAttribute(
         "transform",
-        `translate(${newPosition.x + 16}, ${newPosition.y + 40})`,
+        `translate(${newPosition.x + 6}, ${newPosition.y + 30})`,
       );
+
+      if (header) {
+        header.setAttribute("x", newPosition.x.toString());
+        header.setAttribute("y", newPosition.y.toString());
+      }
+
+      if (name) {
+        name.setAttribute(
+          "transform",
+          `translate(${newPosition.x + 60}, ${newPosition.y + 30})`,
+        );
+      }
     }
   };
 
@@ -850,6 +869,7 @@ function Canvas({
 
         {temporaryElement && (
           <g className="hover:cursor-move">
+            {/* Main rectangle */}
             <rect
               onMouseDown={handleTempElementDragStart}
               id="temp-element"
@@ -866,15 +886,32 @@ function Canvas({
               filter="url(#subtleDropShadow)"
             />
 
+            {/* Header rectangle */}
+            <rect
+              id="temp-element-header"
+              x={temporaryElement.x}
+              y={temporaryElement.y}
+              width={temporaryElement.width}
+              height={60}
+              fill={currentColor}
+              fillOpacity={0.8}
+              stroke={currentColor}
+              strokeWidth={4}
+              rx={4}
+              ry={4}
+              onMouseDown={handleTempElementDragStart}
+            />
+
+            {/* Icon */}
             <g
               id="temp-element-icon"
-              transform={`translate(${temporaryElement.x + 16}, ${temporaryElement.y + 40})`}
+              transform={`translate(${temporaryElement.x + 6}, ${temporaryElement.y + 30})`}
             >
               <text
                 className="font-sans text-4xl font-bold shadow-sm select-none"
                 dominantBaseline="middle"
               >
-                {currentIcon}
+                {currentIcon} {currentTitle}
               </text>
             </g>
           </g>
