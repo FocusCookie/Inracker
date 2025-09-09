@@ -49,38 +49,6 @@ function RouteComponent() {
       isLoading={chapters.isLoading || party.isLoading}
       chapters={chapters.data || []}
       party={party.data}
-      onRemovePlayerFromParty={(data) =>
-        db.parties.removePlayerFromParty(data.partyId, data.playerId)
-      }
-      onRemoveImmunityFromPlayer={(data) =>
-        db.players.removeImmunityFromPlayer(data.playerId, data.immunityId)
-      }
-      onRemoveResistanceFromPlayer={(data) =>
-        db.players.removeResistanceFromPlayer(data.playerId, data.resistanceId)
-      }
-      onRemoveEffectFromPlayer={(data) =>
-        db.players.removeEffectFromPlayer(data.playerId, data.effectId)
-      }
-      onCreateChapter={db.chapters.create}
-      onEditChapter={db.chapters.update}
-      onDeleteChapter={db.chapters.delete}
-      onCreatePlayer={db.players.create}
-      onEditPlayer={db.players.update}
-      onAddPlayerToParty={(data) =>
-        db.parties.addPlayerToParty(data.partyId, data.playerId)
-      }
-      onCreateEffect={db.effects.create}
-      onAddEffectToPlayer={(data) =>
-        db.players.addEffectToPlayer(data.playerId, data.effectId)
-      }
-      onCreateImmunity={db.immunitites.create}
-      onAddImmunityToPlayer={(data) =>
-        db.players.addImmunityToPlayer(data.playerId, data.immunityId)
-      }
-      onCreateResistance={db.resistances.create}
-      onAddResistanceToPlayer={(data) =>
-        db.players.addResistanceToPlayer(data.playerId, data.resistanceId)
-      }
     />
   ) : (
     <span>No Party ID set</span>
