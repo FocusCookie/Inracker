@@ -22,9 +22,6 @@ import IconAvatar from "../IconAvatar/IconAvatar";
 import { useTranslation } from "react-i18next";
 import { DBEffect, Effect } from "@/types/effect";
 import EffectCard from "../EffectCard/EffectCard";
-import { useImmunityStore } from "@/stores/useImmunityStore";
-import { useEffectStore } from "@/stores/useEffectStore";
-import { useResistancesStore } from "@/stores/useResistanceStore";
 
 type Props = {
   player: Player;
@@ -40,6 +37,9 @@ type Props = {
     resistanceId: DBResistance["id"],
   ) => void;
   onRemoveEffect: (playerId: Player["id"], effectId: DBEffect["id"]) => void;
+  onEditImmunity: (immunity: DBImmunity) => void;
+  onEditResistance: (resistances: DBResistance) => void;
+  onEditEffect: (effect: Effect) => void;
   onOpenImmunitiesCatalog: () => void;
   onOpenResistancesCatalog: () => void;
   onOpenEffectsCatalog: () => void;
@@ -50,6 +50,9 @@ function PlayerCard({
   expanded,
   onEdit,
   onRemove,
+  onEditEffect,
+  onEditImmunity,
+  onEditResistance,
   onRemoveImmunity,
   onRemoveResistance,
   onRemoveEffect,
@@ -58,10 +61,6 @@ function PlayerCard({
   onOpenEffectsCatalog,
 }: Props) {
   const { t } = useTranslation("ComponentPlayerCard");
-  const { setSelectedImmunity, openEditImmunityDrawer } = useImmunityStore();
-  const { setSelectedEffect, openEditEffectDrawer } = useEffectStore();
-  const { setSelectedResistance, openEditResistanceDrawer } =
-    useResistancesStore();
 
   const positiveEffects = player.effects.filter(
     (effect) => effect.type === "positive",
@@ -88,21 +87,6 @@ function PlayerCard({
 
   function handleRemoveEffect(effectId: DBEffect["id"]) {
     onRemoveEffect(player.id, effectId);
-  }
-
-  function handleEditImmunity(immunity: DBImmunity) {
-    setSelectedImmunity(immunity);
-    openEditImmunityDrawer();
-  }
-
-  function handleEditEffect(effect: Effect) {
-    setSelectedEffect(effect);
-    openEditEffectDrawer();
-  }
-
-  function handleEditResistance(resistance: DBResistance) {
-    setSelectedResistance(resistance);
-    openEditResistanceDrawer();
   }
 
   const quickActions = () => (
@@ -201,7 +185,7 @@ function PlayerCard({
                       key={`player-${player.id}-immunity-${immunity.id}`}
                       immunity={immunity}
                       onRemove={() => handleRemoveImmunity(immunity.id)}
-                      onEdit={handleEditImmunity}
+                      onEdit={onEditImmunity}
                     />
                   ))}
                 </div>
@@ -225,7 +209,7 @@ function PlayerCard({
                       key={`player-${player.id}-resistances-${resistance.id}`}
                       resistance={resistance}
                       onRemove={() => handleRemoveResistance(resistance.id)}
-                      onEdit={handleEditResistance}
+                      onEdit={onEditResistance}
                     />
                   ))}
                 </div>
@@ -249,7 +233,7 @@ function PlayerCard({
                       key={`player-${player.id}-effect-${effect.id}`}
                       effect={effect}
                       onRemove={() => handleRemoveEffect(effect.id)}
-                      onEdit={handleEditEffect}
+                      onEdit={onEditEffect}
                     />
                   ))}
                 </div>
@@ -273,7 +257,7 @@ function PlayerCard({
                       key={`player-${player.id}-effect-${effect.id}`}
                       effect={effect}
                       onRemove={() => handleRemoveEffect(effect.id)}
-                      onEdit={handleEditEffect}
+                      onEdit={onEditEffect}
                     />
                   ))}
                 </div>
