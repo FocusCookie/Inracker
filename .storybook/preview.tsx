@@ -13,6 +13,7 @@ import {
   createRouter,
 } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { OverlayHost } from "../src/components/Overlay/OverlayHost";
 
 const queryClient = new QueryClient();
 const rootRoute = createRootRoute();
@@ -63,6 +64,15 @@ const withRouter = (Story: any, context: any) => {
   );
 };
 
+const withOverlayHost = (Story: any, context: any) => {
+  return (
+    <>
+      <Story {...context} />
+      <OverlayHost />
+    </>
+  );
+};
+
 const withTanstackQuery = (Story: any, context: any) => {
   return (
     <QueryClientProvider client={queryClient}>
@@ -77,6 +87,7 @@ const preview: Preview = {
     withI18next,
     withRouter,
     (Story) => <div className="h-full w-full bg-black">{Story()}</div>,
+    withOverlayHost,
   ],
   parameters: {
     controls: {
