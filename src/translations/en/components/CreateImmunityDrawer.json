@@ -1,10 +1,19 @@
 {
   "descriptionText": "Design a unique immunity to expand your character's abilities and resilience. Define what they are impervious to, from specific conditions and magical effects to environmental hazards or physical afflictions.",
-  "title": "Create a new Immunity",
+  "title": "Create a immunity",
   "create": "Create",
   "cancel": "Cancel",
   "icon": "Icon",
   "name": "Name",
   "namePlaceholder": "Fire Immunity",
-  "description": "Description"
+  "description": "Description",
+  "descriptionPlaceholder": "This immunity protects against fire damage and heat-based attacks...",
+  "validation": {
+    "name": {
+      "minLength": "The immunity name must be at least 2 characters."
+    },
+    "icon": {
+      "emoji": "The icon must be an emoji."
+    }
+  }
 }

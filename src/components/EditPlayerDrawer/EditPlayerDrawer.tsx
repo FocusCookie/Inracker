@@ -1,76 +1,114 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Drawer from "../Drawer/Drawer";
 import { Button } from "../ui/button";
-import { Player } from "@/types/player";
 import EditPlayerForm from "../EditPlayerForm/EditPlayerForm";
 import { storeImage } from "@/lib/utils";
-import { DBResistance } from "@/types/resistances";
-import { DBImmunity } from "@/types/immunitiy";
-import { DBEffect } from "@/types/effect";
+import { useEditPlayer } from "@/hooks/useEditPlayer";
+import { CancelReason, OverlayMap } from "@/types/overlay";
 
-type Props = {
-  player: Player | null;
+type OverlayProps = OverlayMap["player.edit"];
+
+type RuntimeProps = {
   open: boolean;
-  loading: boolean;
-  /**
-   * the form which controls all the inputs
-   */
-  form: any;
   onOpenChange: (state: boolean) => void;
-  onSave: (player: Player) => void;
+  onExitComplete: () => void; // host removes after exit
 };
+
+type Props = OverlayProps & RuntimeProps;
 
 function EditPlayerDrawer({
   player,
   open,
-  loading,
-  form,
   onOpenChange,
-  onSave,
+  onExitComplete,
+  onComplete,
+  onCancel,
+  onEdit,
 }: Props) {
-  async function handleSavePlayer() {
-    const { picture, resistances, immunities, effects, ...update } =
-      form.getValues();
-    let pictureFilePath: string | null = player?.image || null;
-
-    if (!!picture) {
-      pictureFilePath = await storeImage(picture, "players");
-    }
-
-    onSave({
-      ...update,
-      image: pictureFilePath,
-      resistances: resistances.map((resistance: DBResistance) => resistance.id),
-      immunities: immunities.map((immunity: DBImmunity) => immunity.id),
-      effects: effects.map((effect: DBEffect) => effect.id),
-    });
-  }
+  const form = useEditPlayer();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [closingReason, setClosingReason] = useState<
+    null | "success" | CancelReason
+  >(null);
 
   useEffect(() => {
     if (!!player) {
-      form.reset(player);
+      form.reset();
     }
   }, [player]);
 
+  async function handleSavePlayer() {
+    try {
+      setIsLoading(true);
+
+      const { picture, resistances, immunities, effects, ...update } =
+        form.getValues();
+      let pictureFilePath: string | null = player?.image || null;
+
+      if (!!picture) {
+        pictureFilePath = await storeImage(picture, "players");
+      }
+
+      const updatedPlayer = await onEdit({
+        ...update,
+        image: pictureFilePath,
+        resistances: player.resistances,
+        immunities: player.immunities,
+        effects: player.effects,
+      });
+
+      onComplete(updatedPlayer);
+
+      setClosingReason("success");
+      onOpenChange(false);
+      form.reset();
+    } catch (error) {
+      console.log("Error while updating a player");
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  function handleCancelClick() {
+    onCancel?.("cancel");
+    setClosingReason("cancel");
+    onOpenChange(false);
+  }
+
+  function handleOpenChange(state: boolean) {
+    if (!state && closingReason === null) {
+      onCancel?.("dismissed");
+      setClosingReason("dismissed");
+    }
+
+    onOpenChange(state);
+  }
+
   return (
     <Drawer
-      open={open && !!player}
-      onOpenChange={onOpenChange}
+      onExitComplete={onExitComplete}
+      open={open}
+      onOpenChange={handleOpenChange}
       description={"description"}
       title={"Edit Player"}
       cancelTrigger={
-        <Button disabled={loading} variant="ghost">
+        <Button
+          disabled={isLoading}
+          variant="ghost"
+          onClick={handleCancelClick}
+        >
           Cancel
         </Button>
       }
       actions={
-        <Button loading={loading} onClick={handleSavePlayer}>
+        <Button loading={isLoading} onClick={handleSavePlayer}>
           Save
         </Button>
       }
     >
       <div className="scrollable-y overflow-y-scroll pr-0.5">
-        <EditPlayerForm form={form} disabled={loading} player={player!} />
+        <EditPlayerForm form={form} disabled={isLoading} player={player!} />
       </div>
     </Drawer>
   );

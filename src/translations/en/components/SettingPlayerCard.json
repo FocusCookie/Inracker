@@ -2,5 +2,6 @@
   "deletionWarning": "Are you sure you want to delete this character? This cannot be undone.",
   "edit": "Edit",
   "delete": "Delete",
-  "deleteCharacter": "Delete"
+  "deleteCharacter": "Delete",
+  "level": "Level"
 }

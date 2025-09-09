@@ -1,4 +1,13 @@
 import "i18next";
+import ComponentEditEncounterDrawer from "@/translations/en/component/EditEncounterDrawer.json";
+import ComponentSettingsCategoryOpponents from "@/translations/en/component/SettingsCategoryOpponents.json";
+import ComponentSettingsCategoryResistances from "@/translations/en/component/SettingsCategoryResistances.json";
+import ComponentSettingsCategoryImmunities from "@/translations/en/component/SettingsCategoryImmunities.json";
+import ComponentSettingsCategoryEffects from "@/translations/en/component/SettingsCategoryEffects.json";
+import ComponentSettingsCategoryPlayers from "@/translations/en/component/SettingsCategoryPlayers.json";
+import ComponentSettingsCategoryGeneral from "@/translations/en/component/SettingsCategoryGeneral.json";
+import ComponentSettingsSidebar from "@/translations/en/component/SettingsSidebar.json";
+import ComponentCatalog from "@/translations/en/component/Catalog.json";
 import ComponentEditResistanceDrawer from "@/translations/en/component/EditResistanceDrawer.json";
 import ComponentSettingResistanceCard from "@/translations/en/component/SettingResistanceCard.json";
 import ComponentEditImmunityDrawer from "@/translations/en/component/EditImmunityDrawer.json";
@@ -42,6 +51,15 @@ declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
       // hygen-components - DO NOT DELETE THIS LINE
+      ComponentEditEncounterDrawer: typeof ComponentEditEncounterDrawer;
+      ComponentSettingsCategoryOpponents: typeof ComponentSettingsCategoryOpponents;
+      ComponentSettingsCategoryResistances: typeof ComponentSettingsCategoryResistances;
+      ComponentSettingsCategoryImmunities: typeof ComponentSettingsCategoryImmunities;
+      ComponentSettingsCategoryEffects: typeof ComponentSettingsCategoryEffects;
+      ComponentSettingsCategoryPlayers: typeof ComponentSettingsCategoryPlayers;
+      ComponentSettingsCategoryGeneral: typeof ComponentSettingsCategoryGeneral;
+      ComponentSettingsSidebar: typeof ComponentSettingsSidebar;
+      ComponentCatalog: typeof ComponentCatalog;
       ComponentEditResistanceDrawer: typeof ComponentEditResistanceDrawer;
       ComponentSettingResistanceCard: typeof ComponentSettingResistanceCard;
       ComponentEditImmunityDrawer: typeof ComponentEditImmunityDrawer;

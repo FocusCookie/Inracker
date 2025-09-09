@@ -21,5 +21,15 @@
   "durationUnitTooltip": "The time unit is in minutes",
   "value": "Effect Value",
   "valueTooltip": "For positive effects, the value is added to health, for negative effects it is subtracted. If Duration Type=Rounds, the value is applied per round, otherwise once.",
-  "timeUnit": "in minutes"
+  "timeUnit": "in minutes",
+  "longRest": "Long Rest",
+  "shortRest": "Short Rest",
+  "validation": {
+    "name": {
+      "minLength": "The effect name must be at least 2 characters."
+    },
+    "duration": {
+      "minValue": "Duration must be at least 1."
+    }
+  }
 }

@@ -1,7 +1,4 @@
 import { storeImage } from "@/lib/utils";
-import { Chapter } from "@/types/chapters";
-import { Party } from "@/types/party";
-import { Prettify } from "@/types/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
@@ -20,24 +17,40 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { Textarea } from "../ui/textarea";
+import { CancelReason, OverlayMap } from "@/types/overlay";
 
-type Props = {
-  isCreating: boolean;
+type OverlayProps = OverlayMap["chapter.create"];
+
+type RuntimeProps = {
   open: boolean;
-  partyId: Party["id"];
   onOpenChange: (state: boolean) => void;
-  onCreate: (chapter: Prettify<Omit<Chapter, "id">>) => void;
+  onExitComplete: () => void;
 };
 
+type Props = OverlayProps & RuntimeProps;
+
 function CreateChapterDrawer({
-  onCreate,
-  isCreating,
   partyId,
   open,
+  onCreate,
   onOpenChange,
+  onExitComplete,
+  onComplete,
+  onCancel,
 }: Props) {
   const { t } = useTranslation("ComponentCreateChapterDrawer");
+  const [isCreating, setIsCreating] = useState(false);
+  const [closingReason, setClosingReason] = useState<
+    null | "success" | CancelReason
+  >(null);
   const [refreshKey, setRefreshKey] = useState<number>(0); // to reset the input type file path after a reset
   const [picturePreview, setPicturePreview] = useState<string>("");
 
@@ -49,6 +62,7 @@ function CreateChapterDrawer({
     icon: z.string().emoji(),
     battlemap: z.instanceof(File).or(z.string()),
     encounters: z.array(z.number()),
+    state: z.enum(["draft", "ongoing", "completed"]),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -59,28 +73,54 @@ function CreateChapterDrawer({
       icon: "🧙",
       battlemap: "",
       encounters: [],
+      state: "draft",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { name, description, icon, battlemap, encounters } = values;
-    let battlemapFilePath: string | null = null;
+  async function handleSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      setIsCreating(true);
 
-    if (!!battlemap) {
-      battlemapFilePath = await storeImage(battlemap, "battlemaps");
+      const { name, description, icon, battlemap, encounters, state } = values;
+      let battlemapFilePath: string | null = null;
+
+      if (!!battlemap) {
+        battlemapFilePath = await storeImage(battlemap, "battlemaps");
+      }
+
+      const created = await onCreate({
+        name,
+        icon,
+        description,
+        battlemap: battlemapFilePath,
+        state,
+        party: partyId,
+        encounters,
+      });
+
+      onComplete(created);
+      onOpenChange(false);
+      form.reset();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsCreating(false);
+    }
+  }
+
+  function handleCancelClick() {
+    onCancel?.("cancel");
+    setClosingReason("cancel");
+    onOpenChange(false);
+  }
+
+  function handleOpenChange(state: boolean) {
+    if (!state && closingReason === null) {
+      onCancel?.("dismissed");
+      setClosingReason("dismissed");
     }
 
-    onCreate({
-      name,
-      icon,
-      description,
-      battlemap: battlemapFilePath,
-      state: "draft",
-      party: partyId,
-      encounters,
-    });
-
-    form.reset();
+    onOpenChange(state);
   }
 
   function handleResetPicture() {
@@ -105,21 +145,26 @@ function CreateChapterDrawer({
 
   return (
     <Drawer
+      onExitComplete={onExitComplete}
       description={t("titleDescription")}
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
       title={t("title")}
       actions={
         <Button
           loading={isCreating}
           disabled={isCreating}
-          onClick={form.handleSubmit(onSubmit)}
+          onClick={form.handleSubmit(handleSubmit)}
         >
           {t("create")}
         </Button>
       }
       cancelTrigger={
-        <Button disabled={isCreating} variant="ghost">
+        <Button
+          disabled={isCreating}
+          variant="ghost"
+          onClick={handleCancelClick}
+        >
           {t("cancel")}
         </Button>
       }
@@ -155,6 +200,33 @@ function CreateChapterDrawer({
               )}
             />
           </div>
+
+          <FormField
+            control={form.control}
+            name="state"
+            render={({ field }) => (
+              <FormItem className="px-0.5">
+                <FormLabel>{t("status")}</FormLabel>
+                <Select
+                  disabled={isCreating}
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("statusPlaceholder")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="draft">{t("draft")}</SelectItem>
+                    <SelectItem value="ongoing">{t("ongoing")}</SelectItem>
+                    <SelectItem value="completed">{t("completed")}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
@@ -215,3 +287,4 @@ function CreateChapterDrawer({
 }
 
 export default CreateChapterDrawer;
+

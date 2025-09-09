@@ -1,10 +1,19 @@
 {
-  "descriptionText": "Design a unique immunity to enhance your character's abilities and resilience. Define what your character is immune to, whether specific conditions, magical effects, environmental hazards, or physical damage.",
-  "title": "Create a New Immunity",
-  "create": "Create",
-  "cancel": "Cancel",
-  "icon": "Icon",
+  "descriptionText": "Gestalte eine einzigartige Immunität, um die Fähigkeiten und die Widerstandsfähigkeit deines Charakters zu verbessern. Definiere, wogegen dein Charakter immun ist, sei es gegen bestimmte Zustände, magische Effekte, Umweltgefahren oder physischen Schaden.",
+  "title": "Erstelle eine Immunität",
+  "create": "Erstellen",
+  "cancel": "Abbrechen",
+  "icon": "Symbol",
   "name": "Name",
-  "namePlaceholder": "Fire Immunity",
-  "description": "Description"
+  "namePlaceholder": "Feuerimmunität",
+  "description": "Beschreibung",
+  "descriptionPlaceholder": "Diese Immunität schützt vor Feuerschaden und hitzebasierten Angriffen...",
+  "validation": {
+    "name": {
+      "minLength": "Der Name der Immunität muss mindestens 2 Zeichen lang sein."
+    },
+    "icon": {
+      "emoji": "Das Symbol muss ein Emoji sein."
+    }
+  }
 }

@@ -1,5 +1,8 @@
 {
   "title": "Einen Helden zur Gruppe hinzufügen",
   "description": "Ein Held aus eurer Liste von Abenteurern zu der Gruppe hinzufügen!",
-  "search": "Suche nach einem bestimmten Helden..."
+  "search": "Suche nach einem bestimmten Helden...",
+  "noPlayers": "Keine Spieler zur Auswahl",
+  "noPlayersDescription": "Du hast alle bereits bekannten Spieler in der Party oder es gibt keine weiteren Spieler zur Auswahl.",
+  "createPlayer": "Erstelle Spieler"
 }

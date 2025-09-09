@@ -1,0 +1,7 @@
+{
+  "immunities": "Immunities",
+  "createImmunity": "Create Immunity",
+  "noImmunities": "No Immunities",
+  "noImmunitiesDescription": "You have not created any immunities yet. Create one to get started.",
+  "searchPlaceholder": "Search for immunities..."
+}

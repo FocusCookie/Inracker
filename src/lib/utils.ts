@@ -8,7 +8,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const IMAGE_FOLDERS = ["players", "battlemaps", "chapters", "others"] as const;
+const IMAGE_FOLDERS = [
+  "players",
+  "battlemaps",
+  "chapters",
+  "others",
+  "opponents",
+] as const;
 export type ImageFolder = (typeof IMAGE_FOLDERS)[number];
 
 export async function createTauriAppDataSubfolders() {

@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { useEncounterStore } from "@/stores/useEncounterStore";
+import { Opponent } from "@/types/opponents";
 import { Player } from "@/types/player";
 import { Token } from "@/types/tokens";
 import {
@@ -11,6 +12,12 @@ import {
 } from "@radix-ui/react-icons";
 import { useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/shallow";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
@@ -20,14 +27,16 @@ const TEMP_DEFAULT_ICON = "📝";
 
 type Props = {
   background?: string;
-  elements: ClickableCanvasElement[];
+  elements: (ClickableCanvasElement & { id: any })[];
   temporaryElement?: CanvasElement;
   players: Player[];
-  selectedPlayer: Player | null;
+  opponents: Opponent[];
+  selectedToken: Token | null;
   tokens: Token[];
-  onPlayerSelect: (player: Player | null) => void;
+  onTokenSelect: (token: Token | null) => void;
   onDrawed: (element: Omit<CanvasElement, "id">) => void;
-  onPlayerMove: (token: Token) => void;
+  onTokenMove: (token: Token) => void;
+  onElementMove: (element: ClickableCanvasElement & { id: any }) => void;
 };
 
 export type CanvasElement = {
@@ -41,7 +50,8 @@ export type CanvasElement = {
 };
 
 export type ClickableCanvasElement = CanvasElement & {
-  onClick: () => void;
+  onClick?: () => void;
+  onEdit?: () => void;
 };
 
 function Canvas({
@@ -49,11 +59,13 @@ function Canvas({
   elements,
   temporaryElement,
   players,
-  selectedPlayer,
+  opponents,
+  selectedToken,
   tokens,
-  onPlayerMove,
-  onPlayerSelect,
+  onTokenMove,
+  onTokenSelect,
   onDrawed,
+  onElementMove,
 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const backgroundImage = useRef<HTMLImageElement | null>(null);
@@ -62,6 +74,8 @@ function Canvas({
     currentColor,
     setCurrentColor,
     currentIcon,
+    currentTitle,
+    setCurrentTitle,
     setCurrentIcon,
     resetCount,
   } = useEncounterStore(
@@ -70,11 +84,12 @@ function Canvas({
       currentColor: state.currentColor,
       setCurrentColor: state.setCurrentColor,
       setCurrentIcon: state.setCurrentIcon,
+      setCurrentTitle: state.setCurrentTitle,
+      currentTitle: state.currentTitle,
       resetCount: state.resetCount,
     })),
   );
 
-  // Use a ref to track the actual current viewBox
   const currentViewBoxRef = useRef<{
     x: number;
     y: number;
@@ -87,7 +102,6 @@ function Canvas({
     height: 1000,
   });
 
-  // State for React rendering
   const [viewBox, setViewBox] = useState<{
     x: number;
     y: number;
@@ -105,39 +119,39 @@ function Canvas({
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const panStartPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const initialCTM = useRef<DOMMatrix | null>(null);
+  // Coalesce pan updates to one rAF callback
+  const panRafId = useRef<number | null>(null);
+  const panNextViewBox = useRef<{ x: number; y: number } | null>(null);
   const tempRectRef = useRef<SVGRectElement | null>(null);
   const drawStartPos = useRef<{ x: number; y: number } | null>(null);
-  const draggedPlayer = useRef<Player | null>(null);
-  const selectedPlayerRef = useRef<Player | null>(selectedPlayer);
-  const isDraggingToken = useRef<boolean>(false);
+  const isDragging = useRef<boolean>(false);
   const dragTokenStartPos = useRef<{ x: number; y: number } | null>(null);
-  const dragElementStartPos = useRef<{ x: number; y: number } | null>(null);
-  const temporaryPlayerPosition = useRef<{
-    playerId: number;
-    coordinates: { x: number; y: number };
-  } | null>(null);
+  const dragTempElementStartPos = useRef<{ x: number; y: number } | null>(null);
+  const draggedToken = useRef<Token | null>(null);
+  const temporaryTokenPosition = useRef<{ x: number; y: number } | null>(null);
   const temporaryTempElementPosition = useRef<{ x: number; y: number } | null>(
     null,
   );
-  const [, forceUpdate] = useState({});
   const viewBoxStartOnPanStart = useRef<{ x: number; y: number }>({
     x: 0,
     y: 0,
   });
-  const [playersTokenState, setPlayersTokenState] = useState<
-    Array<{
-      id: Player["id"];
-      visible: boolean;
-    }>
-  >(
-    players.map((player) => {
-      return { id: player.id, visible: true };
-    }),
+  const [tokenVisibility, setTokenVisibility] = useState<
+    Record<string, boolean>
+  >({});
+
+  const draggedElement = useRef<(ClickableCanvasElement & { id: any }) | null>(
+    null,
+  );
+  const dragElementStartPos = useRef<{ x: number; y: number } | null>(null);
+  const temporaryElementPosition = useRef<{ x: number; y: number } | null>(
+    null,
   );
 
   useEffect(() => {
     setCurrentColor(TEMP_DEFAULT_COLOR);
     setCurrentIcon(TEMP_DEFAULT_ICON);
+    setCurrentTitle("");
   }, []);
 
   useEffect(() => {
@@ -146,7 +160,6 @@ function Canvas({
       tmp.onload = () => {
         backgroundImage.current = tmp;
 
-        // Update viewBox to fit the background image
         const newViewBox = {
           x: -tmp.naturalWidth / 2,
           y: -tmp.naturalHeight / 2,
@@ -162,23 +175,23 @@ function Canvas({
   }, [background]);
 
   useEffect(() => {
-    selectedPlayerRef.current = selectedPlayer;
-  }, [selectedPlayer]);
-
-  useEffect(() => {
     window.addEventListener("keydown", showPaneCursor);
     window.addEventListener("keyup", hidePaneCursor);
-    window.addEventListener("keydown", unselectSelectedPlayer);
+    window.addEventListener("keydown", unselectSelectedToken);
 
     return () => {
       window.removeEventListener("keydown", showPaneCursor);
       window.removeEventListener("keyup", hidePaneCursor);
-      window.removeEventListener("keydown", unselectSelectedPlayer);
+      window.removeEventListener("keydown", unselectSelectedToken);
     };
   }, []);
 
   const transformScreenCoordsToSvgCoords = (
-    event: MouseEvent | React.MouseEvent<SVGSVGElement>,
+    event:
+      | MouseEvent
+      | React.MouseEvent<SVGSVGElement>
+      | React.MouseEvent<SVGImageElement>
+      | React.MouseEvent<SVGGElement>,
   ) => {
     if (!svgRef.current || !initialCTM.current) return { x: 0, y: 0 };
 
@@ -200,6 +213,8 @@ function Canvas({
   const handleMouseDown = (
     event: React.MouseEvent<SVGSVGElement, MouseEvent>,
   ) => {
+    // Only react to left mouse button (0)
+    if (event.button !== 0) return;
     if (isPanning && svgRef.current) {
       const svg = svgRef.current;
 
@@ -229,7 +244,6 @@ function Canvas({
       const coords = transformScreenCoordsToSvgCoords(event);
       drawStartPos.current = coords;
 
-      // create temporary rect
       const rect = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "rect",
@@ -264,6 +278,7 @@ function Canvas({
     const newX = viewBoxStartOnPanStart.current.x - dx;
     const newY = viewBoxStartOnPanStart.current.y - dy;
 
+    // Track latest viewBox target and coalesce updates into a single rAF
     currentViewBoxRef.current = {
       x: newX,
       y: newY,
@@ -271,18 +286,23 @@ function Canvas({
       height: currentViewBoxRef.current.height,
     };
 
-    requestAnimationFrame(() => {
-      if (svgRef.current) {
+    panNextViewBox.current = { x: newX, y: newY };
+    if (panRafId.current == null) {
+      panRafId.current = requestAnimationFrame(() => {
+        panRafId.current = null;
+        if (!svgRef.current || !panNextViewBox.current) return;
+        const { x, y } = panNextViewBox.current;
         svgRef.current.setAttribute(
           "viewBox",
-          `${newX} ${newY} ${currentViewBoxRef.current.width} ${currentViewBoxRef.current.height}`,
+          `${x} ${y} ${currentViewBoxRef.current.width} ${currentViewBoxRef.current.height}`,
         );
-      }
-    });
+      });
+    }
   };
 
   const handleMouseUp = () => {
     setViewBox(currentViewBoxRef.current);
+    panNextViewBox.current = null;
 
     window.removeEventListener("mousemove", handleMouseMove);
     window.removeEventListener("mouseup", handleMouseUp);
@@ -292,20 +312,16 @@ function Canvas({
     const delta = direction === "in" ? ZOOM_DELTA : -ZOOM_DELTA;
     const newZoom = Math.max(MIN_ZOOM, Math.min(zoom + delta, MAX_ZOOM));
 
-    // Get current center of the view from the ref
     const { x, y, width, height } = currentViewBoxRef.current;
     const currentCenterX = x + width / 2;
     const currentCenterY = y + height / 2;
 
-    // Calculate new dimensions
     const newWidth = (width * zoom) / newZoom;
     const newHeight = (height * zoom) / newZoom;
 
-    // Calculate new top-left corner while maintaining the center point
     const newX = currentCenterX - newWidth / 2;
     const newY = currentCenterY - newHeight / 2;
 
-    // Update both ref and state
     const newViewBox = {
       x: newX,
       y: newY,
@@ -327,7 +343,7 @@ function Canvas({
   }
 
   function showPaneCursor(event: KeyboardEvent) {
-    if (event.repeat) return; // if key is hold return immidiatly
+    if (event.repeat) return;
 
     if (!isPanning && event.code === "Space") {
       setIsPanning(true);
@@ -385,7 +401,6 @@ function Canvas({
         });
       }
 
-      // delete temporary rect
       tempRectRef.current.remove();
       tempRectRef.current = null;
       drawStartPos.current = null;
@@ -396,12 +411,13 @@ function Canvas({
     window.removeEventListener("mouseup", handleDrawEnd);
   };
 
-  const handlePlayerDragStart = (
+  const handleTokenDragStart = (
     event: React.MouseEvent<SVGImageElement>,
-    player: Player,
+    token: Token,
   ) => {
-    const playerToken = tokens.find((token) => token.entity === player.id);
-    if (isDrawing || isPanning || !playerToken) return;
+    // Only start drag on left button
+    if (event.button !== 0) return;
+    if (isDrawing || isPanning) return;
 
     const svg = svgRef.current;
     if (!svg) return;
@@ -410,22 +426,69 @@ function Canvas({
     if (!CTM) return;
     initialCTM.current = CTM;
 
-    // @ts-ignore
     const coords = transformScreenCoordsToSvgCoords(event);
 
     dragTokenStartPos.current = {
-      x: coords.x - playerToken.coordinates.x,
-      y: coords.y - playerToken.coordinates.y,
+      x: coords.x - token.coordinates.x,
+      y: coords.y - token.coordinates.y,
     };
-    draggedPlayer.current = player;
+    draggedToken.current = token;
 
-    window.addEventListener("mousemove", handlePlayerDragMove);
-    window.addEventListener("mouseup", handlePlayerDragEnd);
+    window.addEventListener("mousemove", handleTokenDragMove);
+    window.addEventListener("mouseup", handleTokenDragEnd);
   };
 
-  const handeTempElementDragStart = (
+  const handleTokenDragMove = (event: MouseEvent) => {
+    if (
+      !draggedToken.current ||
+      !dragTokenStartPos.current ||
+      !initialCTM.current ||
+      !svgRef.current
+    )
+      return;
+
+    isDragging.current = true;
+    const currentPos = transformScreenCoordsToSvgCoords(event);
+
+    const newPosition = {
+      x: currentPos.x - dragTokenStartPos.current.x,
+      y: currentPos.y - dragTokenStartPos.current.y,
+    };
+
+    temporaryTokenPosition.current = newPosition;
+
+    const tokenImage = svgRef.current.querySelector(
+      `[data-token-id="${draggedToken.current.id}"]`,
+    );
+
+    if (tokenImage) {
+      tokenImage.setAttribute("x", newPosition.x.toString());
+      tokenImage.setAttribute("y", newPosition.y.toString());
+    }
+  };
+
+  const handleTokenDragEnd = () => {
+    if (draggedToken.current && temporaryTokenPosition.current) {
+      const updatedToken = {
+        ...draggedToken.current,
+        coordinates: temporaryTokenPosition.current,
+      };
+      onTokenMove(updatedToken);
+    }
+
+    draggedToken.current = null;
+    dragTokenStartPos.current = null;
+    temporaryTokenPosition.current = null;
+
+    window.removeEventListener("mousemove", handleTokenDragMove);
+    window.removeEventListener("mouseup", handleTokenDragEnd);
+  };
+
+  const handleTempElementDragStart = (
     event: React.MouseEvent<SVGRectElement>,
   ) => {
+    // Only start drag on left button
+    if (event.button !== 0) return;
     if (isDrawing || isPanning || !temporaryElement) return;
 
     const svg = svgRef.current;
@@ -435,16 +498,12 @@ function Canvas({
     if (!CTM) return;
     initialCTM.current = CTM;
 
-    // @ts-ignore
     const coords = transformScreenCoordsToSvgCoords(event);
 
-    dragElementStartPos.current = {
+    dragTempElementStartPos.current = {
       x: coords.x - temporaryElement.x,
       y: coords.y - temporaryElement.y,
     };
-
-    window.removeEventListener("mousemove", handleTempElementDragMove);
-    window.removeEventListener("mouseup", handleTempElementDragEnd);
 
     window.addEventListener("mousemove", handleTempElementDragMove);
     window.addEventListener("mouseup", handleTempElementDragEnd);
@@ -453,25 +512,26 @@ function Canvas({
   const handleTempElementDragMove = (event: MouseEvent) => {
     if (
       !temporaryElement ||
-      !dragElementStartPos.current ||
+      !dragTempElementStartPos.current ||
       !initialCTM.current ||
       !svgRef.current
     )
       return;
 
-    isDraggingToken.current = true;
+    isDragging.current = true;
     const currentPos = transformScreenCoordsToSvgCoords(event);
 
     const newPosition = {
-      x: currentPos.x - dragElementStartPos.current.x,
-      y: currentPos.y - dragElementStartPos.current.y,
+      x: currentPos.x - dragTempElementStartPos.current.x,
+      y: currentPos.y - dragTempElementStartPos.current.y,
     };
 
-    // Store the position for when we need to update React state
     temporaryTempElementPosition.current = Object.assign({}, newPosition);
 
     const element = svgRef.current.querySelector("#temp-element");
     const icon = svgRef.current.querySelector("#temp-element-icon");
+    const header = svgRef.current.querySelector("#temp-element-header");
+    const name = svgRef.current.querySelector("#temp-element-name");
 
     if (element && icon) {
       element.setAttribute("x", newPosition.x.toString());
@@ -479,11 +539,21 @@ function Canvas({
 
       icon.setAttribute(
         "transform",
-        `translate(${newPosition.x + 16}, ${newPosition.y + 40})`,
+        `translate(${newPosition.x + 6}, ${newPosition.y + 30})`,
       );
-    }
 
-    // Don't call forceUpdate here - we'll only update React state when the drag ends
+      if (header) {
+        header.setAttribute("x", newPosition.x.toString());
+        header.setAttribute("y", newPosition.y.toString());
+      }
+
+      if (name) {
+        name.setAttribute(
+          "transform",
+          `translate(${newPosition.x + 60}, ${newPosition.y + 30})`,
+        );
+      }
+    }
   };
 
   const handleTempElementDragEnd = () => {
@@ -497,101 +567,124 @@ function Canvas({
       onDrawed(update);
     }
 
-    dragElementStartPos.current = null;
-    isDraggingToken.current = false;
+    dragTempElementStartPos.current = null;
 
-    forceUpdate({});
-
-    window.removeEventListener("mousemove", handlePlayerDragMove);
-    window.removeEventListener("mouseup", handlePlayerDragEnd);
+    window.removeEventListener("mousemove", handleTempElementDragMove);
+    window.removeEventListener("mouseup", handleTempElementDragEnd);
   };
 
-  const handlePlayerDragMove = (event: MouseEvent) => {
+  const handleElementDragStart = (
+    event: React.MouseEvent<SVGGElement>,
+    element: ClickableCanvasElement & { id: any },
+  ) => {
+    // Only start drag on left button
+    if (event.button !== 0) return;
+    if (isDrawing || isPanning) return;
+
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    const CTM = svg.getScreenCTM();
+    if (!CTM) return;
+    initialCTM.current = CTM;
+
+    const coords = transformScreenCoordsToSvgCoords(event);
+
+    dragElementStartPos.current = {
+      x: coords.x - element.x,
+      y: coords.y - element.y,
+    };
+    draggedElement.current = element;
+
+    window.addEventListener("mousemove", handleElementDragMove);
+    window.addEventListener("mouseup", handleElementDragEnd);
+  };
+
+  const handleElementDragMove = (event: MouseEvent) => {
     if (
-      !draggedPlayer.current ||
-      !dragTokenStartPos.current ||
+      !draggedElement.current ||
+      !dragElementStartPos.current ||
       !initialCTM.current ||
       !svgRef.current
     )
       return;
 
-    isDraggingToken.current = true;
+    isDragging.current = true;
     const currentPos = transformScreenCoordsToSvgCoords(event);
 
     const newPosition = {
-      x: currentPos.x - dragTokenStartPos.current.x,
-      y: currentPos.y - dragTokenStartPos.current.y,
+      x: currentPos.x - dragElementStartPos.current.x,
+      y: currentPos.y - dragElementStartPos.current.y,
     };
 
-    // Store the position for when we need to update React state
-    temporaryPlayerPosition.current = {
-      playerId: draggedPlayer.current.id,
-      coordinates: newPosition,
-    };
+    temporaryElementPosition.current = newPosition;
 
-    // Find the actual SVG image element for this player and update it directly
-    const playerImage = svgRef.current.querySelector(
-      `[data-player-id="${draggedPlayer.current.id}"]`,
+    const elementG = svgRef.current.querySelector(
+      `[data-element-id="${draggedElement.current.id}"]`,
     );
-    if (playerImage) {
-      playerImage.setAttribute("x", newPosition.x.toString());
-      playerImage.setAttribute("y", newPosition.y.toString());
-    }
 
-    // Don't call forceUpdate here - we'll only update React state when the drag ends
-  };
-
-  const handlePlayerDragEnd = () => {
-    if (draggedPlayer.current && temporaryPlayerPosition.current) {
-      const updatedPlayer = {
-        ...draggedPlayer.current,
-      };
-
-      const updatedToken = tokens.find(
-        (token) => token.entity === updatedPlayer.id,
+    if (elementG) {
+      elementG.setAttribute(
+        "transform",
+        `translate(${newPosition.x}, ${newPosition.y})`,
       );
-
-      if (updatedToken) {
-        updatedToken.coordinates = temporaryPlayerPosition.current.coordinates;
-        onPlayerMove(updatedToken);
-      }
     }
-
-    draggedPlayer.current = null;
-    dragTokenStartPos.current = null;
-    temporaryPlayerPosition.current = null;
-
-    forceUpdate({});
-
-    window.removeEventListener("mousemove", handlePlayerDragMove);
-    window.removeEventListener("mouseup", handlePlayerDragEnd);
   };
 
-  function handleMouseUpOnPlayerToken(player: Player) {
-    if (isDraggingToken.current) {
-      isDraggingToken.current = false;
-    } else if (selectedPlayer && selectedPlayer.id === player.id) {
-      onPlayerSelect(null);
+  const handleElementDragEnd = () => {
+    if (draggedElement.current && temporaryElementPosition.current) {
+      const updatedElement = {
+        ...draggedElement.current,
+        x: temporaryElementPosition.current.x,
+        y: temporaryElementPosition.current.y,
+      };
+      onElementMove(updatedElement);
+    }
+
+    draggedElement.current = null;
+    dragElementStartPos.current = null;
+    temporaryElementPosition.current = null;
+
+    window.removeEventListener("mousemove", handleElementDragMove);
+    window.removeEventListener("mouseup", handleElementDragEnd);
+  };
+
+  function handleElementClick(elementOnClick: () => void | undefined) {
+    if (isDragging.current) {
+      isDragging.current = false;
+      return;
+    }
+    if (elementOnClick) elementOnClick();
+  }
+
+  function handleTokenClick(token: Token) {
+    if (isDragging.current) {
+      isDragging.current = false;
+      return;
+    }
+
+    if (selectedToken && selectedToken.id === token.id) {
+      onTokenSelect(null);
     } else {
-      onPlayerSelect(player);
+      onTokenSelect(token);
     }
   }
 
-  function unselectSelectedPlayer(event: KeyboardEvent) {
+  function unselectSelectedToken(event: KeyboardEvent) {
     if (event.key === "Escape") {
-      onPlayerSelect(null);
+      onTokenSelect(null);
     }
   }
 
   useEffect(() => {
     window.addEventListener("keydown", showPaneCursor);
     window.addEventListener("keyup", hidePaneCursor);
-    window.addEventListener("keydown", unselectSelectedPlayer);
+    window.addEventListener("keydown", unselectSelectedToken);
 
     return () => {
       window.removeEventListener("keydown", showPaneCursor);
       window.removeEventListener("keyup", hidePaneCursor);
-      window.removeEventListener("keydown", unselectSelectedPlayer);
+      window.removeEventListener("keydown", unselectSelectedToken);
     };
   }, []);
 
@@ -612,23 +705,13 @@ function Canvas({
     }
   }, [temporaryElement]);
 
-  function togglePlayerToken(player: Player) {
-    const update = [...playersTokenState];
-    const playerStateIndex = update.findIndex(
-      (playerState) => playerState.id === player.id,
-    );
+  function toggleToken(token: Token) {
+    const newVisibility = !(tokenVisibility[token.id] ?? true);
+    setTokenVisibility((prev) => ({ ...prev, [token.id]: newVisibility }));
 
-    update[playerStateIndex].visible = !update[playerStateIndex].visible;
-
-    if (
-      !update[playerStateIndex].visible &&
-      selectedPlayer &&
-      selectedPlayer.id === player.id
-    ) {
-      onPlayerSelect(null);
+    if (!newVisibility && selectedToken && token.id === selectedToken.id) {
+      onTokenSelect(null);
     }
-
-    setPlayersTokenState(update);
   }
 
   return (
@@ -653,7 +736,7 @@ function Canvas({
 
         {backgroundImage.current && (
           <defs>
-            <mask id="roundedImageMask">
+            <clipPath id="roundedImageClip">
               <rect
                 x={-backgroundImage.current.naturalWidth / 2}
                 y={-backgroundImage.current.naturalHeight / 2}
@@ -661,9 +744,8 @@ function Canvas({
                 height={backgroundImage.current.naturalHeight}
                 rx={8}
                 ry={8}
-                fill="white"
               />
-            </mask>
+            </clipPath>
           </defs>
         )}
 
@@ -675,83 +757,121 @@ function Canvas({
             x={-backgroundImage.current.naturalWidth / 2}
             y={-backgroundImage.current.naturalHeight / 2}
             preserveAspectRatio="xMidYMid"
-            mask="url(#roundedImageMask)"
+            clipPath="url(#roundedImageClip)"
+            pointerEvents="none"
+            style={{ imageRendering: zoom >= 2 ? "pixelated" : "auto" }}
           />
         )}
 
         {elements.map((element, index) => (
-          <g
-            className="hover:cursor-pointer"
-            key={"element-" + index}
-            onClick={element.onClick}
-          >
-            <rect
-              x={element.x}
-              y={element.y}
-              width={element.width}
-              height={element.height}
-              fill={element.color}
-              fillOpacity={0.25}
-              stroke={element.color}
-              strokeWidth={4}
-              rx={4}
-              ry={4}
-              filter="url(#subtleDropShadow)"
-            />
-
-            {/* Header rectangle */}
-            <rect
-              x={element.x}
-              y={element.y}
-              width={element.width}
-              height={60}
-              fill={element.color}
-              fillOpacity={0.8}
-              stroke={element.color}
-              strokeWidth={4}
-              rx={4}
-              ry={4}
-            />
-
-            {/* Icon */}
-            <g transform={`translate(${element.x + 6}, ${element.y + 30})`}>
-              <text
-                className="font-sans text-4xl font-bold shadow-sm select-none"
-                dominantBaseline="middle"
+          <ContextMenu key={"element-" + index} modal={false}>
+            <ContextMenuTrigger asChild>
+              <g
+                className="group hover:animate-pulse hover:cursor-move focus:outline-none"
+                data-element-id={element.id}
+                transform={`translate(${element.x}, ${element.y})`}
+                onMouseDown={(e) => handleElementDragStart(e, element)}
+                tabIndex={0}
+                role="button"
+                aria-label={
+                  element.name ? `Open ${element.name}` : "Open canvas element"
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    // @ts-ignore TODO: fix this ts issue
+                    handleElementClick(element.onClick);
+                  }
+                }}
               >
-                {element.icon}
-              </text>
-            </g>
+                <g className="hover:cursor-pointer">
+                  <rect
+                    x={0}
+                    y={0}
+                    width={element.width}
+                    height={element.height}
+                    fill={element.color}
+                    fillOpacity={0.25}
+                    stroke={element.color}
+                    strokeWidth={4}
+                    rx={4}
+                    ry={4}
+                    filter="url(#subtleDropShadow)"
+                  />
 
-            {/* Text */}
-            {element.name && (
-              <g transform={`translate(${element.x + 60}, ${element.y + 30})`}>
-                <defs>
-                  <clipPath id={`text-clip-${index}`}>
-                    <rect
-                      x="0"
-                      y="-12"
-                      width={element.width - 66}
-                      height="24"
-                    />
-                  </clipPath>
-                </defs>
-                <text
-                  className="font-sans text-lg font-medium text-white select-none"
-                  dominantBaseline="middle"
-                  clipPath={`url(#text-clip-${index})`}
-                >
-                  {element.name}
-                </text>
+                  {/* Header rectangle */}
+                  <rect
+                    x={0}
+                    y={0}
+                    width={element.width}
+                    height={60}
+                    fill={element.color}
+                    fillOpacity={0.8}
+                    stroke={element.color}
+                    strokeWidth={4}
+                    rx={4}
+                    ry={4}
+                  />
+
+                  {/* Icon */}
+                  <g transform={`translate(6, 30)`}>
+                    <text
+                      className="font-sans text-4xl font-bold shadow-sm select-none"
+                      dominantBaseline="middle"
+                    >
+                      {element.icon}
+                    </text>
+                  </g>
+
+                  {/* Text */}
+                  {element.name && (
+                    <g transform={`translate(60, 30)`}>
+                      <defs>
+                        <clipPath id={`text-clip-${index}`}>
+                          <rect
+                            x="0"
+                            y="-12"
+                            width={element.width - 66}
+                            height="24"
+                          />
+                        </clipPath>
+                      </defs>
+                      <text
+                        className="font-sans text-lg font-medium text-white select-none"
+                        dominantBaseline="middle"
+                        clipPath={`url(#text-clip-${index})`}
+                      >
+                        {element.name}
+                      </text>
+                    </g>
+                  )}
+                </g>
+
+                <rect
+                  x={0}
+                  y={0}
+                  width={element.width}
+                  height={element.height}
+                  rx={4}
+                  ry={4}
+                  fill="none"
+                  stroke="white"
+                  strokeWidth={8}
+                  className="pointer-events-none opacity-0 group-focus:opacity-100 group-focus-visible:opacity-100"
+                />
               </g>
-            )}
-          </g>
+            </ContextMenuTrigger>
+            <ContextMenuContent className="w-52">
+              <ContextMenuItem onClick={element.onEdit}>Edit</ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
         ))}
 
         {temporaryElement && (
           <g className="hover:cursor-move">
+            {/* Main rectangle */}
             <rect
-              onMouseDown={handeTempElementDragStart}
+              onMouseDown={handleTempElementDragStart}
               id="temp-element"
               x={temporaryElement.x}
               y={temporaryElement.y}
@@ -766,77 +886,191 @@ function Canvas({
               filter="url(#subtleDropShadow)"
             />
 
+            {/* Header rectangle */}
+            <rect
+              id="temp-element-header"
+              x={temporaryElement.x}
+              y={temporaryElement.y}
+              width={temporaryElement.width}
+              height={60}
+              fill={currentColor}
+              fillOpacity={0.8}
+              stroke={currentColor}
+              strokeWidth={4}
+              rx={4}
+              ry={4}
+              onMouseDown={handleTempElementDragStart}
+            />
+
+            {/* Icon */}
             <g
               id="temp-element-icon"
-              transform={`translate(${temporaryElement.x + 16}, ${temporaryElement.y + 40})`}
+              transform={`translate(${temporaryElement.x + 6}, ${temporaryElement.y + 30})`}
             >
               <text
                 className="font-sans text-4xl font-bold shadow-sm select-none"
                 dominantBaseline="middle"
               >
-                {currentIcon}
+                {currentIcon} {currentTitle}
               </text>
             </g>
           </g>
         )}
 
-        {selectedPlayer && (
+        {selectedToken && (
           <circle
             id="selection-ring"
-            cx={
-              // @ts-expect-error
-              tokens.find((token) => token.entity === selectedPlayer.id)
-                .coordinates.x + 50
-            }
-            cy={
-              // @ts-expect-error
-              tokens.find((token) => token.entity === selectedPlayer.id)
-                .coordinates.y + 50
-            }
+            cx={selectedToken.coordinates.x + 50}
+            cy={selectedToken.coordinates.y + 50}
             r={65}
             stroke="white"
-            //            stroke="#FA00FF" pink
-            stroke-width="10"
+            strokeWidth={10}
             className="animate-pulse"
           />
         )}
 
         {tokens.map((token) => {
-          const player = players.find((player) => player.id === token.entity);
-
-          return (
-            player && (
-              <image
-                className={cn(
-                  "hover:cursor-pointer",
-                  Boolean(
-                    playersTokenState.find(
-                      (playerToken) => playerToken.id === token.entity,
-                    )?.visible,
-                  )
-                    ? "visible"
-                    : "hidden",
-                  selectedPlayer &&
-                    token.entity === selectedPlayer.id &&
-                    "border-2 border-red-500",
-                )}
-                key={"player-" + token.entity}
-                data-player-id={player.id} // Add this attribute for direct DOM manipulation
-                // @ts-ignore
-                href={player.image}
-                width={100}
-                height={100}
-                x={token.coordinates.x}
-                y={token.coordinates.y}
-                preserveAspectRatio="xMidYMid"
-                style={{
-                  cursor: isDrawing || isPanning ? "default" : "move",
-                }}
-                onMouseDown={(e) => handlePlayerDragStart(e, player)}
-                onClick={() => handleMouseUpOnPlayerToken(player)}
-              />
-            )
+          const player = players.find(
+            (player) => token.type === "player" && player.id === token.entity,
           );
+          const opponent = opponents.find(
+            (opponent) =>
+              token.type === "opponent" && opponent.id === token.entity,
+          );
+
+          if (player) {
+            return (
+              <ContextMenu key={"player-" + token.id}>
+                <ContextMenuTrigger asChild>
+                  <g
+                    className={cn(
+                      "group focus:outline-none focus-visible:outline-none",
+                      (tokenVisibility[token.id] ?? true)
+                        ? "visible"
+                        : "hidden",
+                    )}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Token of player ${player.name}`}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleTokenClick(token);
+                      }
+                    }}
+                  >
+                    <image
+                      className={cn(
+                        "hover:cursor-pointer",
+                        selectedToken &&
+                          token.id === selectedToken.id &&
+                          "border-2 border-red-500",
+                      )}
+                      data-token-id={token.id}
+                      href={!player.image ? undefined : player.image}
+                      width={100}
+                      height={100}
+                      x={token.coordinates.x}
+                      y={token.coordinates.y}
+                      preserveAspectRatio="xMidYMid"
+                      style={{
+                        cursor: isDrawing || isPanning ? "default" : "move",
+                        clipPath: "circle(40%)",
+                      }}
+                      onMouseDown={(e) => handleTokenDragStart(e, token)}
+                      onClick={() => handleTokenClick(token)}
+                    />
+
+                    <circle
+                      cx={token.coordinates.x + 50}
+                      cy={token.coordinates.y + 50}
+                      r={52}
+                      fill="none"
+                      stroke="white"
+                      strokeWidth={4}
+                      className="pointer-events-none opacity-0 group-focus:opacity-100 group-focus-visible:opacity-100"
+                    />
+                  </g>
+                </ContextMenuTrigger>
+                <ContextMenuContent className="w-40">
+                  <ContextMenuItem onClick={() => onTokenSelect(token)}>
+                    Select
+                  </ContextMenuItem>
+                  <ContextMenuItem onClick={() => toggleToken(token)}>
+                    {(tokenVisibility[token.id] ?? true) ? "Hide" : "Show"}
+                  </ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
+            );
+          }
+
+          if (opponent) {
+            return (
+              <ContextMenu key={"opponent-" + token.id}>
+                <ContextMenuTrigger asChild>
+                  <g
+                    className={cn(
+                      "group outline-4 focus:outline-none focus-visible:outline-none",
+                      (tokenVisibility[token.id] ?? true)
+                        ? "visible"
+                        : "hidden",
+                    )}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Token of opponent ${opponent.name}`}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleTokenClick(token);
+                      }
+                    }}
+                  >
+                    <image
+                      className={cn(
+                        "hover:cursor-pointer",
+                        selectedToken &&
+                          token.id === selectedToken.id &&
+                          "border-2 border-red-500",
+                      )}
+                      data-token-id={token.id}
+                      href={opponent.image === "" ? undefined : opponent.image}
+                      width={100}
+                      height={100}
+                      x={token.coordinates.x}
+                      y={token.coordinates.y}
+                      preserveAspectRatio="xMidYMid"
+                      style={{
+                        cursor: isDrawing || isPanning ? "default" : "move",
+                        clipPath: "circle(40%)",
+                      }}
+                      onMouseDown={(e) => handleTokenDragStart(e, token)}
+                      onClick={() => handleTokenClick(token)}
+                    />
+
+                    <circle
+                      cx={token.coordinates.x + 50}
+                      cy={token.coordinates.y + 50}
+                      r={52}
+                      fill="none"
+                      stroke="white"
+                      strokeWidth={4}
+                      className="pointer-events-none opacity-0 group-focus:opacity-100 group-focus-visible:opacity-100"
+                    />
+                  </g>
+                </ContextMenuTrigger>
+                <ContextMenuContent className="w-40">
+                  <ContextMenuItem onClick={() => onTokenSelect(token)}>
+                    Select
+                  </ContextMenuItem>
+                  <ContextMenuItem onClick={() => toggleToken(token)}>
+                    {(tokenVisibility[token.id] ?? true) ? "Hide" : "Show"}
+                  </ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
+            );
+          }
+
+          return null;
         })}
       </svg>
 
@@ -852,34 +1086,77 @@ function Canvas({
           )}
         </button>
 
-        {players.map((player) => (
-          <button
-            key={`player-${player.id}-token-state`}
-            onClick={() => togglePlayerToken(player)}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
-          >
-            <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
-              {player.image && player.image !== "" ? (
-                <img
-                  className="col-start-1 col-end-1 row-start-1 row-end-2"
-                  src={player.image}
-                  alt={`Picture of Player ${player.name}`}
-                />
-              ) : (
-                <span className="col-start-1 col-end-1 row-start-1 row-end-2">
-                  {player.icon}
-                </span>
-              )}
+        <div className="flex flex-col gap-2">
+          {players.map((player) => {
+            const token = tokens.find(
+              (t) => t.type === "player" && t.entity === player.id,
+            );
+            if (!token) return null;
+            return (
+              <button
+                key={`player-${player.id}-token-state`}
+                onClick={() => toggleToken(token)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+              >
+                <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
+                  {player.image && player.image !== "" ? (
+                    <img
+                      className="col-start-1 col-end-1 row-start-1 row-end-2"
+                      src={player.image}
+                      alt={`Picture of Player ${player.name}`}
+                    />
+                  ) : (
+                    <span className="col-start-1 col-end-1 row-start-1 row-end-2">
+                      {player.icon}
+                    </span>
+                  )}
 
-              {!playersTokenState.find((state) => state.id === player.id)
-                ?.visible && (
-                <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
-                  <EyeNoneIcon className="h-4 w-4 text-white" />
+                  {!(tokenVisibility[token.id] ?? true) && (
+                    <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                      <EyeNoneIcon className="h-4 w-4 text-white" />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </button>
-        ))}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {opponents.map((opponent) => {
+            const token = tokens.find(
+              (t) => t.type === "opponent" && t.entity === opponent.id,
+            );
+            if (!token) return null;
+            return (
+              <button
+                key={`opponent-${opponent.id}-token-state`}
+                onClick={() => toggleToken(token)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+              >
+                <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
+                  {opponent.image && opponent.image !== "" ? (
+                    <img
+                      className="col-start-1 col-end-1 row-start-1 row-end-2"
+                      src={opponent.image}
+                      alt={`Picture of Opponent ${opponent.name}`}
+                    />
+                  ) : (
+                    <span className="col-start-1 col-end-1 row-start-1 row-end-2">
+                      {opponent.icon}
+                    </span>
+                  )}
+
+                  {!(tokenVisibility[token.id] ?? true) && (
+                    <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                      <EyeNoneIcon className="h-4 w-4 text-white" />
+                    </div>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="absolute bottom-4 left-4 flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">

@@ -25,32 +25,35 @@ import {
   TooltipProvider,
 } from "../ui/tooltip";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
+import { CancelReason, OverlayMap } from "@/types/overlay";
 
-type Props = {
-  effect: Effect | null;
-  isLoading: boolean;
+type OverlayProps = OverlayMap["effect.edit"];
+
+type RuntimeProps = {
   open: boolean;
   onOpenChange: (state: boolean) => void;
-  onEdit: (effect: Effect) => void;
+  onExitComplete: () => void; // host removes after exit
 };
+
+type Props = OverlayProps & RuntimeProps;
 
 function EditEffectDrawer({
   effect,
-  isLoading,
   open,
   onEdit,
   onOpenChange,
+  onCancel,
+  onComplete,
+  onExitComplete,
 }: Props) {
   const { t } = useTranslation("ComponentEditEffectDrawer");
+  const [isLoading, setIsLoading] = useState(false);
+  const [closingReason, setClosingReason] = useState<
+    null | "success" | CancelReason
+  >(null);
   const [durationType, setDurationType] = useState<Effect["durationType"]>(
-    effect ? effect.durationType : "rounds",
+    effect.durationType,
   );
-
-  useEffect(() => {
-    if (!!effect) {
-      form.reset(effect);
-    }
-  }, [effect]);
 
   const formSchema = z.object({
     name: z.string().min(2, {
@@ -62,29 +65,42 @@ function EditEffectDrawer({
     duration: z.coerce.number().min(1, {
       message: t("validation.minDuration"),
     }),
-    durationType: z.enum(["rounds", "time"]),
+    durationType: z.enum(["rounds", "time", "long", "short"]),
     value: z.coerce.number(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: effect ? effect.name : "",
-      description: effect ? effect.description : "",
-      icon: effect ? effect.icon : "✨",
-      type: effect ? effect.type : "positive",
-      duration: effect ? effect.duration : 1,
-      durationType: effect ? effect.durationType : "rounds",
-      value: Math.abs(effect ? effect.value : 1),
+      name: effect.name,
+      description: effect.description,
+      icon: effect.icon,
+      type: effect.type,
+      duration: effect.duration,
+      durationType: effect.durationType,
+      value: effect.value,
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const { name, description, icon, duration, durationType, type, value } =
-      values;
+  useEffect(() => {
+    form.reset({
+      name: effect.name,
+      description: effect.description,
+      icon: effect.icon,
+      type: effect.type,
+      duration: effect.duration,
+      durationType: effect.durationType,
+      value: Math.abs(effect.value),
+    });
+  }, [effect, form]);
 
-    if (!!effect) {
-      onEdit({
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      setIsLoading(true);
+      const { name, description, icon, duration, durationType, type, value } =
+        values;
+
+      const updatedEffect = await onEdit({
         id: effect.id,
         name,
         icon,
@@ -92,8 +108,18 @@ function EditEffectDrawer({
         duration,
         durationType,
         type,
-        value: type === "positive" ? value : Math.abs(value) * -1,
+        value,
       });
+
+      onComplete?.(updatedEffect);
+      setClosingReason("success");
+      onOpenChange(false);
+      form.reset();
+    } catch (error) {
+      console.log("Error while updating an effect");
+      console.log(error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -110,29 +136,46 @@ function EditEffectDrawer({
     setDurationType(value);
   }
 
+  function handleCancelClick() {
+    onCancel?.("cancel");
+    setClosingReason("cancel");
+    onOpenChange(false);
+  }
+
+  function handleOpenChange(state: boolean) {
+    if (!state && closingReason === null) {
+      onCancel?.("dismissed");
+      setClosingReason("dismissed");
+    }
+
+    onOpenChange(state);
+  }
+
   return (
     <Drawer
+      onExitComplete={onExitComplete}
       description={t("descriptionText")}
-      open={open && !!effect}
-      onOpenChange={onOpenChange}
+      open={open}
+      onOpenChange={handleOpenChange}
       title={t("title")}
       actions={
-        <Button loading={isLoading} onClick={form.handleSubmit(onSubmit)}>
-          {t("edit")}
-        </Button>
+        <Button onClick={form.handleSubmit(onSubmit)}>{t("edit")}</Button>
       }
       cancelTrigger={
-        <Button disabled={isLoading} variant="ghost">
+        <Button
+          disabled={isLoading}
+          variant="ghost"
+          onClick={handleCancelClick}
+        >
           {t("cancel")}
         </Button>
       }
       children={
-        !!effect && (
-          <Form {...form}>
-            <form
-              onSubmit={(e) => e.preventDefault()}
-              className="flex flex-col gap-4"
-            >
+        <Form {...form} key={effect.id}>
+          <form
+            onSubmit={(e) => e.preventDefault()}
+            className="flex flex-col gap-4"
+          >
               <div className="flex items-start gap-2">
                 <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
                   <FormLabel>{t("icon")}</FormLabel>
@@ -298,7 +341,6 @@ function EditEffectDrawer({
               </div>
             </form>
           </Form>
-        )
       }
     />
   );

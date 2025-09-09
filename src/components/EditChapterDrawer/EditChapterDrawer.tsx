@@ -1,5 +1,4 @@
 import { storeImage } from "@/lib/utils";
-import { Chapter } from "@/types/chapters";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
@@ -18,6 +17,13 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import {
   AlertDialog,
@@ -31,28 +37,37 @@ import {
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
 
-type Props = {
-  chapter: Chapter | null;
-  loading: boolean;
+import { CancelReason, OverlayMap } from "@/types/overlay";
+
+type OverlayProps = OverlayMap["chapter.edit"];
+
+type RuntimeProps = {
   open: boolean;
   onOpenChange: (state: boolean) => void;
-  onSave: (chapter: Chapter) => void;
-  onDelete: (chapterId: Chapter["id"]) => void;
+  onExitComplete: () => void; // host removes after exit
 };
 
+type Props = OverlayProps & RuntimeProps;
+
 function EditChapterDrawer({
-  onSave,
   chapter,
-  loading,
   open,
   onOpenChange,
+  onExitComplete,
+  onComplete,
+  onCancel,
   onDelete,
+  onEdit,
 }: Props) {
   const { t } = useTranslation("ComponentEditChapterDrawer");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [refreshKey, setRefreshKey] = useState<number>(0); // to reset the input type file path after a reset
   const [picturePreview, setPicturePreview] = useState<string>(
     chapter?.battlemap || "",
   );
+  const [closingReason, setClosingReason] = useState<
+    null | "success" | CancelReason
+  >(null);
 
   const formSchema = z.object({
     name: z.string().min(2, {
@@ -61,6 +76,7 @@ function EditChapterDrawer({
     description: z.string(),
     icon: z.string().emoji(),
     battlemap: z.instanceof(File).or(z.string()),
+    state: z.enum(["draft", "ongoing", "completed"]),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -70,6 +86,7 @@ function EditChapterDrawer({
       description: "",
       icon: "🧙",
       battlemap: "",
+      state: "draft",
     },
   });
 
@@ -80,6 +97,7 @@ function EditChapterDrawer({
         description: chapter.description || "",
         icon: chapter.icon,
         battlemap: chapter.battlemap || "",
+        state: chapter.state,
       });
 
       setPicturePreview(chapter?.battlemap || "");
@@ -87,24 +105,53 @@ function EditChapterDrawer({
   }, [chapter, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (chapter) {
-      const { name, description, icon, battlemap } = values;
+    try {
+      setIsLoading(true);
+
+      const { name, description, icon, battlemap, state } = values;
       let battlemapFilePath: string | null = null;
 
       if (!!battlemap) {
         battlemapFilePath = await storeImage(battlemap, "battlemaps");
       }
 
-      onSave({
+      const updatedChapter = await onEdit({
         ...chapter,
         name,
         description,
         icon,
         battlemap: battlemapFilePath || chapter.battlemap,
+        state,
       });
 
       form.reset();
+
+      onComplete(updatedChapter);
+
+      setClosingReason("success");
+      onOpenChange(false);
+      form.reset();
+    } catch (error) {
+      console.log("Error while updating a chapter");
+      console.log(error);
+    } finally {
+      setIsLoading(false);
     }
+  }
+
+  function handleCancelClick() {
+    onCancel?.("cancel");
+    setClosingReason("cancel");
+    onOpenChange(false);
+  }
+
+  function handleOpenChange(state: boolean) {
+    if (!state && closingReason === null) {
+      onCancel?.("dismissed");
+      setClosingReason("dismissed");
+    }
+
+    onOpenChange(state);
   }
 
   function handleResetPicture() {
@@ -127,23 +174,31 @@ function EditChapterDrawer({
     form.setValue("icon", icon);
   }
 
-  function handleDeleteChapter() {
-    if (chapter) {
-      onDelete(chapter.id);
-      form.reset();
+  async function handleDeleteChapter() {
+    try {
+      setIsLoading(true);
+      await onDelete(chapter.id);
+      onComplete({ chapterId: chapter.id });
+      setClosingReason("success");
       onOpenChange(false);
+      form.reset();
+    } catch (error) {
+      console.log("Error while deleting chapter");
+    } finally {
+      setIsLoading(false);
     }
   }
 
   return (
     <Drawer
+      onExitComplete={onExitComplete}
       description={t("titleDescription")}
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
       title={t("title")}
       actions={
         <>
-          <Button loading={loading} onClick={form.handleSubmit(onSubmit)}>
+          <Button loading={isLoading} onClick={form.handleSubmit(onSubmit)}>
             {t("save")}
           </Button>
 
@@ -151,8 +206,8 @@ function EditChapterDrawer({
             <AlertDialogTrigger asChild>
               <Button
                 variant="destructive"
-                loading={loading}
-                disabled={loading}
+                loading={isLoading}
+                disabled={isLoading}
               >
                 {t("delete")}
               </Button>
@@ -176,7 +231,11 @@ function EditChapterDrawer({
         </>
       }
       cancelTrigger={
-        <Button disabled={loading} variant="ghost">
+        <Button
+          disabled={isLoading}
+          variant="ghost"
+          onClick={handleCancelClick}
+        >
           {t("cancel")}
         </Button>
       }
@@ -188,7 +247,7 @@ function EditChapterDrawer({
               <FormLabel>{t("icon")}</FormLabel>
               <IconPicker
                 initialIcon={chapter?.icon}
-                disabled={loading}
+                disabled={isLoading}
                 onIconClick={handleIconSelect}
               />
               <FormMessage />
@@ -202,7 +261,7 @@ function EditChapterDrawer({
                   <FormLabel>{t("name")}</FormLabel>
                   <FormControl>
                     <Input
-                      disabled={loading}
+                      disabled={isLoading}
                       placeholder={t("namePlaceholder")}
                       {...field}
                     />
@@ -215,13 +274,40 @@ function EditChapterDrawer({
 
           <FormField
             control={form.control}
+            name="state"
+            render={({ field }) => (
+              <FormItem className="px-0.5">
+                <FormLabel>{t("status")}</FormLabel>
+                <Select
+                  disabled={isLoading}
+                  onValueChange={field.onChange}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("statusPlaceholder")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="draft">{t("draft")}</SelectItem>
+                    <SelectItem value="ongoing">{t("ongoing")}</SelectItem>
+                    <SelectItem value="completed">{t("completed")}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem className="px-0.5">
                 <FormLabel>{t("description")}</FormLabel>
 
                 <FormControl>
-                  <Textarea disabled={loading} placeholder="" {...field} />
+                  <Textarea disabled={isLoading} placeholder="" {...field} />
                 </FormControl>
 
                 <FormMessage />
@@ -272,3 +358,4 @@ function EditChapterDrawer({
 }
 
 export default EditChapterDrawer;
+

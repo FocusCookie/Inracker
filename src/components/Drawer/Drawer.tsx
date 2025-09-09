@@ -20,11 +20,11 @@ type Props = {
   cancelTrigger: React.ReactNode;
   noBackgdrop?: boolean;
   modal?: boolean;
+  onExitComplete: () => void;
 };
 
 function Drawer({
   open,
-  onOpenChange,
   title,
   description,
   children,
@@ -33,6 +33,8 @@ function Drawer({
   cancelTrigger,
   noBackgdrop,
   modal,
+  onExitComplete,
+  onOpenChange,
 }: Props) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -40,7 +42,7 @@ function Drawer({
         <Dialog.Trigger asChild>{createTrigger}</Dialog.Trigger>
       )}
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" onExitComplete={onExitComplete}>
         {open && (
           <Dialog.Portal
             container={document.getElementById("drawer-portal")}

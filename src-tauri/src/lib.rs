@@ -113,7 +113,7 @@ pub fn run() {
                 passed INTEGER NOT NULL, -- boolean state
                 dice INTEGER,
                 skill TEXT,
-                difficulties string, -- array of difficulty classes
+                difficulties TEXT, -- array of difficulty classes
                 opponents TEXT -- JSON array of ids of opponents
             )",
             kind: MigrationKind::Up,
@@ -179,7 +179,7 @@ pub fn run() {
                 entity_type TEXT NOT NULL, -- 'player' or 'opponent'
                 remaining_duration INTEGER, -- null for 'until rest' effects
                 duration_type TEXT NOT NULL, -- 'rounds', 'minutes', 'hours', 'short_rest', 'long_rest'
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )",
             kind: MigrationKind::Up,
         },

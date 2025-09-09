@@ -11,8 +11,10 @@ const meta = {
   args: {
     open: true,
     onOpenChange: fn(),
-    isLoading: false,
     onEdit: fn(),
+    onComplete: fn(),
+    onCancel: fn(),
+    onExitComplete: fn(),
     resistance: {
       id: 1,
       name: "Fire Resistance",
@@ -35,14 +37,3 @@ export const Primary: Story = {
   // args: {},
 };
 
-export const Loading: Story = {
-  args: {
-    isLoading: true,
-  },
-};
-
-export const NoResistance: Story = {
-  args: {
-    resistance: null,
-  },
-};

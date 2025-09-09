@@ -2,102 +2,194 @@ import { storeImage } from "@/lib/utils";
 import { TCreatePlayer } from "@/types/player";
 import CreatePlayerForm from "../CreatePlayerForm/CreatePlayerForm";
 import Drawer from "../Drawer/Drawer";
-import { Button } from "../ui/button";
 import { TypographyH2 } from "../ui/typographyh2";
 import { DBImmunity } from "@/types/immunitiy";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
 import { DBResistance } from "@/types/resistances";
 import ResistanceCard from "../ResistanceCard/ResistanceCard";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
+import { useOverlayStore } from "@/stores/useOverlayStore";
+import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
+import { useCreatePlayer } from "@/hooks/useCreatePlayer";
+import db from "@/lib/database";
+import type { CancelReason, OverlayMap } from "@/types/overlay";
+import { Button } from "../ui/button";
+type OverlayProps = OverlayMap["player.create"];
 
-type Props = {
+type RuntimeProps = {
   open: boolean;
-  loading: boolean;
-  /**
-   * the form which controls all the inputs
-   */
-  form: any;
-  immunities: DBImmunity[];
-  resistances: DBResistance[];
   onOpenChange: (state: boolean) => void;
-  onCreate: (player: TCreatePlayer) => void;
-  onOpenImmunityCatalog: () => void;
-  onOpenResistanceCatalog: () => void;
-  onCreateImmunity: () => void;
-  onCreateResistance: () => void;
+  onExitComplete: () => void;
 };
+type Props = OverlayProps & RuntimeProps;
 
-function CreatePlayerDrawer({
+export default function CreatePlayerDrawer({
   open,
-  loading,
-  form,
-  immunities,
-  resistances,
-  onOpenChange,
   onCreate,
-  onOpenImmunityCatalog,
-  onOpenResistanceCatalog,
-  onCreateImmunity,
-  onCreateResistance,
+  onComplete,
+  onCancel,
+  onOpenChange,
+  onExitComplete,
 }: Props) {
   const { t } = useTranslation("ComponentCreatePlayerDrawer");
+  const openOverlay = useOverlayStore((s) => s.open);
+  const [isCreating, setIsCreating] = useState(false);
+  const [closingReason, setClosingReason] = useState<
+    null | "success" | CancelReason
+  >(null);
+  const form = useCreatePlayer();
 
-  async function handleCreatePlayer() {
-    const {
-      picture,
-      details,
-      ep,
-      icon,
-      immunities,
-      level,
-      maxHealth,
-      name,
-      overview,
-      resistances,
-      role,
-    } = form.getValues();
-    let pictureFilePath: string | null = null;
+  const immunities = useQueryWithToast({
+    queryKey: ["immunities"],
+    queryFn: () => db.immunitites.getAll(),
+  });
 
-    if (!!picture) {
-      pictureFilePath = await storeImage(picture, "players");
+  const resistances = useQueryWithToast({
+    queryKey: ["resistances"],
+    queryFn: () => db.resistances.getAll(),
+  });
+
+  async function handleSubmit(values: any) {
+    try {
+      setIsCreating(true);
+
+      let pictureFilePath: string | null = null;
+      if (values.picture) {
+        pictureFilePath = await storeImage(values.picture, "players");
+      }
+
+      const input: TCreatePlayer = {
+        name: values.name,
+        details: values.details ?? "",
+        overview: values.overview ?? "",
+        icon: values.icon,
+        level: values.level,
+        max_health: values.maxHealth,
+        health: values.maxHealth,
+        ep: values.ep,
+        role: values.role,
+        image: pictureFilePath || "",
+        immunities: values.immunities,
+        resistances: values.resistances,
+        effects: [],
+      };
+
+      console.log("create ", input);
+      const created = await onCreate(input); // must return { id: number }
+
+      onComplete(created);
+
+      setClosingReason("success");
+      onOpenChange(false);
+      form.reset();
+    } finally {
+      setIsCreating(false);
+    }
+  }
+
+  function handleCancelClick() {
+    onCancel?.("cancel");
+    setClosingReason("cancel");
+    onOpenChange(false);
+  }
+
+  function handleOpenChange(state: boolean) {
+    if (!state && closingReason === null) {
+      onCancel?.("dismissed");
+      setClosingReason("dismissed");
     }
 
-    onCreate({
-      details,
-      ep,
-      icon,
-      immunities,
-      level,
-      name,
-      overview,
-      resistances,
-      role,
-      health: maxHealth,
-      max_health: maxHealth,
-      effects: [],
-      image: pictureFilePath || "",
+    onOpenChange(state);
+  }
+
+  function handleCreateImmunity() {
+    openOverlay("immunity.create", {
+      onCreate: async (immunity) => {
+        const createdImmunity = await db.immunitites.create(immunity);
+
+        return createdImmunity;
+      },
+      onComplete: (immunity) => {
+        const currentImmunities = form.getValues("immunities");
+        form.setValue("immunities", [...currentImmunities, immunity.id]);
+
+        immunities.refetch();
+      },
+      onCancel: (reason) => {
+        console.log("Immunity creation cancelled:", reason);
+      },
+    });
+  }
+
+  function handleCreateResistance() {
+    openOverlay("resistance.create", {
+      onCreate: async (resistance) => {
+        const created = await db.resistances.create(resistance);
+
+        return created;
+      },
+      onComplete: (resistance) => {
+        const currentResistances = form.getValues("resistances");
+        form.setValue("resistances", [...currentResistances, resistance.id]);
+
+        console.log(form.getValues("resistances"));
+        resistances.refetch();
+      },
+      onCancel: (reason) => {
+        console.log("Resistance creation cancelled:", reason);
+      },
+    });
+  }
+
+  function handleOpenImmunityCatalog() {
+    openOverlay("immunity.catalog", {
+      onSelect: async (immunity) => {
+        const currentImmunities = form.getValues("immunities");
+        form.setValue("immunities", [...currentImmunities, immunity.id]);
+      },
+      onCancel: (reason) => {
+        console.log("Immunity catalog cancelled:", reason);
+      },
+    });
+  }
+
+  function handleOpenResistanceCatalog() {
+    openOverlay("resistance.catalog", {
+      onSelect: async (resistances) => {
+        const currentResistances = form.getValues("resistances");
+        form.setValue("resistances", [...currentResistances, resistances.id]);
+      },
+      onCancel: (reason) => {
+        console.log("Resistance catalog cancelled:", reason);
+      },
     });
   }
 
   return (
     <Drawer
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
+      onExitComplete={onExitComplete}
       description={t("descriptionText")}
       title={t("title")}
-      cancelTrigger={
-        <Button disabled={loading} variant="ghost">
-          {t("cancel")}
+      actions={
+        <Button disabled={isCreating} onClick={form.handleSubmit(handleSubmit)}>
+          {t("create")}
         </Button>
       }
-      actions={
-        <Button loading={loading} onClick={handleCreatePlayer}>
-          {t("create")}
+      cancelTrigger={
+        <Button
+          onClick={handleCancelClick}
+          disabled={isCreating}
+          variant="ghost"
+        >
+          {t("cancel")}
         </Button>
       }
     >
       <div className="scrollable-y overflow-y-scroll pr-0.5">
-        <CreatePlayerForm form={form} disabled={loading}>
+        <CreatePlayerForm form={form} disabled={isCreating}>
           <CreatePlayerForm.Immunities>
             <div className="flex flex-col gap-2">
               <div className="flex justify-between gap-4">
@@ -106,12 +198,12 @@ function CreatePlayerDrawer({
                   <Button
                     type="button"
                     variant="ghost"
-                    onClick={onCreateImmunity}
+                    onClick={handleCreateImmunity}
                   >
                     {t("create")}
                   </Button>
 
-                  <Button type="button" onClick={onOpenImmunityCatalog}>
+                  <Button type="button" onClick={handleOpenImmunityCatalog}>
                     {t("catalog")}
                   </Button>
                 </div>
@@ -119,7 +211,13 @@ function CreatePlayerDrawer({
               <div className="flex flex-col gap-4">
                 {form
                   .watch("immunities")
-                  .map((id: number) => immunities.find((im) => im.id === id))
+                  .map((id: number) =>
+                    immunities.data?.find((im) => im.id === id),
+                  )
+                  .filter(
+                    (immunity): immunity is DBImmunity =>
+                      immunity !== undefined,
+                  )
                   .map((immunity: DBImmunity) => (
                     <ImmunityCard
                       key={`immunity-${immunity.id}`}
@@ -138,12 +236,12 @@ function CreatePlayerDrawer({
                   <Button
                     type="button"
                     variant="ghost"
-                    onClick={onCreateResistance}
+                    onClick={handleCreateResistance}
                   >
                     {t("create")}
                   </Button>
 
-                  <Button type="button" onClick={onOpenResistanceCatalog}>
+                  <Button type="button" onClick={handleOpenResistanceCatalog}>
                     {t("catalog")}
                   </Button>
                 </div>
@@ -151,7 +249,13 @@ function CreatePlayerDrawer({
               <div className="flex flex-col gap-4">
                 {form
                   .watch("resistances")
-                  .map((id: number) => resistances.find((re) => re.id === id))
+                  .map((id: number) =>
+                    resistances.data?.find((re) => re.id === id),
+                  )
+                  .filter(
+                    (resistance): resistance is DBResistance =>
+                      resistance !== undefined,
+                  )
                   .map((resistance: DBResistance) => (
                     <ResistanceCard
                       key={`resistance-${resistance.id}`}
@@ -166,5 +270,3 @@ function CreatePlayerDrawer({
     </Drawer>
   );
 }
-
-export default CreatePlayerDrawer;

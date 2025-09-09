@@ -444,6 +444,7 @@ const addPlayerToParty = async (
   playerId: number,
 ) => {
   const dbParty = await getPartyById(db, partyId);
+  const player = await getDetailedPlayerById(db, playerId);
   const players = JSON.parse(dbParty.players) as number[];
   players.push(playerId);
 
@@ -452,9 +453,7 @@ const addPlayerToParty = async (
     JSON.stringify(players),
   ]);
 
-  const updatedParty = await getPartyDetailedById(db, partyId);
-
-  return updatedParty;
+  return player;
 };
 
 const removePlayerFromParty = async (
@@ -475,7 +474,7 @@ const removePlayerFromParty = async (
 const deletePartyById = async (
   db: TauriDatabase,
   id: number,
-): Promise<DBParty> => {
+): Promise<Party["id"]> => {
   const deletedParty = await getPartyById(db, id);
   const chapters = await getAllChaptersForParty(db, id);
 
@@ -518,14 +517,14 @@ const deletePartyById = async (
 
   await db.execute("DELETE FROM parties WHERE id = $1", [id]);
 
-  return deletedParty;
+  return deletedParty.id;
 };
 
 //* Player
 const getDetailedPlayerById = async (
   db: TauriDatabase,
   playerId: Player["id"],
-) => {
+): Promise<Player> => {
   const dbPlayer = await getPlayerById(db, playerId);
   const {
     effects: dbEffects,
@@ -727,7 +726,7 @@ const addImmunityToPlayer = async (
   db: TauriDatabase,
   playerId: Player["id"],
   immunityId: DBImmunity["id"],
-) => {
+): Promise<Player> => {
   const { immunities } = await getDetailedPlayerById(db, playerId);
   const isAlreadySet = immunities.some(
     (immunity) => immunity.id === immunityId,
@@ -752,6 +751,9 @@ const removeImmunityFromPlayer = async (
   immunityId: DBImmunity["id"],
 ) => {
   const { immunities } = await getDetailedPlayerById(db, playerId);
+  const removedImmunity = immunities.find(
+    (immunity) => immunity.id === immunityId,
+  );
   const update = immunities.filter((immunity) => immunity.id !== immunityId);
 
   await db.execute("UPDATE players SET immunities = $2 WHERE id = $1", [
@@ -764,14 +766,14 @@ const removeImmunityFromPlayer = async (
     ),
   ]);
 
-  return getDetailedPlayerById(db, playerId);
+  return removedImmunity as DBImmunity;
 };
 
 const addResistanceToPlayer = async (
   db: TauriDatabase,
   playerId: Player["id"],
   resistanceId: DBResistance["id"],
-) => {
+): Promise<Player> => {
   const { resistances } = await getDetailedPlayerById(db, playerId);
   const isAlreadySet = resistances.some(
     (resistance) => resistance.id === resistanceId,
@@ -796,6 +798,9 @@ const removeResistanceFromPlayer = async (
   resistanceId: DBResistance["id"],
 ) => {
   const { resistances } = await getDetailedPlayerById(db, playerId);
+  const removedResistance = resistances.find(
+    (resistance) => resistance.id === resistanceId,
+  ) as DBResistance;
   const update = resistances.filter(
     (resistance) => resistance.id !== resistanceId,
   );
@@ -810,7 +815,7 @@ const removeResistanceFromPlayer = async (
     ),
   ]);
 
-  return getDetailedPlayerById(db, playerId);
+  return removedResistance;
 };
 
 const deletePlayerById = async (
@@ -943,7 +948,7 @@ const updateChapterProperty = async <
 
   await db.execute(sql, [chapterId, value]);
 
-  const updated = await getDetailedChapterById(db, chapterId);
+  await getDetailedChapterById(db, chapterId);
 
   return getDetailedChapterById(db, chapterId);
 };
@@ -1197,6 +1202,20 @@ const getDetailedEncountersByIds = async (
   return encounters.map((enc) => enc.value) as unknown as Encounter[];
 };
 
+const getDetailedEncountersByChapterId = async (
+  db: TauriDatabase,
+  chapterId: Chapter["id"],
+): Promise<Encounter[]> => {
+  const chapter = await getDetailedChapterById(db, chapterId);
+  const encounterPromises = chapter.encounters.map((id) =>
+    getDetailedEncounterById(db, id),
+  );
+  const encounters = await Promise.allSettled(encounterPromises);
+
+  //@ts-ignore
+  return encounters.map((enc) => enc.value) as unknown as Encounter[];
+};
+
 const createEncounter = async (
   db: TauriDatabase,
   encounter: Omit<Encounter, "id">,
@@ -1305,7 +1324,7 @@ const getAllDetailedOpponents = async (
     detailedOpponents.push(detailedOpponent);
   }
 
-  return detailedOpponents;
+  return detailedOpponents as unknown as Opponent[];
 };
 
 const getDetailedOpponentById = async (
@@ -1770,7 +1789,7 @@ export const Database = {
       const db = await connect();
       return getResistanceById(db, id);
     },
-    create: async (resistance: Omit<DBResistance, "id">) => {
+    create: async (resistance: Resistance) => {
       const db = await connect();
       return createResistance(db, resistance);
     },
@@ -1849,15 +1868,7 @@ export const Database = {
     },
     getAllDetailed: async () => {
       const db = await connect();
-      const playersRaw = await getAllPlayers(db);
-      const detailedPlayers: Player[] = [];
-
-      for (const player of playersRaw) {
-        const detailedPlayer = await getDetailedPlayerById(db, player.id);
-        detailedPlayers.push(detailedPlayer);
-      }
-
-      return detailedPlayers;
+      return getAllDetailedPlayers(db);
     },
     create: async (player: TCreatePlayer) => {
       const db = await connect();
@@ -1927,13 +1938,16 @@ export const Database = {
       const db = await connect();
       const { effects } = await getDetailedPlayerById(db, playerId);
       const update = effects.filter((effect) => effect.id !== effectId);
+      const removedEffect = effects.find(
+        (effect) => effect.id === effectId,
+      ) as Effect;
 
       await db.execute("UPDATE players SET effects = $2 WHERE id = $1", [
         playerId,
         JSON.stringify(update.map((im) => im.id).map((id: number) => id)),
       ]);
 
-      return getDetailedPlayerById(db, playerId);
+      return removedEffect;
     },
     deletePlayerById: async (playerId: Player["id"]) => {
       const db = await connect();
@@ -1979,6 +1993,17 @@ export const Database = {
       const encounters = chapter.encounters
         ? [...chapter.encounters, encounterId]
         : [encounterId];
+      return updateChapterProperty(db, chapterId, "encounters", encounters);
+    },
+    removeEncounter: async (
+      chapterId: Chapter["id"],
+      encounterId: Encounter["id"],
+    ) => {
+      const db = await connect();
+      const chapter = await getDetailedChapterById(db, chapterId);
+      const encounters = chapter.encounters
+        ? chapter.encounters.filter((id) => id !== encounterId)
+        : [];
       return updateChapterProperty(db, chapterId, "encounters", encounters);
     },
     delete: async (id: Chapter["id"]) => {
@@ -2059,6 +2084,10 @@ export const Database = {
       const db = await connect();
       return getDetailedEncountersByIds(db, ids);
     },
+    getDetailedEncountersByChapterId: async (chapterId: Chapter["id"]) => {
+      const db = await connect();
+      return getDetailedEncountersByChapterId(db, chapterId);
+    },
     delete: async (id: Encounter["id"]) => {
       const db = await connect();
       return deleteEncounterById(db, id);
@@ -2086,7 +2115,7 @@ export const Database = {
       const db = await connect();
       return getDetailedOpponentById(db, id);
     },
-    getAllDetailed: async () => {
+    getAllDetailed: async (): Promise<Opponent[]> => {
       const db = await connect();
       return getAllDetailedOpponents(db);
     },

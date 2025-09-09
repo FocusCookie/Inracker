@@ -1,27 +1,43 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentEditEncounterDrawerEN from "@/translations/en/components/EditEncounterDrawer.json";
+import ComponentEditEncounterDrawerDE from "@/translations/de/components/EditEncounterDrawer.json"; 
+import ComponentSettingsCategoryOpponentsEN from "@/translations/en/components/SettingsCategoryOpponents.json";
+import ComponentSettingsCategoryOpponentsDE from "@/translations/de/components/SettingsCategoryOpponents.json"; 
+import ComponentSettingsCategoryResistancesEN from "@/translations/en/components/SettingsCategoryResistances.json";
+import ComponentSettingsCategoryResistancesDE from "@/translations/de/components/SettingsCategoryResistances.json"; 
+import ComponentSettingsCategoryImmunitiesEN from "@/translations/en/components/SettingsCategoryImmunities.json";
+import ComponentSettingsCategoryImmunitiesDE from "@/translations/de/components/SettingsCategoryImmunities.json"; 
+import ComponentSettingsCategoryEffectsEN from "@/translations/en/components/SettingsCategoryEffects.json";
+import ComponentSettingsCategoryEffectsDE from "@/translations/de/components/SettingsCategoryEffects.json"; 
+import ComponentSettingsCategoryPlayersEN from "@/translations/en/components/SettingsCategoryPlayers.json";
+import ComponentSettingsCategoryPlayersDE from "@/translations/de/components/SettingsCategoryPlayers.json"; 
+import ComponentSettingsCategoryGeneralEN from "@/translations/en/components/SettingsCategoryGeneral.json";
+import ComponentSettingsCategoryGeneralDE from "@/translations/de/components/SettingsCategoryGeneral.json"; 
+import ComponentSettingsSidebarEN from "@/translations/en/components/SettingsSidebar.json";
+import ComponentSettingsSidebarDE from "@/translations/de/components/SettingsSidebar.json"; 
 import ComponentEditResistanceDrawerEN from "@/translations/en/components/EditResistanceDrawer.json";
-import ComponentEditResistanceDrawerDE from "@/translations/de/components/EditResistanceDrawer.json"; 
+import ComponentEditResistanceDrawerDE from "@/translations/de/components/EditResistanceDrawer.json";
 import ComponentSettingResistanceCardEN from "@/translations/en/components/SettingResistanceCard.json";
-import ComponentSettingResistanceCardDE from "@/translations/de/components/SettingResistanceCard.json"; 
+import ComponentSettingResistanceCardDE from "@/translations/de/components/SettingResistanceCard.json";
 import ComponentEditImmunityDrawerEN from "@/translations/en/components/EditImmunityDrawer.json";
-import ComponentEditImmunityDrawerDE from "@/translations/de/components/EditImmunityDrawer.json"; 
+import ComponentEditImmunityDrawerDE from "@/translations/de/components/EditImmunityDrawer.json";
 import ComponentSettingImmunityCardEN from "@/translations/en/components/SettingImmunityCard.json";
-import ComponentSettingImmunityCardDE from "@/translations/de/components/SettingImmunityCard.json"; 
+import ComponentSettingImmunityCardDE from "@/translations/de/components/SettingImmunityCard.json";
 import ComponentSettingEffectCardEN from "@/translations/en/components/SettingEffectCard.json";
-import ComponentSettingEffectCardDE from "@/translations/de/components/SettingEffectCard.json"; 
+import ComponentSettingEffectCardDE from "@/translations/de/components/SettingEffectCard.json";
 import ComponentSettingPlayerCardEN from "@/translations/en/components/SettingPlayerCard.json";
-import ComponentSettingPlayerCardDE from "@/translations/de/components/SettingPlayerCard.json"; 
+import ComponentSettingPlayerCardDE from "@/translations/de/components/SettingPlayerCard.json";
 import ComponentEditEffectDrawerEN from "@/translations/en/components/EditEffectDrawer.json";
-import ComponentEditEffectDrawerDE from "@/translations/de/components/EditEffectDrawer.json"; 
+import ComponentEditEffectDrawerDE from "@/translations/de/components/EditEffectDrawer.json";
 import ComponentCreateEffectDrawerEN from "@/translations/en/components/CreateEffectDrawer.json";
-import ComponentCreateEffectDrawerDE from "@/translations/de/components/CreateEffectDrawer.json"; 
+import ComponentCreateEffectDrawerDE from "@/translations/de/components/CreateEffectDrawer.json";
 import ComponentOpponentsCatalogEN from "@/translations/en/components/OpponentsCatalog.json";
-import ComponentOpponentsCatalogDE from "@/translations/de/components/OpponentsCatalog.json"; 
+import ComponentOpponentsCatalogDE from "@/translations/de/components/OpponentsCatalog.json";
 import ComponentOpponentCardEN from "@/translations/en/components/OpponentCard.json";
-import ComponentOpponentCardDE from "@/translations/de/components/OpponentCard.json"; 
+import ComponentOpponentCardDE from "@/translations/de/components/OpponentCard.json";
 import ComponentCreateEncounterDrawerEN from "@/translations/en/components/CreateEncounterDrawer.json";
-import ComponentCreateEncounterDrawerDE from "@/translations/de/components/CreateEncounterDrawer.json"; 
+import ComponentCreateEncounterDrawerDE from "@/translations/de/components/CreateEncounterDrawer.json";
 import ComponentCreateOpponentDrawerEN from "@/translations/en/components/CreateOpponentDrawer.json";
 import ComponentCreateOpponentDrawerDE from "@/translations/de/components/CreateOpponentDrawer.json";
 import ComponentCreateOpponentFormEN from "@/translations/en/components/CreateOpponentForm.json";
@@ -77,6 +93,15 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentEditEncounterDrawer: ComponentEditEncounterDrawerEN,
+    ComponentSettingsCategoryOpponents: ComponentSettingsCategoryOpponentsEN,
+    ComponentSettingsCategoryResistances: ComponentSettingsCategoryResistancesEN,
+    ComponentSettingsCategoryImmunities: ComponentSettingsCategoryImmunitiesEN,
+    ComponentSettingsCategoryEffects: ComponentSettingsCategoryEffectsEN,
+    ComponentSettingsCategoryPlayers: ComponentSettingsCategoryPlayersEN,
+    ComponentSettingsCategoryGeneral: ComponentSettingsCategoryGeneralEN,
+    ComponentSettingsSidebar: ComponentSettingsSidebarEN,
+    ComponentCatalog: ComponentCatalogEN,
     ComponentEditResistanceDrawer: ComponentEditResistanceDrawerEN,
     ComponentSettingResistanceCard: ComponentSettingResistanceCardEN,
     ComponentEditImmunityDrawer: ComponentEditImmunityDrawerEN,
@@ -108,7 +133,6 @@ const resources = {
     ComponentResistanceCard: ComponentResistanceCardEN,
     ComponentCreateImmunityDrawer: ComponentCreateImmunityDrawerEN,
     ComponentCreatePlayerDrawer: ComponentCreatePlayerDrawerEN,
-    ComponentCatalog: ComponentCatalogEN,
 
     // hygen-en-hooks - DO NOT DELETE THIS LINE
     HookUseMutationWithErrorTaost: HookUseMutationWithErrorTaostEN,
@@ -120,6 +144,15 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentEditEncounterDrawer: ComponentEditEncounterDrawerDE,
+    ComponentSettingsCategoryOpponents: ComponentSettingsCategoryOpponentsDE,
+    ComponentSettingsCategoryResistances: ComponentSettingsCategoryResistancesDE,
+    ComponentSettingsCategoryImmunities: ComponentSettingsCategoryImmunitiesDE,
+    ComponentSettingsCategoryEffects: ComponentSettingsCategoryEffectsDE,
+    ComponentSettingsCategoryPlayers: ComponentSettingsCategoryPlayersDE,
+    ComponentSettingsCategoryGeneral: ComponentSettingsCategoryGeneralDE,
+    ComponentSettingsSidebar: ComponentSettingsSidebarDE,
+    ComponentCatalog: ComponentCatalogDE,
     ComponentEditResistanceDrawer: ComponentEditResistanceDrawerDE,
     ComponentSettingResistanceCard: ComponentSettingResistanceCardDE,
     ComponentEditImmunityDrawer: ComponentEditImmunityDrawerDE,
@@ -151,7 +184,6 @@ const resources = {
     ComponentPartyCard: ComponentPartyCardDE,
     ComponentCreateImmunityDrawer: ComponentCreateImmunityDrawerDE,
     ComponentCreatePlayerDrawer: ComponentCreatePlayerDrawerDE,
-    ComponentCatalog: ComponentCatalogDE,
 
     // hygen-de-hooks - DO NOT DELETE THIS LINE
     HookUseMutationWithErrorTaost: HookUseMutationWithErrorTaostDE,

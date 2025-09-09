@@ -39,7 +39,7 @@ Planned Features 🌟
 
 ## Notes
 
-- **Remove** in `index.html` the ` <script src="http://localhost:8097"></script>` in the build process.
+- **Remove** in `index.html` the `<script src="http://localhost:8097"></script>` in the build process.
 
 ## Templates
 
@@ -58,6 +58,17 @@ hygen translation new
 In order to use the react dev tools within the tauri application, you need to install the dev tools via npm
 `npm install -g react-devtools`
 This is because it uses webkit as the browser engine. As you can read [here](https://react.dev/learn/react-developer-tools) it can be connected via the npm package.
+
+## Architecture
+
+### Overlays
+
+- tbd
+
+### Components
+
+- if the components uses data from the database and also manipulates the same data and nothing else, you can use useQuery and useMutation in the component itself. There is no need for passing the data trough the props.
+- if the component mutates another data than it shows, for example the add players catalog, which mutates the party and not the players list. Than pass the mutation function as a prop from the parent.
 
 ## Internationalization and localization
 
@@ -95,13 +106,21 @@ hygen translation new
 
 # Todos
 
+- [ ] MP3 files
+      -- [ ] component where music can be selected that can be played during the game
 - [x] Effects need to have a boolean value for until long rest
+- [ ] Canvas
+  - [x] Show opponents when there are tokens for the encounters
+  - [x] make the elements movable like the tokens
+- [ ] Play screen
+  - [ ] Go back button and exit party button
+  - [ ] show the game states here if there are implemented
 - [ ] ActiveEffects connecting with players and opponents in chapter
 - [ ] effectCard - show duration and value in the opened card or as badges
 - [ ] need to store a game round and time state for the effects. time needs to be enabled somehow with a timer than rounds could be updated with a next round function
-- [ ] settings dialog
-  - [ ] immunites edit
-  - [ ] resistances edit
+- [x] settings dialog
+  - [x] immunites edit
+  - [x] resistances edit
   - [ ] user settings
 - [ ] ui for round interaction
 - [ ] innitiative

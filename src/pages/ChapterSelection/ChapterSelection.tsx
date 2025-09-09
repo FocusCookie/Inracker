@@ -18,17 +18,12 @@ import {
 } from "@/components/ui/tooltip";
 import { TypographyH1 } from "@/components/ui/typographyH1";
 import { TypographyP } from "@/components/ui/typographyP";
-import { useChapterStore } from "@/stores/useChapterStore";
-import { useEffectStore } from "@/stores/useEffectStore";
-import { useImmunityStore } from "@/stores/useImmunityStore";
-import { usePlayerStore } from "@/stores/usePlayerStore";
-import { useResistancesStore } from "@/stores/useResistanceStore";
 import { Chapter } from "@/types/chapters";
-import { DBEffect } from "@/types/effect";
-import { DBImmunity } from "@/types/immunitiy";
+import { DBEffect, Effect } from "@/types/effect";
+import { DBImmunity, Immunity } from "@/types/immunitiy";
 import { Party } from "@/types/party";
-import { Player } from "@/types/player";
-import { DBResistance } from "@/types/resistances";
+import { Player, TCreatePlayer } from "@/types/player";
+import { DBResistance, Resistance } from "@/types/resistances";
 import {
   CardStackPlusIcon,
   ChevronLeftIcon,
@@ -37,97 +32,189 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { RiArrowLeftBoxLine, RiUserAddFill } from "react-icons/ri";
-import { useShallow } from "zustand/shallow";
+import { useOverlayStore } from "@/stores/useOverlayStore";
+import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
+import { toast } from "@/hooks/use-toast";
+import defaultDb from "@/lib/database";
 
 type Props = {
+  database: typeof defaultDb;
   party: Party;
   chapters: Chapter[];
   isLoading: boolean;
-  onRemovePlayerFromParty: (id: Player["id"]) => void;
-  onRemoveImmunityFromPlayer: (
-    playerId: Player["id"],
-    immunityId: DBImmunity["id"],
-  ) => void;
-  onRemoveResistanceFromPlayer: (
-    playerId: Player["id"],
-    resistanceId: DBResistance["id"],
-  ) => void;
-  onRemoveEffectFromPlayer: (
-    playerId: Player["id"],
-    effectId: DBEffect["id"],
-  ) => void;
 };
 
 function ChapterSelection({
+  database = defaultDb,
   party,
   chapters,
   isLoading,
-  onRemovePlayerFromParty,
-  onRemoveImmunityFromPlayer,
-  onRemoveResistanceFromPlayer,
-  onRemoveEffectFromPlayer,
 }: Props) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { t } = useTranslation("PageChapterSelection");
   const keysPressed = useRef<Record<string, boolean>>({});
-  const {
-    isAsideOpen,
-    openAside,
-    closeAside,
-    openCreateChapterDrawer,
-    openEditChapterDrawer,
-    setCurrentChapter,
-  } = useChapterStore(
-    useShallow((state) => ({
-      isAsideOpen: state.isAsideOpen,
-      openAside: state.openAside,
-      closeAside: state.closeAside,
-      openCreateChapterDrawer: state.openCreateChapterDrawer,
-      openEditChapterDrawer: state.openEditChapterDrawer,
-      setCurrentChapter: state.setCurrentChapter,
-    })),
-  );
-  const {
-    openEditPlayerDrawer,
-    setSelectedPlayer,
-    openCreateDrawer,
-    openPlayersCatalog,
-    closePlayersCatalog,
-  } = usePlayerStore(
-    useShallow((state) => ({
-      openEditPlayerDrawer: state.openEditPlayerDrawer,
-      setSelectedPlayer: state.setSelectedPlayer,
-      openCreateDrawer: state.openCreatePlayerDrawer,
-      openPlayersCatalog: state.openPlayersCatalog,
-      closePlayersCatalog: state.closePlayersCatalog,
-    })),
-  );
+  const openOverlay = useOverlayStore((s) => s.open);
+  const [isAsideOpen, setIsAsideOpen] = useState(false);
 
-  const { openImmunititesCatalog, openCreateImmunityDrawer } = useImmunityStore(
-    useShallow((state) => ({
-      openImmunititesCatalog: state.openImmunititesCatalog,
-      openCreateImmunityDrawer: state.openCreateImmunityDrawer,
-    })),
-  );
+  const createPlayer = useMutationWithErrorToast({
+    mutationFn: (player: TCreatePlayer) => database.players.create(player),
+    onSuccess: (player: Player) => {
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+      toast({
+        variant: "default",
+        title: `Created ${player.icon} ${player.name}`,
+      });
+    },
+  });
 
-  const { openEffectsCatalog, openCreateEffectDrawer } = useEffectStore(
-    useShallow((state) => ({
-      openEffectsCatalog: state.openEffectsCatalog,
-      openCreateEffectDrawer: state.openCreateEffectDrawer,
-    })),
-  );
+  const editPlayer = useMutationWithErrorToast({
+    mutationFn: (player: Player) => database.players.update(player),
+    onSuccess: (_player: Player) => {
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+      queryClient.invalidateQueries({ queryKey: ["party"] });
+      queryClient.invalidateQueries({ queryKey: ["parties"] });
+    },
+  });
 
-  const { openResistancesCatalog, openCreateResistanceDrawer } =
-    useResistancesStore(
-      useShallow((state) => ({
-        openCreateResistanceDrawer: state.openCreateResistanceDrawer,
-        openResistancesCatalog: state.openResistancesCatalog,
-      })),
-    );
+  const removePlayerFromPartyMutation = useMutationWithErrorToast({
+    mutationFn: (data: { partyId: Party["id"]; playerId: Player["id"] }) =>
+      database.parties.removePlayerFromParty(data.partyId, data.playerId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["party"],
+      });
+    },
+  });
+
+  const createChapterMutation = useMutationWithErrorToast({
+    mutationFn: (chapter: Omit<Chapter, "id">) =>
+      database.chapters.create(chapter),
+  });
+
+  const editChapterMutation = useMutationWithErrorToast({
+    mutationFn: (chapter: Chapter) => database.chapters.update(chapter),
+  });
+
+  const deleteChapterMutation = useMutationWithErrorToast({
+    mutationFn: (id: Chapter["id"]) => database.chapters.delete(id),
+    onSuccess: (chapter) => {
+      toast({
+        title: `Deleted ${chapter.icon} ${chapter.name}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["chapters"] });
+    },
+  });
+
+  const addPlayerToPartyMutation = useMutationWithErrorToast({
+    mutationFn: (data: { partyId: Party["id"]; playerId: Player["id"] }) =>
+      database.parties.addPlayerToParty(data.partyId, data.playerId),
+  });
+
+  const createEffectMutation = useMutationWithErrorToast({
+    mutationFn: (effect: Omit<Effect, "id">) => database.effects.create(effect),
+  });
+
+  const createImmunityMutation = useMutationWithErrorToast({
+    mutationFn: (immunity: Immunity) => database.immunitites.create(immunity),
+  });
+
+  const addEffectToPlayerMutation = useMutationWithErrorToast({
+    mutationFn: (data: { playerId: Player["id"]; effectId: Effect["id"] }) =>
+      database.players.addEffectToPlayer(data.playerId, data.effectId),
+  });
+
+  const addImmunityToPlayerMutation = useMutationWithErrorToast({
+    mutationFn: (data: {
+      playerId: Player["id"];
+      immunityId: DBImmunity["id"];
+    }) => database.players.addImmunityToPlayer(data.playerId, data.immunityId),
+  });
+
+  const addResistanceToPlayerMutation = useMutationWithErrorToast({
+    mutationFn: (data: {
+      playerId: Player["id"];
+      resistanceId: DBResistance["id"];
+    }) =>
+      database.players.addResistanceToPlayer(data.playerId, data.resistanceId),
+  });
+
+  const createResistanceMutation = useMutationWithErrorToast({
+    mutationFn: (resistance: Resistance) =>
+      database.resistances.create(resistance),
+  });
+
+  const removeImmunityFromPlayerMutation = useMutationWithErrorToast({
+    mutationFn: (data: {
+      playerId: Player["id"];
+      immunityId: DBImmunity["id"];
+    }) =>
+      database.players.removeImmunityFromPlayer(data.playerId, data.immunityId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["party"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["players"],
+      });
+    },
+  });
+
+  const removeResistanceFromPlayerMutation = useMutationWithErrorToast({
+    mutationFn: (data: {
+      playerId: Player["id"];
+      resistanceId: DBResistance["id"];
+    }) =>
+      database.players.removeResistanceFromPlayer(
+        data.playerId,
+        data.resistanceId,
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["party"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["players"],
+      });
+    },
+  });
+
+  const removeEffectFromPlayerMutation = useMutationWithErrorToast({
+    mutationFn: (data: { playerId: Player["id"]; effectId: DBEffect["id"] }) =>
+      database.players.removeEffectFromPlayer(data.playerId, data.effectId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["party"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["players"],
+      });
+    },
+  });
+
+  const editImmunity = useMutationWithErrorToast({
+    mutationFn: database.immunitites.update,
+    onSuccess: (_immunity: DBImmunity) => {
+      queryClient.invalidateQueries({ queryKey: ["immunities"] });
+    },
+  });
+
+  const editResistance = useMutationWithErrorToast({
+    mutationFn: database.resistances.update,
+    onSuccess: (_resistance: DBResistance) => {
+      queryClient.invalidateQueries({ queryKey: ["resistances"] });
+    },
+  });
+
+  const editEffect = useMutationWithErrorToast({
+    mutationFn: database.effects.update,
+    onSuccess: (_effect: Effect) => {
+      queryClient.invalidateQueries({ queryKey: ["effects"] });
+    },
+  });
 
   useEffect(() => {
     //TODO: Shortcut for other OS
@@ -137,9 +224,9 @@ function ChapterSelection({
 
       if (keysPressed.current["Meta"] && event.key.toLowerCase() === "s") {
         if (isAsideOpen) {
-          closeAside();
+          setIsAsideOpen(false);
         } else {
-          openAside();
+          setIsAsideOpen(true);
         }
       }
     };
@@ -158,11 +245,7 @@ function ChapterSelection({
   }, [isAsideOpen]);
 
   function handleAsideToggle() {
-    if (isAsideOpen) {
-      closeAside();
-    } else {
-      openAside();
-    }
+    setIsAsideOpen(!isAsideOpen);
   }
 
   function handleExitParty() {
@@ -171,36 +254,257 @@ function ChapterSelection({
     });
   }
 
-  function handlePlayersCatalogOpen(state: boolean) {
-    state ? openPlayersCatalog() : closePlayersCatalog();
+  function handlePlayersCatalog() {
+    openOverlay("player.catalog", {
+      excludedPlayers: party.players,
+      partyId: party.id,
+      onSelect: async (partyId: Party["id"], playerId: Player["id"]) => {
+        await addPlayerToPartyMutation.mutateAsync({ partyId, playerId });
+
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["parties"] });
+      },
+      onCancel: (reason) => {
+        console.log("Player creation cancelled:", reason);
+      },
+    });
   }
 
-  function handleAddImmunityToPlayer(player: Player) {
-    setSelectedPlayer(player);
-    openImmunititesCatalog();
+  function handleCreateEffect() {
+    openOverlay("effect.create", {
+      onCreate: (effect: Omit<Effect, "id">) =>
+        createEffectMutation.mutateAsync(effect),
+      onComplete: (effect) => {
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["effects"] });
+
+        toast({
+          title: `Created ${effect.icon} ${effect.name}`,
+        });
+      },
+      onCancel: (reason) => {
+        console.log("Effect creation cancelled:", reason);
+      },
+    });
   }
 
-  function handleOnAddEffectToPlayer(player: Player) {
-    setSelectedPlayer(player);
-    openEffectsCatalog();
+  function handleCreateChapter() {
+    openOverlay("chapter.create", {
+      partyId: party.id,
+      onCreate: async (chapter: Omit<Chapter, "id">) => {
+        const newChapter = await createChapterMutation.mutateAsync(chapter);
+        return {
+          ...newChapter,
+          encounters: JSON.parse(newChapter.encounters || "[]"),
+        };
+      },
+      onComplete: (_chapter) => {
+        queryClient.invalidateQueries({ queryKey: ["chapters"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+      },
+      onCancel: (reason) => {
+        console.log("Chapter creation cancelled:", reason);
+      },
+    });
   }
 
-  function handleAddResistanceToPlayer(player: Player) {
-    setSelectedPlayer(player);
-    openResistancesCatalog();
+  function handleCreateImmunity() {
+    openOverlay("immunity.create", {
+      onCreate: (immunity: Immunity) =>
+        createImmunityMutation.mutateAsync(immunity),
+      onComplete: (immunity) => {
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["immunitites"] });
+
+        toast({
+          title: `Created ${immunity.icon} ${immunity.name}`,
+        });
+      },
+      onCancel: (reason) => {
+        console.log("Immunity creation cancelled:", reason);
+      },
+    });
+  }
+
+  function handleEffectsCatalog(player: Player) {
+    openOverlay("effect.catalog", {
+      onSelect: async (effect) => {
+        await addEffectToPlayerMutation.mutateAsync({
+          playerId: player.id,
+          effectId: effect.id,
+        });
+
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["parties"] });
+
+        toast({
+          title: `Added ${effect.icon} ${effect.name} to ${player.name}`,
+        });
+      },
+      onCancel: (reason) => {
+        console.log("Immunity Catalog cancelled:", reason);
+      },
+    });
+  }
+
+  function handleImmunitiesCatalog(player: Player) {
+    openOverlay("immunity.catalog", {
+      onSelect: async (immunity) => {
+        await addImmunityToPlayerMutation.mutateAsync({
+          playerId: player.id,
+          immunityId: immunity.id,
+        });
+
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["parties"] });
+
+        toast({
+          title: `Added ${immunity.icon} ${immunity.name} to ${player.name}`,
+        });
+      },
+      onCancel: (reason) => {
+        console.log("Immunity Catalog cancelled:", reason);
+      },
+    });
+  }
+
+  function handleResistancesCatalog(player: Player) {
+    openOverlay("resistance.catalog", {
+      onSelect: async (resistance) => {
+        await addResistanceToPlayerMutation.mutateAsync({
+          playerId: player.id,
+          resistanceId: resistance.id,
+        });
+
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["parties"] });
+
+        toast({
+          title: `Added ${resistance.icon} ${resistance.name} to ${player.name}`,
+        });
+      },
+      onCancel: (reason) => {
+        console.log("Resistance Catalog cancelled:", reason);
+      },
+    });
+  }
+
+  function handleCreateResistance() {
+    openOverlay("resistance.create", {
+      onCreate: (resistance: Omit<Resistance, "id">) =>
+        createResistanceMutation.mutateAsync(resistance),
+      onComplete: (resistance) => {
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["resistances"] });
+
+        toast({
+          title: `Created ${resistance.icon} ${resistance.name}`,
+        });
+      },
+      onCancel: (reason) => {
+        console.log("Resitance creation cancelled:", reason);
+      },
+    });
   }
 
   function handleEditChapter(chapter: Chapter) {
-    openEditChapterDrawer(chapter);
+    openOverlay("chapter.edit", {
+      chapter,
+      onEdit: (chapter) => editChapterMutation.mutateAsync(chapter),
+      onDelete: (chapterId) => deleteChapterMutation.mutateAsync(chapterId),
+      onComplete: (_result) => {
+        queryClient.invalidateQueries({ queryKey: ["chapters"] });
+      },
+    });
   }
 
-  function handlePlayChapter(chapter: Chapter["id"]) {
-    setCurrentChapter(chapter);
+  function handlePlayChapter(chapterId: Chapter["id"]) {
     queryClient.invalidateQueries({ queryKey: ["chapter"] });
     queryClient.invalidateQueries({ queryKey: ["encounters"] });
 
     navigate({
       to: `/play`,
+      search: {
+        partyId: party.id,
+        chapterId,
+      },
+    });
+  }
+
+  function handleOpenCreatePlayer() {
+    openOverlay("player.create", {
+      onCreate: (player) => createPlayer.mutateAsync(player),
+      onComplete: async (player) => {
+        await addPlayerToPartyMutation.mutateAsync({
+          partyId: party.id,
+          playerId: player.id,
+        });
+        queryClient.invalidateQueries({ queryKey: ["parties"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+      },
+      onCancel: (reason) => {
+        console.log("Player creation cancelled:", reason);
+      },
+    });
+  }
+
+  function handleOpenEditPlayer(player: Player) {
+    openOverlay("player.edit", {
+      player,
+      onEdit: (player) => editPlayer.mutateAsync(player),
+      onComplete: async (player) => {
+        console.log("Updated: ", player);
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["parties"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+      },
+      onCancel: (reason) => {
+        console.log("Player creation cancelled:", reason);
+      },
+    });
+  }
+
+  function handleOpenEditImmunity(immunity: DBImmunity) {
+    openOverlay("immunity.edit", {
+      immunity,
+      onEdit: (immunity: DBImmunity) => editImmunity.mutateAsync(immunity),
+      onComplete: (_immunity) => {
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["immunites"] });
+      },
+    });
+  }
+
+  function handleOpenEditResistance(resistance: DBResistance) {
+    openOverlay("resistance.edit", {
+      resistance,
+      onEdit: (resistance: DBResistance) =>
+        editResistance.mutateAsync(resistance),
+      onComplete: (_resistance) => {
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["resistances"] });
+      },
+    });
+  }
+
+  function handleOpenEditEffect(effect: Effect) {
+    openOverlay("effect.edit", {
+      effect,
+      onEdit: (effect: Effect) => editEffect.mutateAsync(effect),
+      onComplete: (_effect) => {
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["effect"] });
+      },
     });
   }
 
@@ -220,17 +524,39 @@ function ChapterSelection({
                 key={player.id}
                 player={player}
                 expanded={isAsideOpen}
-                onAddEffect={handleOnAddEffectToPlayer}
-                onRemove={onRemovePlayerFromParty}
-                onEdit={(player: Player) => {
-                  setSelectedPlayer(player);
-                  openEditPlayerDrawer();
+                onEditImmunity={handleOpenEditImmunity}
+                onEditResistance={handleOpenEditResistance}
+                onEditEffect={handleOpenEditEffect}
+                onRemove={(playerId) => {
+                  removePlayerFromPartyMutation.mutate({
+                    partyId: party.id,
+                    playerId,
+                  });
                 }}
-                onAddImmunity={handleAddImmunityToPlayer}
-                onAddResistance={handleAddResistanceToPlayer}
-                onRemoveImmunity={onRemoveImmunityFromPlayer}
-                onRemoveResistance={onRemoveResistanceFromPlayer}
-                onRemoveEffect={onRemoveEffectFromPlayer}
+                onEdit={handleOpenEditPlayer}
+                onRemoveImmunity={(playerId, immunityId) => {
+                  removeImmunityFromPlayerMutation.mutate({
+                    playerId,
+                    immunityId,
+                  });
+                }}
+                onRemoveResistance={(playerId, resistanceId) => {
+                  removeResistanceFromPlayerMutation.mutate({
+                    playerId,
+                    resistanceId,
+                  });
+                }}
+                onRemoveEffect={(playerId, effectId) => {
+                  removeEffectFromPlayerMutation.mutate({
+                    playerId,
+                    effectId,
+                  });
+                }}
+                onOpenEffectsCatalog={() => handleEffectsCatalog(player)}
+                onOpenResistancesCatalog={() =>
+                  handleResistancesCatalog(player)
+                }
+                onOpenImmunitiesCatalog={() => handleImmunitiesCatalog(player)}
               />
             ))}
           </MainLayout.Players>
@@ -259,13 +585,13 @@ function ChapterSelection({
 
                     <DropdownMenuContent className="w-56">
                       <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={openCreateEffectDrawer}>
+                        <DropdownMenuItem onClick={handleCreateEffect}>
                           {t("createEffect")}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={openCreateImmunityDrawer}>
+                        <DropdownMenuItem onClick={handleCreateImmunity}>
                           {t("createImmunity")}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={openCreateResistanceDrawer}>
+                        <DropdownMenuItem onClick={handleCreateResistance}>
                           {t("createResistance")}
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
@@ -281,12 +607,10 @@ function ChapterSelection({
 
                     <DropdownMenuContent className="w-56">
                       <DropdownMenuGroup>
-                        <DropdownMenuItem
-                          onClick={() => handlePlayersCatalogOpen(true)}
-                        >
+                        <DropdownMenuItem onClick={handlePlayersCatalog}>
                           {t("addFromCatalog")}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={openCreateDrawer}>
+                        <DropdownMenuItem onClick={handleOpenCreatePlayer}>
                           {t("createNewPlayer")}
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
@@ -343,7 +667,7 @@ function ChapterSelection({
             </div>
 
             <Button
-              onClick={() => openCreateChapterDrawer()}
+              onClick={handleCreateChapter}
               variant={chapters.length === 0 ? "default" : "outline"}
             >
               {t("createChapter")}

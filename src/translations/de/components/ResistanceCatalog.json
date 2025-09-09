@@ -4,5 +4,6 @@
   "placeholderSearch": "Suche nach einem bestimmten Widerstand",
   "noResistances": "Keine Widerstände verfügbar",
   "noResistancesDescription": "Es gibt noch keine Widerstände. Erstelle jetzt einen!",
-  "createResistance": "Widerstand erstellen"
+  "createResistance": "Widerstand erstellen",
+  "add": "Hinzufügen"
 }
