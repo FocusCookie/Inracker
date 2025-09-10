@@ -659,8 +659,8 @@ function ChapterSelection({
             </motion.div>
           </MainLayout.Settings>
 
-          <div className="flex w-full flex-col items-center gap-4 overflow-hidden">
-            <div className="w-content flex flex-col gap-2">
+          <div className="md:w-content flex w-full flex-col items-center gap-4 overflow-hidden p-1 md:p-0">
+            <div className="flex w-full flex-col gap-2">
               <TypographyH1>{t("chapters")}</TypographyH1>
 
               <TypographyP>{t("description")}</TypographyP>
@@ -678,7 +678,7 @@ function ChapterSelection({
                 <Loader size="large" title="loading chapters..." key="loader" />
               )}
               {!isLoading && (
-                <div className="scrollable-y w-content flex flex-col gap-4 overflow-y-scroll rounded pt-1 pr-2 pb-4">
+                <div className="scrollable-y flex w-full flex-col gap-4 overflow-y-scroll rounded pt-1 pr-2 pb-4">
                   {chapters.map((chapter, index) => (
                     <ChapterCard
                       key={`chapter-${chapter.id}`}

@@ -71,37 +71,40 @@ const PartySelection = ({
 
   return (
     <div className="flex h-full w-full flex-col items-center gap-8 rounded-md bg-white p-2">
-      <div className="w-content flex flex-col gap-2">
-        <TypographyH1>{t("headline")}</TypographyH1>
-        <TypographyP>{t("description")}</TypographyP>
-      </div>
+      <div className="md:w-content flex w-full flex-col items-center gap-4">
+        <div className="flex w-full flex-col gap-2">
+          <TypographyH1>{t("headline")}</TypographyH1>
+          <TypographyP>{t("description")}</TypographyP>
+        </div>
 
-      <Button
-        variant={parties.length === 0 ? "default" : "outline"}
-        onClick={handleOpenCreateParty}
-      >
-        {t("createParty")}
-      </Button>
+        <Button
+          variant={parties.length === 0 ? "default" : "outline"}
+          onClick={handleOpenCreateParty}
+          className="w-fit"
+        >
+          {t("createParty")}
+        </Button>
 
-      <AnimatePresence mode="wait">
-        {loading && <Loader size="large" title={t("loading")} key="loader" />}
+        <AnimatePresence mode="wait">
+          {loading && <Loader size="large" title={t("loading")} key="loader" />}
 
-        {!loading && (
-          <div className="scrollable-y w-content overflow-y-scroll pr-0.5">
-            <div className="flex w-full flex-col gap-4 pb-4">
-              {parties.map((party, index) => (
-                <PartyCard
-                  key={`party-${party.id}`}
-                  animationDelay={index * 0.05}
-                  party={party}
-                  onEdit={() => handleOpenEditParty(party)}
-                  onOpen={() => onPartySelect(party.id)}
-                />
-              ))}
+          {!loading && (
+            <div className="scrollable-y w-full overflow-y-scroll pr-0.5">
+              <div className="flex w-full flex-col gap-4 pb-4">
+                {parties.map((party, index) => (
+                  <PartyCard
+                    key={`party-${party.id}`}
+                    animationDelay={index * 0.05}
+                    party={party}
+                    onEdit={() => handleOpenEditParty(party)}
+                    onOpen={() => onPartySelect(party.id)}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };
