@@ -1,5 +1,5 @@
 import db from "@/lib/database";
-import { SidebarProvider } from "../ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "../ui/sidebar";
 import SettingsSidebar, {
   SettingsCategory,
 } from "../SettingsSidebar/SettingsSidebar";
@@ -112,6 +112,7 @@ function SettingsDrawer({
 
                     <main className="flex h-full w-full justify-center">
                       <div className="scrollable-y flex h-full w-full max-w-[1024px] flex-col gap-4 overflow-y-scroll p-4">
+                        <SidebarTrigger />
                         {showSettingsCategory(activeCategory)}
                       </div>
                     </main>
