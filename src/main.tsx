@@ -32,7 +32,7 @@ createTauriAppDataSubfolders().then(() =>
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools buttonPosition="top-left" initialIsOpen={false} />
+      <ReactQueryDevtools buttonPosition="bottom-left" initialIsOpen={false} />
 
       <div className="h-full w-full bg-black p-4">
         <RouterProvider router={router} />
