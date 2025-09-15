@@ -1,5 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import PagePlayEN from "@/translations/en/pages/Play.json";
+import PagePlayDE from "@/translations/de/pages/Play.json"; 
 import ComponentEditEncounterDrawerEN from "@/translations/en/components/EditEncounterDrawer.json";
 import ComponentEditEncounterDrawerDE from "@/translations/de/components/EditEncounterDrawer.json"; 
 import ComponentSettingsCategoryOpponentsEN from "@/translations/en/components/SettingsCategoryOpponents.json";
@@ -138,6 +140,7 @@ const resources = {
     HookUseMutationWithErrorTaost: HookUseMutationWithErrorTaostEN,
 
     // hygen-en-pages - DO NOT DELETE THIS LINE
+    PagePlay: PagePlayEN,
     PageWelcome: PageWelcomeEN,
     PagePartySelection: PagePartySelectionEN,
     PageChapterSelection: PageChapterSelectionEN,
@@ -189,6 +192,7 @@ const resources = {
     HookUseMutationWithErrorTaost: HookUseMutationWithErrorTaostDE,
 
     // hygen-de-pages - DO NOT DELETE THIS LINE
+    PagePlay: PagePlayDE,
     PageWelcome: PageWelcomeDE,
     PagePartySelection: PagePartySelectionDE,
     PageChapterSelection: PageChapterSelectionDE,

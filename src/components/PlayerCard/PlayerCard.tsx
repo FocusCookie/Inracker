@@ -26,7 +26,7 @@ import EffectCard from "../EffectCard/EffectCard";
 type Props = {
   player: Player;
   expanded: boolean;
-  onRemove: (playerId: Player["id"]) => void;
+  onRemove?: (playerId: Player["id"]) => void;
   onEdit: (player: Player) => void;
   onRemoveImmunity: (
     playerId: Player["id"],
@@ -70,7 +70,7 @@ function PlayerCard({
   );
 
   function handleRemovePlayer() {
-    onRemove(player.id);
+    if (onRemove) onRemove(player.id);
   }
 
   function handleEditPlayer() {
@@ -184,7 +184,11 @@ function PlayerCard({
                     <ImmunityCard
                       key={`player-${player.id}-immunity-${immunity.id}`}
                       immunity={immunity}
-                      onRemove={() => handleRemoveImmunity(immunity.id)}
+                      onRemove={
+                        onRemove
+                          ? () => handleRemoveImmunity(immunity.id)
+                          : undefined
+                      }
                       onEdit={onEditImmunity}
                     />
                   ))}

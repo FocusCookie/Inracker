@@ -46,6 +46,7 @@ function RouteComponent() {
 
   return !!party.data ? (
     <ChapterSelection
+      database={db}
       isLoading={chapters.isLoading || party.isLoading}
       chapters={chapters.data || []}
       party={party.data}

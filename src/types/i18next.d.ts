@@ -1,4 +1,5 @@
 import "i18next";
+import PagePlay from "@/translations/en/page/Play.json";
 import ComponentEditEncounterDrawer from "@/translations/en/component/EditEncounterDrawer.json";
 import ComponentSettingsCategoryOpponents from "@/translations/en/component/SettingsCategoryOpponents.json";
 import ComponentSettingsCategoryResistances from "@/translations/en/component/SettingsCategoryResistances.json";
@@ -98,6 +99,7 @@ declare module "i18next" {
       HookUseMutationWithErrorTaost: typeof HookUseMutationWithErrorTaost;
 
       // hygen-pages - DO NOT DELETE THIS LINE
+      PagePlay: typeof PagePlay;
       PageWelcome: typeof PageWelcome;
       PagePartySelection: typeof PagePartySelection;
       PageChapterSelection: typeof PageChapterSelection;
