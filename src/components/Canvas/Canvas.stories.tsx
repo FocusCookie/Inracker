@@ -2,9 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 import testBackground from "./test_assets/HB_Festplatz.jpg";
 import player1 from "./test_assets/player_1.webp";
-import player2 from "./test_assets/player_2.webp";
-import player3 from "./test_assets/player_3.webp";
-import player4 from "./test_assets/player_4.webp";
 
 import Canvas from "./Canvas";
 
@@ -18,15 +15,15 @@ const meta = {
     layout: "centered",
   },
   decorators: [
-    (Story) => (
+    (Story: any) => (
       <div className="h-[90vh] w-[90vw] bg-neutral-800 p-8">{Story()}</div>
     ),
   ],
-  // args: { onClick: fn() },
   args: {
     background:
       "http://localhost:6006/src/components/Canvas/test_assets/HB_Festplatz.jpg",
     elements: [],
+    temporaryElement: undefined,
     players: [
       {
         id: 1,
@@ -52,18 +49,21 @@ const meta = {
         overview: "overview",
       },
     ],
+    opponents: [],
+    selectedToken: null,
     tokens: [
       {
         coordinates: { x: 1, y: 1 },
         id: 1,
         entity: 1,
+        chapter: 1,
+        type: "player",
       },
     ],
-    selectedPlayer: null,
-    onElementClick: fn(),
     onDrawed: fn(),
-    onPlayerMove: fn(),
-    onPlayerSelect: fn(),
+    onElementMove: fn(),
+    onTokenSelect: fn(),
+    onTokenMove: fn(),
   },
 } satisfies Meta<typeof Canvas>;
 
@@ -87,7 +87,6 @@ export const WithBackgroundAndElements: Story = {
     elements: [
       {
         id: "1",
-        title: "red",
         icon: "🥦",
         onClick: fn(),
         height: 300,
@@ -98,7 +97,6 @@ export const WithBackgroundAndElements: Story = {
       },
       {
         id: "2",
-        title: "pink",
         icon: "📞",
         onClick: fn(),
         height: 250,
@@ -109,7 +107,6 @@ export const WithBackgroundAndElements: Story = {
       },
       {
         id: "3",
-        title: "green",
         icon: "🍓",
         onClick: fn(),
         height: 100,
@@ -128,7 +125,6 @@ export const WithSelectedPlayer: Story = {
     elements: [
       {
         id: "1",
-        title: "red",
         icon: "🥦",
         onClick: fn(),
         height: 300,
@@ -139,7 +135,6 @@ export const WithSelectedPlayer: Story = {
       },
       {
         id: "2",
-        title: "pink",
         icon: "📞",
         onClick: fn(),
         height: 250,
@@ -150,7 +145,6 @@ export const WithSelectedPlayer: Story = {
       },
       {
         id: "3",
-        title: "green",
         icon: "🍓",
         onClick: fn(),
         height: 100,
@@ -160,28 +154,5 @@ export const WithSelectedPlayer: Story = {
         color: "0, 255, 0",
       },
     ],
-    selectedPlayer: {
-      id: 1,
-      role: "mage",
-      details: "Hex hex!",
-      effects: [],
-      icon: "🧙",
-      ep: 234,
-      health: 23,
-      level: 4,
-      immunities: [],
-      name: "H. Potter",
-      resistances: [
-        {
-          id: 1,
-          name: "resistance xyz",
-          icon: "🚨",
-          description: "# Resistance markdown",
-        },
-      ],
-      image: player1,
-      max_health: 10,
-      overview: "overview",
-    },
   },
 };
