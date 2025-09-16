@@ -21,7 +21,7 @@ import {
 
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
-const ZOOM_DELTA = 0.2;
+const ZOOM_DELTA = 0.5;
 const TEMP_DEFAULT_COLOR = "#FFFFFF";
 const TEMP_DEFAULT_ICON = "📝";
 
@@ -1096,7 +1096,7 @@ function Canvas({
               <button
                 key={`player-${player.id}-token-state`}
                 onClick={() => toggleToken(token)}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+                className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
               >
                 <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
                   {player.image && player.image !== "" ? (
