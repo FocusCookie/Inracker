@@ -1,23 +1,25 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentCanvasEN from "@/translations/en/components/Canvas.json";
+import ComponentCanvasDE from "@/translations/de/components/Canvas.json"; 
 import PagePlayEN from "@/translations/en/pages/Play.json";
-import PagePlayDE from "@/translations/de/pages/Play.json"; 
+import PagePlayDE from "@/translations/de/pages/Play.json";
 import ComponentEditEncounterDrawerEN from "@/translations/en/components/EditEncounterDrawer.json";
-import ComponentEditEncounterDrawerDE from "@/translations/de/components/EditEncounterDrawer.json"; 
+import ComponentEditEncounterDrawerDE from "@/translations/de/components/EditEncounterDrawer.json";
 import ComponentSettingsCategoryOpponentsEN from "@/translations/en/components/SettingsCategoryOpponents.json";
-import ComponentSettingsCategoryOpponentsDE from "@/translations/de/components/SettingsCategoryOpponents.json"; 
+import ComponentSettingsCategoryOpponentsDE from "@/translations/de/components/SettingsCategoryOpponents.json";
 import ComponentSettingsCategoryResistancesEN from "@/translations/en/components/SettingsCategoryResistances.json";
-import ComponentSettingsCategoryResistancesDE from "@/translations/de/components/SettingsCategoryResistances.json"; 
+import ComponentSettingsCategoryResistancesDE from "@/translations/de/components/SettingsCategoryResistances.json";
 import ComponentSettingsCategoryImmunitiesEN from "@/translations/en/components/SettingsCategoryImmunities.json";
-import ComponentSettingsCategoryImmunitiesDE from "@/translations/de/components/SettingsCategoryImmunities.json"; 
+import ComponentSettingsCategoryImmunitiesDE from "@/translations/de/components/SettingsCategoryImmunities.json";
 import ComponentSettingsCategoryEffectsEN from "@/translations/en/components/SettingsCategoryEffects.json";
-import ComponentSettingsCategoryEffectsDE from "@/translations/de/components/SettingsCategoryEffects.json"; 
+import ComponentSettingsCategoryEffectsDE from "@/translations/de/components/SettingsCategoryEffects.json";
 import ComponentSettingsCategoryPlayersEN from "@/translations/en/components/SettingsCategoryPlayers.json";
-import ComponentSettingsCategoryPlayersDE from "@/translations/de/components/SettingsCategoryPlayers.json"; 
+import ComponentSettingsCategoryPlayersDE from "@/translations/de/components/SettingsCategoryPlayers.json";
 import ComponentSettingsCategoryGeneralEN from "@/translations/en/components/SettingsCategoryGeneral.json";
-import ComponentSettingsCategoryGeneralDE from "@/translations/de/components/SettingsCategoryGeneral.json"; 
+import ComponentSettingsCategoryGeneralDE from "@/translations/de/components/SettingsCategoryGeneral.json";
 import ComponentSettingsSidebarEN from "@/translations/en/components/SettingsSidebar.json";
-import ComponentSettingsSidebarDE from "@/translations/de/components/SettingsSidebar.json"; 
+import ComponentSettingsSidebarDE from "@/translations/de/components/SettingsSidebar.json";
 import ComponentEditResistanceDrawerEN from "@/translations/en/components/EditResistanceDrawer.json";
 import ComponentEditResistanceDrawerDE from "@/translations/de/components/EditResistanceDrawer.json";
 import ComponentSettingResistanceCardEN from "@/translations/en/components/SettingResistanceCard.json";
@@ -95,9 +97,11 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentCanvas: ComponentCanvasEN,
     ComponentEditEncounterDrawer: ComponentEditEncounterDrawerEN,
     ComponentSettingsCategoryOpponents: ComponentSettingsCategoryOpponentsEN,
-    ComponentSettingsCategoryResistances: ComponentSettingsCategoryResistancesEN,
+    ComponentSettingsCategoryResistances:
+      ComponentSettingsCategoryResistancesEN,
     ComponentSettingsCategoryImmunities: ComponentSettingsCategoryImmunitiesEN,
     ComponentSettingsCategoryEffects: ComponentSettingsCategoryEffectsEN,
     ComponentSettingsCategoryPlayers: ComponentSettingsCategoryPlayersEN,
@@ -147,9 +151,11 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentCanvas: ComponentCanvasDE,
     ComponentEditEncounterDrawer: ComponentEditEncounterDrawerDE,
     ComponentSettingsCategoryOpponents: ComponentSettingsCategoryOpponentsDE,
-    ComponentSettingsCategoryResistances: ComponentSettingsCategoryResistancesDE,
+    ComponentSettingsCategoryResistances:
+      ComponentSettingsCategoryResistancesDE,
     ComponentSettingsCategoryImmunities: ComponentSettingsCategoryImmunitiesDE,
     ComponentSettingsCategoryEffects: ComponentSettingsCategoryEffectsDE,
     ComponentSettingsCategoryPlayers: ComponentSettingsCategoryPlayersDE,

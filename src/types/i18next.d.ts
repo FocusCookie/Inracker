@@ -1,4 +1,5 @@
 import "i18next";
+import ComponentCanvas from "@/translations/en/component/Canvas.json";
 import PagePlay from "@/translations/en/page/Play.json";
 import ComponentEditEncounterDrawer from "@/translations/en/component/EditEncounterDrawer.json";
 import ComponentSettingsCategoryOpponents from "@/translations/en/component/SettingsCategoryOpponents.json";
@@ -52,6 +53,7 @@ declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
       // hygen-components - DO NOT DELETE THIS LINE
+      ComponentCanvas: typeof ComponentCanvas;
       ComponentEditEncounterDrawer: typeof ComponentEditEncounterDrawer;
       ComponentSettingsCategoryOpponents: typeof ComponentSettingsCategoryOpponents;
       ComponentSettingsCategoryResistances: typeof ComponentSettingsCategoryResistances;

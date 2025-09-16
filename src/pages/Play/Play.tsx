@@ -5,8 +5,12 @@ import Canvas, {
   CanvasElement,
   ClickableCanvasElement,
 } from "@/components/Canvas/Canvas";
-import { TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Tooltip, TooltipContent } from "@radix-ui/react-tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import {
   CardStackPlusIcon,
@@ -462,7 +466,7 @@ function Play({
     }
   }
 
-  function handleExitParty() {
+  function handleExitPlay() {
     navigate({
       to: `/chapters?partyId=${partyId}`,
     });
@@ -659,7 +663,7 @@ function Play({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      onClick={handleExitParty}
+                      onClick={handleExitPlay}
                       variant="ghost"
                       size="icon"
                     >
@@ -702,6 +706,7 @@ function Play({
               ...enc.element,
               name: enc.name,
               onEdit: () => handleElementClick(enc),
+              onClick: (element) => console.log("clocked", element),
             })) || []
           }
           temporaryElement={tempElement}

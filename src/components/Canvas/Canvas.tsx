@@ -19,6 +19,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { CircleX, Swords, UsersRound } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
@@ -51,8 +52,8 @@ export type CanvasElement = {
 };
 
 export type ClickableCanvasElement = CanvasElement & {
-  onClick?: () => void;
-  onEdit?: () => void;
+  onClick?: (element: CanvasElement) => void;
+  onEdit?: (element: CanvasElement) => void;
 };
 
 function Canvas({
@@ -68,6 +69,7 @@ function Canvas({
   onDrawed,
   onElementMove,
 }: Props) {
+  const { t } = useTranslation("ComponentCanvas");
   const svgRef = useRef<SVGSVGElement>(null);
   const backgroundImage = useRef<HTMLImageElement | null>(null);
   const [isPlayersPanelOpen, setIsPlayersPanelOpen] = useState<boolean>(false);
@@ -783,6 +785,7 @@ function Canvas({
                 data-element-id={element.id}
                 transform={`translate(${element.x}, ${element.y})`}
                 onMouseDown={(e) => handleElementDragStart(e, element)}
+                onClick={() => element?.onClick && element.onClick(element)}
                 tabIndex={0}
                 role="button"
                 aria-label={
@@ -874,7 +877,11 @@ function Canvas({
               </g>
             </ContextMenuTrigger>
             <ContextMenuContent className="w-52">
-              <ContextMenuItem onClick={element.onEdit}>Edit</ContextMenuItem>
+              <ContextMenuItem
+                onClick={() => element?.onEdit && element.onEdit(element)}
+              >
+                {t("edit")}
+              </ContextMenuItem>
             </ContextMenuContent>
           </ContextMenu>
         ))}
@@ -1006,10 +1013,12 @@ function Canvas({
                 </ContextMenuTrigger>
                 <ContextMenuContent className="w-40">
                   <ContextMenuItem onClick={() => onTokenSelect(token)}>
-                    Select
+                    {t("select")}
                   </ContextMenuItem>
                   <ContextMenuItem onClick={() => toggleToken(token)}>
-                    {(tokenVisibility[token.id] ?? true) ? "Hide" : "Show"}
+                    {(tokenVisibility[token.id] ?? true)
+                      ? t("hide")
+                      : t("show")}
                   </ContextMenuItem>
                 </ContextMenuContent>
               </ContextMenu>
@@ -1072,7 +1081,7 @@ function Canvas({
                 </ContextMenuTrigger>
                 <ContextMenuContent className="w-40">
                   <ContextMenuItem onClick={() => onTokenSelect(token)}>
-                    Select
+                    {t("select")}
                   </ContextMenuItem>
                   <ContextMenuItem onClick={() => toggleToken(token)}>
                     {(tokenVisibility[token.id] ?? true) ? "Hide" : "Show"}
