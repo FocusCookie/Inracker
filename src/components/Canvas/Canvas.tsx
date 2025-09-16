@@ -18,6 +18,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { CircleX, Swords, UsersRound } from "lucide-react";
 
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
@@ -69,6 +70,9 @@ function Canvas({
 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const backgroundImage = useRef<HTMLImageElement | null>(null);
+  const [isPlayersPanelOpen, setIsPlayersPanelOpen] = useState<boolean>(false);
+  const [isOpponentsPanelOpen, setIsOpponentsPanelOpen] =
+    useState<boolean>(false);
 
   const {
     currentColor,
@@ -714,6 +718,14 @@ function Canvas({
     }
   }
 
+  function handlePlayersPanel() {
+    setIsPlayersPanelOpen((c) => !c);
+  }
+
+  function handleOpponentsPanel() {
+    setIsOpponentsPanelOpen((c) => !c);
+  }
+
   return (
     <div className="relative h-full w-full" key={resetCount}>
       <svg
@@ -1074,88 +1086,107 @@ function Canvas({
         })}
       </svg>
 
-      <div className="absolute top-1/2 right-4 flex -translate-y-1/2 flex-col gap-4 rounded-full border border-white/80 bg-white/20 p-2 shadow-md backdrop-blur-sm">
-        <button
-          onClick={() => setIsDrawing((c) => !c)}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
-        >
-          {isDrawing ? (
-            <Cross2Icon className="h-4 w-4" />
-          ) : (
-            <PaddingIcon className="h-4 w-4" />
-          )}
-        </button>
+      <div className="absolute top-4 right-4 flex flex-col gap-4">
+        <div className="flex flex-col gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
+          <button
+            onClick={handlePlayersPanel}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+          >
+            {isPlayersPanelOpen ? (
+              <CircleX className="h-4 w-4" />
+            ) : (
+              <UsersRound className="h-4 w-4" />
+            )}
+          </button>
 
-        <div className="flex flex-col gap-2">
-          {players.map((player) => {
-            const token = tokens.find(
-              (t) => t.type === "player" && t.entity === player.id,
-            );
-            if (!token) return null;
-            return (
-              <button
-                key={`player-${player.id}-token-state`}
-                onClick={() => toggleToken(token)}
-                className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
-              >
-                <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
-                  {player.image && player.image !== "" ? (
-                    <img
-                      className="col-start-1 col-end-1 row-start-1 row-end-2"
-                      src={player.image}
-                      alt={`Picture of Player ${player.name}`}
-                    />
-                  ) : (
-                    <span className="col-start-1 col-end-1 row-start-1 row-end-2">
-                      {player.icon}
-                    </span>
-                  )}
+          {isPlayersPanelOpen && (
+            <div className="flex flex-col gap-2">
+              {players.map((player) => {
+                const token = tokens.find(
+                  (t) => t.type === "player" && t.entity === player.id,
+                );
+                if (!token) return null;
+                return (
+                  <button
+                    key={`player-${player.id}-token-state`}
+                    onClick={() => toggleToken(token)}
+                    className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+                  >
+                    <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
+                      {player.image && player.image !== "" ? (
+                        <img
+                          className="col-start-1 col-end-1 row-start-1 row-end-2"
+                          src={player.image}
+                          alt={`Picture of Player ${player.name}`}
+                        />
+                      ) : (
+                        <span className="col-start-1 col-end-1 row-start-1 row-end-2">
+                          {player.icon}
+                        </span>
+                      )}
 
-                  {!(tokenVisibility[token.id] ?? true) && (
-                    <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
-                      <EyeNoneIcon className="h-4 w-4 text-white" />
+                      {!(tokenVisibility[token.id] ?? true) && (
+                        <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                          <EyeNoneIcon className="h-4 w-4 text-white" />
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </button>
-            );
-          })}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        <div className="flex flex-col gap-2">
-          {opponents.map((opponent) => {
-            const token = tokens.find(
-              (t) => t.type === "opponent" && t.entity === opponent.id,
-            );
-            if (!token) return null;
-            return (
-              <button
-                key={`opponent-${opponent.id}-token-state`}
-                onClick={() => toggleToken(token)}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
-              >
-                <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
-                  {opponent.image && opponent.image !== "" ? (
-                    <img
-                      className="col-start-1 col-end-1 row-start-1 row-end-2"
-                      src={opponent.image}
-                      alt={`Picture of Opponent ${opponent.name}`}
-                    />
-                  ) : (
-                    <span className="col-start-1 col-end-1 row-start-1 row-end-2">
-                      {opponent.icon}
-                    </span>
-                  )}
+        <div className="flex flex-col gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
+          <button
+            onClick={handleOpponentsPanel}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+          >
+            {isOpponentsPanelOpen ? (
+              <CircleX className="h-4 w-4" />
+            ) : (
+              <Swords className="h-4 w-4" />
+            )}
+          </button>
 
-                  {!(tokenVisibility[token.id] ?? true) && (
-                    <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
-                      <EyeNoneIcon className="h-4 w-4 text-white" />
+          {isOpponentsPanelOpen && (
+            <div className="flex flex-col gap-2">
+              {opponents.map((opponent) => {
+                const token = tokens.find(
+                  (t) => t.type === "opponent" && t.entity === opponent.id,
+                );
+                if (!token) return null;
+                return (
+                  <button
+                    key={`opponent-${opponent.id}-token-state`}
+                    onClick={() => toggleToken(token)}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+                  >
+                    <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
+                      {opponent.image && opponent.image !== "" ? (
+                        <img
+                          className="col-start-1 col-end-1 row-start-1 row-end-2"
+                          src={opponent.image}
+                          alt={`Picture of Opponent ${opponent.name}`}
+                        />
+                      ) : (
+                        <span className="col-start-1 col-end-1 row-start-1 row-end-2">
+                          {opponent.icon}
+                        </span>
+                      )}
+
+                      {!(tokenVisibility[token.id] ?? true) && (
+                        <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                          <EyeNoneIcon className="h-4 w-4 text-white" />
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </button>
-            );
-          })}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -1172,6 +1203,17 @@ function Canvas({
           className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
         >
           <ZoomInIcon className="h-4 w-4" />
+        </button>
+
+        <button
+          onClick={() => setIsDrawing((c) => !c)}
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+        >
+          {isDrawing ? (
+            <Cross2Icon className="h-4 w-4" />
+          ) : (
+            <PaddingIcon className="h-4 w-4" />
+          )}
         </button>
       </div>
     </div>
