@@ -10,33 +10,79 @@
 
 import { createFileRoute } from '@tanstack/react-router'
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as PlayIndexRouteImport } from './routes/play/index'
-import { Route as PartiesIndexRouteImport } from './routes/parties/index'
-import { Route as ChaptersIndexRouteImport } from './routes/chapters/index'
+// Import Routes
 
-const IndexLazyRouteImport = createFileRoute('/')()
+import { Route as rootRoute } from './routes/__root'
+import { Route as PlayIndexImport } from './routes/play/index'
+import { Route as PartiesIndexImport } from './routes/parties/index'
+import { Route as ChaptersIndexImport } from './routes/chapters/index'
 
-const IndexLazyRoute = IndexLazyRouteImport.update({
+// Create Virtual Routes
+
+const IndexLazyImport = createFileRoute('/')()
+
+// Create/Update Routes
+
+const IndexLazyRoute = IndexLazyImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
-const PlayIndexRoute = PlayIndexRouteImport.update({
+
+const PlayIndexRoute = PlayIndexImport.update({
   id: '/play/',
   path: '/play/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
-const PartiesIndexRoute = PartiesIndexRouteImport.update({
+
+const PartiesIndexRoute = PartiesIndexImport.update({
   id: '/parties/',
   path: '/parties/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
-const ChaptersIndexRoute = ChaptersIndexRouteImport.update({
+
+const ChaptersIndexRoute = ChaptersIndexImport.update({
   id: '/chapters/',
   path: '/chapters/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
+
+// Populate the FileRoutesByPath interface
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/chapters/': {
+      id: '/chapters/'
+      path: '/chapters'
+      fullPath: '/chapters'
+      preLoaderRoute: typeof ChaptersIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/parties/': {
+      id: '/parties/'
+      path: '/parties'
+      fullPath: '/parties'
+      preLoaderRoute: typeof PartiesIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/play/': {
+      id: '/play/'
+      path: '/play'
+      fullPath: '/play'
+      preLoaderRoute: typeof PlayIndexImport
+      parentRoute: typeof rootRoute
+    }
+  }
+}
+
+// Create and export the route tree
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
@@ -44,19 +90,22 @@ export interface FileRoutesByFullPath {
   '/parties': typeof PartiesIndexRoute
   '/play': typeof PlayIndexRoute
 }
+
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
   '/chapters': typeof ChaptersIndexRoute
   '/parties': typeof PartiesIndexRoute
   '/play': typeof PlayIndexRoute
 }
+
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
+  __root__: typeof rootRoute
   '/': typeof IndexLazyRoute
   '/chapters/': typeof ChaptersIndexRoute
   '/parties/': typeof PartiesIndexRoute
   '/play/': typeof PlayIndexRoute
 }
+
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths: '/' | '/chapters' | '/parties' | '/play'
@@ -65,44 +114,12 @@ export interface FileRouteTypes {
   id: '__root__' | '/' | '/chapters/' | '/parties/' | '/play/'
   fileRoutesById: FileRoutesById
 }
+
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   ChaptersIndexRoute: typeof ChaptersIndexRoute
   PartiesIndexRoute: typeof PartiesIndexRoute
   PlayIndexRoute: typeof PlayIndexRoute
-}
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexLazyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/play/': {
-      id: '/play/'
-      path: '/play'
-      fullPath: '/play'
-      preLoaderRoute: typeof PlayIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/parties/': {
-      id: '/parties/'
-      path: '/parties'
-      fullPath: '/parties'
-      preLoaderRoute: typeof PartiesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/chapters/': {
-      id: '/chapters/'
-      path: '/chapters'
-      fullPath: '/chapters'
-      preLoaderRoute: typeof ChaptersIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-  }
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -111,6 +128,35 @@ const rootRouteChildren: RootRouteChildren = {
   PartiesIndexRoute: PartiesIndexRoute,
   PlayIndexRoute: PlayIndexRoute,
 }
-export const routeTree = rootRouteImport
+
+export const routeTree = rootRoute
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+/* ROUTE_MANIFEST_START
+{
+  "routes": {
+    "__root__": {
+      "filePath": "__root.tsx",
+      "children": [
+        "/",
+        "/chapters/",
+        "/parties/",
+        "/play/"
+      ]
+    },
+    "/": {
+      "filePath": "index.lazy.tsx"
+    },
+    "/chapters/": {
+      "filePath": "chapters/index.tsx"
+    },
+    "/parties/": {
+      "filePath": "parties/index.tsx"
+    },
+    "/play/": {
+      "filePath": "play/index.tsx"
+    }
+  }
+}
+ROUTE_MANIFEST_END */

@@ -66,6 +66,11 @@ export type OverlayMap = {
     onComplete: (result: OverlaySuccessMap["encounter.create"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
+  "encounter.selection": {
+    encounter: Encounter;
+    chapterId: Chapter["id"];
+    onCancel?: (reason: CancelReason) => void;
+  };
   "encounter.edit": {
     encounter: Encounter;
     onEdit: (encounter: Encounter) => Promise<Encounter>;

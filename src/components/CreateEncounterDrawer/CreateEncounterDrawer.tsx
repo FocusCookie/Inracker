@@ -204,8 +204,6 @@ function CreateEncounterDrawer({
   function handleTitleChange(event: ChangeEvent<HTMLInputElement>) {
     const { value } = event.target;
 
-    console.log({ value });
-
     form.setValue("name", value);
     setCurrenTitle(value);
   }

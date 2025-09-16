@@ -2,7 +2,6 @@ import { storeImage } from "@/lib/utils";
 import { TCreatePlayer } from "@/types/player";
 import CreatePlayerForm from "../CreatePlayerForm/CreatePlayerForm";
 import Drawer from "../Drawer/Drawer";
-import { TypographyH2 } from "../ui/typographyh2";
 import { DBImmunity } from "@/types/immunitiy";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
 import { DBResistance } from "@/types/resistances";
@@ -15,6 +14,7 @@ import { useCreatePlayer } from "@/hooks/useCreatePlayer";
 import db from "@/lib/database";
 import type { CancelReason, OverlayMap } from "@/types/overlay";
 import { Button } from "../ui/button";
+import { TypographyH2 } from "../ui/typographyH2";
 type OverlayProps = OverlayMap["player.create"];
 
 type RuntimeProps = {

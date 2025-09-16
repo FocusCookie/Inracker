@@ -421,11 +421,10 @@ function Play({
     });
   }
 
-  function handleElementClick(encounter: Encounter) {
+  function handleElementEdit(encounter: Encounter) {
     openOverlay("encounter.edit", {
       encounter,
       onEdit: async (updatedEncounter) => {
-        console.log({ updatedEncounter });
         await updateEncounterMutation.mutateAsync(updatedEncounter);
         return updatedEncounter;
       },
@@ -437,6 +436,16 @@ function Play({
       },
       onCancel: (reason) => {
         console.log("Encounter edit cancelled:", reason);
+      },
+    });
+  }
+
+  function handleElementClick(encounter: Encounter) {
+    openOverlay("encounter.selection", {
+      encounter,
+      chapterId: chapter.id,
+      onCancel: (reason) => {
+        console.log("Encounter selection:", reason);
       },
     });
   }
@@ -705,8 +714,8 @@ function Play({
               id: enc.id,
               ...enc.element,
               name: enc.name,
-              onEdit: () => handleElementClick(enc),
-              onClick: (element) => console.log("clocked", element),
+              onEdit: () => handleElementEdit(enc),
+              onClick: () => handleElementClick(enc),
             })) || []
           }
           temporaryElement={tempElement}
