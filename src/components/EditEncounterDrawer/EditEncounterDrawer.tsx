@@ -82,6 +82,11 @@ function EditEncounterDrawer({
     queryFn: () => db.opponents.getAllDetailed(),
   });
 
+  const encounterOpponentsQuery = useQueryWithToast({
+    queryKey: ["encounter-opponents"],
+    queryFn: () => db.encounterOpponents.getAllDetailed(),
+  });
+
   const formSchema = z.object({
     name: z.string().min(2, { message: t("nameValidation") }),
     description: z.string(),
@@ -138,9 +143,6 @@ function EditEncounterDrawer({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      if (JSON.stringify(encounter) === JSON.stringify(values))
-        console.log("NO DIFFERENCE!");
-      console.log("DIFFEREN!!!");
       setIsLoading(true);
       const updatedEncounter = await onEdit({
         ...encounter,
@@ -153,6 +155,7 @@ function EditEncounterDrawer({
       });
 
       if (onComplete) onComplete(updatedEncounter);
+
       setClosingReason("success");
       onOpenChange(false);
 
@@ -221,6 +224,7 @@ function EditEncounterDrawer({
 
     try {
       setIsLoading(true);
+
       const updatedEncounter = await onEdit({
         ...encounter,
         ...formValues,
@@ -245,24 +249,30 @@ function EditEncounterDrawer({
     openOverlay("opponent.create", {
       onCreate: async (opponent) => {
         const createdOpponent = await db.opponents.create(opponent);
+
         if (chapterId === null)
           throw new Error(
             "Chapter id is missing in creating the token for the opponent",
           );
+
         const token: Omit<Token, "id"> = {
           type: "opponent",
           entity: createdOpponent.id,
           coordinates: { x: 0, y: 0 },
           chapter: chapterId,
         };
+
         await db.tokens.create(token);
+
         return createdOpponent;
       },
       onComplete: (opponent) => {
         const currentOpponents = form.getValues("opponents") || [];
+
         form.setValue("opponents", [...currentOpponents, opponent.id]);
         opponentsQuery.refetch();
         queryClient.invalidateQueries({ queryKey: ["opponents"] });
+        queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
         queryClient.invalidateQueries({ queryKey: ["tokens"] });
       },
       onCancel: (reason) => {
@@ -274,8 +284,42 @@ function EditEncounterDrawer({
   const selectedOpponents =
     form
       .watch("opponents")
-      ?.map((id: number) => opponentsQuery.data?.find((op) => op.id === id))
+      ?.map((id: number) =>
+        encounterOpponentsQuery.data?.find((op) => op.id === id),
+      )
       .filter((opponent): opponent is Opponent => opponent !== undefined) || [];
+
+  function handleOpenOpponentsCatalog() {
+    openOverlay("opponent.catalog", {
+      database: db,
+      onSelect: async (encounterOpponentId) => {
+        let currentOpponents: EncounterOpponent["id"] = [];
+
+        if (form.getValues("opponents"))
+          currentOpponents = form.getValues("opponents");
+
+        form.setValue("opponents", [...currentOpponents, encounterOpponentId]);
+
+        if (chapterId) {
+          await db.tokens.create({
+            chapter: chapterId,
+            type: "opponent",
+            entity: encounterOpponentId,
+            coordinates: {
+              x: encounter.element.x + encounter.element.width / 2,
+              y: encounter.element.y + encounter.element.height / 2,
+            },
+          });
+        }
+
+        queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
+        queryClient.invalidateQueries({ queryKey: ["tokens"] });
+      },
+      onCancel: (reason) => {
+        console.log("Opponent catalog cancelled:", reason);
+      },
+    });
+  }
 
   return (
     <Drawer
@@ -713,7 +757,12 @@ function EditEncounterDrawer({
                           >
                             {t("createOpponent")}
                           </Button>
-                          <Button type="button">{t("catalog")}</Button>
+                          <Button
+                            onClick={handleOpenOpponentsCatalog}
+                            type="button"
+                          >
+                            {t("catalog")}
+                          </Button>
                         </div>
                       </div>
 

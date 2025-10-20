@@ -74,9 +74,14 @@ function CreateEncounterDrawer({
     })),
   );
 
-  const opponents = useQueryWithToast({
+  const opponentsQuery = useQueryWithToast({
     queryKey: ["opponents"],
     queryFn: () => db.opponents.getAllDetailed(),
+  });
+
+  const encounterOpponentsQuery = useQueryWithToast({
+    queryKey: ["encounter-opponents"],
+    queryFn: () => db.encounterOpponents.getAllDetailed(),
   });
 
   const { fields, remove, append } = useFieldArray({
@@ -165,7 +170,7 @@ function CreateEncounterDrawer({
       onComplete: (opponent) => {
         const currentOpponents = form.getValues("opponents") || [];
         form.setValue("opponents", [...currentOpponents, opponent.id]);
-        opponents.refetch();
+        opponentsQuery.refetch();
 
         queryClient.invalidateQueries({ queryKey: ["opponents"] });
         queryClient.invalidateQueries({ queryKey: ["tokens"] });
@@ -176,24 +181,26 @@ function CreateEncounterDrawer({
     });
   }
 
-  /*
   function handleOpenOpponentsCatalog() {
     openOverlay("opponent.catalog", {
-      onSelect: async (opponent) => {
+      database: db,
+      onSelect: async (encounterOpponentId) => {
         const currentOpponents = form.getValues("opponents") || [];
-        form.setValue("opponents", [...currentOpponents, opponent.id]);
+        form.setValue("opponents", [...currentOpponents, encounterOpponentId]);
+        queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
       },
       onCancel: (reason) => {
         console.log("Opponent catalog cancelled:", reason);
       },
     });
   }
-  */
 
   const selectedOpponents =
     form
       .watch("opponents")
-      ?.map((id: number) => opponents.data?.find((op) => op.id === id))
+      ?.map((id: number) =>
+        encounterOpponentsQuery.data?.find((op) => op.id === id),
+      )
       .filter((opponent): opponent is Opponent => opponent !== undefined) || [];
 
   function handleColorChange(value: string) {
@@ -641,7 +648,7 @@ function CreateEncounterDrawer({
 
                           <Button
                             type="button"
-                            // onClick={handleOpenOpponentsCatalog}
+                            onClick={handleOpenOpponentsCatalog}
                           >
                             {t("catalog")}
                           </Button>

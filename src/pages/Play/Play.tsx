@@ -29,7 +29,6 @@ import { DBResistance, Resistance } from "@/types/resistances";
 import { DBEffect, Effect } from "@/types/effect";
 import { toast } from "@/hooks/use-toast";
 import { Chapter } from "@/types/chapters";
-import { Opponent } from "@/types/opponents";
 import { Encounter } from "@/types/encounter";
 import { CancelReason } from "@/types/overlay";
 import {
@@ -49,7 +48,6 @@ type Props = {
   database: typeof db;
   chapter: Chapter;
   encounters: Encounter[];
-  opponents: Opponent[];
   players: Player[];
   tokens: Token[];
 };
@@ -60,7 +58,6 @@ function Play({
   chapter,
   encounters,
   tokens,
-  opponents,
   players,
 }: Props) {
   const { t } = useTranslation("PagePlay");
@@ -216,6 +213,7 @@ function Play({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["encounters"] });
+      queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
       queryClient.invalidateQueries({ queryKey: ["chapter"] });
     },
   });
@@ -401,8 +399,7 @@ function Play({
           element: { ...element, color: encounter.color, icon: encounter.icon },
         };
         const created = await db.encounters.create(encounterWithElement);
-        // @ts-expect-error
-        await db.chapters.addEncounter(chapterId, created.id);
+        await db.chapters.addEncounter(chapter.id, created.id);
         return created;
       },
       onComplete: (encounter) => {
@@ -412,6 +409,7 @@ function Play({
         queryClient.invalidateQueries({ queryKey: ["party"] });
         queryClient.invalidateQueries({ queryKey: ["chapter"] });
         queryClient.invalidateQueries({ queryKey: ["encounters"] });
+        queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
       },
       onCancel: (reason: CancelReason) => {
         setIsCreateEncounterDrawerOpen(false);
@@ -426,10 +424,17 @@ function Play({
       encounter,
       onEdit: async (updatedEncounter) => {
         await updateEncounterMutation.mutateAsync(updatedEncounter);
+
+        queryClient.invalidateQueries({ queryKey: ["encounters"] });
+        queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
+
         return updatedEncounter;
       },
-      onComplete: (encounter) => {
-        console.log("deleted encounter ", encounter);
+      onComplete: (_encounter) => {
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["chapter"] });
+        queryClient.invalidateQueries({ queryKey: ["encounters"] });
+        queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
       },
       onDelete: async (encounterId) => {
         deleteEncounterMutation.mutate(encounterId);
@@ -611,7 +616,6 @@ function Play({
           />
         ))}
       </PlayLayout.Players>
-
       <PlayLayout.Settings>
         <motion.div
           initial={{
@@ -705,9 +709,9 @@ function Play({
           </TooltipProvider>
         </motion.div>
       </PlayLayout.Settings>
-
       <AnimatePresence mode="wait">
         <Canvas
+          database={database}
           background={chapter.battlemap || undefined}
           elements={
             encounters.map((enc) => ({
@@ -721,7 +725,6 @@ function Play({
           temporaryElement={tempElement}
           tokens={tokens}
           players={players}
-          opponents={opponents}
           selectedToken={selectedToken}
           onTokenSelect={setSelectedToken}
           onDrawed={handeOpenCreateElementDrawer}

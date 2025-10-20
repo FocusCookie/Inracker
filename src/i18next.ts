@@ -1,5 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentEncounterSelectionEN from "@/translations/en/components/EncounterSelection.json";
+import ComponentEncounterSelectionDE from "@/translations/de/components/EncounterSelection.json"; 
 import ComponentCanvasEN from "@/translations/en/components/Canvas.json";
 import ComponentCanvasDE from "@/translations/de/components/Canvas.json"; 
 import PagePlayEN from "@/translations/en/pages/Play.json";
@@ -97,6 +99,7 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentEncounterSelection: ComponentEncounterSelectionEN,
     ComponentCanvas: ComponentCanvasEN,
     ComponentEditEncounterDrawer: ComponentEditEncounterDrawerEN,
     ComponentSettingsCategoryOpponents: ComponentSettingsCategoryOpponentsEN,
@@ -151,6 +154,7 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentEncounterSelection: ComponentEncounterSelectionDE,
     ComponentCanvas: ComponentCanvasDE,
     ComponentEditEncounterDrawer: ComponentEditEncounterDrawerDE,
     ComponentSettingsCategoryOpponents: ComponentSettingsCategoryOpponentsDE,

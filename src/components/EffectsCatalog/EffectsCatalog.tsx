@@ -41,7 +41,7 @@ function EffectsCatalog({
 
   function handleCreateEffect() {
     openOverlay("effect.create", {
-      onCreate: async (effect: Effect) => {
+      onCreate: async (effect: Omit<Effect, "id">) => {
         const created = await db.effects.create(effect);
         return created;
       },

@@ -41,15 +41,14 @@ function RouteComponent() {
     enabled: !!chapterId,
   });
 
+  const encounterOpponents = useQueryWithToast({
+    queryKey: ["encounter-opponents"],
+    queryFn: () => db.encounterOpponents.getAllDetailed(),
+  });
+
   const tokensQuery = useQueryWithToast({
     queryKey: ["tokens"],
     queryFn: () => db.tokens.getChapterTokens(partyId, chapterId),
-    enabled: !!chapterId && !!partyId,
-  });
-
-  const opponentsQuery = useQueryWithToast({
-    queryKey: ["opponents"],
-    queryFn: () => db.opponents.getAllDetailed(),
     enabled: !!chapterId && !!partyId,
   });
 
@@ -66,7 +65,7 @@ function RouteComponent() {
             database={db}
             chapter={chapterQuery.data}
             encounters={encountersQuery.data || []}
-            opponents={opponentsQuery.data || []}
+            encounterOpponents={encounterOpponents.data || []}
             players={partyQuery.data.players || []}
             tokens={tokensQuery.data || []}
           />

@@ -1,18 +1,29 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import db from "@/lib/database";
 import { AnimatePresence, motion } from "framer-motion";
-import { TypographyH3 } from "../ui/typographyH3";
 import { OverlayMap } from "@/types/overlay";
 import { Button } from "../ui/button";
 import { useOverlayStore } from "@/stores/useOverlayStore";
-import { Encounter } from "@/types/encounter";
+import { Encounter, EncounterDifficulty } from "@/types/encounter";
 import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { useQueryClient } from "@tanstack/react-query";
-import { XIcon } from "lucide-react";
+import { ShrinkIcon, XIcon } from "lucide-react";
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import { Badge } from "../ui/badge";
 import { TypographyH4 } from "../ui/typographyH4";
-import { TypographySmall } from "../ui/typographyhSmall";
+import MarkdownReader from "../MarkdownReader/MarkdownReader";
+import OpponentCard from "../OpponentCard/OpponentCard";
+import { DBOpponent, Opponent } from "@/types/opponents";
+import { toast } from "@/hooks/use-toast";
+import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+import { useTranslation } from "react-i18next";
+import { ScrollArea } from "../ui/scroll-area";
 
 type OverlayProps = OverlayMap["encounter.selection"];
 
@@ -25,6 +36,18 @@ type RuntimeProps = {
 
 type Props = OverlayProps & RuntimeProps;
 
+function Difficulty({ diff }: { diff: EncounterDifficulty }) {
+  return (
+    <div className="flex items-start gap-4">
+      <span className="flex min-w-14 justify-center rounded-lg border border-r-neutral-300 py-2 font-bold text-neutral-800">
+        {diff.value}
+      </span>
+
+      <p className="pt-2">{diff.description}</p>
+    </div>
+  );
+}
+
 function EncounterSelection({
   open,
   chapterId,
@@ -33,8 +56,28 @@ function EncounterSelection({
   onOpenChange,
   onCancel,
 }: Props) {
+  const { t } = useTranslation("ComponentEncounterSelection");
   const openOverlay = useOverlayStore((s) => s.open);
   const queryClient = useQueryClient();
+
+  const encounterOpponents = useQueryWithToast({
+    queryKey: ["encounter-opponents"],
+    queryFn: () => db.encounterOpponents.getAllDetailed(),
+  });
+
+  const removeOpponent = useMutationWithErrorToast({
+    mutationFn: db.encounterOpponents.delete,
+    onSuccess: (opponent: DBOpponent) => {
+      queryClient.invalidateQueries({ queryKey: ["party"] });
+      queryClient.invalidateQueries({ queryKey: ["chapter"] });
+      queryClient.invalidateQueries({ queryKey: ["encounters"] });
+      queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
+      toast({
+        variant: "default",
+        title: `Deleted ${opponent.icon} ${opponent.name}`,
+      });
+    },
+  });
 
   function handleClose() {
     if (onCancel) onCancel("closed");
@@ -44,6 +87,11 @@ function EncounterSelection({
   const updateEncounterMutation = useMutationWithErrorToast({
     mutationFn: (encounter: Encounter) => {
       return db.encounters.update(encounter);
+    },
+    onSuccess: (_encounter: Encounter) => {
+      queryClient.invalidateQueries({ queryKey: ["encounters"] });
+      queryClient.invalidateQueries({ queryKey: ["chapter"] });
+      queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["encounters"] });
@@ -61,15 +109,33 @@ function EncounterSelection({
     },
   });
 
+  const groupEncounterTokensToElementMutation = useMutationWithErrorToast({
+    mutationFn: async (encounter: Encounter) => {
+      const tokens =
+        encounter.opponents && encounterOpponents.data
+          ? encounter.opponents.filter((id) =>
+              encounterOpponents.data.some((opp) => opp.id === id),
+            )
+          : [];
+
+      return db.tokens.groupTokensIntoElemementByEnitityId(
+        tokens,
+        encounter.element,
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["encounters"] });
+      queryClient.invalidateQueries({ queryKey: ["chapter"] });
+      queryClient.invalidateQueries({ queryKey: ["tokens"] });
+    },
+  });
+
   function handleElementEdit() {
     openOverlay("encounter.edit", {
       encounter,
       onEdit: async (updatedEncounter) => {
         await updateEncounterMutation.mutateAsync(updatedEncounter);
         return updatedEncounter;
-      },
-      onComplete: (encounter) => {
-        console.log("deleted encounter ", encounter);
       },
       onDelete: async (encounterId) => {
         deleteEncounterMutation.mutate(encounterId);
@@ -81,6 +147,10 @@ function EncounterSelection({
 
     if (onCancel) onCancel("dismissed");
     onOpenChange(false);
+  }
+
+  function handleGroupOpponentTokensIntoEncounter() {
+    groupEncounterTokensToElementMutation.mutate(encounter);
   }
 
   return (
@@ -97,11 +167,14 @@ function EncounterSelection({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: "100%" }}
                 transition={{ type: "tween", duration: 0.2 }}
-                className="shadow-4xl fixed bottom-4 left-1/2 flex w-md -translate-x-1/2 flex-col gap-4 rounded-t-lg border-t-4 border-r-4 border-l-4 bg-white p-4"
+                className={`shadow-4xl border-opacity-50 fixed bottom-4 left-[calc(50%+64px)] flex w-md -translate-x-1/2 flex-col rounded-t-lg border-t-4 border-r-4 border-l-4 bg-white`}
                 onClick={(e) => e.stopPropagation()}
                 style={{ borderColor: encounter.element.color }}
               >
-                <div className="flex flex-col">
+                <div
+                  className="flex flex-col border-b-4 p-4"
+                  style={{ borderColor: encounter.element.color }}
+                >
                   <div className="flex items-center justify-between gap-2">
                     <Dialog.Title asChild>
                       <TypographyH4 truncate>
@@ -109,17 +182,42 @@ function EncounterSelection({
                       </TypographyH4>
                     </Dialog.Title>
 
-                    <div className="flex gap-2">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={handleElementEdit}
-                      >
-                        <Pencil1Icon />
-                      </Button>
-                      <Button size="icon" onClick={handleClose}>
-                        <XIcon />
-                      </Button>
+                    <div className="flex flex-row-reverse gap-2">
+                      <TooltipProvider>
+                        <Button size="icon" onClick={handleClose}>
+                          <XIcon />
+                        </Button>
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={handleElementEdit}
+                            >
+                              <Pencil1Icon />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{t("editEncounter")}</p>
+                          </TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={handleGroupOpponentTokensIntoEncounter}
+                            >
+                              <ShrinkIcon />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{t("groupAllOpponentsIntoElement")}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </div>
 
@@ -127,16 +225,53 @@ function EncounterSelection({
                     Encounter {encounter.type} - {encounter.name}
                   </Dialog.DialogDescription>
 
-                  {Boolean(encounter.experience) && (
-                    <TypographySmall>
-                      Experience: {encounter.experience}
-                    </TypographySmall>
-                  )}
+                  <div className="flex gap-2">
+                    {Boolean(encounter.experience) && (
+                      <Badge variant="secondary">
+                        {encounter.experience} EP
+                      </Badge>
+                    )}
+
+                    {encounter.type === "roll" && (
+                      <>
+                        <Badge variant="secondary">{encounter.skill}</Badge>
+                        <Badge variant="secondary">{encounter.dice} 🎲</Badge>
+                      </>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex w-full grow flex-col gap-4 overflow-hidden">
-                  content here
-                </div>
+                <ScrollArea className="h-96 overflow-hidden">
+                  <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
+                    {!!encounter.description && (
+                      <MarkdownReader markdown={encounter.description} />
+                    )}
+
+                    {encounter.type === "roll" &&
+                      encounter?.difficulties &&
+                      encounter.difficulties.map((diff, index) => (
+                        <Difficulty diff={diff} key={index} />
+                      ))}
+
+                    {encounter.type === "fight" &&
+                      encounterOpponents.data &&
+                      encounter?.opponents &&
+                      encounter.opponents
+                        .filter((id) =>
+                          encounterOpponents.data.some((opp) => opp.id === id),
+                        )
+                        .map((id) =>
+                          encounterOpponents.data.find((opp) => opp.id === id),
+                        )
+                        .map((opponent: Opponent) => (
+                          <OpponentCard
+                            key={`opp-${opponent.id}`}
+                            opponent={opponent}
+                            onRemove={removeOpponent.mutate}
+                          />
+                        ))}
+                  </div>
+                </ScrollArea>
               </motion.div>
             </Dialog.Content>
           </Dialog.Portal>

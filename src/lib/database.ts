@@ -1056,6 +1056,22 @@ const getDetailedTokenById = async (
   return { ...dbToken, coordinates };
 };
 
+const getDetailedTokenByEntityId = async (
+  db: TauriDatabase,
+  entityId: Token["entity"],
+): Promise<Token> => {
+  const dbTokens = await db.select<DBToken[]>(
+    "SELECT * FROM tokens WHERE entity = $1",
+    [entityId],
+  );
+
+  const rawToken = dbTokens[0];
+
+  const token = { ...rawToken, coordinates: JSON.parse(rawToken.coordinates) };
+
+  return token;
+};
+
 const getTokensForChapter = async (
   db: TauriDatabase,
   chapter: Chapter["id"],
@@ -1117,6 +1133,42 @@ const deleteTokenById = async (
   await db.execute("DELETE FROM tokens WHERE id = $1", [id]);
 
   return deletedToken;
+};
+
+const groupTokensIntoElement = async (
+  db: TauriDatabase,
+  entityIds: Array<Token["entity"]>,
+  element: CanvasElement,
+) => {
+  const getTokenPromises = entityIds.map((token) => {
+    return getDetailedTokenByEntityId(db, token);
+  });
+
+  const detailedTokensResults = await Promise.allSettled(getTokenPromises);
+
+  const detailedTokens = detailedTokensResults
+    .filter((s): s is PromiseFulfilledResult<Token> => s.status === "fulfilled")
+    .map((s) => s.value);
+
+  const tmpTokens = detailedTokens.map((token) => {
+    return {
+      ...token,
+      coordinates: {
+        x: element.x + element.width / 2 - 32, // 32 because a token is 64 px
+        y: element.y + element.height / 2 - 32,
+      },
+    };
+  }) as any as Token[];
+
+  const updateTokensPromises = tmpTokens.map((token) => updateToken(db, token));
+
+  const updatedTokensResult = await Promise.allSettled(updateTokensPromises);
+
+  const updatedTokens = updatedTokensResult
+    .filter((s): s is PromiseFulfilledResult<Token> => s.status === "fulfilled")
+    .map((s) => s.value);
+
+  return updatedTokens;
 };
 
 //* Encounters
@@ -1234,6 +1286,51 @@ const createEncounter = async (
     type,
     element,
   } = encounter;
+
+  // Duplicate provided opponents into encounter_opponents and use their IDs
+  let encounterOpponentIds: number[] | null = null;
+
+  if (opponents && opponents.length > 0) {
+    const creationPromises = opponents.map(async (opponentId) => {
+      const baseOpponent = await getDetailedOpponentById(
+        db,
+        Number(opponentId),
+      );
+
+      const encounterOpponentPayload = {
+        details: baseOpponent.details,
+        effects: baseOpponent.effects.map((e: Effect) => e.id),
+        health: baseOpponent.health,
+        icon: baseOpponent.icon,
+        image: baseOpponent.image,
+        immunities: baseOpponent.immunities.map((im: DBImmunity) => im.id),
+        labels: baseOpponent.labels,
+        level: baseOpponent.level,
+        max_health: baseOpponent.max_health,
+        name: baseOpponent.name,
+        resistances: baseOpponent.resistances.map(
+          (res: DBResistance) => res.id,
+        ),
+        blueprint: baseOpponent.id,
+      } as Omit<EncounterOpponent, "id">;
+
+      const created = await createEncounterOpponent(
+        db,
+        encounterOpponentPayload,
+      );
+
+      return created.id;
+    });
+
+    const settled = await Promise.allSettled(creationPromises);
+
+    encounterOpponentIds = settled
+      .filter(
+        (s): s is PromiseFulfilledResult<number> => s.status === "fulfilled",
+      )
+      .map((s) => s.value);
+  }
+
   const result = await db.execute(
     "INSERT INTO encounters(name,description,color,dice,difficulties,experience,images,opponents,passed,skill,type, element) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
     [
@@ -1244,7 +1341,7 @@ const createEncounter = async (
       difficulties,
       experience,
       images,
-      opponents,
+      encounterOpponentIds,
       passed,
       skill,
       type,
@@ -1598,23 +1695,6 @@ const getDetailedEncounterOpponentById = async (
     blueprint,
   };
 
-  const getAllEncounterOpponentsDetailed = async (
-    db: TauriDatabase,
-  ): Promise<EncounterOpponent[]> => {
-    const encounterOpponentsRaw = await getAllEncounterOpponents(db); // Fetch basic encounter opponents
-    const detailedEncounterOpponents: EncounterOpponent[] = [];
-
-    for (const opponent of encounterOpponentsRaw) {
-      const detailedOpponent = await getDetailedEncounterOpponentById(
-        db,
-        opponent.id,
-      ); // Get detailed opponent data
-      detailedEncounterOpponents.push(detailedOpponent); // Store it in the array
-    }
-
-    return detailedEncounterOpponents; // Return the array of detailed encounter opponents
-  };
-
   return encounterOpponent;
 };
 
@@ -1635,9 +1715,26 @@ const getAllEncounterOpponentsDetailed = async (
   return detailedEncounterOpponents; // Return the array of detailed encounter opponents
 };
 
+const getDetailedEncounterOpponentsByIds = async (
+  db: TauriDatabase,
+  ids: Array<DBEncounterOpponent["id"]>,
+): Promise<EncounterOpponent[]> => {
+  const promises = ids.map((id) => getDetailedEncounterOpponentById(db, id));
+  const settled = await Promise.allSettled(promises);
+
+  const detailed = settled
+    .filter(
+      (s): s is PromiseFulfilledResult<EncounterOpponent> =>
+        s.status === "fulfilled",
+    )
+    .map((s) => s.value);
+
+  return detailed;
+};
+
 const createEncounterOpponent = async (
   db: TauriDatabase,
-  encounterOpponent: Omit<EncounterOpponent, "id">,
+  opponent: Omit<EncounterOpponent, "id">,
 ): Promise<EncounterOpponent> => {
   const {
     details,
@@ -1651,8 +1748,7 @@ const createEncounterOpponent = async (
     max_health,
     name,
     resistances,
-    blueprint, // additional prop
-  } = encounterOpponent;
+  } = opponent;
 
   const result = await db.execute(
     "INSERT INTO encounter_opponents (details, effects, health, icon, image, immunities, labels, level, max_health, name, resistances, blueprint) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
@@ -1668,7 +1764,7 @@ const createEncounterOpponent = async (
       max_health,
       name,
       JSON.stringify(resistances),
-      blueprint,
+      opponent.id, // blueprint
     ],
   );
 
@@ -1723,6 +1819,7 @@ const deleteEncounterOpponentById = async (
   db: TauriDatabase,
   id: EncounterOpponent["id"],
 ): Promise<DBEncounterOpponent> => {
+  console.log({ id });
   const deletedEncounterOpponent = await getEncounterOpponentById(db, id);
 
   await db.execute("DELETE FROM encounter_opponents WHERE id = $1", [id]);
@@ -2025,6 +2122,10 @@ export const Database = {
       const db = await connect();
       return getDetailedTokenById(db, id);
     },
+    detByEntityDetailed: async (entitiyId: Token["entity"]) => {
+      const db = await connect();
+      return getDetailedTokenByEntityId(db, entitiyId);
+    },
     getChapterTokens: async (
       partyId: Party["id"],
       chapterId: Chapter["id"],
@@ -2060,6 +2161,13 @@ export const Database = {
     delete: async (id: Token["id"]) => {
       const db = await connect();
       return deleteTokenById(db, id);
+    },
+    groupTokensIntoElemementByEnitityId: async (
+      entityIds: Array<Token["id"]>,
+      element: CanvasElement,
+    ) => {
+      const db = await connect();
+      return groupTokensIntoElement(db, entityIds, element);
     },
   },
 
@@ -2145,6 +2253,10 @@ export const Database = {
     getAllDetailed: async () => {
       const db = await connect();
       return getAllEncounterOpponentsDetailed(db);
+    },
+    getDetailedByIds: async (ids: Array<DBEncounterOpponent["id"]>) => {
+      const db = await connect();
+      return getDetailedEncounterOpponentsByIds(db, ids);
     },
     delete: async (id: EncounterOpponent["id"]) => {
       const db = await connect();

@@ -13,12 +13,11 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   Pencil1Icon,
-  Pencil2Icon,
 } from "@radix-ui/react-icons";
 import { DBImmunity } from "@/types/immunitiy";
 import { DBResistance } from "@/types/resistances";
 import EffectCard from "../EffectCard/EffectCard";
-import { DBEffect } from "@/types/effect";
+import { DBEffect, Effect } from "@/types/effect";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Props = {
@@ -134,7 +133,7 @@ function OpponentCard({ opponent, onRemove, onEdit }: Props) {
                   }
                 >
                   <div className="flex w-full flex-col gap-4">
-                    {opponent.effects.map((effect: DBEffect) => (
+                    {opponent.effects.map((effect: Effect) => (
                       <EffectCard
                         key={`opponent-${opponent.id}-effect-${effect.id}`}
                         effect={effect}

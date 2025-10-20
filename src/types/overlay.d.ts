@@ -1,3 +1,4 @@
+import db from "@/lib/database";
 import type { Party } from "@/types/party";
 import type { Player, TCreatePlayer } from "@/types/player";
 import type { DBImmunity, Immunity } from "@/types/immunitiy";
@@ -18,6 +19,7 @@ export type OverlaySuccessMap = {
   "encounter.create": Encounter;
   "encounter.edit": Encounter;
   "opponent.create": Opponent;
+  "opponent.catalog": Opponent;
   "party.create": { partyId: Party["id"] };
   "party.edit": { partyId: Party["id"] };
   "player.create": Player;
@@ -58,7 +60,7 @@ export type OverlayMap = {
     onCancel?: (reason: CancelReason) => void;
   };
   "effect.catalog": {
-    onSelect: (effect: DBEffect) => Promise<void>;
+    onSelect: (effect: Effect) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
   };
   "encounter.create": {
@@ -81,6 +83,11 @@ export type OverlayMap = {
   "opponent.create": {
     onCreate: (opponent: Omit<Opponent, "id">) => Promise<Opponent>;
     onComplete: (result: OverlaySuccessMap["opponent.create"]) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "opponent.catalog": {
+    database: typeof db;
+    onSelect: (opponent: Opponent) => void;
     onCancel?: (reason: CancelReason) => void;
   };
   "party.create": {

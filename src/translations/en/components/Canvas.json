@@ -2,6 +2,10 @@
   "edit": "Edit",
   "select": "Select",
   "hide": "Hide",
-  "show": "Show"
+  "show": "Show",
+  "playerTokens": "Spieler Tokens",
+  "opponentTokens": "Gegner Tokens",
+  "zoomOut": "Verkleinern",
+  "zoomIn": "Vergrößern",
+  "drawEncounter": "Zeichne Begngung"
 }
-

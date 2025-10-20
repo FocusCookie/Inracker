@@ -14,15 +14,21 @@ import { useTranslation } from "react-i18next";
 import { useController, useForm } from "react-hook-form";
 import LabelsInput from "../LabelInput/LabelInput";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
+import { OverlayMap } from "@/types/overlay";
+import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 
-type Props = {
+type OverlayProps = OverlayMap["opponent.catalog"];
+
+type RuntimeProps = {
   open: boolean;
   onOpenChange: (state: boolean) => void;
-  onAdd: (opponent: Opponent["id"]) => void;
-  opponents: Opponent[];
+  onExitComplete: () => void;
 };
 
-function OpponentsCatalog({ open, opponents, onAdd, onOpenChange }: Props) {
+type Props = OverlayProps & RuntimeProps;
+
+function OpponentsCatalog({ open, database, onSelect, onOpenChange }: Props) {
   const { t } = useTranslation("ComponentOpponentsCatalog");
   const [search, setSearch] = useState("");
 
@@ -30,6 +36,15 @@ function OpponentsCatalog({ open, opponents, onAdd, onOpenChange }: Props) {
     defaultValues: {
       searchLabels: [],
     },
+  });
+
+  const opponentsQuery = useQueryWithToast({
+    queryKey: ["opponents"],
+    queryFn: () => database.opponents.getAllDetailed(),
+  });
+
+  const createEncounterOpponent = useMutationWithErrorToast({
+    mutationFn: database.encounterOpponents.create,
   });
 
   const { field: searchLabelsField } = useController({
@@ -40,11 +55,6 @@ function OpponentsCatalog({ open, opponents, onAdd, onOpenChange }: Props) {
   function handleSearchTerm(event: React.ChangeEvent<HTMLInputElement>) {
     setSearch(event.target.value);
   }
-
-  const nameMatchOpponents = (opponents: Opponent[]) =>
-    opponents.filter((opponent) =>
-      opponent.name.toLowerCase().includes(search.toLowerCase()),
-    );
 
   const labelMatchOpponents = (opponents: Opponent[]) => {
     const searchLabels = searchLabelsField.value as string[];
@@ -60,20 +70,25 @@ function OpponentsCatalog({ open, opponents, onAdd, onOpenChange }: Props) {
     );
   };
 
-  const filteredOpponents = opponents
-    .filter((opponent) => {
-      if (search) {
-        return nameMatchOpponents([opponent]).length > 0;
-      }
-      return true;
-    })
-    .filter((opponent) => {
-      const searchLabels = searchLabelsField.value as string[];
-      if (searchLabels && searchLabels.length > 0) {
-        return labelMatchOpponents([opponent]).length > 0;
-      }
-      return true;
-    });
+  const filteredOpponents = opponentsQuery.data
+    ? opponentsQuery.data
+        .filter((opponent: Opponent) =>
+          opponent.name.toLowerCase().includes(search.toLowerCase()),
+        )
+        .filter((opponent: Opponent) => {
+          const searchLabels = searchLabelsField.value as string[];
+          if (searchLabels && searchLabels.length > 0) {
+            return labelMatchOpponents([opponent]).length > 0;
+          }
+          return true;
+        })
+    : [];
+
+  async function handleSelect(opponent: Opponent) {
+    const encOpponent = await createEncounterOpponent.mutateAsync(opponent);
+    onSelect(encOpponent.id);
+    onOpenChange(false);
+  }
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
@@ -94,10 +109,7 @@ function OpponentsCatalog({ open, opponents, onAdd, onOpenChange }: Props) {
 
             <TabsContent value="name">
               <div className="flex flex-col gap-2 pb-2">
-                <label
-                  className="text-sm font-medium"
-                  htmlFor={`${name}-input`}
-                >
+                <label className="text-sm font-medium" htmlFor="name">
                   {t("searchByName")}
                 </label>
                 <Input placeholder={t("search")} onChange={handleSearchTerm} />
@@ -118,11 +130,11 @@ function OpponentsCatalog({ open, opponents, onAdd, onOpenChange }: Props) {
         <div className="flex max-h-[300px] w-full overflow-hidden">
           <div className="scrollable-y w-full overflow-y-scroll pr-0.5">
             <div className="flex h-full w-full flex-col gap-4 p-1">
-              {filteredOpponents.map((opponent) => (
+              {filteredOpponents.map((opponent: Opponent) => (
                 <div key={`oponents-catalog-${opponent.id}}`}>
                   <button
                     onClick={() => {
-                      onAdd(Math.abs(opponent.id));
+                      handleSelect(opponent);
                     }}
                     className="focus-visible:ring-ring hover:bg-secondary/80 focus-within:bg-secondary/80 flex w-full items-start justify-start gap-2 rounded-md p-1 ring-offset-1 outline-black transition-colors focus-within:outline-1 hover:cursor-pointer focus-visible:ring-1"
                   >
