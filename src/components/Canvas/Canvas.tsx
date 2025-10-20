@@ -1,6 +1,6 @@
+import db from "@/lib/database";
 import { cn } from "@/lib/utils";
 import { useEncounterStore } from "@/stores/useEncounterStore";
-import { Opponent } from "@/types/opponents";
 import { Player } from "@/types/player";
 import { Token } from "@/types/tokens";
 import {
@@ -16,10 +16,18 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuLabel,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { CircleX, Swords, UsersRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
@@ -28,11 +36,11 @@ const TEMP_DEFAULT_COLOR = "#FFFFFF";
 const TEMP_DEFAULT_ICON = "📝";
 
 type Props = {
+  database: typeof db;
   background?: string;
   elements: (ClickableCanvasElement & { id: any })[];
   temporaryElement?: CanvasElement;
   players: Player[];
-  opponents: Opponent[];
   selectedToken: Token | null;
   tokens: Token[];
   onTokenSelect: (token: Token | null) => void;
@@ -57,11 +65,11 @@ export type ClickableCanvasElement = CanvasElement & {
 };
 
 function Canvas({
+  database,
   background,
   elements,
   temporaryElement,
   players,
-  opponents,
   selectedToken,
   tokens,
   onTokenMove,
@@ -95,6 +103,11 @@ function Canvas({
       resetCount: state.resetCount,
     })),
   );
+
+  const encounterOpponents = useQueryWithToast({
+    queryKey: ["encounter-opponents"],
+    queryFn: () => database.encounterOpponents.getAllDetailed(),
+  });
 
   const currentViewBoxRef = useRef<{
     x: number;
@@ -941,7 +954,7 @@ function Canvas({
             id="selection-ring"
             cx={selectedToken.coordinates.x + 50}
             cy={selectedToken.coordinates.y + 50}
-            r={65}
+            r={64}
             stroke="white"
             strokeWidth={10}
             className="animate-pulse"
@@ -952,10 +965,12 @@ function Canvas({
           const player = players.find(
             (player) => token.type === "player" && player.id === token.entity,
           );
-          const opponent = opponents.find(
-            (opponent) =>
-              token.type === "opponent" && opponent.id === token.entity,
-          );
+          const opponent = encounterOpponents.data
+            ? encounterOpponents.data.find(
+                (opponent) =>
+                  token.type === "opponent" && opponent.id === token.entity,
+              )
+            : [];
 
           if (player) {
             return (
@@ -1012,6 +1027,7 @@ function Canvas({
                   </g>
                 </ContextMenuTrigger>
                 <ContextMenuContent className="w-40">
+                  <ContextMenuLabel>{player.name}</ContextMenuLabel>
                   <ContextMenuItem onClick={() => onTokenSelect(token)}>
                     {t("select")}
                   </ContextMenuItem>
@@ -1080,6 +1096,7 @@ function Canvas({
                   </g>
                 </ContextMenuTrigger>
                 <ContextMenuContent className="w-40">
+                  <ContextMenuLabel>{opponent.name}</ContextMenuLabel>
                   <ContextMenuItem onClick={() => onTokenSelect(token)}>
                     {t("select")}
                   </ContextMenuItem>
@@ -1098,16 +1115,23 @@ function Canvas({
       {players.length > 0 && (
         <div className="absolute top-4 right-4 flex flex-col gap-4">
           <div className="flex flex-col gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
-            <button
-              onClick={handlePlayersPanel}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
-            >
-              {isPlayersPanelOpen ? (
-                <CircleX className="h-4 w-4" />
-              ) : (
-                <UsersRound className="h-4 w-4" />
-              )}
-            </button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handlePlayersPanel}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+                  >
+                    {isPlayersPanelOpen ? (
+                      <CircleX className="h-4 w-4" />
+                    ) : (
+                      <UsersRound className="h-4 w-4" />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>{t("playerTokens")}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
             {isPlayersPanelOpen && (
               <div className="flex flex-col gap-2">
@@ -1117,117 +1141,157 @@ function Canvas({
                   );
                   if (!token) return null;
                   return (
-                    <button
-                      key={`player-${player.id}-token-state`}
-                      onClick={() => toggleToken(token)}
-                      className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
-                    >
-                      <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
-                        {player.image && player.image !== "" ? (
-                          <img
-                            className="col-start-1 col-end-1 row-start-1 row-end-2"
-                            src={player.image}
-                            alt={`Picture of Player ${player.name}`}
-                          />
-                        ) : (
-                          <span className="col-start-1 col-end-1 row-start-1 row-end-2">
-                            {player.icon}
-                          </span>
-                        )}
+                    <Tooltip key={`player-${player.id}-token-state`}>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => toggleToken(token)}
+                          className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
+                        >
+                          <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
+                            {player.image && player.image !== "" ? (
+                              <img
+                                className="col-start-1 col-end-1 row-start-1 row-end-2"
+                                src={player.image}
+                                alt={`Picture of Player ${player.name}`}
+                              />
+                            ) : (
+                              <span className="col-start-1 col-end-1 row-start-1 row-end-2">
+                                {player.icon}
+                              </span>
+                            )}
 
-                        {!(tokenVisibility[token.id] ?? true) && (
-                          <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
-                            <EyeNoneIcon className="h-4 w-4 text-white" />
+                            {!(tokenVisibility[token.id] ?? true) && (
+                              <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                                <EyeNoneIcon className="h-4 w-4 text-white" />
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    </button>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>{player.name}</TooltipContent>
+                    </Tooltip>
                   );
                 })}
               </div>
             )}
           </div>
 
-          {opponents.length > 0 && (
+          {encounterOpponents.data && encounterOpponents.data.length > 0 && (
             <div className="flex flex-col gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
-              <button
-                onClick={handleOpponentsPanel}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
-              >
-                {isOpponentsPanelOpen ? (
-                  <CircleX className="h-4 w-4" />
-                ) : (
-                  <Swords className="h-4 w-4" />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={handleOpponentsPanel}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
+                    >
+                      {isOpponentsPanelOpen ? (
+                        <CircleX className="h-4 w-4" />
+                      ) : (
+                        <Swords className="h-4 w-4" />
+                      )}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>{t("opponentTokens")}</TooltipContent>
+                </Tooltip>
+
+                {isOpponentsPanelOpen && (
+                  <div className="flex flex-col gap-2">
+                    {encounterOpponents.data &&
+                      encounterOpponents.data.map((opponent) => {
+                        const token = tokens.find(
+                          (t) =>
+                            t.type === "opponent" && t.entity === opponent.id,
+                        );
+                        if (!token) return null;
+                        return (
+                          <Tooltip key={`opponent-${opponent.id}-token-state`}>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() => toggleToken(token)}
+                                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
+                              >
+                                <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
+                                  {opponent.image && opponent.image !== "" ? (
+                                    <img
+                                      className="col-start-1 col-end-1 row-start-1 row-end-2"
+                                      src={opponent.image}
+                                      alt={`Picture of Opponent ${opponent.name}`}
+                                    />
+                                  ) : (
+                                    <span className="col-start-1 col-end-1 row-start-1 row-end-2">
+                                      {opponent.icon}
+                                    </span>
+                                  )}
+
+                                  {!(tokenVisibility[token.id] ?? true) && (
+                                    <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                                      <EyeNoneIcon className="h-4 w-4 text-white" />
+                                    </div>
+                                  )}
+                                </div>
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>{opponent.name}</TooltipContent>
+                          </Tooltip>
+                        );
+                      })}
+                  </div>
                 )}
-              </button>
-
-              {isOpponentsPanelOpen && (
-                <div className="flex flex-col gap-2">
-                  {opponents.map((opponent) => {
-                    const token = tokens.find(
-                      (t) => t.type === "opponent" && t.entity === opponent.id,
-                    );
-                    if (!token) return null;
-                    return (
-                      <button
-                        key={`opponent-${opponent.id}-token-state`}
-                        onClick={() => toggleToken(token)}
-                        className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
-                      >
-                        <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
-                          {opponent.image && opponent.image !== "" ? (
-                            <img
-                              className="col-start-1 col-end-1 row-start-1 row-end-2"
-                              src={opponent.image}
-                              alt={`Picture of Opponent ${opponent.name}`}
-                            />
-                          ) : (
-                            <span className="col-start-1 col-end-1 row-start-1 row-end-2">
-                              {opponent.icon}
-                            </span>
-                          )}
-
-                          {!(tokenVisibility[token.id] ?? true) && (
-                            <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
-                              <EyeNoneIcon className="h-4 w-4 text-white" />
-                            </div>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+              </TooltipProvider>
             </div>
           )}
         </div>
       )}
 
       <div className="absolute bottom-4 left-4 flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
-        <button
-          onClick={zoomOut}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
-        >
-          <ZoomOutIcon className="h-4 w-4" />
-        </button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={zoomOut}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+              >
+                <ZoomOutIcon className="h-4 w-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t("zoomOut")}</p>
+            </TooltipContent>
+          </Tooltip>
 
-        <button
-          onClick={zoomIn}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
-        >
-          <ZoomInIcon className="h-4 w-4" />
-        </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={zoomIn}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+              >
+                <ZoomInIcon className="h-4 w-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t("zoomIn")}</p>
+            </TooltipContent>
+          </Tooltip>
 
-        <button
-          onClick={() => setIsDrawing((c) => !c)}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
-        >
-          {isDrawing ? (
-            <Cross2Icon className="h-4 w-4" />
-          ) : (
-            <PaddingIcon className="h-4 w-4" />
-          )}
-        </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setIsDrawing((c) => !c)}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+              >
+                {isDrawing ? (
+                  <Cross2Icon className="h-4 w-4" />
+                ) : (
+                  <PaddingIcon className="h-4 w-4" />
+                )}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t("drawEncounter")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </div>
   );
