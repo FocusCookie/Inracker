@@ -1024,6 +1024,16 @@ function Canvas({
                       strokeWidth={4}
                       className="pointer-events-none opacity-0 group-focus:opacity-100 group-focus-visible:opacity-100"
                     />
+
+                    <g>
+                      <text
+                        className="text-4xl"
+                        x={token.coordinates.x}
+                        y={token.coordinates.y + 32}
+                      >
+                        {player.icon}
+                      </text>
+                    </g>
                   </g>
                 </ContextMenuTrigger>
                 <ContextMenuContent className="w-40">
@@ -1062,6 +1072,26 @@ function Canvas({
                       }
                     }}
                   >
+                    {!opponent.image && (
+                      <g>
+                        <circle
+                          cx={token.coordinates.x + 50}
+                          cy={token.coordinates.y + 50}
+                          r={52}
+                          strokeWidth={4}
+                          className="pointer-events-none fill-neutral-50/50"
+                        ></circle>
+
+                        <text
+                          className="text-4xl"
+                          x={token.coordinates.x + 32}
+                          y={token.coordinates.y + 64}
+                        >
+                          {opponent.icon}
+                        </text>
+                      </g>
+                    )}
+
                     <image
                       className={cn(
                         "hover:cursor-pointer",
@@ -1093,6 +1123,18 @@ function Canvas({
                       strokeWidth={4}
                       className="pointer-events-none opacity-0 group-focus:opacity-100 group-focus-visible:opacity-100"
                     />
+
+                    {opponent.image && (
+                      <g>
+                        <text
+                          className="text-4xl"
+                          x={token.coordinates.x}
+                          y={token.coordinates.y + 32}
+                        >
+                          {opponent.icon}
+                        </text>
+                      </g>
+                    )}
                   </g>
                 </ContextMenuTrigger>
                 <ContextMenuContent className="w-40">
