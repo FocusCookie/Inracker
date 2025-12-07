@@ -25,6 +25,10 @@ export const getEffectById = async (
     [effectId],
   );
 
+  if (!result.length) {
+    throw createDatabaseError(`Effect with ID ${effectId} not found`);
+  }
+
   const { description, duration, duration_type, icon, id, name, type, value } =
     result[0];
 
@@ -38,10 +42,6 @@ export const getEffectById = async (
     type,
     value,
   };
-
-  if (!result.length) {
-    throw createDatabaseError(`Effect with ID ${id} not found`);
-  }
 
   return effect;
 };
@@ -83,7 +83,7 @@ export const deleteEffect = async (
     "SELECT * FROM effects WHERE id = $1",
     [id],
   );
-  
+
   // Clean up references in players
   const allPlayers = await getAllPlayers(db);
 

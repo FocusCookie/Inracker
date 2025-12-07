@@ -1,3 +1,8 @@
 {
-    
+  "opponents": "Gegner",
+  "createOpponent": "Erstelle Gegner",
+  "noOpponents": "Keine Gegner",
+  "noOpponentsDescription": "Du hast noch keine Gegner erstellt. Erstelle einen, um loszulegen.",
+  "searchPlaceholder": "Suche nach Gegnern..."
 }
+

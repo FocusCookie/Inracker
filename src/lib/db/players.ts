@@ -142,22 +142,20 @@ export const createPlayer = async (
     "INSERT INTO players (details, effects, ep, health, max_health, image, icon, immunities, level, name, overview, resistances, role) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)  RETURNING *",
     [
       details,
-      effects.length > 0
-        ? JSON.stringify(effects.map((id) => id).join(", "))
-        : "[]",
+      effects.length > 0 ? JSON.stringify(effects.map((id) => id)) : "[]",
       ep,
       health,
       max_health,
       image,
       icon,
       immunities.length > 0
-        ? JSON.stringify(immunities.map((id) => id).join(", "))
+        ? JSON.stringify(immunities.map((id) => id))
         : "[]",
       level,
       name,
       overview,
       resistances.length > 0
-        ? JSON.stringify(resistances.map((id) => id).join(", "))
+        ? JSON.stringify(resistances.map((id) => id))
         : "[]",
       role,
     ],
@@ -192,17 +190,17 @@ export const updatePlayer = async (
     [
       id, // 1
       details, // 2
-      JSON.stringify(effects.map((id) => id).join(", ")), // 3
+      JSON.stringify(effects.map((id) => id)), // 3
       ep, // 4
       health, // 5
       max_health, // 6
       image, // 7
       icon, // 8
-      JSON.stringify(immunities.map((id) => id).join(", ")), // 9
+      JSON.stringify(immunities.map((id) => id)), // 9
       level, // 10
       name, // 11
       overview, // 12
-      JSON.stringify(resistances.map((id) => id).join(", ")), // 13
+      JSON.stringify(resistances.map((id) => id)), // 13
       role, // 14
     ],
   );
@@ -226,7 +224,7 @@ export const addImmunityToPlayer = async (
 
     await db.execute("UPDATE players SET immunities = $2 WHERE id = $1", [
       playerId,
-      JSON.stringify(update.map((id: number) => id).join(", ")),
+      JSON.stringify(update.map((id: number) => id)),
     ]);
   }
 
@@ -249,8 +247,7 @@ export const removeImmunityFromPlayer = async (
     JSON.stringify(
       update
         .map((im) => im.id)
-        .map((id: number) => id)
-        .join(", "),
+        .map((id: number) => id),
     ),
   ]);
 
@@ -273,7 +270,7 @@ export const addResistanceToPlayer = async (
 
     await db.execute("UPDATE players SET resistances = $2 WHERE id = $1", [
       playerId,
-      JSON.stringify(update.map((id: number) => id).join(", ")),
+      JSON.stringify(update.map((id: number) => id)),
     ]);
   }
 
@@ -298,13 +295,15 @@ export const removeResistanceFromPlayer = async (
     JSON.stringify(
       update
         .map((im) => im.id)
-        .map((id: number) => id)
-        .join(", "),
+        .map((id: number) => id),
     ),
   ]);
 
   return removedResistance;
 };
+
+import { DBToken, Token } from "@/types/tokens";
+import { deleteTokenById } from "./tokens";
 
 export const deletePlayerById = async (
   db: TauriDatabase,
@@ -315,6 +314,16 @@ export const deletePlayerById = async (
   const partiesWithPlayer = allParties.filter((party) =>
     party.players.includes(id.toString()),
   );
+
+  // Delete all tokens for this player
+  const playerTokens = await db.select<DBToken[]>(
+    "SELECT * FROM tokens WHERE entity = $1 AND type = $2",
+    [id, "player"],
+  );
+  
+  for (const token of playerTokens) {
+    await deleteTokenById(db, token.id);
+  }
 
   await db.execute("DELETE FROM players WHERE id = $1", [id]);
   //TODO: Implement deletion of the image
@@ -332,6 +341,48 @@ export const deletePlayerById = async (
   }
 
   return deletedPlayer;
+};
+
+export const addEffectToPlayer = async (
+  db: TauriDatabase,
+  playerId: Player["id"],
+  effectId: Effect["id"],
+): Promise<Player> => {
+  const { effects } = await getDetailedPlayerById(db, playerId);
+  const isAlreadySet = effects.some((effect) => effect.id === effectId);
+  const update = effects.map((effect) => effect.id);
+
+  if (!isAlreadySet) {
+    update.push(effectId);
+
+    await db.execute("UPDATE players SET effects = $2 WHERE id = $1", [
+      playerId,
+      JSON.stringify(update.map((id: number) => id)),
+    ]);
+  }
+
+  return getDetailedPlayerById(db, playerId);
+};
+
+export const removeEffectFromPlayer = async (
+  db: TauriDatabase,
+  playerId: Player["id"],
+  effectId: Effect["id"],
+) => {
+  const { effects } = await getDetailedPlayerById(db, playerId);
+  const removedEffect = effects.find((effect) => effect.id === effectId);
+  const update = effects.filter((effect) => effect.id !== effectId);
+
+  await db.execute("UPDATE players SET effects = $2 WHERE id = $1", [
+    playerId,
+    JSON.stringify(
+      update
+        .map((eff) => eff.id)
+        .map((id: number) => id),
+    ),
+  ]);
+
+  return removedEffect as Effect;
 };
 
 export const players = {
@@ -354,6 +405,14 @@ export const players = {
   delete: async (id: Player["id"]) => {
     const db = await connect();
     return deletePlayerById(db, id);
+  },
+  addEffect: async (playerId: Player["id"], effectId: Effect["id"]) => {
+    const db = await connect();
+    return addEffectToPlayer(db, playerId, effectId);
+  },
+  removeEffect: async (playerId: Player["id"], effectId: Effect["id"]) => {
+    const db = await connect();
+    return removeEffectFromPlayer(db, playerId, effectId);
   },
   addImmunity: async (
     playerId: Player["id"],

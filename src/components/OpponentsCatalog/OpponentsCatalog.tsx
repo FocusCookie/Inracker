@@ -16,7 +16,6 @@ import LabelsInput from "../LabelInput/LabelInput";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import { OverlayMap } from "@/types/overlay";
-import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 
 type OverlayProps = OverlayMap["opponent.catalog"];
 
@@ -41,10 +40,6 @@ function OpponentsCatalog({ open, database, onSelect, onOpenChange }: Props) {
   const opponentsQuery = useQueryWithToast({
     queryKey: ["opponents"],
     queryFn: () => database.opponents.getAllDetailed(),
-  });
-
-  const createEncounterOpponent = useMutationWithErrorToast({
-    mutationFn: database.encounterOpponents.create,
   });
 
   const { field: searchLabelsField } = useController({
@@ -85,8 +80,7 @@ function OpponentsCatalog({ open, database, onSelect, onOpenChange }: Props) {
     : [];
 
   async function handleSelect(opponent: Opponent) {
-    const encOpponent = await createEncounterOpponent.mutateAsync(opponent);
-    onSelect(encOpponent.id);
+    onSelect(opponent);
     onOpenChange(false);
   }
 
@@ -155,9 +149,9 @@ function OpponentsCatalog({ open, database, onSelect, onOpenChange }: Props) {
                         <span className="text-xl font-bold">
                           {opponent.name}
                         </span>
-                        <Badge variant="outline">LVL {opponent.level}</Badge>
                       </div>
                       <div className="flex flex-wrap gap-2">
+                        <Badge variant="outline">LVL {opponent.level}</Badge>
                         {opponent.labels &&
                           opponent.labels.map((label: string) => (
                             <Badge key={label} variant="outline">

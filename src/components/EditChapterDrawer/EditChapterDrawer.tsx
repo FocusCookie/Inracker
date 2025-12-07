@@ -178,7 +178,7 @@ function EditChapterDrawer({
     try {
       setIsLoading(true);
       await onDelete(chapter.id);
-      onComplete({ chapterId: chapter.id });
+      onComplete(chapter);
       setClosingReason("success");
       onOpenChange(false);
       form.reset();
@@ -198,17 +198,13 @@ function EditChapterDrawer({
       title={t("title")}
       actions={
         <>
-          <Button loading={isLoading} onClick={form.handleSubmit(onSubmit)}>
+          <Button disabled={isLoading} onClick={form.handleSubmit(onSubmit)}>
             {t("save")}
           </Button>
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button
-                variant="destructive"
-                loading={isLoading}
-                disabled={isLoading}
-              >
+              <Button variant="destructive" disabled={isLoading}>
                 {t("delete")}
               </Button>
             </AlertDialogTrigger>
@@ -358,4 +354,3 @@ function EditChapterDrawer({
 }
 
 export default EditChapterDrawer;
-

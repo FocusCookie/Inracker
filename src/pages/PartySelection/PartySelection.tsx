@@ -3,48 +3,38 @@ import PartyCard from "@/components/PartyCard/PartyCard";
 import { Button } from "@/components/ui/button";
 import { TypographyH1 } from "@/components/ui/typographyH1";
 import { TypographyP } from "@/components/ui/typographyP";
-import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
+import {
+  useCreateParty,
+  useDeleteParty,
+  useUpdateParty,
+} from "@/hooks/useParties";
 import { useOverlayStore } from "@/stores/useOverlayStore";
-import type { DBParty, Party } from "@/types/party";
+import type { Party } from "@/types/party";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import database from "@/lib/database";
 
 type PartySelectionProps = {
+  database: typeof database;
   parties: Party[];
-  loading: boolean;
-  onEditParty: (party: Party) => Promise<Party>;
+  isLoading: boolean;
   onPartySelect: (id: Party["id"]) => void;
-  onCreateParty: (party: Omit<Party, "id">) => Promise<DBParty>;
-  onDeleteParty: (id: Party["id"]) => Promise<number>;
 };
 
 const PartySelection = ({
+  database,
   parties,
-  loading,
-  onEditParty,
+  isLoading,
   onPartySelect,
-  onCreateParty,
-  onDeleteParty,
 }: PartySelectionProps) => {
   const { t } = useTranslation("PagePartySelection");
   const openOverlay = useOverlayStore((s) => s.open);
   const queryClient = useQueryClient();
 
-  const createPartyMutation = useMutationWithErrorToast({
-    mutationFn: onCreateParty,
-  });
-
-  const editPartyMutation = useMutationWithErrorToast({
-    mutationFn: onEditParty,
-  });
-
-  const deletePartyMutation = useMutationWithErrorToast({
-    mutationFn: onDeleteParty,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["parties"] });
-    },
-  });
+  const createPartyMutation = useCreateParty(database);
+  const editPartyMutation = useUpdateParty(database);
+  const deletePartyMutation = useDeleteParty(database);
 
   function handleOpenCreateParty() {
     openOverlay("party.create", {
@@ -86,9 +76,11 @@ const PartySelection = ({
         </Button>
 
         <AnimatePresence mode="wait">
-          {loading && <Loader size="large" title={t("loading")} key="loader" />}
+          {isLoading && (
+            <Loader size="large" title={t("loading")} key="loader" />
+          )}
 
-          {!loading && (
+          {!isLoading && (
             <div className="scrollable-y w-full overflow-y-scroll pr-0.5">
               <div className="flex w-full flex-col gap-4 pb-4">
                 {parties.map((party, index) => (

@@ -13,7 +13,7 @@ import { Badge } from "../ui/badge";
 import { TypographyH4 } from "../ui/typographyH4";
 import MarkdownReader from "../MarkdownReader/MarkdownReader";
 import OpponentCard from "../OpponentCard/OpponentCard";
-import { DBOpponent, Opponent } from "@/types/opponents";
+import { DBOpponent } from "@/types/opponents";
 import { toast } from "@/hooks/use-toast";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import {
@@ -65,13 +65,31 @@ function EncounterSelection({
     queryFn: () => db.encounterOpponents.getAllDetailed(),
   });
 
+  //TODO: Das Problem ist, dass absolutes chaos ist was mittels useMutations ausgelöst wird oder direkt in der database.
+  // es sollte bei einer löschung des encounteropponents dieser und sein token gelöscht werden und anschliessen der encounter
+  // aktuallisiert werden (dessen .opponents liste)
+  // könnte die mutationFn auch erweitern dass in diseer die db calls immer liegen die gemacht werden müssen, um so alles
+  // zusammen zustellen an db calls - dann liefe aber alles über mutations und nichts direkt in db nebenher
+  throw new Error("LEFT OF at encounterSelection");
   const removeOpponent = useMutationWithErrorToast({
     mutationFn: db.encounterOpponents.delete,
     onSuccess: (opponent: DBOpponent) => {
+      const previousOpponents = encounter.opponents
+        ? [...encounter.opponents]
+        : [];
+      db.encounters.update({
+        ...encounter,
+        opponents: previousOpponents.filter(
+          (opp: number) => opp !== opponent.id,
+        ),
+      });
+
       queryClient.invalidateQueries({ queryKey: ["party"] });
+      queryClient.invalidateQueries({ queryKey: ["tokens"] });
       queryClient.invalidateQueries({ queryKey: ["chapter"] });
       queryClient.invalidateQueries({ queryKey: ["encounters"] });
       queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
+
       toast({
         variant: "default",
         title: `Deleted ${opponent.icon} ${opponent.name}`,
@@ -104,8 +122,9 @@ function EncounterSelection({
       return db.encounters.delete(encounterId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["encounters"] });
       queryClient.invalidateQueries({ queryKey: ["chapter"] });
+      queryClient.invalidateQueries({ queryKey: ["encounters"] });
+      queryClient.invalidateQueries({ queryKey: ["tokens"] });
     },
   });
 
@@ -142,6 +161,16 @@ function EncounterSelection({
       },
       onCancel: (reason) => {
         console.log("Encounter edit cancelled:", reason);
+      },
+      onComplete: async (encounter) => {
+        if (chapterId) {
+          await db.tokens.createOpponentsTokensByEncounter(
+            chapterId,
+            encounter,
+          );
+        }
+
+        queryClient.invalidateQueries({ queryKey: ["tokens"] });
       },
     });
 
@@ -203,20 +232,22 @@ function EncounterSelection({
                           </TooltipContent>
                         </Tooltip>
 
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={handleGroupOpponentTokensIntoEncounter}
-                            >
-                              <ShrinkIcon />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{t("groupAllOpponentsIntoElement")}</p>
-                          </TooltipContent>
-                        </Tooltip>
+                        {encounter.type === "fight" && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={handleGroupOpponentTokensIntoEncounter}
+                              >
+                                <ShrinkIcon />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{t("groupAllOpponentsIntoElement")}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
                       </TooltipProvider>
                     </div>
                   </div>
@@ -226,6 +257,8 @@ function EncounterSelection({
                   </Dialog.DialogDescription>
 
                   <div className="flex gap-2">
+                    <Badge>{t(encounter.type)}</Badge>
+
                     {Boolean(encounter.experience) && (
                       <Badge variant="secondary">
                         {encounter.experience} EP
@@ -257,16 +290,18 @@ function EncounterSelection({
                       encounterOpponents.data &&
                       encounter?.opponents &&
                       encounter.opponents
-                        .filter((id) =>
-                          encounterOpponents.data.some((opp) => opp.id === id),
-                        )
-                        .map((id) =>
-                          encounterOpponents.data.find((opp) => opp.id === id),
-                        )
-                        .map((opponent: Opponent) => (
+                        .map((id) => {
+                          return {
+                            entity: id,
+                            opponent: encounterOpponents.data.find(
+                              (opp) => opp.id === id,
+                            ),
+                          };
+                        })
+                        .map((encOpp) => (
                           <OpponentCard
-                            key={`opp-${opponent.id}`}
-                            opponent={opponent}
+                            key={`opp-${encOpp.entity}`}
+                            opponent={encOpp.opponent}
                             onRemove={removeOpponent.mutate}
                           />
                         ))}

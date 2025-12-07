@@ -1,6 +1,8 @@
 {
   "groupAllOpponentsIntoElement": "Move all Opponentstokens into the Encounter element.",
   "editEncounter": "Edit Encounter",
-  "closeEncounter": "Close Encounter"
+  "closeEncounter": "Close Encounter",
+  "fight": "Fight",
+  "note": "Note",
+  "roll": "Roll"
 }
-

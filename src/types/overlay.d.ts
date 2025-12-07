@@ -19,6 +19,7 @@ export type OverlaySuccessMap = {
   "encounter.create": Encounter;
   "encounter.edit": Encounter;
   "opponent.create": Opponent;
+  "opponent.edit": Opponent;
   "opponent.catalog": Opponent;
   "party.create": { partyId: Party["id"] };
   "party.edit": { partyId: Party["id"] };
@@ -45,7 +46,7 @@ export type OverlayMap = {
     chapter: Chapter;
     onEdit: (chapter: Chapter) => Promise<Chapter>;
     onDelete: (chapterId: Chapter["id"]) => Promise<DBChapter>;
-    onComplete: (result: OverlaySuccessMap["chapter.edit"]) => void;
+    onComplete: (result: Chapter) => void;
     onCancel?: (reason: CancelReason) => void;
   };
   "effect.create": {
@@ -60,6 +61,7 @@ export type OverlayMap = {
     onCancel?: (reason: CancelReason) => void;
   };
   "effect.catalog": {
+    database?: typeof db;
     onSelect: (effect: Effect) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
   };
@@ -85,6 +87,12 @@ export type OverlayMap = {
     onComplete: (result: OverlaySuccessMap["opponent.create"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
+  "opponent.edit": {
+    opponent: Opponent;
+    onEdit: (opponent: Opponent) => Promise<Opponent>;
+    onComplete: (result: OverlaySuccessMap["opponent.edit"]) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
   "opponent.catalog": {
     database: typeof db;
     onSelect: (opponent: Opponent) => void;
@@ -103,6 +111,7 @@ export type OverlayMap = {
     onDelete: (partyId: Party["id"]) => Promise<Party["id"]>;
   };
   "player.create": {
+    database?: typeof db;
     onCreate: (player: TCreatePlayer) => Promise<Player>;
     onComplete: (result: OverlaySuccessMap["player.create"]) => void;
     onCancel?: (reason: CancelReason) => void;
@@ -125,6 +134,7 @@ export type OverlayMap = {
     onCancel?: (reason: CancelReason) => void;
   };
   "immunity.catalog": {
+    database?: typeof db;
     onSelect: (immunity: DBImmunity) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
   };
@@ -140,6 +150,7 @@ export type OverlayMap = {
     onCancel?: (reason: CancelReason) => void;
   };
   "resistance.catalog": {
+    database?: typeof db;
     onSelect: (restistance: DBResistance) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
   };

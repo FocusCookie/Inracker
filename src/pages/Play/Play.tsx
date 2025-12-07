@@ -40,8 +40,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTranslation } from "react-i18next";
 import { RiArrowLeftBoxLine, RiUserAddFill } from "react-icons/ri";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Party } from "@/types/party";
+import { useAddPlayer } from "@/hooks/useParties";
 
 type Props = {
   partyId: Party["id"];
@@ -60,6 +61,7 @@ function Play({
   tokens,
   players,
 }: Props) {
+  const { chapterId } = useSearch({ from: "/play/" });
   const { t } = useTranslation("PagePlay");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -72,6 +74,8 @@ function Play({
   const [isAsideOpen, setIsAsideOpen] = useState<boolean>(false);
   const [isCreateEncounterDrawerOpen, setIsCreateEncounterDrawerOpen] =
     useState<boolean>(false);
+  
+  const addPlayerToPartyMutation = useAddPlayer(database);
 
   const editImmunity = useMutationWithErrorToast({
     mutationFn: database.immunitites.update,
@@ -105,6 +109,7 @@ function Play({
 
   function handleEffectsCatalog(player: Player) {
     openOverlay("effect.catalog", {
+      database,
       onSelect: async (effect) => {
         await addEffectToPlayerMutation.mutateAsync({
           playerId: player.id,
@@ -144,6 +149,7 @@ function Play({
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["encounters"] });
+      queryClient.invalidateQueries({ queryKey: ["tokens"] });
     },
   });
 
@@ -186,6 +192,7 @@ function Play({
 
   function handleResistancesCatalog(player: Player) {
     openOverlay("resistance.catalog", {
+      database,
       onSelect: async (resistance) => {
         await addResistanceToPlayerMutation.mutateAsync({
           playerId: player.id,
@@ -208,11 +215,16 @@ function Play({
 
   const deleteEncounterMutation = useMutationWithErrorToast({
     mutationFn: async (encounterId: number) => {
-      await db.chapters.removeEncounter(chapter.id, encounterId);
+      await db.chapters.updateProperty(
+        chapter.id,
+        "encounters",
+        chapter.encounters.filter((enc) => enc !== encounterId),
+      );
       return db.encounters.delete(encounterId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["encounters"] });
+      queryClient.invalidateQueries({ queryKey: ["tokens"] });
       queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
       queryClient.invalidateQueries({ queryKey: ["chapter"] });
     },
@@ -264,11 +276,6 @@ function Play({
         title: `Created ${player.icon} ${player.name}`,
       });
     },
-  });
-
-  const addPlayerToPartyMutation = useMutationWithErrorToast({
-    mutationFn: (data: { partyId: Party["id"]; playerId: Player["id"] }) =>
-      database.parties.addPlayerToParty(data.partyId, data.playerId),
   });
 
   const createEffectMutation = useMutationWithErrorToast({
@@ -356,8 +363,7 @@ function Play({
     openOverlay("player.edit", {
       player,
       onEdit: (player) => editPlayer.mutateAsync(player),
-      onComplete: async (player) => {
-        console.log("Updated: ", player);
+      onComplete: async (_player) => {
         queryClient.invalidateQueries({ queryKey: ["players"] });
         queryClient.invalidateQueries({ queryKey: ["parties"] });
         queryClient.invalidateQueries({ queryKey: ["party"] });
@@ -370,6 +376,7 @@ function Play({
 
   function handleImmunitiesCatalog(player: Player) {
     openOverlay("immunity.catalog", {
+      database,
       onSelect: async (immunity) => {
         await addImmunityToPlayerMutation.mutateAsync({
           playerId: player.id,
@@ -399,14 +406,24 @@ function Play({
           element: { ...element, color: encounter.color, icon: encounter.icon },
         };
         const created = await db.encounters.create(encounterWithElement);
+
         await db.chapters.addEncounter(chapter.id, created.id);
+
         return created;
       },
-      onComplete: (encounter) => {
+      onComplete: async (encounter) => {
         setIsCreateEncounterDrawerOpen(false);
         setTempElement(undefined);
-        console.log("created encounter ", encounter);
+
+        if (chapterId) {
+          await db.tokens.createOpponentsTokensByEncounter(
+            chapterId,
+            encounter,
+          );
+        }
+
         queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["tokens"] });
         queryClient.invalidateQueries({ queryKey: ["chapter"] });
         queryClient.invalidateQueries({ queryKey: ["encounters"] });
         queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
@@ -424,23 +441,13 @@ function Play({
       encounter,
       onEdit: async (updatedEncounter) => {
         await updateEncounterMutation.mutateAsync(updatedEncounter);
-
-        queryClient.invalidateQueries({ queryKey: ["encounters"] });
-        queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
-
         return updatedEncounter;
       },
-      onComplete: (_encounter) => {
-        queryClient.invalidateQueries({ queryKey: ["party"] });
-        queryClient.invalidateQueries({ queryKey: ["chapter"] });
-        queryClient.invalidateQueries({ queryKey: ["encounters"] });
-        queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
-      },
       onDelete: async (encounterId) => {
-        deleteEncounterMutation.mutate(encounterId);
+        await deleteEncounterMutation.mutateAsync(encounterId);
       },
       onCancel: (reason) => {
-        console.log("Encounter edit cancelled:", reason);
+        console.log("Element edit cancelled:", reason);
       },
     });
   }
@@ -549,10 +556,6 @@ function Play({
       partyId: partyId,
       onSelect: async (partyId: Party["id"], playerId: Player["id"]) => {
         await addPlayerToPartyMutation.mutateAsync({ partyId, playerId });
-
-        queryClient.invalidateQueries({ queryKey: ["players"] });
-        queryClient.invalidateQueries({ queryKey: ["party"] });
-        queryClient.invalidateQueries({ queryKey: ["parties"] });
       },
       onCancel: (reason) => {
         console.log("Player creation cancelled:", reason);
@@ -562,14 +565,13 @@ function Play({
 
   function handleOpenCreatePlayer() {
     openOverlay("player.create", {
+      database,
       onCreate: (player) => createPlayer.mutateAsync(player),
       onComplete: async (player) => {
         await addPlayerToPartyMutation.mutateAsync({
           partyId,
           playerId: player.id,
         });
-        queryClient.invalidateQueries({ queryKey: ["parties"] });
-        queryClient.invalidateQueries({ queryKey: ["party"] });
       },
       onCancel: (reason) => {
         console.log("Player creation cancelled:", reason);

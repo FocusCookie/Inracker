@@ -102,7 +102,7 @@ function EditPlayerDrawer({
         </Button>
       }
       actions={
-        <Button loading={isLoading} onClick={handleSavePlayer}>
+        <Button disabled={isLoading} onClick={handleSavePlayer}>
           Save
         </Button>
       }

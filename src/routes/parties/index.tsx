@@ -1,4 +1,4 @@
-import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
+import { usePartiesQuery } from "@/hooks/useParties";
 import db from "@/lib/database";
 import PartySelection from "@/pages/PartySelection/PartySelection";
 import { Party } from "@/types/party";
@@ -10,11 +10,7 @@ export const Route = createFileRoute("/parties/")({
 
 function Parties() {
   const navigate = useNavigate();
-
-  const partiesQuery = useQueryWithToast({
-    queryKey: ["parties"],
-    queryFn: db.parties.getAllDetailed,
-  });
+  const partiesQuery = usePartiesQuery(db);
 
   function handlePartySelection(partyId: Party["id"]) {
     navigate({
@@ -25,12 +21,10 @@ function Parties() {
 
   return (
     <PartySelection
-      loading={partiesQuery.isPending}
+      database={db}
+      isLoading={partiesQuery.isPending}
       parties={partiesQuery.data || []}
-      onEditParty={db.parties.updateByParty}
-      onDeleteParty={db.parties.deleteById}
       onPartySelect={handlePartySelection}
-      onCreateParty={db.parties.create}
     />
   );
 }

@@ -50,25 +50,55 @@ Inracker is a Dungeon Master Tool for playing Dungeons and Dragons and other TTR
 The frontend interacts with the "backend" (the `database.ts` layer) exclusively via **TanStack Query**. To maintain clean separation and reusability, we use the **Entity Hook Pattern**.
 
 - **Entity Hook Pattern:**
+
   - Create a dedicated hook file for each domain entity (e.g., `src/hooks/useOpponents.ts`, `src/hooks/useEncounterOpponents.ts`).
-  - These hooks export functions wrapping `useQuery` (for reading) and `useMutation` (for writing).
+  - These hooks **export individual functions** (e.g., `export function useCreateOpponent(database = defaultDb)`) wrapping `useQuery` (for reading) and `useMutation` (for writing).
+  - **Dependency Injection:** Each hook function should accept an optional `database` parameter (defaulting to the global `database` instance). This allows for easier testing by injecting a mock database.
   - Use `useMutationWithErrorToast` to handle errors consistently.
   - **Responsibility:** The hook handles cache invalidation (`queryClient.invalidateQueries`) upon success. The Component simply calls `create.mutate(data)`.
 
 - **Atomic Operations (No Chaining in UI):**
+
   - **Rule:** If an action requires multiple database steps (e.g., "Create Opponent" AND "Create Token"), **do not chain promises in the React component**.
   - **Solution:** Create a single, atomic async function in `src/lib/database.ts` (e.g., `createEncounterOpponentWithToken`) that performs all steps. The hook and UI should treat this as one operation.
 
 - **Example Usage:**
+
   ```tsx
   // src/hooks/useEncounterOpponents.ts
-  export function useCreateEncounterOpponent() {
+  export function useCreateEncounterOpponent(database = defaultDb) {
+    const queryClient = useQueryClient();
     return useMutationWithErrorToast({
-      mutationFn: (data) => Database.encounterOpponents.createWithToken(data),
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: ['encounter-opponents'] })
+      mutationFn: (data) => database.encounterOpponents.createWithToken(data),
+      onSuccess: () =>
+        queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] }),
     });
   }
+  
+  // In Component
+  import { useCreateEncounterOpponent } from "@/hooks/useEncounterOpponents";
+  
+  function MyComponent({ database }) {
+    const createOpponent = useCreateEncounterOpponent(database);
+    // ...
+  }
   ```
+
+### Component Database Injection
+
+To enhance testability and facilitate isolated unit/integration testing with tools like Storybook, certain page-level components (e.g., `ChapterSelection`, `PartySelection`) now accept the `database` instance as a direct prop. This allows for injecting a mock or in-memory database implementation during testing, enabling comprehensive UI and logic validation without relying on a live database connection.
+
+**Usage:**
+
+```tsx
+function MyComponent({ database }) {
+  // ... component logic using the injected database instance ...
+  const myHook = useMyHook(database);
+  // ...
+}
+```
+
+This pattern ensures that components remain independent of global database imports and can be easily tested in various scenarios.
 
 ### 3. State Management (TanStack Query & Limited Zustand)
 
@@ -124,18 +154,18 @@ Overlays (Drawers, Dialogs) are managed centrally to ensure clean state manageme
 
 ## Development Workflow
 
-1.  **Modify Schema:**
+1. **Modify Schema:**
     - Update migrations in `src-tauri/src/lib.rs`.
     - Update TypeScript types in `src/types/`.
-2.  **Update Data Layer:**
+2. **Update Data Layer:**
     - Add/Update functions in `src/lib/database.ts` to handle the new schema.
-3.  **Update State/UI:**
+3. **Update State/UI:**
     - Create/Update TanStack Query hooks (in `src/hooks/` or co-located).
     - If a new Overlay is needed:
-        - Create the component.
-        - Register it in `src/components/Overlay/OverlayHost.tsx`.
-        - Add types to `src/types/overlay.ts`.
-4.  **Scaffold:**
+      - Create the component.
+      - Register it in `src/components/Overlay/OverlayHost.tsx`.
+      - Add types to `src/types/overlay.ts`.
+4. **Scaffold:**
     - Use `hygen component new` or `hygen translation new` to speed up boilerplate.
 
 ## Common Commands
@@ -146,3 +176,4 @@ npm run tauri dev     # Full Desktop app with hot reload
 npm run build         # Build web assets
 npm run storybook     # UI Component development
 ```
+

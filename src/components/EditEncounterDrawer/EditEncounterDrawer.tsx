@@ -46,6 +46,8 @@ import { useOverlayStore } from "@/stores/useOverlayStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import { Token } from "@/types/tokens";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { InfoIcon } from "lucide-react";
 
 type OverlayProps = OverlayMap["encounter.edit"];
 
@@ -76,6 +78,8 @@ function EditEncounterDrawer({
   const [closingReason, setClosingReason] = useState<
     null | "success" | CancelReason
   >(null);
+  const [encounterOpponentsToAttache, setEncounterOpponentsToAttache] =
+    useState<Array<Omit<Encounter, "id">>>([]);
 
   const opponentsQuery = useQueryWithToast({
     queryKey: ["opponents"],
@@ -144,9 +148,21 @@ function EditEncounterDrawer({
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
+
+      const existingEncounterOpponents = encounter.opponents || [];
+      const newEncounterOpponents = await db.encounterOpponents.createMultiple(
+        encounterOpponentsToAttache,
+      );
+
       const updatedEncounter = await onEdit({
         ...encounter,
         ...values,
+        opponents: [
+          ...existingEncounterOpponents,
+          ...newEncounterOpponents.map(
+            (encOpp: EncounterOpponent) => encOpp.id,
+          ),
+        ],
         element: {
           ...encounter.element,
           icon: values.icon,
@@ -212,11 +228,19 @@ function EditEncounterDrawer({
     setType(value);
   }
 
+  function handleRemoveEncounterOpponentToAttache(index: number) {
+    setEncounterOpponentsToAttache((current) =>
+      current.filter((_, encOpIndex) => encOpIndex !== index),
+    );
+  }
+
   async function handleRemoveOpponent(id: EncounterOpponent["id"]) {
     const currentOpponents = form.getValues("opponents") || [];
     const updatedOpponents = currentOpponents.filter(
       (opponentId: number) => opponentId !== id,
     );
+
+    await db.encounterOpponents.delete(id);
 
     form.setValue("opponents", updatedOpponents);
 
@@ -249,6 +273,8 @@ function EditEncounterDrawer({
     openOverlay("opponent.create", {
       onCreate: async (opponent) => {
         const createdOpponent = await db.opponents.create(opponent);
+        const encounterOpponent =
+          await db.encounterOpponents.create(createdOpponent);
 
         if (chapterId === null)
           throw new Error(
@@ -257,14 +283,14 @@ function EditEncounterDrawer({
 
         const token: Omit<Token, "id"> = {
           type: "opponent",
-          entity: createdOpponent.id,
+          entity: encounterOpponent.id,
           coordinates: { x: 0, y: 0 },
           chapter: chapterId,
         };
 
         await db.tokens.create(token);
 
-        return createdOpponent;
+        return encounterOpponent;
       },
       onComplete: (opponent) => {
         const currentOpponents = form.getValues("opponents") || [];
@@ -292,28 +318,11 @@ function EditEncounterDrawer({
   function handleOpenOpponentsCatalog() {
     openOverlay("opponent.catalog", {
       database: db,
-      onSelect: async (encounterOpponentId) => {
-        let currentOpponents: EncounterOpponent["id"] = [];
-
-        if (form.getValues("opponents"))
-          currentOpponents = form.getValues("opponents");
-
-        form.setValue("opponents", [...currentOpponents, encounterOpponentId]);
-
-        if (chapterId) {
-          await db.tokens.create({
-            chapter: chapterId,
-            type: "opponent",
-            entity: encounterOpponentId,
-            coordinates: {
-              x: encounter.element.x + encounter.element.width / 2,
-              y: encounter.element.y + encounter.element.height / 2,
-            },
-          });
-        }
-
-        queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
-        queryClient.invalidateQueries({ queryKey: ["tokens"] });
+      onSelect: async (selectedOpponent: Opponent) => {
+        setEncounterOpponentsToAttache((current) => [
+          ...current,
+          selectedOpponent,
+        ]);
       },
       onCancel: (reason) => {
         console.log("Opponent catalog cancelled:", reason);
@@ -766,6 +775,14 @@ function EditEncounterDrawer({
                         </div>
                       </div>
 
+                      <Alert>
+                        <InfoIcon />
+                        <AlertTitle>{t("encounterOpponents")}</AlertTitle>
+                        <AlertDescription>
+                          {t("encounterOpponentsDescription")}
+                        </AlertDescription>
+                      </Alert>
+
                       <div className="flex flex-col gap-4">
                         {selectedOpponents.map(
                           (opponent: EncounterOpponent) => (
@@ -777,6 +794,27 @@ function EditEncounterDrawer({
                                 <OpponentCard
                                   opponent={opponent}
                                   onRemove={handleRemoveOpponent}
+                                  onEdit={undefined}
+                                />
+                              </div>
+                            </div>
+                          ),
+                        )}
+
+                        {encounterOpponentsToAttache.map(
+                          (opponent: EncounterOpponent, index: number) => (
+                            <div
+                              key={`encounter-opponent-to-attache-${index}`}
+                              className="flex items-center gap-2"
+                            >
+                              <div className="grow">
+                                <OpponentCard
+                                  opponent={opponent}
+                                  onRemove={() =>
+                                    handleRemoveEncounterOpponentToAttache(
+                                      index,
+                                    )
+                                  }
                                   onEdit={undefined}
                                 />
                               </div>

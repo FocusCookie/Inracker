@@ -43,5 +43,8 @@
   "cancel": "Abbrechen",
   "catalog": "Katalog",
   "drawerDescription": "Erstelle eine neue Begegnung.",
-  "createButton": "Erstellen"
+  "createButton": "Erstellen",
+  "encounterOpponents": "Begegnungsgegner",
+  "encounterOpponentsDescription": "Gegner, die du aus dem Katalog auswählst, werden als eigene Begegnungsgegner dupliziert. So kannst du die Katalogvorlagen verwenden und bei Bedarf die Details jedes Gegners anpassen."
 }
+

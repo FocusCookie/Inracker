@@ -25,19 +25,19 @@ function RouteComponent() {
 
   const partyQuery = useQueryWithToast({
     queryKey: ["party"],
-    queryFn: () => db.parties.getDetailedById(partyId!),
+    queryFn: () => db.parties.getById(partyId!),
     enabled: !!partyId,
   });
 
   const chapterQuery = useQueryWithToast({
     queryKey: ["chapter"],
-    queryFn: () => db.chapters.getByIdDetailed(chapterId),
+    queryFn: () => db.chapters.getById(chapterId),
     enabled: !!chapterId,
   });
 
   const encountersQuery = useQueryWithToast({
     queryKey: ["encounters"],
-    queryFn: () => db.encounters.getDetailedEncountersByChapterId(chapterId),
+    queryFn: () => db.encounters.getByChapterId(chapterId),
     enabled: !!chapterId,
   });
 
@@ -48,7 +48,7 @@ function RouteComponent() {
 
   const tokensQuery = useQueryWithToast({
     queryKey: ["tokens"],
-    queryFn: () => db.tokens.getChapterTokens(partyId, chapterId),
+    queryFn: () => db.tokens.getByChapter(chapterId),
     enabled: !!chapterId && !!partyId,
   });
 
@@ -65,7 +65,6 @@ function RouteComponent() {
             database={db}
             chapter={chapterQuery.data}
             encounters={encountersQuery.data || []}
-            encounterOpponents={encounterOpponents.data || []}
             players={partyQuery.data.players || []}
             tokens={tokensQuery.data || []}
           />

@@ -6,6 +6,7 @@ import { getAllChaptersForParty } from "./chapters";
 import { deleteChapterById } from "./chapters";
 import { getDetailedEncountersByIds, deleteEncounterById } from "./encounters";
 import { deleteEncounterOpponentById } from "./opponents";
+import { createToken, deleteTokens, getTokensForChapter } from "./tokens";
 
 export const getAllParties = async (db: TauriDatabase): Promise<DBParty[]> =>
   await db.select<DBParty[]>("SELECT * FROM parties");
@@ -58,7 +59,12 @@ export const createParty = async (
   const { name, icon, description, players } = party;
   const result = await db.execute(
     "INSERT INTO parties (name, icon, description, players ) VALUES ($1, $2, $3, $4) RETURNING *",
-    [name, icon, description, JSON.stringify(players)],
+    [
+      name,
+      icon,
+      description,
+      JSON.stringify(players.map((p) => p.id)),
+    ],
   );
 
   const createdParty = await getPartyById(db, result!.lastInsertId as number);
@@ -97,6 +103,17 @@ export const addPlayerToParty = async (
     JSON.stringify(players),
   ]);
 
+  // Create Tokens for the new player in all chapters of the party
+  const chapters = await getAllChaptersForParty(db, partyId);
+  for (const chapter of chapters) {
+    await createToken(db, {
+      chapter: chapter.id,
+      entity: playerId,
+      coordinates: { x: 0, y: 0 },
+      type: "player",
+    });
+  }
+
   return player;
 };
 
@@ -113,6 +130,19 @@ export const removePlayerFromParty = async (
     partyId,
     JSON.stringify(newPlayers),
   ]);
+
+  // Remove Tokens for the player in all chapters of the party
+  const chapters = await getAllChaptersForParty(db, partyId);
+  for (const chapter of chapters) {
+    const tokens = await getTokensForChapter(db, chapter.id);
+    const playerTokens = tokens.filter(
+      (token) => token.entity === playerId && token.type === "player",
+    );
+    await deleteTokens(
+      db,
+      playerTokens.map((t) => t.id),
+    );
+  }
 };
 
 export const deletePartyById = async (
@@ -164,10 +194,28 @@ export const deletePartyById = async (
   return deletedParty.id;
 };
 
+export const getAllPartiesDetailed = async (
+  db: TauriDatabase,
+): Promise<Party[]> => {
+  const partiesRaw = await getAllParties(db);
+  const detailedParties: Party[] = [];
+
+  for (const party of partiesRaw) {
+    const detailedParty = await getPartyDetailedById(db, party.id);
+    detailedParties.push(detailedParty);
+  }
+
+  return detailedParties;
+};
+
 export const parties = {
   getAll: async () => {
     const db = await connect();
     return getAllParties(db);
+  },
+  getAllDetailed: async () => {
+    const db = await connect();
+    return getAllPartiesDetailed(db);
   },
   getById: async (id: number) => {
     const db = await connect();

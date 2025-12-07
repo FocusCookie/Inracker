@@ -1,4 +1,3 @@
-import db from "@/lib/database";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Catalog from "../Catalog/Catalog";
@@ -11,10 +10,14 @@ import { useOverlayStore } from "@/stores/useOverlayStore";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import { useQueryClient } from "@tanstack/react-query";
 import { Effect } from "@/types/effect";
+import { useCreateEffect } from "@/hooks/useEffects";
+import { toast } from "@/hooks/use-toast";
+import database from "@/lib/database";
 
 type OverlayProps = OverlayMap["effect.catalog"];
 
 type RuntimeProps = {
+  database: typeof database;
   open: boolean;
   onOpenChange: (state: boolean) => void;
   onExitComplete: () => void;
@@ -23,6 +26,7 @@ type RuntimeProps = {
 type Props = OverlayProps & RuntimeProps;
 
 function EffectsCatalog({
+  database,
   open,
   onOpenChange,
   onExitComplete,
@@ -34,19 +38,24 @@ function EffectsCatalog({
   const [searchTerm, setSearchTerm] = useState("");
   const openOverlay = useOverlayStore((s) => s.open);
 
+  const createEffect = useCreateEffect(database);
+
   const effects = useQueryWithToast({
     queryKey: ["effects"],
-    queryFn: () => db.effects.getAll(),
+    queryFn: () => database.effects.getAll(),
   });
 
   function handleCreateEffect() {
     openOverlay("effect.create", {
       onCreate: async (effect: Omit<Effect, "id">) => {
-        const created = await db.effects.create(effect);
+        const created = await createEffect.mutateAsync(effect);
         return created;
       },
-      onComplete: () => {
+      onComplete: (effect) => {
         queryClient.invalidateQueries({ queryKey: ["effects"] });
+        toast({
+          title: `Created ${effect.icon} ${effect.name}`,
+        });
       },
       onCancel: (reason) => {
         console.log("Effect creation cancelled:", reason);

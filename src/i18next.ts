@@ -1,5 +1,11 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentSettingsOpponentCardEN from "@/translations/en/components/SettingsOpponentCard.json";
+import ComponentSettingsOpponentCardDE from "@/translations/de/components/SettingsOpponentCard.json"; 
+import ComponentEditOpponentDrawerEN from "@/translations/en/components/EditOpponentDrawer.json";
+import ComponentEditOpponentDrawerDE from "@/translations/de/components/EditOpponentDrawer.json"; 
+import ComponentEncounterOpponentEditDrawerEN from "@/translations/en/components/EncounterOpponentEditDrawer.json";
+import ComponentEncounterOpponentEditDrawerDE from "@/translations/de/components/EncounterOpponentEditDrawer.json"; 
 import ComponentEncounterSelectionEN from "@/translations/en/components/EncounterSelection.json";
 import ComponentEncounterSelectionDE from "@/translations/de/components/EncounterSelection.json"; 
 import ComponentCanvasEN from "@/translations/en/components/Canvas.json";
@@ -99,6 +105,9 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentSettingsOpponentCard: ComponentSettingsOpponentCardEN,
+    ComponentEditOpponentDrawer: ComponentEditOpponentDrawerEN,
+    ComponentEncounterOpponentEditDrawer: ComponentEncounterOpponentEditDrawerEN,
     ComponentEncounterSelection: ComponentEncounterSelectionEN,
     ComponentCanvas: ComponentCanvasEN,
     ComponentEditEncounterDrawer: ComponentEditEncounterDrawerEN,
@@ -154,6 +163,9 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentSettingsOpponentCard: ComponentSettingsOpponentCardDE,
+    ComponentEditOpponentDrawer: ComponentEditOpponentDrawerDE,
+    ComponentEncounterOpponentEditDrawer: ComponentEncounterOpponentEditDrawerDE,
     ComponentEncounterSelection: ComponentEncounterSelectionDE,
     ComponentCanvas: ComponentCanvasDE,
     ComponentEditEncounterDrawer: ComponentEditEncounterDrawerDE,

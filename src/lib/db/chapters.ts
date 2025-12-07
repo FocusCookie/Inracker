@@ -5,6 +5,12 @@ import TauriDatabase from "@tauri-apps/plugin-sql";
 import { deleteImage } from "../utils";
 import { getDetailedEncountersByIds, deleteEncounterById } from "./encounters";
 import { deleteEncounterOpponentById } from "./opponents";
+import {
+  createToken,
+  deleteTokens,
+  getTokensForChapter,
+} from "./tokens";
+import { getPartyById } from "./parties";
 
 export const getChapterById = async (
   db: TauriDatabase,
@@ -58,6 +64,19 @@ export const createChapter = async (
     db,
     result!.lastInsertId as number,
   );
+
+  // Create Tokens for all players in the party
+  const partyData = await getPartyById(db, party);
+  const playerIds = JSON.parse(partyData.players) as number[];
+
+  for (const playerId of playerIds) {
+    await createToken(db, {
+      chapter: createdChapter.id,
+      entity: playerId,
+      coordinates: { x: 0, y: 0 },
+      type: "player",
+    });
+  }
 
   return createdChapter;
 };
@@ -158,6 +177,13 @@ export const deleteChapterById = async (
       );
     }
   }
+
+  // Delete all tokens for this chapter
+  const tokens = await getTokensForChapter(db, id);
+  await deleteTokens(
+    db,
+    tokens.map((t) => t.id),
+  );
 
   await db.execute("DELETE FROM chapters WHERE id = $1", [id]);
 

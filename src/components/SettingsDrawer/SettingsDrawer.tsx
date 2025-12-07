@@ -67,7 +67,7 @@ function SettingsDrawer({
         return <SettingsCategoryResistances database={database} />;
 
       case "opponents":
-        return <SettingsCategoryOpponents />;
+        return <SettingsCategoryOpponents database={database} />;
 
       default:
         return <SettingsCategoryGeneral />;
@@ -104,15 +104,18 @@ function SettingsDrawer({
               >
                 <div className="flex h-full w-full grow flex-col">
                   <SidebarProvider>
-                    <SettingsSidebar
-                      activeItem={activeCategory}
-                      onSelect={setActiveCategory}
-                      onClose={handleCloseDrawer}
-                    />
+                    <div>
+                      <SidebarTrigger className="mt-5 ml-[18px] md:invisible" />
+
+                      <SettingsSidebar
+                        activeItem={activeCategory}
+                        onSelect={setActiveCategory}
+                        onClose={handleCloseDrawer}
+                      />
+                    </div>
 
                     <main className="flex h-full w-full justify-center">
                       <div className="scrollable-y flex h-full w-full max-w-[1024px] flex-col gap-4 overflow-y-scroll p-4">
-                        <SidebarTrigger />
                         {showSettingsCategory(activeCategory)}
                       </div>
                     </main>

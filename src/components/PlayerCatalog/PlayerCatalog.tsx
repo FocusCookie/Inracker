@@ -5,18 +5,19 @@ import { Badge } from "../ui/badge";
 import { ScrollArea } from "../ui/scroll-area";
 import { useTranslation } from "react-i18next";
 import { OverlayMap } from "@/types/overlay";
-import db from "@/lib/database";
-import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import { useOverlayStore } from "@/stores/useOverlayStore";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { MoonIcon } from "@radix-ui/react-icons";
 import { Button } from "../ui/button";
 import Catalog from "../Catalog/Catalog";
-import { useQueryClient } from "@tanstack/react-query";
+import { useAllPlayers, useCreatePlayer } from "@/hooks/usePlayers";
+import { toast } from "@/hooks/use-toast";
+import database from "@/lib/database";
 
 type OverlayProps = OverlayMap["player.catalog"];
 
 type RuntimeProps = {
+  database: typeof database;
   open: boolean;
   onOpenChange: (state: boolean) => void;
   onExitComplete: () => void;
@@ -25,6 +26,7 @@ type RuntimeProps = {
 type Props = OverlayProps & RuntimeProps;
 
 function PlayerCatalog({
+  database,
   partyId,
   open,
   excludedPlayers,
@@ -34,25 +36,20 @@ function PlayerCatalog({
   onOpenChange,
 }: Props) {
   const { t } = useTranslation("ComponentPlayerCatalog");
-  const queryClient = useQueryClient();
   const openOverlay = useOverlayStore((s) => s.open);
   const [search, setSearch] = useState("");
 
-  const players = useQueryWithToast({
-    queryKey: ["players"],
-    queryFn: () => db.players.getAllDetailed(),
-  });
+  const players = useAllPlayers(database);
+  const createPlayer = useCreatePlayer(database);
 
   function handleCreatePlayer() {
     openOverlay("player.create", {
-      onCreate: async (player) => {
-        const created = await db.players.create(player);
-        return created;
-      },
-      onComplete: () => {
-        queryClient.invalidateQueries({ queryKey: ["players"] });
-        queryClient.invalidateQueries({ queryKey: ["parties"] });
-        queryClient.invalidateQueries({ queryKey: ["party"] });
+      onCreate: (player) => createPlayer.mutateAsync(player),
+      onComplete: (player) => {
+        toast({
+          variant: "default",
+          title: `Created ${player.icon} ${player.name}`,
+        });
       },
       onCancel: (reason) => {
         console.log("Player creation cancelled:", reason);

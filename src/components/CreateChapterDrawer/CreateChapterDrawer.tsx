@@ -100,6 +100,7 @@ function CreateChapterDrawer({
 
       onComplete(created);
       onOpenChange(false);
+
       form.reset();
     } catch (error) {
       console.log(error);
@@ -151,11 +152,7 @@ function CreateChapterDrawer({
       onOpenChange={handleOpenChange}
       title={t("title")}
       actions={
-        <Button
-          loading={isCreating}
-          disabled={isCreating}
-          onClick={form.handleSubmit(handleSubmit)}
-        >
+        <Button disabled={isCreating} onClick={form.handleSubmit(handleSubmit)}>
           {t("create")}
         </Button>
       }
@@ -287,4 +284,3 @@ function CreateChapterDrawer({
 }
 
 export default CreateChapterDrawer;
-

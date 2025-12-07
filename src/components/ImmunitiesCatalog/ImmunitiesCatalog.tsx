@@ -8,13 +8,16 @@ import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { MoonIcon } from "@radix-ui/react-icons";
 import { useOverlayStore } from "@/stores/useOverlayStore";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
-import db from "@/lib/database";
 import type { OverlayMap } from "@/types/overlay";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCreateImmunity } from "@/hooks/useImmunities";
+import { toast } from "@/hooks/use-toast";
+import database from "@/lib/database";
 
 type OverlayProps = OverlayMap["immunity.catalog"];
 
 type RuntimeProps = {
+  database: typeof database;
   open: boolean;
   onOpenChange: (state: boolean) => void;
   onExitComplete: () => void;
@@ -23,6 +26,7 @@ type RuntimeProps = {
 type Props = OverlayProps & RuntimeProps;
 
 export default function ImmunitiesCatalog({
+  database,
   open,
   onSelect,
   onCancel,
@@ -34,19 +38,24 @@ export default function ImmunitiesCatalog({
   const [immunitySearch, setImmunitySearch] = useState<string>("");
   const openOverlay = useOverlayStore((s) => s.open);
 
+  const createImmunity = useCreateImmunity(database);
+
   const immunities = useQueryWithToast({
     queryKey: ["immunities"],
-    queryFn: () => db.immunitites.getAll(),
+    queryFn: () => database.immunitites.getAll(),
   });
 
   function handleCreateImmunity() {
     openOverlay("immunity.create", {
       onCreate: async (immunity) => {
-        const created = await db.immunitites.create(immunity);
+        const created = await createImmunity.mutateAsync(immunity);
         return created;
       },
-      onComplete: () => {
+      onComplete: (immunity) => {
         queryClient.invalidateQueries({ queryKey: ["immunities"] });
+        toast({
+          title: `Created ${immunity.icon} ${immunity.name}`,
+        });
       },
       onCancel: (reason) => {
         console.log("Immunity creation cancelled:", reason);
