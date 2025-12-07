@@ -2,63 +2,111 @@
 
 ## Product Overview
 
-Inracker is an Dungeon Master Tool for playing Dungeons and Dragons and also any other TTRPG. You can create parties and chapters where you can create and manage your campaigns. You will draw all the information about rolls, fights and notes on to your battlemap. The players and opponents will have tokens, which you can place on the map. This will help you to prepare your offline game or your online game upfront without any tool.
+Inracker is a Dungeon Master Tool for playing Dungeons and Dragons and other TTRPGs. It allows users to create and manage campaigns (parties, chapters), track combat on a battlemap with tokens for players and opponents, and manage entity stats (effects, immunities, resistances). It is designed to support both offline preparation and live session management.
 
 ## Tech Stack
 
-- Tauri 2 desktop app (Rust core + plugins)
-- Rust backend (Tauri runner, migrations)
-- SQLite (via `@tauri-apps/plugin-sql` with Rust-side migrations)
-- React + TypeScript frontend
-- TanStack: Router (file-based) and Query (+ DevTools)
-- Tailwind CSS (v4) + tailwind-merge + clsx
-- Storybook 8
-- shadcn/ui components (Radix primitives)
-- i18n: English and German (react-i18next + language detector)
-- Hygen templates (components and translations)
-- Zustand state management
-- react-markdown (+ remark-gfm)
-- zod + react-hook-form (+ @hookform/resolvers)
-- Vite 6 (bundling + router plugin)
+- **Core:** Tauri 2 (Rust backend + Web frontend)
+- **Database:** SQLite (via `@tauri-apps/plugin-sql` with Rust-side migrations)
+- **Frontend Framework:** React + TypeScript
+- **Routing:** TanStack Router (file-based)
+- **Data Fetching:** TanStack Query (React Query)
+- **State Management:** Zustand
+- **Styling:** Tailwind CSS (v4), clsx, tailwind-merge
+- **UI Library:** shadcn/ui (Radix primitives)
+- **i18n:** react-i18next (English & German)
+- **Tooling:** Vite 6, Hygen (templating), Storybook 8
 
 ## Project Layout
 
 - `src/`
-  - `routes/` – TanStack Router file-based routes (`createFileRoute`, generated `routeTree.gen.ts`).
-  - `components/` – UI and feature components (shadcn/ui, Radix, stories alongside).
-  - `lib/` – helpers such as `database.ts` (SQL client), `utils.ts` (file handling, paths, images).
-  - `schemas/` – zod schemas for forms and validations.
-  - `stores/` – Zustand stores for UI and feature state.
-  - `translations/` – i18n JSON namespaces under `en/` and `de/`.
-  - `i18next.ts` – i18n bootstrap with resource wiring (Hygen insertion markers present).
-  - `styles/global.css` – Tailwind base styles.
-  - `main.tsx` – App bootstrap (Router, QueryClient, DevTools, app data dir init).
-- `src-tauri/`
-  - `src/lib.rs` – Tauri app entry + SQL migrations registration + plugins (fs, sql, shell).
-  - `tauri.conf.json` – Tauri configuration.
-  - `capabilities/` – Tauri 2 capability JSON (sql permissions etc.).
-  - `Cargo.toml` – Rust crate config (plugins: fs, shell, sql with sqlite feature).
-- `.storybook/` – Storybook configuration.
-- `_templates/` – Hygen templates (components and translation automation).
-- `package.json` – Scripts, dependencies, and dev tools.
-- `vite.config.ts` – Vite config (alias `@` to `src/`, TanStack Router plugin, Tauri dev server settings).
+  - `components/` – UI components.
+    - `Overlay/OverlayHost.tsx` – **Central manager for all overlay/drawer rendering.**
+    - `ui/` – shadcn/ui primitives.
+  - `lib/`
+    - `database.ts` – **The ONLY entry point for database interactions.**
+    - `utils.ts` – Shared helpers.
+  - `routes/` – File-based routes for TanStack Router.
+  - `stores/` – Zustand stores (e.g., `useOverlayStore`, `useEncounterStore`).
+  - `translations/` – i18n JSON resources.
+  - `types/` – TypeScript definitions for domain entities (Player, Party, etc.).
+- `src-tauri/` – Rust backend, migrations, and plugins.
 
-## Run, Build, and Dev Tools
+## Architecture & Patterns
 
-- Dev (web, browser): `pnpm dev` – Vite dev server for quick UI work (some Tauri APIs won’t function).
-- Dev (desktop app): `pnpm tauri dev` – Run Tauri app with hot reload.
-- Build (web assets): `pnpm build` – Type-check + Vite build.
-- Storybook: `pnpm storybook` (dev) / `pnpm build-storybook` (static build).
-- Note: `index.html` includes `<script src="http://localhost:8097"></script>` to enable React DevTools in Tauri. Ensure it’s removed before production builds.
+### 1. Database Access Layer (`src/lib/database.ts`)
+
+**Rule:** `src/lib/database.ts` is the **single source of truth** for all database interactions.
+
+- **Implementation:** It uses `@tauri-apps/plugin-sql` to communicate with the local SQLite database.
+- **Abstraction:** It provides typed `async` functions (e.g., `getAllPlayers`, `createParty`, `updateToken`) that handle SQL queries, JSON parsing/serialization, and type mapping.
+- **Usage:**
+  - **NEVER** write raw SQL inside React components.
+  - **NEVER** import `TauriDatabase` directly in components.
+  - **ALWAYS** use the exported helper functions from `database.ts`.
+
+### 2. Frontend-Backend Communication (TanStack Query)
+
+The frontend interacts with the "backend" (the `database.ts` layer) exclusively via **TanStack Query**. To maintain clean separation and reusability, we use the **Entity Hook Pattern**.
+
+- **Entity Hook Pattern:**
+  - Create a dedicated hook file for each domain entity (e.g., `src/hooks/useOpponents.ts`, `src/hooks/useEncounterOpponents.ts`).
+  - These hooks export functions wrapping `useQuery` (for reading) and `useMutation` (for writing).
+  - Use `useMutationWithErrorToast` to handle errors consistently.
+  - **Responsibility:** The hook handles cache invalidation (`queryClient.invalidateQueries`) upon success. The Component simply calls `create.mutate(data)`.
+
+- **Atomic Operations (No Chaining in UI):**
+  - **Rule:** If an action requires multiple database steps (e.g., "Create Opponent" AND "Create Token"), **do not chain promises in the React component**.
+  - **Solution:** Create a single, atomic async function in `src/lib/database.ts` (e.g., `createEncounterOpponentWithToken`) that performs all steps. The hook and UI should treat this as one operation.
+
+- **Example Usage:**
+  ```tsx
+  // src/hooks/useEncounterOpponents.ts
+  export function useCreateEncounterOpponent() {
+    return useMutationWithErrorToast({
+      mutationFn: (data) => Database.encounterOpponents.createWithToken(data),
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: ['encounter-opponents'] })
+    });
+  }
+  ```
+
+### 3. State Management (TanStack Query & Limited Zustand)
+
+- **Primary Application State:** For server-like data, caching, and most application-level state, **TanStack Query is the preferred solution.** Drive UI updates via TanStack Query's invalidations and refetches.
+- **Limited UI State (Zustand):** Zustand stores are used sparingly for highly specific UI concerns, primarily:
+  - The global overlay stack (`src/stores/useOverlayStore.tsx`).
+  - A single use case within the canvas component.
+- **Rule:** Do not use Zustand for general application data or state that can be managed effectively by TanStack Query.
+
+### 4. Forms & Validation (React Hook Form & Zod)
+
+- **Libraries:** `react-hook-form` for form management, integrated with `zod` schemas via `@hookform/resolvers` for validation.
+- **Pattern:**
+  - Define Zod schemas in `src/schemas/*`.
+  - In components/hooks, create form instances using `useForm({ resolver: zodResolver(yourSchema) })`.
+  - Reuse `shadcn/ui` form primitives (from `src/components/ui/form.tsx`) for consistent UI.
+
+### 5. Overlay Management (`OverlayHost`)
+
+Overlays (Drawers, Dialogs) are managed centrally to ensure clean state management and debuggability.
+
+- **Component:** `src/components/Overlay/OverlayHost.tsx`
+  - This component is mounted once in the app root (`src/routes/__root.tsx`).
+  - It renders a stack of active overlays based on the global state.
+  - It maintains a `registry` mapping internal strings (e.g., `"party.create"`) to React components.
+- **Store:** `src/stores/useOverlayStore.tsx` (Zustand)
+  - Controls the stack of open overlays.
+  - **API:** `open(type, props)`, `close(id)`, `remove(id)`.
+- **Usage Pattern:**
+  - To open a drawer: `useOverlayStore.getState().open("opponent.create", { ...props })`.
+  - Do **not** embed large Drawer components directly into page layouts if they can be handled globally.
 
 ## Environment & Database
 
-- `VITE_ENV` controls the SQLite database name. Examples:
-  - Dev scripts set `VITE_ENV=dev`.
-  - Build sets `VITE_ENV=prod`.
-- DB naming: Rust constructs `sqlite:${VITE_ENV}.db`; frontend connects via `@tauri-apps/plugin-sql` using `import.meta.env.VITE_ENV`.
-- DB location: Resides under the OS-specific Tauri App Data directory. The app logs the directory on startup (see `appDataDir()` in `main.tsx`).
-- Migrations: Defined in `src-tauri/src/lib.rs` and applied via `tauri_plugin_sql::Builder::add_migrations` on startup.
+- **Environment Variables:**
+  - `VITE_ENV` determines the database filename (e.g., `sqlite:dev.db` vs `sqlite:prod.db`).
+- **Migrations:** Defined in `src-tauri/src/lib.rs` and applied automatically on startup.
+- **Images:** Stored in the OS-specific App Data folder via `@tauri-apps/plugin-fs` and referenced by file path in the DB.
 
 ### Schema Summary (key tables)
 
@@ -74,106 +122,27 @@ Inracker is an Dungeon Master Tool for playing Dungeons and Dragons and also any
 - `encounter_opponents(id, name, details, level, health, max_health, image, icon, labels JSON, resistances JSON, immunities JSON, effects JSON, blueprint)`
 - `active_effects(id, effect_id, entity_id, entity_type, remaining_duration, duration_type, created_at)`
 
-## Data Access Pattern
+## Development Workflow
 
-- Use `src/lib/database.ts` as the single entry for DB operations.
-  - It lazily creates and caches a `TauriDatabase` instance via `@tauri-apps/plugin-sql`.
-  - Provides typed functions to `select`, `insert`, `update`, `delete` across all entities.
-  - Handles JSON fields (e.g., IDs arrays) and maps DB rows to domain types.
-- Always reuse the exported helpers rather than executing raw SQL from components.
-
-## Routing
-
-- TanStack Router (file-based) with generated `src/routeTree.gen.ts`.
-- Define routes using `createFileRoute` and the `routes/` directory convention.
-- DevTools: `TanStackRouterDevtools` mounted in `__root` keeps navigation/debug visibility during dev.
-
-## State Management
-
-- Query state: `@tanstack/react-query` for server-like/stateful data (cache, stale times, retries).
-- UI/local state: `zustand` stores in `src/stores/*` for view models, drawer toggles, selection, etc.
-- Helpers: `useQueryWithErrorToast` and `useMutationWithErrorToast` wrap TanStack Query with i18n’d error toasts.
-
-## Forms & Validation
-
-- `react-hook-form` with `zod` schemas via `@hookform/resolvers`.
-- Patterns:
-  - Define schemas in `src/schemas/*`.
-  - In components/hooks, create form via `useForm({ resolver: zodResolver(schema) })`.
-  - Reuse shadcn form primitives in `src/components/ui/form.tsx`.
-
-## UI, Styling, and Components
-
-- Tailwind CSS v4 with `clsx` + `tailwind-merge` helper `cn` in `lib/utils`.
-- shadcn/ui components configured by `components.json`.
-- Radix UI used for accessible primitives (e.g., Dialog, Tabs, Tooltip, etc.).
-- Storybook co-located stories for components; run Storybook to iterate UI in isolation.
-
-## Internationalization (i18n)
-
-- Libraries: `i18next`, `react-i18next`, `i18next-browser-languagedetector`.
-- Resource wiring in `src/i18next.ts` for `en` and `de`.
-- Types: `src/types/i18next.d.ts` augments i18next with namespaces.
-- Hygen assists adding new namespaces and imports:
-  - `hygen translation new` – generates JSON files and inserts wiring comments.
-  - Follow the on-file markers like `// hygen-en-components` to keep automated insertions working.
-- For usage outside React, call `i18next.t('Namespace:key')` directly.
-
-## File Storage (Images)
-
-- Images (players, battlemaps, chapters, others) are stored under App Data dir using `@tauri-apps/plugin-fs`.
-- `createTauriAppDataSubfolders()` ensures folders exist on startup.
-- `storeImage(file, folder)` writes to `images/<folder>/` and returns a `convertFileSrc(...)` URL usable in the UI.
-- `deleteImage(name, folder)` removes a file from the App Data images folder.
-
-## Conventions & Tips
-
-- Prefer importing from `@/` (Vite alias to `src`).
-- Keep DB mutations and side effects inside hooks or `lib/database.ts`, and drive UI via TanStack Query mutations/invalidations.
-- Co-locate stories and small component-specific schemas/types near components where practical.
-- Keep translations in both `en` and `de`; update resources/types or use Hygen to scaffold.
-- Maintain JSON-in-DB fields as IDs or small blobs, and perform mapping to full objects in `database.ts` helpers.
-- Use React Query DevTools and Router DevTools during development; remove/disable any production-unsafe dev tooling before release.
+1.  **Modify Schema:**
+    - Update migrations in `src-tauri/src/lib.rs`.
+    - Update TypeScript types in `src/types/`.
+2.  **Update Data Layer:**
+    - Add/Update functions in `src/lib/database.ts` to handle the new schema.
+3.  **Update State/UI:**
+    - Create/Update TanStack Query hooks (in `src/hooks/` or co-located).
+    - If a new Overlay is needed:
+        - Create the component.
+        - Register it in `src/components/Overlay/OverlayHost.tsx`.
+        - Add types to `src/types/overlay.ts`.
+4.  **Scaffold:**
+    - Use `hygen component new` or `hygen translation new` to speed up boilerplate.
 
 ## Common Commands
 
 ```bash
-# Web dev
-npm run dev
-
-# Desktop app dev (Tauri)
-npm run tauri dev
-
-# Build web assets
-npm run build
-
-# Storybook
-npm run storybook
-npm run build-storybook
-
-# Hygen scaffolding
-hygen component new
-hygen translation new
+npm run dev           # Web-only dev (mocked DB or limited functionality)
+npm run tauri dev     # Full Desktop app with hot reload
+npm run build         # Build web assets
+npm run storybook     # UI Component development
 ```
-
-## Where to Extend Next
-
-- New entity or feature:
-
-  1. Add DB schema migration (Rust) if needed.
-  2. Create DB helpers in `lib/database.ts`.
-  3. Add zod schemas and RHF forms.
-  4. Add stores (Zustand) if UI state is needed.
-  5. Add components, translations (use Hygen), and stories.
-  6. Wire queries/mutations with invalidation and optimistic updates where appropriate.
-
-- New translations namespace:
-
-  - Run Hygen, then verify imports and resources in `i18next.ts` and `types/i18next.d.ts` were inserted correctly.
-
-- New route/view:
-  - Create a file route under `src/routes/...`, then re-run dev to regenerate `routeTree.gen.ts` (TanStack Router plugin).
-
----
-
-This guide is optimized for rapid, consistent contributions in this codebase: migrate schema in Rust, access data through `lib/database.ts`, wire UI with TanStack Query + Zustand, validate via zod/RHF, keep i18n and stories current, and ship through Tauri.
