@@ -169,7 +169,7 @@ function CreateEncounterDrawer({
       onComplete: async (opponent) => {
         const currentOpponents = form.getValues("opponents") || [];
         const encounterOpponent = await createEncounterOpponent.mutateAsync({
-          opponent,
+          opponent: { ...opponent, blueprint: opponent.id },
           chapterId: Number(chapterId),
         });
 
@@ -191,7 +191,7 @@ function CreateEncounterDrawer({
         const currentOpponents = form.getValues("opponents") || [];
 
         const encounterOpponent = await createEncounterOpponent.mutateAsync({
-          opponent,
+          opponent: { ...opponent, blueprint: opponent.id },
           chapterId: Number(chapterId),
         });
 

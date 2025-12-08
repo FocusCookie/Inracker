@@ -238,6 +238,44 @@ export const db = {
       return Promise.resolve(deletedResistance);
     },
   },
+  tokens: {
+    createOpponentsTokensByEncounter: async () => {
+      console.log("STORYBOOK MOCK: createOpponentsTokensByEncounter");
+      return Promise.resolve([]);
+    },
+    update: async (token: any) => {
+      console.log("STORYBOOK MOCK: update token", token);
+      return Promise.resolve(token);
+    },
+  },
+  encounters: {
+    create: async (encounter: any) => {
+      console.log("STORYBOOK MOCK: create encounter", encounter);
+      return Promise.resolve({ ...encounter, id: Math.random() });
+    },
+    update: async (encounter: any) => {
+      console.log("STORYBOOK MOCK: update encounter", encounter);
+      return Promise.resolve(encounter);
+    },
+    delete: async (id: number) => {
+      console.log("STORYBOOK MOCK: delete encounter", id);
+      return Promise.resolve({ id } as any);
+    },
+  },
+  chapters: {
+    addEncounter: async () => {
+      console.log("STORYBOOK MOCK: addEncounter");
+      return Promise.resolve({} as any);
+    },
+    updateProperty: async () => {
+      console.log("STORYBOOK MOCK: updateProperty");
+      return Promise.resolve({} as any);
+    },
+    delete: async (id: number) => {
+      console.log("STORYBOOK MOCK: delete chapter", id);
+      return Promise.resolve({ id } as any);
+    },
+  },
 };
 
 export default db;

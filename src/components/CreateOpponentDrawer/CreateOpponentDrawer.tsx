@@ -61,11 +61,21 @@ function CreateOpponentDrawer({
         pictureFilePath = await storeImage(values.image, "opponents");
       }
 
+      const selectedImmunities = (values.immunities || [])
+        .map((id) => immunities.data?.find((i) => i.id === id))
+        .filter((i): i is DBImmunity => !!i);
+
+      const selectedResistances = (values.resistances || [])
+        .map((id) => resistances.data?.find((r) => r.id === id))
+        .filter((r): r is DBResistance => !!r);
+
       const input: Omit<Opponent, "id"> = {
         ...values,
         health: values.max_health,
         image: pictureFilePath || "",
         effects: [],
+        immunities: selectedImmunities,
+        resistances: selectedResistances,
       };
 
       const created = await onCreate(input);

@@ -445,6 +445,8 @@ function Canvas({
     if (!CTM) return;
     initialCTM.current = CTM;
 
+    isDragging.current = false;
+
     const coords = transformScreenCoordsToSvgCoords(event);
 
     dragTokenStartPos.current = {
@@ -516,6 +518,8 @@ function Canvas({
     const CTM = svg.getScreenCTM();
     if (!CTM) return;
     initialCTM.current = CTM;
+
+    isDragging.current = false;
 
     const coords = transformScreenCoordsToSvgCoords(event);
 
@@ -606,6 +610,8 @@ function Canvas({
     const CTM = svg.getScreenCTM();
     if (!CTM) return;
     initialCTM.current = CTM;
+
+    isDragging.current = false;
 
     const coords = transformScreenCoordsToSvgCoords(event);
 
@@ -798,7 +804,9 @@ function Canvas({
                 data-element-id={element.id}
                 transform={`translate(${element.x}, ${element.y})`}
                 onMouseDown={(e) => handleElementDragStart(e, element)}
-                onClick={() => element?.onClick && element.onClick(element)}
+                onClick={() =>
+                  handleElementClick(() => element?.onClick?.(element))
+                }
                 tabIndex={0}
                 role="button"
                 aria-label={
@@ -1270,7 +1278,7 @@ function Canvas({
                                 <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
                                   {opponent.image && opponent.image !== "" ? (
                                     <img
-                                      className="col-start-1 col-end-1 row-start-1 row-end-2"
+                                      className="col-start-1 col-end-1 row-start-1 row-end-2 rounded-full"
                                       src={opponent.image}
                                       alt={`Picture of Opponent ${opponent.name}`}
                                     />

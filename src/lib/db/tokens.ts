@@ -148,34 +148,55 @@ export const createToken = async (
   return createdToken;
 };
 
+export const existsToken = async (
+  db: TauriDatabase,
+  chapter: Token["chapter"],
+  entity: Token["entity"],
+  type: Token["type"],
+): Promise<boolean> => {
+  const result = await db.select<DBToken[]>(
+    "SELECT * FROM tokens WHERE chapter = $1 AND entity = $2 AND type = $3",
+    [chapter, entity, type],
+  );
+
+  return result.length > 0;
+};
+
 export const createTokensForEncounter = async (
   db: TauriDatabase,
   chapterId: Chapter["id"],
   encounter: Encounter,
 ): Promise<Token[]> => {
-  const createPromises = encounter.opponents
-    ? encounter.opponents.map((opponent, index) => {
-        const token: Omit<Token, "id"> = {
-          type: "opponent",
-          // @ts-ignore
-          entity: opponent,
-          coordinates: {
-            x: encounter.element
-              ? encounter.element.width / 2 + encounter.element.x - 42
-              : 0,
-            y: encounter.element ? encounter.element.y + 84 + index * 84 : 0,
-          },
-          chapter: chapterId!,
-        };
+  if (!encounter.opponents) return [];
 
-        return createToken(db, token);
-      })
-    : [];
+  const createPromises = encounter.opponents.map(async (opponent, index) => {
+    // @ts-ignore
+    const exists = await existsToken(db, chapterId!, opponent, "opponent");
+    if (exists) return null;
+
+    const token: Omit<Token, "id"> = {
+      type: "opponent",
+      // @ts-ignore
+      entity: opponent,
+      coordinates: {
+        x: encounter.element
+          ? encounter.element.width / 2 + encounter.element.x - 32
+          : 0,
+        y: encounter.element ? encounter.element.y + 64 + index * 84 : 0,
+      },
+      chapter: chapterId!,
+    };
+
+    return createToken(db, token);
+  });
 
   const createdTokenResult = await Promise.allSettled(createPromises);
 
   const createdTokens = createdTokenResult
-    .filter((s): s is PromiseFulfilledResult<Token> => s.status === "fulfilled")
+    .filter(
+      (s): s is PromiseFulfilledResult<Token> =>
+        s.status === "fulfilled" && s.value !== null,
+    )
     .map((s) => s.value);
 
   return createdTokens;
@@ -275,6 +296,13 @@ export const tokens = {
   create: async (token: Omit<Token, "id">) => {
     const db = await connect();
     return createToken(db, token);
+  },
+  createOpponentsTokensByEncounter: async (
+    chapterId: Chapter["id"],
+    encounter: Encounter,
+  ) => {
+    const db = await connect();
+    return createTokensForEncounter(db, chapterId, encounter);
   },
   update: async (token: Token) => {
     const db = await connect();

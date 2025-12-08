@@ -87,8 +87,9 @@ export const getDetailedEncountersByIds = async (
   );
   const encounters = await Promise.allSettled(encounterPromises);
 
-  //@ts-ignore
-  return encounters.map((enc) => enc.value) as unknown as Encounter[];
+  return encounters
+    .filter((enc): enc is PromiseFulfilledResult<Encounter> => enc.status === "fulfilled")
+    .map((enc) => enc.value);
 };
 
 export const getDetailedEncountersByChapterId = async (
@@ -101,8 +102,9 @@ export const getDetailedEncountersByChapterId = async (
   );
   const encounters = await Promise.allSettled(encounterPromises);
 
-  //@ts-ignore
-  return encounters.map((enc) => enc.value) as unknown as Encounter[];
+  return encounters
+    .filter((enc): enc is PromiseFulfilledResult<Encounter> => enc.status === "fulfilled")
+    .map((enc) => enc.value);
 };
 
 export const createEncounter = async (

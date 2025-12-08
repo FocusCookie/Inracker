@@ -48,6 +48,11 @@ import { useSearch } from "@tanstack/react-router";
 import { Token } from "@/types/tokens";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { InfoIcon } from "lucide-react";
+import {
+  useCreateEncounterOpponent,
+  useCreateMultipleEncounterOpponents,
+  useDeleteEncounterOpponent,
+} from "@/hooks/useEncounterOpponents";
 
 type OverlayProps = OverlayMap["encounter.edit"];
 
@@ -80,6 +85,11 @@ function EditEncounterDrawer({
   >(null);
   const [encounterOpponentsToAttache, setEncounterOpponentsToAttache] =
     useState<Array<Omit<Encounter, "id">>>([]);
+
+  const createMultipleEncounterOpponents =
+    useCreateMultipleEncounterOpponents(db);
+  const createEncounterOpponent = useCreateEncounterOpponent(db);
+  const deleteEncounterOpponent = useDeleteEncounterOpponent(db);
 
   const opponentsQuery = useQueryWithToast({
     queryKey: ["opponents"],
@@ -150,15 +160,21 @@ function EditEncounterDrawer({
       setIsLoading(true);
 
       const existingEncounterOpponents = encounter.opponents || [];
-      const newEncounterOpponents = await db.encounterOpponents.createMultiple(
-        encounterOpponentsToAttache,
-      );
+      // Map opponents to include blueprint ID
+      const opponentsToCreate = encounterOpponentsToAttache.map((opp: any) => ({
+        ...opp,
+        blueprint: opp.id,
+      }));
+
+      const newEncounterOpponents =
+        await createMultipleEncounterOpponents.mutateAsync(opponentsToCreate);
 
       const updatedEncounter = await onEdit({
         ...encounter,
         ...values,
         opponents: [
           ...existingEncounterOpponents,
+          //@ts-ignore
           ...newEncounterOpponents.map(
             (encOpp: EncounterOpponent) => encOpp.id,
           ),
@@ -240,7 +256,7 @@ function EditEncounterDrawer({
       (opponentId: number) => opponentId !== id,
     );
 
-    await db.encounterOpponents.delete(id);
+    await deleteEncounterOpponent.mutateAsync(id);
 
     form.setValue("opponents", updatedOpponents);
 
@@ -273,8 +289,10 @@ function EditEncounterDrawer({
     openOverlay("opponent.create", {
       onCreate: async (opponent) => {
         const createdOpponent = await db.opponents.create(opponent);
-        const encounterOpponent =
-          await db.encounterOpponents.create(createdOpponent);
+        const encounterOpponent = await db.encounterOpponents.create({
+          ...createdOpponent,
+          blueprint: createdOpponent.id,
+        });
 
         if (chapterId === null)
           throw new Error(
@@ -285,7 +303,7 @@ function EditEncounterDrawer({
           type: "opponent",
           entity: encounterOpponent.id,
           coordinates: { x: 0, y: 0 },
-          chapter: chapterId,
+          chapter: Number(chapterId),
         };
 
         await db.tokens.create(token);

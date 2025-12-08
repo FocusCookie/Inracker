@@ -215,6 +215,18 @@ export const chapters = {
     const db = await connect();
     return updateChapterProperty(db, chapterId, property, value);
   },
+  addEncounter: async (chapterId: number, encounterId: number) => {
+    const db = await connect();
+    const chapter = await getDetailedChapterById(db, chapterId);
+    const encounters = [...chapter.encounters, encounterId];
+    return updateChapterProperty(db, chapterId, "encounters", JSON.stringify(encounters));
+  },
+  removeEncounter: async (chapterId: number, encounterId: number) => {
+     const db = await connect();
+     const chapter = await getDetailedChapterById(db, chapterId);
+     const encounters = chapter.encounters.filter((id) => id !== encounterId);
+     return updateChapterProperty(db, chapterId, "encounters", JSON.stringify(encounters));
+  },
   delete: async (id: number) => {
     const db = await connect();
     return deleteChapterById(db, id);

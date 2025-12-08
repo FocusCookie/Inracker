@@ -347,8 +347,7 @@ export const createEncounterOpponent = async (
     resistances,
   } = opponent;
 
-  // Handle optional blueprint
-  const blueprint = "blueprint" in opponent ? opponent.blueprint : undefined;
+  const blueprint = opponent.blueprint;
 
   const result = await db.execute(
     "INSERT INTO encounter_opponents (details, effects, health, icon, image, immunities, labels, level, max_health, name, resistances, blueprint) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
@@ -520,6 +519,10 @@ export const encounterOpponents = {
   ) => {
     const db = await connect();
     return createEncounterOpponentWithToken(db, opponent, chapterId);
+  },
+  createMultiple: async (opponents: Array<Omit<EncounterOpponent, "id">>) => {
+    const db = await connect();
+    return createEncounterOpponents(db, opponents);
   },
   delete: async (id: number) => {
     const db = await connect();

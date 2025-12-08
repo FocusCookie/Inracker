@@ -4,18 +4,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { OverlayMap } from "@/types/overlay";
 import { Button } from "../ui/button";
 import { useOverlayStore } from "@/stores/useOverlayStore";
-import { Encounter, EncounterDifficulty } from "@/types/encounter";
-import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
-import { useQueryClient } from "@tanstack/react-query";
+import { EncounterDifficulty } from "@/types/encounter";
 import { ShrinkIcon, XIcon } from "lucide-react";
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import { Badge } from "../ui/badge";
 import { TypographyH4 } from "../ui/typographyH4";
 import MarkdownReader from "../MarkdownReader/MarkdownReader";
 import OpponentCard from "../OpponentCard/OpponentCard";
-import { DBOpponent } from "@/types/opponents";
 import { toast } from "@/hooks/use-toast";
-import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import {
   Tooltip,
   TooltipContent,
@@ -24,6 +20,19 @@ import {
 } from "../ui/tooltip";
 import { useTranslation } from "react-i18next";
 import { ScrollArea } from "../ui/scroll-area";
+import {
+  useDeleteEncounterOpponent,
+  useEncounterOpponentsDetailed,
+} from "@/hooks/useEncounterOpponents";
+import {
+  useRemoveOpponentFromEncounter,
+  useUpdateEncounter,
+} from "@/hooks/useEncounters";
+import { useRemoveEncounterFromChapter } from "@/hooks/useChapters";
+import {
+  useCreateTokensForEncounter,
+  useGroupTokensIntoElement,
+} from "@/hooks/useTokens";
 
 type OverlayProps = OverlayMap["encounter.selection"];
 
@@ -49,6 +58,7 @@ function Difficulty({ diff }: { diff: EncounterDifficulty }) {
 }
 
 function EncounterSelection({
+  database,
   open,
   chapterId,
   encounter,
@@ -58,96 +68,39 @@ function EncounterSelection({
 }: Props) {
   const { t } = useTranslation("ComponentEncounterSelection");
   const openOverlay = useOverlayStore((s) => s.open);
-  const queryClient = useQueryClient();
 
-  const encounterOpponents = useQueryWithToast({
-    queryKey: ["encounter-opponents"],
-    queryFn: () => db.encounterOpponents.getAllDetailed(),
-  });
+  const encounterOpponents = useEncounterOpponentsDetailed(database);
+  const deleteEncounterOpponent = useDeleteEncounterOpponent(database);
+  const removeOpponentFromEncounter = useRemoveOpponentFromEncounter(database);
+  const updateEncounterMutation = useUpdateEncounter(database);
+  const deleteEncounterMutation = useRemoveEncounterFromChapter(database);
+  const groupTokensIntoElementMutation = useGroupTokensIntoElement(database);
+  const createTokensForEncounterMutation =
+    useCreateTokensForEncounter(database);
 
-  //TODO: Das Problem ist, dass absolutes chaos ist was mittels useMutations ausgelöst wird oder direkt in der database.
-  // es sollte bei einer löschung des encounteropponents dieser und sein token gelöscht werden und anschliessen der encounter
-  // aktuallisiert werden (dessen .opponents liste)
-  // könnte die mutationFn auch erweitern dass in diseer die db calls immer liegen die gemacht werden müssen, um so alles
-  // zusammen zustellen an db calls - dann liefe aber alles über mutations und nichts direkt in db nebenher
-  throw new Error("LEFT OF at encounterSelection");
-  const removeOpponent = useMutationWithErrorToast({
-    mutationFn: db.encounterOpponents.delete,
-    onSuccess: (opponent: DBOpponent) => {
-      const previousOpponents = encounter.opponents
-        ? [...encounter.opponents]
-        : [];
-      db.encounters.update({
-        ...encounter,
-        opponents: previousOpponents.filter(
-          (opp: number) => opp !== opponent.id,
-        ),
-      });
+  async function handleRemoveOpponent(opponentId: number) {
+    await deleteEncounterOpponent.mutateAsync(opponentId);
+    await removeOpponentFromEncounter.mutateAsync({
+      encounter,
+      opponentId,
+    });
 
-      queryClient.invalidateQueries({ queryKey: ["party"] });
-      queryClient.invalidateQueries({ queryKey: ["tokens"] });
-      queryClient.invalidateQueries({ queryKey: ["chapter"] });
-      queryClient.invalidateQueries({ queryKey: ["encounters"] });
-      queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
+    const opponent = encounterOpponents.data?.find(
+      (opp) => opp.id === opponentId,
+    );
 
+    if (opponent) {
       toast({
         variant: "default",
         title: `Deleted ${opponent.icon} ${opponent.name}`,
       });
-    },
-  });
+    }
+  }
 
   function handleClose() {
     if (onCancel) onCancel("closed");
     onOpenChange(false);
   }
-
-  const updateEncounterMutation = useMutationWithErrorToast({
-    mutationFn: (encounter: Encounter) => {
-      return db.encounters.update(encounter);
-    },
-    onSuccess: (_encounter: Encounter) => {
-      queryClient.invalidateQueries({ queryKey: ["encounters"] });
-      queryClient.invalidateQueries({ queryKey: ["chapter"] });
-      queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["encounters"] });
-    },
-  });
-
-  const deleteEncounterMutation = useMutationWithErrorToast({
-    mutationFn: async (encounterId: number) => {
-      await db.chapters.removeEncounter(chapterId, encounterId);
-      return db.encounters.delete(encounterId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["chapter"] });
-      queryClient.invalidateQueries({ queryKey: ["encounters"] });
-      queryClient.invalidateQueries({ queryKey: ["tokens"] });
-    },
-  });
-
-  const groupEncounterTokensToElementMutation = useMutationWithErrorToast({
-    mutationFn: async (encounter: Encounter) => {
-      const tokens =
-        encounter.opponents && encounterOpponents.data
-          ? encounter.opponents.filter((id) =>
-              encounterOpponents.data.some((opp) => opp.id === id),
-            )
-          : [];
-
-      return db.tokens.groupTokensIntoElemementByEnitityId(
-        tokens,
-        encounter.element,
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["encounters"] });
-      queryClient.invalidateQueries({ queryKey: ["chapter"] });
-      queryClient.invalidateQueries({ queryKey: ["tokens"] });
-    },
-  });
 
   function handleElementEdit() {
     openOverlay("encounter.edit", {
@@ -157,20 +110,18 @@ function EncounterSelection({
         return updatedEncounter;
       },
       onDelete: async (encounterId) => {
-        deleteEncounterMutation.mutate(encounterId);
+        deleteEncounterMutation.mutate({ chapterId, encounterId });
       },
       onCancel: (reason) => {
         console.log("Encounter edit cancelled:", reason);
       },
       onComplete: async (encounter) => {
         if (chapterId) {
-          await db.tokens.createOpponentsTokensByEncounter(
+          await createTokensForEncounterMutation.mutateAsync({
             chapterId,
             encounter,
-          );
+          });
         }
-
-        queryClient.invalidateQueries({ queryKey: ["tokens"] });
       },
     });
 
@@ -179,7 +130,17 @@ function EncounterSelection({
   }
 
   function handleGroupOpponentTokensIntoEncounter() {
-    groupEncounterTokensToElementMutation.mutate(encounter);
+    const tokens =
+      encounter.opponents && encounterOpponents.data
+        ? encounter.opponents.filter((id) =>
+            encounterOpponents.data!.some((opp) => opp.id === id),
+          )
+        : [];
+
+    groupTokensIntoElementMutation.mutate({
+      tokens: tokens.map((id) => Number(id)),
+      element: encounter.element,
+    });
   }
 
   return (
@@ -293,16 +254,18 @@ function EncounterSelection({
                         .map((id) => {
                           return {
                             entity: id,
-                            opponent: encounterOpponents.data.find(
+                            opponent: encounterOpponents.data!.find(
                               (opp) => opp.id === id,
                             ),
                           };
                         })
+                        .filter((encOpp) => encOpp.opponent !== undefined)
                         .map((encOpp) => (
                           <OpponentCard
                             key={`opp-${encOpp.entity}`}
+                            // @ts-ignore
                             opponent={encOpp.opponent}
-                            onRemove={removeOpponent.mutate}
+                            onRemove={handleRemoveOpponent}
                           />
                         ))}
                   </div>
