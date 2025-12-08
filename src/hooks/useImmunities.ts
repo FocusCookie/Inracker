@@ -2,6 +2,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import defaultDb from "@/lib/database";
 import { useMutationWithErrorToast } from "./useMutationWithErrorToast";
 import { DBImmunity, Immunity } from "@/types/immunitiy";
+import { useQueryWithToast } from "./useQueryWithErrorToast";
+
+export function useImmunities(database = defaultDb) {
+  return useQueryWithToast({
+    queryKey: ["immunities"],
+    queryFn: () => database.immunitites.getAll(),
+  });
+}
 
 export function useCreateImmunity(database = defaultDb) {
   const queryClient = useQueryClient();

@@ -1,4 +1,4 @@
-import db from "@/lib/database";
+import database from "@/lib/database";
 import { SidebarProvider, SidebarTrigger } from "../ui/sidebar";
 import SettingsSidebar, {
   SettingsCategory,
@@ -20,15 +20,15 @@ type RuntimeProps = {
   open: boolean;
   onOpenChange: (state: boolean) => void;
   onExitComplete: () => void;
+  database: typeof database;
 };
 
-type Props = OverlayProps & RuntimeProps & { database?: typeof db };
-
+type Props = OverlayProps & RuntimeProps;
 function SettingsDrawer({
+  database,
   open,
   onOpenChange,
   onExitComplete,
-  database = db,
 }: Props) {
   const [activeCategory, setActiveCategory] =
     useState<SettingsCategory>("general");

@@ -5,70 +5,40 @@ import { Player } from "@/types/player";
 import { useTranslation } from "react-i18next";
 import SettingPlayerCard from "../SettingPlayerCard/SettingPlayerCard";
 import { useOverlayStore } from "@/stores/useOverlayStore";
-import { useQueryClient } from "@tanstack/react-query";
-import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { TypographyH1 } from "../ui/typographyH1";
 import { toast } from "@/hooks/use-toast";
-import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { MoonIcon } from "lucide-react";
 import { Button } from "../ui/button";
+import {
+  useAllPlayers,
+  useCreatePlayer,
+  useDeletePlayer,
+  useUpdatePlayer,
+} from "@/hooks/usePlayers";
 
 type Props = {
-  database: typeof defaultDb;
+  database?: typeof defaultDb;
 };
 
 function SettingsCategoryPlayers({ database = defaultDb }: Props) {
-  const queryClient = useQueryClient();
   const { t } = useTranslation("ComponentSettingsCategoryPlayers");
   const openOverlay = useOverlayStore((s) => s.open);
   const [search, setSearch] = useState<string>("");
 
-  const players = useQueryWithToast({
-    queryKey: ["players"],
-    queryFn: () => database.players.getAllDetailed(),
-  });
-
-  const createPlayer = useMutationWithErrorToast({
-    mutationFn: database.players.create,
-    onSuccess: (player: Player) => {
-      queryClient.invalidateQueries({ queryKey: ["players"] });
-      toast({
-        variant: "default",
-        title: `Created ${player.icon} ${player.name}`,
-      });
-    },
-  });
-
-  const editPlayer = useMutationWithErrorToast({
-    mutationFn: database.players.update,
-    onSuccess: (_player: Player) => {
-      queryClient.invalidateQueries({ queryKey: ["players"] });
-      queryClient.invalidateQueries({ queryKey: ["party"] });
-      queryClient.invalidateQueries({ queryKey: ["parties"] });
-    },
-  });
-
-  const deletePlayer = useMutationWithErrorToast({
-    mutationFn: database.players.deletePlayerById,
-    onSuccess: (player: Player) => {
-      queryClient.invalidateQueries({ queryKey: ["players"] });
-      queryClient.invalidateQueries({ queryKey: ["party"] });
-      queryClient.invalidateQueries({ queryKey: ["parties"] });
-
-      toast({
-        title: `Deleted ${player.icon} ${player.name} successfully`,
-      });
-    },
-  });
+  const players = useAllPlayers(database);
+  const createPlayer = useCreatePlayer(database);
+  const editPlayer = useUpdatePlayer(database);
+  const deletePlayer = useDeletePlayer(database);
 
   function handleOpenCreatePlayer() {
     openOverlay("player.create", {
       onCreate: (player) => createPlayer.mutateAsync(player),
-      onComplete: async (_player) => {
-        queryClient.invalidateQueries({ queryKey: ["players"] });
-        queryClient.invalidateQueries({ queryKey: ["parties"] });
-        queryClient.invalidateQueries({ queryKey: ["party"] });
+      onComplete: async (player) => {
+        toast({
+          variant: "default",
+          title: `Created ${player.icon} ${player.name}`,
+        });
       },
       onCancel: (reason) => {
         console.log("Player creation cancelled:", reason);
@@ -86,9 +56,6 @@ function SettingsCategoryPlayers({ database = defaultDb }: Props) {
       onEdit: (player) => editPlayer.mutateAsync(player),
       onComplete: async (player) => {
         console.log("Updated: ", player);
-        queryClient.invalidateQueries({ queryKey: ["players"] });
-        queryClient.invalidateQueries({ queryKey: ["parties"] });
-        queryClient.invalidateQueries({ queryKey: ["party"] });
       },
       onCancel: (reason) => {
         console.log("Player creation cancelled:", reason);
@@ -97,7 +64,11 @@ function SettingsCategoryPlayers({ database = defaultDb }: Props) {
   }
 
   async function handleDeletePlayer(playerId: Player["id"]) {
-    await deletePlayer.mutateAsync(playerId);
+    const player = await deletePlayer.mutateAsync(playerId);
+
+    toast({
+      title: `Deleted ${player.icon} ${player.name} successfully`,
+    });
   }
 
   return (

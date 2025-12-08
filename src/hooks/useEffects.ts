@@ -2,6 +2,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import defaultDb from "@/lib/database";
 import { useMutationWithErrorToast } from "./useMutationWithErrorToast";
 import { Effect } from "@/types/effect";
+import { useQueryWithToast } from "./useQueryWithErrorToast";
+
+export function useEffects(database = defaultDb) {
+  return useQueryWithToast({
+    queryKey: ["effects"],
+    queryFn: () => database.effects.getAll(),
+  });
+}
 
 export function useCreateEffect(database = defaultDb) {
   const queryClient = useQueryClient();

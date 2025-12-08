@@ -2,6 +2,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import defaultDb from "@/lib/database";
 import { useMutationWithErrorToast } from "./useMutationWithErrorToast";
 import { DBResistance, Resistance } from "@/types/resistances";
+import { useQueryWithToast } from "./useQueryWithErrorToast";
+
+export function useResistances(database = defaultDb) {
+  return useQueryWithToast({
+    queryKey: ["resistances"],
+    queryFn: () => database.resistances.getAll(),
+  });
+}
 
 export function useCreateResistance(database = defaultDb) {
   const queryClient = useQueryClient();
