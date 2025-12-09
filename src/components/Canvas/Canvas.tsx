@@ -9,7 +9,6 @@ import {
   PaddingIcon,
   ZoomInIcon,
   ZoomOutIcon,
-  CheckIcon,
 } from "@radix-ui/react-icons";
 import { useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/shallow";
@@ -29,6 +28,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { CanvasElementNode } from "./CanvasElementNode";
 
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
@@ -59,6 +59,7 @@ export type CanvasElement = {
   icon: string;
   name?: string;
   completed?: boolean;
+  opponents?: number[];
 };
 
 export type ClickableCanvasElement = CanvasElement & {
@@ -85,6 +86,9 @@ function Canvas({
   const [isPlayersPanelOpen, setIsPlayersPanelOpen] = useState<boolean>(false);
   const [isOpponentsPanelOpen, setIsOpponentsPanelOpen] =
     useState<boolean>(false);
+  const [resizingElementId, setResizingElementId] = useState<number | null>(
+    null,
+  );
 
   const {
     currentColor,
@@ -169,6 +173,24 @@ function Canvas({
     null,
   );
 
+  const resizeStartPos = useRef<{ x: number; y: number } | null>(null);
+  const resizingElementStartDim = useRef<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const resizingHandle = useRef<"nw" | "ne" | "sw" | "se" | null>(null);
+  const resizingElementRef = useRef<
+    (ClickableCanvasElement & { id: any }) | null
+  >(null);
+  const tempResizedElementRef = useRef<
+    (ClickableCanvasElement & { id: any }) | null
+  >(null);
+  const [tempResizedElement, setTempResizedElement] = useState<
+    (ClickableCanvasElement & { id: any }) | null
+  >(null);
+
   useEffect(() => {
     setCurrentColor(TEMP_DEFAULT_COLOR);
     setCurrentIcon(TEMP_DEFAULT_ICON);
@@ -212,7 +234,8 @@ function Canvas({
       | MouseEvent
       | React.MouseEvent<SVGSVGElement>
       | React.MouseEvent<SVGImageElement>
-      | React.MouseEvent<SVGGElement>,
+      | React.MouseEvent<SVGGElement>
+      | React.MouseEvent<SVGRectElement>,
   ) => {
     if (!svgRef.current || !initialCTM.current) return { x: 0, y: 0 };
 
@@ -236,6 +259,14 @@ function Canvas({
   ) => {
     // Only react to left mouse button (0)
     if (event.button !== 0) return;
+
+    const target = event.target as Element;
+    const isElement = target.closest("[data-element-id]");
+
+    if (!isElement && resizingElementId !== null) {
+      setResizingElementId(null);
+    }
+
     if (isPanning && svgRef.current) {
       const svg = svgRef.current;
 
@@ -676,11 +707,133 @@ function Canvas({
     window.removeEventListener("mouseup", handleElementDragEnd);
   };
 
-  function handleElementClick(elementOnClick: () => void | undefined) {
+  const handleResizeStart = (
+    event: React.MouseEvent<SVGRectElement>,
+    element: ClickableCanvasElement & { id: any },
+    handle: "nw" | "ne" | "sw" | "se",
+  ) => {
+    if (event.button !== 0) return;
+    event.stopPropagation();
+
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    const CTM = svg.getScreenCTM();
+    if (!CTM) return;
+    initialCTM.current = CTM;
+
+    const coords = transformScreenCoordsToSvgCoords(event);
+    resizeStartPos.current = coords;
+    resizingElementStartDim.current = {
+      x: element.x,
+      y: element.y,
+      width: element.width,
+      height: element.height,
+    };
+    resizingHandle.current = handle;
+    resizingElementRef.current = element;
+
+    window.addEventListener("mousemove", handleResizeMove);
+    window.addEventListener("mouseup", handleResizeEnd);
+  };
+
+  const handleResizeMove = (event: MouseEvent) => {
+    if (
+      !resizingElementRef.current ||
+      !resizeStartPos.current ||
+      !resizingElementStartDim.current ||
+      !resizingHandle.current ||
+      !svgRef.current
+    )
+      return;
+
+    const currentPos = transformScreenCoordsToSvgCoords(event);
+    const dx = currentPos.x - resizeStartPos.current.x;
+    const dy = currentPos.y - resizeStartPos.current.y;
+
+    const start = resizingElementStartDim.current;
+    let newX = start.x;
+    let newY = start.y;
+    let newWidth = start.width;
+    let newHeight = start.height;
+
+    switch (resizingHandle.current) {
+      case "se":
+        newWidth = Math.max(50, start.width + dx);
+        newHeight = Math.max(50, start.height + dy);
+        break;
+      case "sw":
+        newWidth = Math.max(50, start.width - dx);
+        newHeight = Math.max(50, start.height + dy);
+        newX = start.x + (start.width - newWidth);
+        break;
+      case "ne":
+        newWidth = Math.max(50, start.width + dx);
+        newHeight = Math.max(50, start.height - dy);
+        newY = start.y + (start.height - newHeight);
+        break;
+      case "nw":
+        newWidth = Math.max(50, start.width - dx);
+        newHeight = Math.max(50, start.height - dy);
+        newX = start.x + (start.width - newWidth);
+        newY = start.y + (start.height - newHeight);
+        break;
+    }
+
+    const updatedElement = {
+      ...resizingElementRef.current,
+      x: newX,
+      y: newY,
+      width: newWidth,
+      height: newHeight,
+    };
+
+    tempResizedElementRef.current = updatedElement;
+    setTempResizedElement(updatedElement);
+  };
+
+  const handleResizeEnd = () => {
+    if (tempResizedElementRef.current) {
+      onElementMove(tempResizedElementRef.current);
+      console.log("Resized Element:", tempResizedElementRef.current);
+    }
+    // setTempResizedElement(null); // Keep the temp element until prop updates to avoid flicker
+    tempResizedElementRef.current = null;
+    resizingElementRef.current = null;
+    resizeStartPos.current = null;
+    resizingElementStartDim.current = null;
+    resizingHandle.current = null;
+
+    window.removeEventListener("mousemove", handleResizeMove);
+    window.removeEventListener("mouseup", handleResizeEnd);
+  };
+
+  useEffect(() => {
+    if (tempResizedElement) {
+      const match = elements.find((e) => e.id === tempResizedElement.id);
+      if (
+        match &&
+        match.x === tempResizedElement.x &&
+        match.y === tempResizedElement.y &&
+        match.width === tempResizedElement.width &&
+        match.height === tempResizedElement.height
+      ) {
+        setTempResizedElement(null);
+      }
+    }
+  }, [elements, tempResizedElement]);
+
+  function handleElementClick(
+    elementOnClick: () => void | undefined,
+    elementId: any,
+  ) {
     if (isDragging.current) {
       isDragging.current = false;
       return;
     }
+
+    setResizingElementId(elementId);
+
     if (elementOnClick) elementOnClick();
   }
 
@@ -732,6 +885,34 @@ function Canvas({
     }
   }, [temporaryElement]);
 
+  useEffect(() => {
+    const tokensToHide = new Set<number>();
+    elements.forEach((element) => {
+      if (element.completed && element.opponents) {
+        const opponentIds = new Set(element.opponents);
+        tokens.forEach((token) => {
+          if (token.type === "opponent" && opponentIds.has(token.entity)) {
+            tokensToHide.add(token.id);
+          }
+        });
+      }
+    });
+
+    if (tokensToHide.size > 0) {
+      setTokenVisibility((prev) => {
+        let hasChanges = false;
+        const next = { ...prev };
+        tokensToHide.forEach((id) => {
+          if (next[id] !== false) {
+            next[id] = false;
+            hasChanges = true;
+          }
+        });
+        return hasChanges ? next : prev;
+      });
+    }
+  }, [elements, tokens]);
+
   function toggleToken(token: Token) {
     const newVisibility = !(tokenVisibility[token.id] ?? true);
     setTokenVisibility((prev) => ({ ...prev, [token.id]: newVisibility }));
@@ -762,10 +943,10 @@ function Canvas({
       >
         <filter id="subtleDropShadow">
           <feDropShadow
-            dx="1"
-            dy="1"
-            stdDeviation="2"
-            floodColor="rgba(0,0,0,0.4)"
+            dx="2"
+            dy="2"
+            stdDeviation="4"
+            floodColor="rgba(0,0,0,0.6)"
           />
         </filter>
 
@@ -798,133 +979,32 @@ function Canvas({
           />
         )}
 
-        {elements.map((element, index) => (
-          <ContextMenu key={"element-" + index} modal={false}>
-            <ContextMenuTrigger asChild>
-              <g
-                className="group hover:animate-pulse hover:cursor-move focus:outline-none"
-                data-element-id={element.id}
-                transform={`translate(${element.x}, ${element.y})`}
-                onMouseDown={(e) => handleElementDragStart(e, element)}
-                onClick={() =>
-                  handleElementClick(() => element?.onClick?.(element))
-                }
-                tabIndex={0}
-                role="button"
-                aria-label={
-                  element.name ? `Open ${element.name}` : "Open canvas element"
-                }
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    // @ts-ignore TODO: fix this ts issue
-                    handleElementClick(element.onClick);
-                  }
-                }}
-              >
-                <g className="hover:cursor-pointer">
-                  <rect
-                    x={0}
-                    y={0}
-                    width={element.width}
-                    height={element.height}
-                    fill={element.color}
-                    fillOpacity={0.25}
-                    stroke={element.color}
-                    strokeWidth={4}
-                    rx={4}
-                    ry={4}
-                    filter="url(#subtleDropShadow)"
-                  />
-
-                  {/* Header rectangle */}
-                  <rect
-                    x={0}
-                    y={0}
-                    width={element.width}
-                    height={60}
-                    fill={element.color}
-                    fillOpacity={0.8}
-                    stroke={element.color}
-                    strokeWidth={4}
-                    rx={4}
-                    ry={4}
-                  />
-
-                  {/* Icon */}
-                  <g transform={`translate(6, 30)`}>
-                    <text
-                      className="font-sans text-4xl font-bold shadow-sm select-none"
-                      dominantBaseline="middle"
-                    >
-                      {element.icon}
-                    </text>
-                  </g>
-
-                  {/* Text */}
-                  {element.name && (
-                    <g transform={`translate(60, 30)`}>
-                      <defs>
-                        <clipPath id={`text-clip-${index}`}>
-                          <rect
-                            x="0"
-                            y="-12"
-                            width={element.width - 66}
-                            height="24"
-                          />
-                        </clipPath>
-                      </defs>
-                      <text
-                        className="font-sans text-lg font-medium text-white select-none"
-                        dominantBaseline="middle"
-                        clipPath={`url(#text-clip-${index})`}
-                      >
-                        {element.name}
-                      </text>
-                    </g>
-                  )}
-
-                  {/* Completed Icon */}
-                  {element.completed && (
-                    <g transform={`translate(${element.width - 30}, 30)`}>
-                      <foreignObject
-                        width="24"
-                        height="24"
-                        x="-12"
-                        y="-12"
-                        className="pointer-events-none"
-                      >
-                        <div className="flex h-full w-full items-center justify-center">
-                          <CheckIcon className="h-6 w-6 text-white" />
-                        </div>
-                      </foreignObject>
-                    </g>
-                  )}
-                </g>
-
-                <rect
-                  x={0}
-                  y={0}
-                  width={element.width}
-                  height={element.height}
-                  rx={4}
-                  ry={4}
-                  fill="none"
-                  stroke="white"
-                  strokeWidth={8}
-                  className="pointer-events-none opacity-0 group-focus:opacity-100 group-focus-visible:opacity-100"
-                />
-              </g>
-            </ContextMenuTrigger>
-            <ContextMenuContent className="w-52">
-              <ContextMenuItem
-                onClick={() => element?.onEdit && element.onEdit(element)}
-              >
-                {t("edit")}
-              </ContextMenuItem>
-            </ContextMenuContent>
-          </ContextMenu>
-        ))}
+        {elements.map((elementData) => {
+          const element =
+            tempResizedElement && tempResizedElement.id === elementData.id
+              ? tempResizedElement
+              : elementData;
+          return (
+            <CanvasElementNode
+              key={"element-" + element.id}
+              element={element}
+              isSelected={resizingElementId === element.id}
+              onEdit={() => element.onEdit?.(element)}
+              onClick={() =>
+                handleElementClick(() => element.onClick?.(element), element.id)
+              }
+              onSelect={() =>
+                setResizingElementId((prev) =>
+                  prev === element.id ? null : element.id,
+                )
+              }
+              onDragStart={(e) => handleElementDragStart(e, element)}
+              onResizeStart={(e, handle) =>
+                handleResizeStart(e, element, handle)
+              }
+            />
+          );
+        })}
 
         {temporaryElement && (
           <g className="hover:cursor-move">
@@ -1381,3 +1461,4 @@ function Canvas({
 }
 
 export default Canvas;
+

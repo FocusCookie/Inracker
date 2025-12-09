@@ -49,7 +49,6 @@ import { Token } from "@/types/tokens";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { InfoIcon } from "lucide-react";
 import {
-  useCreateEncounterOpponent,
   useCreateMultipleEncounterOpponents,
   useDeleteEncounterOpponent,
 } from "@/hooks/useEncounterOpponents";
@@ -88,7 +87,6 @@ function EditEncounterDrawer({
 
   const createMultipleEncounterOpponents =
     useCreateMultipleEncounterOpponents(db);
-  const createEncounterOpponent = useCreateEncounterOpponent(db);
   const deleteEncounterOpponent = useDeleteEncounterOpponent(db);
 
   const opponentsQuery = useQueryWithToast({

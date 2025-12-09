@@ -72,8 +72,6 @@ export const getDetailedEncounterById = async (
     element = JSON.parse(dbEncounter.element) as CanvasElement;
   }
 
-  console.log({ dbEncounter });
-
   return {
     ...dbEncounter,
     type: type,

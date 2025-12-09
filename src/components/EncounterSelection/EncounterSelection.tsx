@@ -162,6 +162,16 @@ function EncounterSelection({
             forceMount
           >
             <Dialog.Content>
+              {/* Ensure a11y title/description exist immediately on mount */}
+              <Dialog.Title className="sr-only">
+                {encounter ? encounter.name : "Encounter"}
+              </Dialog.Title>
+              <Dialog.Description className="sr-only">
+                {encounter
+                  ? `Encounter ${encounter.type} - ${encounter.name}`
+                  : ""}
+              </Dialog.Description>
+
               {!encounter ? (
                 <h2>encounter not found try agiain</h2>
               ) : (
@@ -254,9 +264,9 @@ function EncounterSelection({
                       </div>
                     </div>
 
-                    <Dialog.DialogDescription className="hidden">
+                    <Dialog.Description className="hidden">
                       Encounter {encounter.type} - {encounter.name}
-                    </Dialog.DialogDescription>
+                    </Dialog.Description>
 
                     <div className="flex gap-2">
                       <Badge>{t(encounter.type)}</Badge>

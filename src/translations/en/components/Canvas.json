@@ -3,9 +3,11 @@
   "select": "Select",
   "hide": "Hide",
   "show": "Show",
-  "playerTokens": "Spieler Tokens",
-  "opponentTokens": "Gegner Tokens",
-  "zoomOut": "Verkleinern",
-  "zoomIn": "Vergrößern",
-  "drawEncounter": "Zeichne Begngung"
+  "playerTokens": "Player Tokens",
+  "opponentTokens": "Opponent Tokens",
+  "zoomOut": "Zoom Out",
+  "zoomIn": "Zoom In",
+  "drawEncounter": "Draw Encounter",
+  "deselect": "Stop Resizing",
+  "resize": "Resize"
 }

@@ -1,11 +1,13 @@
 {
-  "edit": "Editieren",
+  "edit": "Bearbeiten",
   "select": "Auswählen",
   "hide": "Ausblenden",
   "show": "Einblenden",
-  "playerTokens": "Player Tokens",
-  "opponentTokens": "Opponent Tokens",
-  "zoomOut": "Zoom in",
-  "zoomIn": "Zoom out",
-  "drawEncounter": "Draw Encounter"
+  "playerTokens": "Spieler Tokens",
+  "opponentTokens": "Gegner Tokens",
+  "zoomOut": "Verkleinern",
+  "zoomIn": "Vergrößern",
+  "drawEncounter": "Begegnung zeichnen",
+  "deselect": "Größe ändern beenden",
+  "resize": "Größe ändern"
 }
