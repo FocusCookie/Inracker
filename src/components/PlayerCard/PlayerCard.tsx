@@ -1,5 +1,7 @@
-import { Player } from "@/types/player";
-import { HeartFilledIcon } from "@radix-ui/react-icons";
+import {
+  HeartFilledIcon,
+  TargetIcon,
+} from "@radix-ui/react-icons";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { motion } from "framer-motion";
@@ -28,6 +30,7 @@ type Props = {
   expanded: boolean;
   onRemove?: (playerId: Player["id"]) => void;
   onEdit: (player: Player) => void;
+  onSelectToken?: (playerId: Player["id"]) => void;
   onRemoveImmunity: (
     playerId: Player["id"],
     immunityId: DBImmunity["id"],
@@ -50,6 +53,7 @@ function PlayerCard({
   expanded,
   onEdit,
   onRemove,
+  onSelectToken,
   onEditEffect,
   onEditImmunity,
   onEditResistance,
@@ -93,6 +97,17 @@ function PlayerCard({
     <DropdownMenuContent className="w-56">
       <DropdownMenuLabel>{player.name}</DropdownMenuLabel>
       <DropdownMenuSeparator />
+      {onSelectToken && (
+        <>
+          <DropdownMenuItem onClick={() => onSelectToken(player.id)}>
+            <div className="flex items-center gap-2">
+              <TargetIcon />
+              <span>{t("selectToken")}</span>
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+        </>
+      )}
       <DropdownMenuGroup>
         <DropdownMenuItem onClick={onOpenEffectsCatalog}>
           {t("addEffect")}

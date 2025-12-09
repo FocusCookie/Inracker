@@ -13,6 +13,7 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   Pencil1Icon,
+  TargetIcon,
 } from "@radix-ui/react-icons";
 import { DBImmunity } from "@/types/immunitiy";
 import { DBResistance } from "@/types/resistances";
@@ -24,9 +25,10 @@ type Props = {
   opponent: Opponent;
   onRemove: (opponentId: Opponent["id"]) => void;
   onEdit?: (opponent: Opponent) => void;
+  onSelectToken?: (opponentId: Opponent["id"]) => void;
 };
 
-function OpponentCard({ opponent, onRemove, onEdit }: Props) {
+function OpponentCard({ opponent, onRemove, onEdit, onSelectToken }: Props) {
   const { t } = useTranslation("ComponentOpponentCard");
   const [expanded, setExpanded] = useState(false);
   const contentRef = useRef(null);
@@ -95,6 +97,17 @@ function OpponentCard({ opponent, onRemove, onEdit }: Props) {
           >
             <TrashIcon />
           </Button>
+
+          {onSelectToken && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => onSelectToken(opponent.id)}
+            >
+              <TargetIcon />
+            </Button>
+          )}
 
           <Button
             variant="ghost"

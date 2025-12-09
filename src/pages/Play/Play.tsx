@@ -92,7 +92,9 @@ function Play({
   tokens,
   players,
 }: Props) {
-  const { chapterId } = useSearch({ from: "/play/" });
+  const { chapterId, selectedToken: selectedTokenId } = useSearch({
+    from: "/play/",
+  });
   const { t } = useTranslation("PagePlay");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -101,7 +103,9 @@ function Play({
   const [tempElement, setTempElement] = useState<undefined | CanvasElement>(
     undefined,
   );
-  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+  const selectedToken =
+    tokens.find((t) => t.id === Number(selectedTokenId)) || null;
+
   const [isAsideOpen, setIsAsideOpen] = useState<boolean>(false);
   const [isCreateEncounterDrawerOpen, setIsCreateEncounterDrawerOpen] =
     useState<boolean>(false);
@@ -361,12 +365,26 @@ function Play({
     });
   }
 
+  function handleTokenSelect(token: Token | null) {
+    navigate({
+      search: (prev) => ({ ...prev, selectedToken: token?.id || null }),
+    });
+  }
+
   function handleElementClick(encounter: Encounter) {
     openOverlay("encounter.selection", {
       encounterId: encounter.id,
       chapterId: chapter.id,
       onCancel: (reason) => {
         console.log("Encounter selection:", reason);
+      },
+      onOpponentSelect: (opponentId) => {
+        const token = tokens.find(
+          (t) => t.type === "opponent" && t.entity === opponentId,
+        );
+        if (token) {
+          handleTokenSelect(token);
+        }
       },
     });
   }
@@ -528,6 +546,12 @@ function Play({
             onOpenEffectsCatalog={() => handleEffectsCatalog(player)}
             onOpenResistancesCatalog={() => handleResistancesCatalog(player)}
             onOpenImmunitiesCatalog={() => handleImmunitiesCatalog(player)}
+            onSelectToken={(playerId) => {
+              const token = tokens.find(
+                (t) => t.type === "player" && t.entity === playerId,
+              );
+              if (token) handleTokenSelect(token);
+            }}
           />
         ))}
       </PlayLayout.Players>
@@ -643,7 +667,7 @@ function Play({
           tokens={tokens}
           players={players}
           selectedToken={selectedToken}
-          onTokenSelect={setSelectedToken}
+          onTokenSelect={handleTokenSelect}
           onDrawed={handeOpenCreateElementDrawer}
           onTokenMove={updateTokenMutation.mutate}
           onElementMove={handleElementMove}

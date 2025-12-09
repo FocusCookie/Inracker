@@ -11,5 +11,6 @@
   "immunitites": "Immunitäten",
   "resistances": "Wiederstände",
   "positiveEffects": "Positive Effekte",
-  "negativeEffects": "Negative Effekte"
+  "negativeEffects": "Negative Effekte",
+  "selectToken": "Token auswählen"
 }

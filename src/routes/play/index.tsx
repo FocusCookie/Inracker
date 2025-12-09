@@ -6,6 +6,7 @@ import Play from "@/pages/Play/Play";
 type PlaySearch = {
   partyId: number | null;
   chapterId: number | null;
+  selectedToken: number | null;
 };
 
 export const Route = createFileRoute("/play/")({
@@ -14,6 +15,9 @@ export const Route = createFileRoute("/play/")({
     return {
       partyId: Number(search?.partyId || null),
       chapterId: Number(search?.chapterId || null),
+      selectedToken: search?.selectedToken
+        ? Number(search.selectedToken)
+        : null,
     };
   },
 });

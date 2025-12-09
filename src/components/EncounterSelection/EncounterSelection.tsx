@@ -67,6 +67,7 @@ function EncounterSelection({
   onExitComplete,
   onOpenChange,
   onCancel,
+  onOpponentSelect,
 }: Props) {
   const { t } = useTranslation("ComponentEncounterSelection");
   const openOverlay = useOverlayStore((s) => s.open);
@@ -311,16 +312,16 @@ function EncounterSelection({
                             };
                           })
                           .filter((encOpp) => encOpp.opponent !== undefined)
-                          .map((encOpp) => (
-                            <OpponentCard
-                              key={`opp-${encOpp.entity}`}
-                              // @ts-ignore
-                              opponent={encOpp.opponent}
-                              onRemove={handleRemoveOpponent}
-                            />
-                          ))}
-                    </div>
-                  </ScrollArea>
+                                                  .map((encOpp) => (
+                                                    <OpponentCard
+                                                      key={`opp-${encOpp.entity}`}
+                                                      // @ts-ignore
+                                                      opponent={encOpp.opponent}
+                                                      onRemove={handleRemoveOpponent}
+                                                      onSelectToken={onOpponentSelect}
+                                                    />
+                                                  ))}
+                                            </div>                  </ScrollArea>
                 </motion.div>
               )}
             </Dialog.Content>
