@@ -52,10 +52,18 @@ function OpponentCard({ opponent, onRemove, onEdit }: Props) {
   return (
     <div className="flex flex-col rounded-md border p-4">
       <div className="flex items-start justify-start gap-4">
-        <Avatar>
-          <AvatarImage src={opponent?.image || undefined} alt={opponent.name} />
-          <AvatarFallback>{opponent.icon}</AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <Avatar>
+            <AvatarImage
+              src={opponent?.image || undefined}
+              alt={opponent.name}
+            />
+            <AvatarFallback>{opponent.icon}</AvatarFallback>
+          </Avatar>
+          <span className="absolute -top-2 -left-2 rounded-full bg-white shadow">
+            {opponent.icon}
+          </span>
+        </div>
         <div className="flex flex-col">
           <h3 className="text-lg font-bold">{opponent.name}</h3>
           <div className="flex items-center gap-2">
