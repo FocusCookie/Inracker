@@ -25,17 +25,19 @@ export type DBEncounter = {
   opponents: string | null;
   skill: string | null;
   type: EncounterType;
+  completed: string;
 };
 
 export type Encounter = Prettify<
   Omit<
     DBEncounter,
-    "images" | "difficulties" | "opponents" | "passed" | "element"
+    "images" | "difficulties" | "opponents" | "passed" | "element" | "completed"
   > & {
     images: string[] | null;
     difficulties: EncounterDifficulty[] | null;
     opponents: number[] | null;
     passed: boolean;
     element: CanvasElement;
+    completed: boolean;
   }
 >;

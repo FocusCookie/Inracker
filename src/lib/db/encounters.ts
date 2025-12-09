@@ -1,4 +1,9 @@
-import { DBEncounter, Encounter, EncounterDifficulty, EncounterType } from "@/types/encounter";
+import {
+  DBEncounter,
+  Encounter,
+  EncounterDifficulty,
+  EncounterType,
+} from "@/types/encounter";
 import { CanvasElement } from "@/components/Canvas/Canvas";
 import { Chapter } from "@/types/chapters";
 import { connect, createDatabaseError } from "./core";
@@ -67,6 +72,8 @@ export const getDetailedEncounterById = async (
     element = JSON.parse(dbEncounter.element) as CanvasElement;
   }
 
+  console.log({ dbEncounter });
+
   return {
     ...dbEncounter,
     type: type,
@@ -75,6 +82,7 @@ export const getDetailedEncounterById = async (
     opponents,
     passed: Boolean(dbEncounter.passed),
     element,
+    completed: JSON.parse(dbEncounter.completed) as Boolean,
   } as Encounter;
 };
 
@@ -88,7 +96,10 @@ export const getDetailedEncountersByIds = async (
   const encounters = await Promise.allSettled(encounterPromises);
 
   return encounters
-    .filter((enc): enc is PromiseFulfilledResult<Encounter> => enc.status === "fulfilled")
+    .filter(
+      (enc): enc is PromiseFulfilledResult<Encounter> =>
+        enc.status === "fulfilled",
+    )
     .map((enc) => enc.value);
 };
 
@@ -103,7 +114,10 @@ export const getDetailedEncountersByChapterId = async (
   const encounters = await Promise.allSettled(encounterPromises);
 
   return encounters
-    .filter((enc): enc is PromiseFulfilledResult<Encounter> => enc.status === "fulfilled")
+    .filter(
+      (enc): enc is PromiseFulfilledResult<Encounter> =>
+        enc.status === "fulfilled",
+    )
     .map((enc) => enc.value);
 };
 
@@ -124,10 +138,11 @@ export const createEncounter = async (
     skill,
     type,
     element,
+    completed,
   } = encounter;
 
   const result = await db.execute(
-    "INSERT INTO encounters(name,description,color,dice,difficulties,experience,images,opponents,passed,skill,type, element) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
+    "INSERT INTO encounters(name,description,color,dice,difficulties,experience,images,opponents,passed,skill,type, element, completed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *",
     [
       name,
       description,
@@ -141,6 +156,7 @@ export const createEncounter = async (
       skill,
       type,
       element,
+      completed,
     ],
   );
 
@@ -170,9 +186,10 @@ export const updateEncounter = async (
     skill,
     type,
     element,
+    completed,
   } = encounter;
   await db.execute(
-    "UPDATE encounters SET name = $2, description = $3, color = $4, dice = $5, difficulties = $6, experience = $7, images = $8, opponents = $9, passed = $10, skill = $11, type = $12, element = $13 WHERE id = $1",
+    "UPDATE encounters SET name = $2, description = $3, color = $4, dice = $5, difficulties = $6, experience = $7, images = $8, opponents = $9, passed = $10, skill = $11, type = $12, element = $13, completed = $14 WHERE id = $1",
     [
       id,
       name,
@@ -187,10 +204,27 @@ export const updateEncounter = async (
       skill,
       type,
       element,
+      completed,
     ],
   );
 
   return getDetailedEncounterById(db, id);
+};
+
+export const updateEncounterProperty = async <
+  T extends keyof Encounter,
+  V extends Encounter[T],
+>(
+  db: TauriDatabase,
+  encounterId: Encounter["id"],
+  property: T,
+  value: V,
+): Promise<Encounter> => {
+  const sql = `UPDATE encounters SET ${property} = $2 WHERE id = $1`;
+
+  await db.execute(sql, [encounterId, value]);
+
+  return getDetailedEncounterById(db, encounterId);
 };
 
 export const deleteEncounterById = async (
@@ -206,7 +240,7 @@ export const deleteEncounterById = async (
 
   if (deletedEncounter.opponents && deletedEncounter.opponents.length > 0) {
     // Cast opponent IDs to numbers if stored as strings
-    const opponentIds = deletedEncounter.opponents.map(id => Number(id));
+    const opponentIds = deletedEncounter.opponents.map((id) => Number(id));
     await deleteEncounterOpponents(db, opponentIds);
   }
 
@@ -231,6 +265,14 @@ export const encounters = {
   update: async (encounter: Encounter) => {
     const db = await connect();
     return updateEncounter(db, encounter);
+  },
+  updateProperty: async <T extends keyof Encounter, V extends Encounter[T]>(
+    id: number,
+    property: T,
+    value: V,
+  ) => {
+    const db = await connect();
+    return updateEncounterProperty(db, id, property, value);
   },
   delete: async (id: number) => {
     const db = await connect();

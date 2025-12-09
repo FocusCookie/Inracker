@@ -9,6 +9,7 @@ import {
   PaddingIcon,
   ZoomInIcon,
   ZoomOutIcon,
+  CheckIcon,
 } from "@radix-ui/react-icons";
 import { useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/shallow";
@@ -57,6 +58,7 @@ export type CanvasElement = {
   color: string;
   icon: string;
   name?: string;
+  completed?: boolean;
 };
 
 export type ClickableCanvasElement = CanvasElement & {
@@ -879,6 +881,23 @@ function Canvas({
                       >
                         {element.name}
                       </text>
+                    </g>
+                  )}
+
+                  {/* Completed Icon */}
+                  {element.completed && (
+                    <g transform={`translate(${element.width - 30}, 30)`}>
+                      <foreignObject
+                        width="24"
+                        height="24"
+                        x="-12"
+                        y="-12"
+                        className="pointer-events-none"
+                      >
+                        <div className="flex h-full w-full items-center justify-center">
+                          <CheckIcon className="h-6 w-6 text-white" />
+                        </div>
+                      </foreignObject>
                     </g>
                   )}
                 </g>

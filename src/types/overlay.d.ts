@@ -71,7 +71,7 @@ export type OverlayMap = {
     onCancel?: (reason: CancelReason) => void;
   };
   "encounter.selection": {
-    encounter: Encounter;
+    encounterId: Encounter["id"];
     chapterId: Chapter["id"];
     onCancel?: (reason: CancelReason) => void;
   };

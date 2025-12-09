@@ -13,6 +13,8 @@
   "draft": "Entwurf",
   "ongoing": "Laufend",
   "completed": "Abgeschlossen",
+  "completionState": "Status",
+  "open": "Offen",
   "save": "Änderungen speichern",
   "delete": "Löschen",
   "cancel": "Abbrechen",

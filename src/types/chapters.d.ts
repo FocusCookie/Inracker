@@ -18,5 +18,7 @@ export type Chapter = Prettify<
   Omit<DBChapter, "state" | "encounters"> & {
     state: ChapterStatus;
     encounters: Array<Encounter["id"]>;
+    totalExperience?: number;
+    completedExperience?: number;
   }
 >;

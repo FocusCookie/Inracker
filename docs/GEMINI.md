@@ -131,6 +131,48 @@ Overlays (Drawers, Dialogs) are managed centrally to ensure clean state manageme
   - To open a drawer: `useOverlayStore.getState().open("opponent.create", { ...props })`.
   - Do **not** embed large Drawer components directly into page layouts if they can be handled globally.
 
+### 5.1 Live Data in Overlays (TanStack Query)
+
+When an overlay/drawer component (managed by `OverlayHost` and `useOverlayStore`) needs to display or react to real-time changes in data that is stored in the database, it's crucial to understand the data flow.
+
+*   **The Challenge:** Overlays receive their initial `props` as a static snapshot when `useOverlayStore.getState().open(type, props)` is called. Since these props are stored in a Zustand store and the overlay renders in a portal, it is effectively "disconnected" from the direct React component tree that might be observing live data via TanStack Query.
+*   **The Solution:** For overlays to reflect immediate database changes (e.g., after a mutation and query invalidation), the overlay component itself must **subscribe directly to the relevant TanStack Query hook**.
+
+**Pattern:**
+1.  Pass minimal identifying information (like an `id`) as a prop to the overlay. If initial display of a full object is necessary before the query loads, pass the full object as an `initialData` prop.
+2.  Inside the overlay component, use a TanStack Query `useQuery` hook (e.g., `useEncounterQuery(id, initialData, database)`) to fetch the latest data based on the ID.
+3.  Use the `data` returned by this query hook as the source of truth for rendering the overlay's UI. This ensures that when related mutations invalidate the query, the overlay component re-renders with the fresh data from the cache.
+
+**Example (simplified):**
+
+```tsx
+// Inside src/components/MyOverlay/MyOverlay.tsx
+import { useMyEntityQuery } from "@/hooks/useMyEntities"; // TanStack Query hook
+
+function MyOverlay({ entityId, initialEntityData, database }) {
+  // Subscribe to live data for the entity
+  const { data: liveEntity } = useMyEntityQuery(entityId, initialEntityData, database);
+
+  // Use 'liveEntity' for all rendering logic
+  if (!liveEntity) return <Loader />;
+
+  return (
+    <div>
+      {/* Display properties of liveEntity */}
+      <p>{liveEntity.name}</p>
+      <button onClick={() => updateMutation.mutate({ ...liveEntity, someProp: newValue })}>
+        Update
+      </button>
+    </div>
+  );
+}
+
+// How to open the overlay
+// useOverlayStore.getState().open("my.overlay", { entityId: 123, initialEntityData: currentEntity });
+```
+
+This pattern ensures that overlays remain dynamic and display the most up-to-date information, despite their decoupled rendering environment.
+
 ## Environment & Database
 
 - **Environment Variables:**

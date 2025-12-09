@@ -43,9 +43,26 @@ export const getDetailedChapterById = async (
 
   const dbChapter = dbChapters[0];
   const state = dbChapter.state as ChapterStatus;
-  const encounters = JSON.parse(dbChapter.encounters) as number[];
+  const encounterIds = JSON.parse(dbChapter.encounters) as number[];
 
-  return { ...dbChapter, state, encounters };
+  const encounters = await getDetailedEncountersByIds(db, encounterIds);
+
+  const totalExperience = encounters.reduce(
+    (acc, enc) => acc + (enc.experience || 0),
+    0,
+  );
+
+  const completedExperience = encounters
+    .filter((enc) => enc.completed)
+    .reduce((acc, enc) => acc + (enc.experience || 0), 0);
+
+  return {
+    ...dbChapter,
+    state,
+    encounters: encounterIds,
+    totalExperience,
+    completedExperience,
+  };
 };
 
 export const createChapter = async (

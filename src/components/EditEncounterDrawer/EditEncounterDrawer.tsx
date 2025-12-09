@@ -37,7 +37,7 @@ import {
 import { CancelReason, OverlayMap } from "@/types/overlay";
 import { Encounter } from "@/types/encounter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { TrashIcon } from "@radix-ui/react-icons";
+import { TrashIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
 import { EncounterOpponent, Opponent } from "@/types/opponents";
@@ -114,6 +114,7 @@ function EditEncounterDrawer({
       .array(z.object({ value: z.number(), description: z.string() }))
       .optional(),
     opponents: z.array(z.number()).optional(),
+    completed: z.boolean().optional(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -129,6 +130,7 @@ function EditEncounterDrawer({
       skill: encounter.skill || "",
       difficulties: [],
       opponents: [],
+      completed: encounter.completed || false,
     },
   });
 
@@ -150,6 +152,7 @@ function EditEncounterDrawer({
         skill: encounter.skill || "",
         difficulties: encounter.difficulties || [],
         opponents: encounter.opponents || [],
+        completed: encounter.completed || false,
       });
       setType(encounter.type);
     }
@@ -409,11 +412,12 @@ function EditEncounterDrawer({
                   />
                   <FormMessage />
                 </div>
+
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
-                    <FormItem className="w-full grow px-0.5">
+                    <FormItem className="grow px-0.5">
                       <FormLabel>{t("name")}</FormLabel>
                       <FormControl>
                         <Input
@@ -421,6 +425,28 @@ function EditEncounterDrawer({
                           placeholder={t("namePlaceholder")}
                           {...field}
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="completed"
+                  render={({ field }) => (
+                    <FormItem className="flex w-40 flex-col gap-1 px-0.5 pt-1.5">
+                      <FormLabel>{t("completionState")}</FormLabel>
+                      <FormControl>
+                        <Button
+                          type="button"
+                          variant={field.value ? "success" : "outline"}
+                          className="w-full"
+                          onClick={() => field.onChange(!field.value)}
+                        >
+                          <CheckIcon />
+                          {field.value ? t("completed") : t("open")}
+                        </Button>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

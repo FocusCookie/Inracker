@@ -363,7 +363,7 @@ function Play({
 
   function handleElementClick(encounter: Encounter) {
     openOverlay("encounter.selection", {
-      encounter,
+      encounterId: encounter.id,
       chapterId: chapter.id,
       onCancel: (reason) => {
         console.log("Encounter selection:", reason);

@@ -20,6 +20,7 @@ export function useCreateEncounter() {
       images: [],
       opponents: [],
       passed: false,
+      completed: false,
       skill: "",
       type: "note",
     },
