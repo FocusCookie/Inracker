@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/context-menu";
 import { CheckIcon, ExternalLinkIcon } from "@radix-ui/react-icons";
 import { useTranslation } from "react-i18next";
-import { CanvasElement, ClickableCanvasElement } from "./Canvas";
+import { ClickableCanvasElement } from "./Canvas";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 

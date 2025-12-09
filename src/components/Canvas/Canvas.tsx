@@ -1104,7 +1104,7 @@ function Canvas({
                       cx={token.coordinates.x + 50}
                       cy={token.coordinates.y + 50}
                       r={52}
-                      className="fill-neutral-50/50"
+                      fill="none"
                     />
 
                     <g>
@@ -1117,12 +1117,7 @@ function Canvas({
                       </text>
                     </g>
                     <image
-                      className={cn(
-                        "hover:cursor-pointer",
-                        selectedToken &&
-                          token.id === selectedToken.id &&
-                          "border-2 border-red-500",
-                      )}
+                      className="hover:cursor-pointer"
                       data-token-id={token.id}
                       href={!player.image ? undefined : player.image}
                       width={100}
@@ -1136,15 +1131,6 @@ function Canvas({
                       }}
                       onMouseDown={(e) => handleTokenDragStart(e, token)}
                       onClick={() => handleTokenClick(token)}
-                    />
-                    <circle
-                      cx={token.coordinates.x + 50}
-                      cy={token.coordinates.y + 50}
-                      r={52}
-                      fill=""
-                      stroke="white"
-                      strokeWidth={4}
-                      className="pointer-events-none opacity-0 group-focus:opacity-100 group-focus-visible:opacity-100"
                     />
                     <g>
                       <text
@@ -1199,8 +1185,9 @@ function Canvas({
                           cx={token.coordinates.x + 50}
                           cy={token.coordinates.y + 50}
                           r={52}
+                          fill="none"
                           strokeWidth={4}
-                          className="pointer-events-none fill-neutral-50/50"
+                          className="pointer-events-none"
                         ></circle>
 
                         <text
@@ -1214,12 +1201,7 @@ function Canvas({
                     )}
 
                     <image
-                      className={cn(
-                        "hover:cursor-pointer",
-                        selectedToken &&
-                          token.id === selectedToken.id &&
-                          "border-2 border-red-500",
-                      )}
+                      className="hover:cursor-pointer"
                       data-token-id={token.id}
                       href={opponent.image === "" ? undefined : opponent.image}
                       width={100}
@@ -1234,17 +1216,6 @@ function Canvas({
                       onMouseDown={(e) => handleTokenDragStart(e, token)}
                       onClick={() => handleTokenClick(token)}
                     />
-
-                    <circle
-                      cx={token.coordinates.x + 50}
-                      cy={token.coordinates.y + 50}
-                      r={52}
-                      fill="none"
-                      stroke="white"
-                      strokeWidth={4}
-                      className="pointer-events-none opacity-0 group-focus:opacity-100 group-focus-visible:opacity-100"
-                    />
-
                     {opponent.image && (
                       <g>
                         <text
@@ -1461,4 +1432,3 @@ function Canvas({
 }
 
 export default Canvas;
-
