@@ -66,6 +66,13 @@ export function useDeleteEncounter(database = defaultDb) {
   });
 }
 
+export function useEncounters(database = defaultDb) {
+  return useQueryWithToast({
+    queryKey: ["encounters"],
+    queryFn: () => database.encounters.getAll(),
+  });
+}
+
 export function useRemoveOpponentFromEncounter(database = defaultDb) {
   const queryClient = useQueryClient();
   return useMutationWithErrorToast({

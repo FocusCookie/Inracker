@@ -1,7 +1,4 @@
-import {
-  HeartFilledIcon,
-  TargetIcon,
-} from "@radix-ui/react-icons";
+import { HeartFilledIcon, TargetIcon } from "@radix-ui/react-icons";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { motion } from "framer-motion";
@@ -24,6 +21,7 @@ import IconAvatar from "../IconAvatar/IconAvatar";
 import { useTranslation } from "react-i18next";
 import { DBEffect, Effect } from "@/types/effect";
 import EffectCard from "../EffectCard/EffectCard";
+import { Player } from "@/types/player";
 
 type Props = {
   player: Player;
@@ -247,7 +245,7 @@ function PlayerCard({
                 }
               >
                 <div className="flex w-full flex-col gap-4">
-                  {positiveEffects.map((effect) => (
+                  {positiveEffects.map((effect: Effect) => (
                     <EffectCard
                       key={`player-${player.id}-effect-${effect.id}`}
                       effect={effect}
@@ -271,7 +269,7 @@ function PlayerCard({
                 }
               >
                 <div className="flex w-full flex-col gap-4">
-                  {negativeEffects.map((effect) => (
+                  {negativeEffects.map((effect: Effect) => (
                     <EffectCard
                       key={`player-${player.id}-effect-${effect.id}`}
                       effect={effect}
@@ -302,34 +300,40 @@ function PlayerCard({
                 </span>
               </div>
 
-              <div className="flex items-center gap-[1px] rounded-md bg-gray-200 px-1 py-0.5 text-sm font-bold text-black">
+              <div className="flex w-full items-center justify-center gap-[1px] rounded-md bg-gray-200 px-1 py-0.5 text-sm font-bold text-black">
                 <span>{player.health}</span>
                 <span>/</span>
                 <span>{player.max_health}</span>
               </div>
 
-              <div className="flex w-full justify-between gap-2">
-                {player.effects.filter((effect) => effect.type === "positive")
-                  .length > 0 && (
-                  <div className="w-full rounded-md bg-emerald-500 px-1 py-0.5 text-sm font-bold text-white">
-                    {
-                      player.effects.filter(
-                        (effect) => effect.type === "positive",
-                      ).length
-                    }
+              {player.effects.length > 0 && (
+                <>
+                  <div className="flex w-full justify-between gap-2">
+                    {player.effects.filter(
+                      (effect: Effect) => effect.type === "positive",
+                    ).length > 0 && (
+                      <div className="w-full rounded-md bg-emerald-500 px-1 py-0.5 text-sm font-bold text-white">
+                        {
+                          player.effects.filter(
+                            (effect: Effect) => effect.type === "positive",
+                          ).length
+                        }
+                      </div>
+                    )}
+                    {player.effects.filter(
+                      (effect: Effect) => effect.type === "negative",
+                    ).length > 0 && (
+                      <div className="w-full rounded-md bg-red-500 px-1 py-0.5 text-sm font-bold text-white">
+                        {
+                          player.effects.filter(
+                            (effect: Effect) => effect.type === "negative",
+                          ).length
+                        }
+                      </div>
+                    )}
                   </div>
-                )}
-                {player.effects.filter((effect) => effect.type === "negative")
-                  .length > 0 && (
-                  <div className="w-full rounded-md bg-red-500 px-1 py-0.5 text-sm font-bold text-white">
-                    {
-                      player.effects.filter(
-                        (effect) => effect.type === "negative",
-                      ).length
-                    }
-                  </div>
-                )}
-              </div>
+                </>
+              )}
             </button>
           </DropdownMenuTrigger>
 

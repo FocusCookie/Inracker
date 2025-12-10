@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CancelReason, OverlayMap } from "@/types/overlay";
 import { useState } from "react";
 import SettingsCategoryGeneral from "../SettingsCategoryGeneral/SettingsCategoryGeneral";
+import SettingsCategoryImages from "../SettingsCategoryImages/SettingsCategoryImages";
 import SettingsCategoryPlayers from "../SettingsCategoryPlayers/SettingsCategoryPlayers";
 import SettingsCategoryEffects from "../SettingsCategoryEffects/SettingsCategoryEffects";
 import SettingsCategoryImmunities from "../SettingsCategoryImmunities/SettingsCategoryImmunities";
@@ -53,6 +54,9 @@ function SettingsDrawer({
     switch (category) {
       case "general":
         return <SettingsCategoryGeneral />;
+
+      case "images":
+        return <SettingsCategoryImages database={database} />;
 
       case "players":
         return <SettingsCategoryPlayers database={database} />;

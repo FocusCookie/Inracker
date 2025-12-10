@@ -17,6 +17,7 @@ import {
   AppWindow,
   ChevronRight,
   Gem,
+  Image,
   NotebookTabs,
   PanelLeft,
   PersonStanding,
@@ -34,6 +35,7 @@ import { useTranslation } from "react-i18next";
 
 export type SettingsCategory =
   | "general"
+  | "images"
   | "players"
   | "effects"
   | "immunities"
@@ -76,6 +78,17 @@ function SettingsSidebar({ activeItem, onClose, onSelect }: Props) {
                 >
                   <AppWindow />
                   <span>{t("general")}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip={t("images")}
+                  isActive={activeItem === "images"}
+                  onClick={() => onSelect("images")}
+                >
+                  <Image />
+                  <span>{t("images")}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 

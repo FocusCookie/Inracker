@@ -26,6 +26,7 @@ import ComponentSettingsCategoryPlayersEN from "@/translations/en/components/Set
 import ComponentSettingsCategoryPlayersDE from "@/translations/de/components/SettingsCategoryPlayers.json";
 import ComponentSettingsCategoryGeneralEN from "@/translations/en/components/SettingsCategoryGeneral.json";
 import ComponentSettingsCategoryGeneralDE from "@/translations/de/components/SettingsCategoryGeneral.json";
+import ComponentSettingsCategoryImagesEN from "@/translations/en/components/SettingsCategoryImages.json";
 import ComponentSettingsSidebarEN from "@/translations/en/components/SettingsSidebar.json";
 import ComponentSettingsSidebarDE from "@/translations/de/components/SettingsSidebar.json";
 import ComponentEditResistanceDrawerEN from "@/translations/en/components/EditResistanceDrawer.json";
@@ -118,6 +119,7 @@ const resources = {
     ComponentSettingsCategoryEffects: ComponentSettingsCategoryEffectsEN,
     ComponentSettingsCategoryPlayers: ComponentSettingsCategoryPlayersEN,
     ComponentSettingsCategoryGeneral: ComponentSettingsCategoryGeneralEN,
+    ComponentSettingsCategoryImages: ComponentSettingsCategoryImagesEN,
     ComponentSettingsSidebar: ComponentSettingsSidebarEN,
     ComponentCatalog: ComponentCatalogEN,
     ComponentEditResistanceDrawer: ComponentEditResistanceDrawerEN,

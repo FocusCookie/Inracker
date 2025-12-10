@@ -12,6 +12,7 @@ import ComponentSettingsCategoryImmunities from "@/translations/en/component/Set
 import ComponentSettingsCategoryEffects from "@/translations/en/component/SettingsCategoryEffects.json";
 import ComponentSettingsCategoryPlayers from "@/translations/en/component/SettingsCategoryPlayers.json";
 import ComponentSettingsCategoryGeneral from "@/translations/en/component/SettingsCategoryGeneral.json";
+import ComponentSettingsCategoryImages from "@/translations/en/components/SettingsCategoryImages.json";
 import ComponentSettingsSidebar from "@/translations/en/component/SettingsSidebar.json";
 import ComponentCatalog from "@/translations/en/component/Catalog.json";
 import ComponentEditResistanceDrawer from "@/translations/en/component/EditResistanceDrawer.json";
@@ -69,6 +70,7 @@ declare module "i18next" {
       ComponentSettingsCategoryEffects: typeof ComponentSettingsCategoryEffects;
       ComponentSettingsCategoryPlayers: typeof ComponentSettingsCategoryPlayers;
       ComponentSettingsCategoryGeneral: typeof ComponentSettingsCategoryGeneral;
+      ComponentSettingsCategoryImages: typeof ComponentSettingsCategoryImages;
       ComponentSettingsSidebar: typeof ComponentSettingsSidebar;
       ComponentCatalog: typeof ComponentCatalog;
       ComponentEditResistanceDrawer: typeof ComponentEditResistanceDrawer;

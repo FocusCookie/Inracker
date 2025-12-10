@@ -375,39 +375,33 @@ function Canvas({
     window.removeEventListener("mouseup", handleMouseUp);
   };
 
-  const handleZoom = useCallback(
-    (direction: "in" | "out") => {
-      const delta = direction === "in" ? ZOOM_DELTA : -ZOOM_DELTA;
-      const currentZoom = zoomRef.current;
-      const newZoom = Math.max(
-        MIN_ZOOM,
-        Math.min(currentZoom + delta, MAX_ZOOM),
-      );
+  const handleZoom = useCallback((direction: "in" | "out") => {
+    const delta = direction === "in" ? ZOOM_DELTA : -ZOOM_DELTA;
+    const currentZoom = zoomRef.current;
+    const newZoom = Math.max(MIN_ZOOM, Math.min(currentZoom + delta, MAX_ZOOM));
 
-      const { x, y, width, height } = currentViewBoxRef.current;
-      const currentCenterX = x + width / 2;
-      const currentCenterY = y + height / 2;
+    const { x, y, width, height } = currentViewBoxRef.current;
+    const currentCenterX = x + width / 2;
+    const currentCenterY = y + height / 2;
 
-      const newWidth = (width * currentZoom) / newZoom;
-      const newHeight = (height * currentZoom) / newZoom;
+    const newWidth = (width * currentZoom) / newZoom;
+    const newHeight = (height * currentZoom) / newZoom;
 
-      const newX = currentCenterX - newWidth / 2;
-      const newY = currentCenterY - newHeight / 2;
+    const newX = currentCenterX - newWidth / 2;
+    const newY = currentCenterY - newHeight / 2;
 
-      const newViewBox = {
-        x: newX,
-        y: newY,
-        width: newWidth,
-        height: newHeight,
-      };
+    const newViewBox = {
+      x: newX,
+      y: newY,
+      width: newWidth,
+      height: newHeight,
+    };
 
-      currentViewBoxRef.current = newViewBox;
-      setViewBox(newViewBox);
-      setZoom(newZoom);
-      zoomRef.current = newZoom;
-    },
-    [],
-  );
+    currentViewBoxRef.current = newViewBox;
+    setViewBox(newViewBox);
+    setZoom(newZoom);
+    zoomRef.current = newZoom;
+  }, []);
 
   useEffect(() => {
     const handleWheel = (event: WheelEvent) => {
@@ -1439,7 +1433,7 @@ function Canvas({
             <TooltipTrigger asChild>
               <button
                 onClick={zoomOut}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
               >
                 <ZoomOutIcon className="h-4 w-4" />
               </button>
@@ -1453,7 +1447,7 @@ function Canvas({
             <TooltipTrigger asChild>
               <button
                 onClick={zoomIn}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
               >
                 <ZoomInIcon className="h-4 w-4" />
               </button>
@@ -1467,7 +1461,7 @@ function Canvas({
             <TooltipTrigger asChild>
               <button
                 onClick={resetZoom}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
               >
                 <ResetIcon className="h-4 w-4" />
               </button>
@@ -1481,7 +1475,7 @@ function Canvas({
             <TooltipTrigger asChild>
               <button
                 onClick={() => setIsDrawing((c) => !c)}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
               >
                 {isDrawing ? (
                   <Cross2Icon className="h-4 w-4" />

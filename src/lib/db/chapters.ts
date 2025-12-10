@@ -207,42 +207,40 @@ export const deleteChapterById = async (
   return deletedChapter;
 };
 
+export const getAllChapters = async (
+  db: TauriDatabase,
+): Promise<Chapter[]> => {
+  const dbChapters = await db.select<DBChapter[]>("SELECT * FROM chapters");
+  const prettyfiedChapters: Chapter[] = [];
+
+  for (const dbChapter of dbChapters) {
+    const prettyChapter = await getDetailedChapterById(db, dbChapter.id);
+    prettyfiedChapters.push(prettyChapter);
+  }
+
+  return prettyfiedChapters;
+};
+
 export const chapters = {
-  getById: async (id: number) => {
+  create: async (chapter: Omit<Chapter, "id">) => {
     const db = await connect();
-    return getDetailedChapterById(db, id);
+    return createChapter(db, chapter);
   },
   getAllForParty: async (partyId: number) => {
     const db = await connect();
     return getAllChaptersForParty(db, partyId);
   },
-  create: async (chapter: Omit<Chapter, "id">) => {
+  getAll: async () => {
     const db = await connect();
-    return createChapter(db, chapter);
+    return getAllChapters(db);
+  },
+  get: async (id: number) => {
+    const db = await connect();
+    return getDetailedChapterById(db, id);
   },
   update: async (chapter: Chapter) => {
     const db = await connect();
     return updateChapter(db, chapter);
-  },
-  updateProperty: async <T extends keyof Chapter, V extends Chapter[T]>(
-    chapterId: number,
-    property: T,
-    value: V,
-  ) => {
-    const db = await connect();
-    return updateChapterProperty(db, chapterId, property, value);
-  },
-  addEncounter: async (chapterId: number, encounterId: number) => {
-    const db = await connect();
-    const chapter = await getDetailedChapterById(db, chapterId);
-    const encounters = [...chapter.encounters, encounterId];
-    return updateChapterProperty(db, chapterId, "encounters", JSON.stringify(encounters));
-  },
-  removeEncounter: async (chapterId: number, encounterId: number) => {
-     const db = await connect();
-     const chapter = await getDetailedChapterById(db, chapterId);
-     const encounters = chapter.encounters.filter((id) => id !== encounterId);
-     return updateChapterProperty(db, chapterId, "encounters", JSON.stringify(encounters));
   },
   delete: async (id: number) => {
     const db = await connect();

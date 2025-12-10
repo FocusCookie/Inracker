@@ -12,11 +12,17 @@ import { getDetailedChapterById } from "./chapters";
 import { getDetailedEncounterTokens, deleteTokens } from "./tokens";
 import { deleteEncounterOpponents } from "./opponents";
 
-/*
-export const getAllEncounters = async (db: TauriDatabase): Promise<DBEncounter[]> => {
-  return await db.select<DBEncounter[]>("SELECT * FROM encounters");
+export const getAllEncounters = async (db: TauriDatabase): Promise<Encounter[]> => {
+  const dbEncounters = await db.select<DBEncounter[]>("SELECT * FROM encounters");
+  const prettyfiedEncounters: Encounter[] = [];
+
+  for (const dbEncounter of dbEncounters) {
+    const prettyEncounter = await getDetailedEncounterById(db, dbEncounter.id);
+    prettyfiedEncounters.push(prettyEncounter);
+  }
+
+  return prettyfiedEncounters;
 };
-*/
 
 export const getEncounterById = async (
   db: TauriDatabase,
@@ -275,5 +281,9 @@ export const encounters = {
   delete: async (id: number) => {
     const db = await connect();
     return deleteEncounterById(db, id);
+  },
+  getAll: async () => {
+    const db = await connect();
+    return getAllEncounters(db);
   },
 };
