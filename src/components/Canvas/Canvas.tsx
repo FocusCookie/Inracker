@@ -7,10 +7,11 @@ import {
   Cross2Icon,
   EyeNoneIcon,
   PaddingIcon,
+  ResetIcon,
   ZoomInIcon,
   ZoomOutIcon,
 } from "@radix-ui/react-icons";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/shallow";
 import {
   ContextMenu,
@@ -127,6 +128,18 @@ function Canvas({
     height: 1000,
   });
 
+  const initialViewBoxRef = useRef<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }>({
+    x: 0,
+    y: 0,
+    width: 1000,
+    height: 1000,
+  });
+
   const [viewBox, setViewBox] = useState<{
     x: number;
     y: number;
@@ -140,6 +153,7 @@ function Canvas({
   });
 
   const [zoom, setZoom] = useState<number>(1);
+  const zoomRef = useRef<number>(1);
   const [isPanning, setIsPanning] = useState<boolean>(false);
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const panStartPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -212,6 +226,7 @@ function Canvas({
 
         currentViewBoxRef.current = newViewBox;
         setViewBox(newViewBox);
+        initialViewBoxRef.current = newViewBox;
       };
       tmp.src = background;
     }
@@ -360,31 +375,71 @@ function Canvas({
     window.removeEventListener("mouseup", handleMouseUp);
   };
 
-  const handleZoom = (direction: "in" | "out") => {
-    const delta = direction === "in" ? ZOOM_DELTA : -ZOOM_DELTA;
-    const newZoom = Math.max(MIN_ZOOM, Math.min(zoom + delta, MAX_ZOOM));
+  const handleZoom = useCallback(
+    (direction: "in" | "out") => {
+      const delta = direction === "in" ? ZOOM_DELTA : -ZOOM_DELTA;
+      const currentZoom = zoomRef.current;
+      const newZoom = Math.max(
+        MIN_ZOOM,
+        Math.min(currentZoom + delta, MAX_ZOOM),
+      );
 
-    const { x, y, width, height } = currentViewBoxRef.current;
-    const currentCenterX = x + width / 2;
-    const currentCenterY = y + height / 2;
+      const { x, y, width, height } = currentViewBoxRef.current;
+      const currentCenterX = x + width / 2;
+      const currentCenterY = y + height / 2;
 
-    const newWidth = (width * zoom) / newZoom;
-    const newHeight = (height * zoom) / newZoom;
+      const newWidth = (width * currentZoom) / newZoom;
+      const newHeight = (height * currentZoom) / newZoom;
 
-    const newX = currentCenterX - newWidth / 2;
-    const newY = currentCenterY - newHeight / 2;
+      const newX = currentCenterX - newWidth / 2;
+      const newY = currentCenterY - newHeight / 2;
 
-    const newViewBox = {
-      x: newX,
-      y: newY,
-      width: newWidth,
-      height: newHeight,
+      const newViewBox = {
+        x: newX,
+        y: newY,
+        width: newWidth,
+        height: newHeight,
+      };
+
+      currentViewBoxRef.current = newViewBox;
+      setViewBox(newViewBox);
+      setZoom(newZoom);
+      zoomRef.current = newZoom;
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const handleWheel = (event: WheelEvent) => {
+      if (event.metaKey) {
+        event.preventDefault();
+        if (event.deltaY < 0) {
+          handleZoom("in");
+        } else {
+          handleZoom("out");
+        }
+      }
     };
 
-    currentViewBoxRef.current = newViewBox;
-    setViewBox(newViewBox);
-    setZoom(newZoom);
-  };
+    const svg = svgRef.current;
+    if (svg) {
+      svg.addEventListener("wheel", handleWheel, { passive: false });
+    }
+
+    return () => {
+      if (svg) {
+        svg.removeEventListener("wheel", handleWheel);
+      }
+    };
+  }, [handleZoom]);
+
+  const resetZoom = useCallback(() => {
+    const defaultViewBox = initialViewBoxRef.current;
+    currentViewBoxRef.current = defaultViewBox;
+    setViewBox(defaultViewBox);
+    setZoom(1);
+    zoomRef.current = 1;
+  }, []);
 
   function zoomIn() {
     handleZoom("in");
@@ -1405,6 +1460,20 @@ function Canvas({
             </TooltipTrigger>
             <TooltipContent>
               <p>{t("zoomIn")}</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={resetZoom}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
+              >
+                <ResetIcon className="h-4 w-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t("resetZoom")}</p>
             </TooltipContent>
           </Tooltip>
 

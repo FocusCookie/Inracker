@@ -8,6 +8,7 @@
   "zoomOut": "Zoom Out",
   "zoomIn": "Zoom In",
   "drawEncounter": "Draw Encounter",
+  "resetZoom": "Reset Zoom",
   "deselect": "Stop Resizing",
   "resize": "Resize"
 }
