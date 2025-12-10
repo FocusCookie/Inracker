@@ -1,15 +1,15 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import ComponentSettingsOpponentCardEN from "@/translations/en/components/SettingsOpponentCard.json";
-import ComponentSettingsOpponentCardDE from "@/translations/de/components/SettingsOpponentCard.json"; 
+import ComponentSettingsOpponentCardDE from "@/translations/de/components/SettingsOpponentCard.json";
 import ComponentEditOpponentDrawerEN from "@/translations/en/components/EditOpponentDrawer.json";
-import ComponentEditOpponentDrawerDE from "@/translations/de/components/EditOpponentDrawer.json"; 
+import ComponentEditOpponentDrawerDE from "@/translations/de/components/EditOpponentDrawer.json";
 import ComponentEncounterOpponentEditDrawerEN from "@/translations/en/components/EncounterOpponentEditDrawer.json";
-import ComponentEncounterOpponentEditDrawerDE from "@/translations/de/components/EncounterOpponentEditDrawer.json"; 
+import ComponentEncounterOpponentEditDrawerDE from "@/translations/de/components/EncounterOpponentEditDrawer.json";
 import ComponentEncounterSelectionEN from "@/translations/en/components/EncounterSelection.json";
-import ComponentEncounterSelectionDE from "@/translations/de/components/EncounterSelection.json"; 
+import ComponentEncounterSelectionDE from "@/translations/de/components/EncounterSelection.json";
 import ComponentCanvasEN from "@/translations/en/components/Canvas.json";
-import ComponentCanvasDE from "@/translations/de/components/Canvas.json"; 
+import ComponentCanvasDE from "@/translations/de/components/Canvas.json";
 import PagePlayEN from "@/translations/en/pages/Play.json";
 import PagePlayDE from "@/translations/de/pages/Play.json";
 import ComponentEditEncounterDrawerEN from "@/translations/en/components/EditEncounterDrawer.json";
@@ -27,6 +27,7 @@ import ComponentSettingsCategoryPlayersDE from "@/translations/de/components/Set
 import ComponentSettingsCategoryGeneralEN from "@/translations/en/components/SettingsCategoryGeneral.json";
 import ComponentSettingsCategoryGeneralDE from "@/translations/de/components/SettingsCategoryGeneral.json";
 import ComponentSettingsCategoryImagesEN from "@/translations/en/components/SettingsCategoryImages.json";
+import ComponentSettingsCategoryImagesDE from "@/translations/de/components/SettingsCategoryImages.json";
 import ComponentSettingsSidebarEN from "@/translations/en/components/SettingsSidebar.json";
 import ComponentSettingsSidebarDE from "@/translations/de/components/SettingsSidebar.json";
 import ComponentEditResistanceDrawerEN from "@/translations/en/components/EditResistanceDrawer.json";
@@ -106,9 +107,11 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentEditPlayerDrawer: ComponentEditPlayerDrawerEN,
     ComponentSettingsOpponentCard: ComponentSettingsOpponentCardEN,
     ComponentEditOpponentDrawer: ComponentEditOpponentDrawerEN,
-    ComponentEncounterOpponentEditDrawer: ComponentEncounterOpponentEditDrawerEN,
+    ComponentEncounterOpponentEditDrawer:
+      ComponentEncounterOpponentEditDrawerEN,
     ComponentEncounterSelection: ComponentEncounterSelectionEN,
     ComponentCanvas: ComponentCanvasEN,
     ComponentEditEncounterDrawer: ComponentEditEncounterDrawerEN,
@@ -141,7 +144,6 @@ const resources = {
     ComponentPlayerCard: ComponentPlayerCardEN,
     ComponentSettingsDialog: ComponentSettingsDialogEN,
     ComponentPlayerCatalog: ComponentPlayerCatalogEN,
-    ComponentEditPlayerDrawer: ComponentEditPlayerDrawerEN,
     ComponentEffectsCatalog: ComponentEffectsCatalogEN,
     ComponentCreateResistanceDrawer: ComponentCreateResistanceDrawerEN,
     ComponentImmunitiesCatalog: ComponentImmunitiesCatalogEN,
@@ -165,9 +167,11 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentEditPlayerDrawer: ComponentEditPlayerDrawerDE,
     ComponentSettingsOpponentCard: ComponentSettingsOpponentCardDE,
     ComponentEditOpponentDrawer: ComponentEditOpponentDrawerDE,
-    ComponentEncounterOpponentEditDrawer: ComponentEncounterOpponentEditDrawerDE,
+    ComponentEncounterOpponentEditDrawer:
+      ComponentEncounterOpponentEditDrawerDE,
     ComponentEncounterSelection: ComponentEncounterSelectionDE,
     ComponentCanvas: ComponentCanvasDE,
     ComponentEditEncounterDrawer: ComponentEditEncounterDrawerDE,
@@ -178,6 +182,7 @@ const resources = {
     ComponentSettingsCategoryEffects: ComponentSettingsCategoryEffectsDE,
     ComponentSettingsCategoryPlayers: ComponentSettingsCategoryPlayersDE,
     ComponentSettingsCategoryGeneral: ComponentSettingsCategoryGeneralDE,
+    ComponentSettingsCategoryImages: ComponentSettingsCategoryImagesDE,
     ComponentSettingsSidebar: ComponentSettingsSidebarDE,
     ComponentCatalog: ComponentCatalogDE,
     ComponentEditResistanceDrawer: ComponentEditResistanceDrawerDE,
@@ -199,7 +204,6 @@ const resources = {
     ComponentPlayerCard: ComponentPlayerCardDE,
     ComponentSettingsDialog: ComponentSettingsDialogDE,
     ComponentPlayerCatalog: ComponentPlayerCatalogDE,
-    ComponentEditPlayerDrawer: ComponentEditPlayerDrawerDE,
     ComponentEffectsCatalog: ComponentEffectsCatalogDE,
     ComponentCreateResistanceDrawer: ComponentCreateResistanceDrawerDE,
     ComponentImmunitiesCatalog: ComponentImmunitiesCatalogDE,

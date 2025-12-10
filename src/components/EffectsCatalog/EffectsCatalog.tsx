@@ -104,7 +104,9 @@ function EffectsCatalog({
             key={`effect-catalog-${effect.id}`}
             effect={effect}
             actions={
-              <Button onClick={() => handleSelectEffect(effect)}>add</Button>
+              <Button onClick={() => handleSelectEffect(effect)}>
+                {t("add")}
+              </Button>
             }
           />
         ))}

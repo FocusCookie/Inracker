@@ -32,9 +32,9 @@ export function ImageSelectionDialog({
       open={open}
       onOpenChange={onOpenChange}
       onExitComplete={onExitComplete}
-      title={t("selectImage")}
-      description={t("selectImageDescription")}
-      cancelTrigger={<Button variant="ghost">{t("cancel")}</Button>}
+      title={t("selectImage") as string}
+      description={t("selectImageDescription") as string}
+      cancelTrigger={<Button variant="ghost">{t("cancel") as string}</Button>}
     >
       <div className="pr-4">
         {loading ? (

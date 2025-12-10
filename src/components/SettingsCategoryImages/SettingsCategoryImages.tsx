@@ -84,14 +84,15 @@ function SettingsCategoryImages({ database = defaultDb }: Props) {
     players.data?.forEach((p) =>
       addToMap(p.image, t("folders.players"), p.name),
     );
+
     opponents.data?.forEach((o) =>
       addToMap(o.image, t("folders.opponents"), o.name),
     );
+
     chapters.data?.forEach((c) => {
       addToMap(c.battlemap, t("folders.chapters"), c.name);
-      // Check tokens in chapter? Tokens usually reference players/opponents, so image is on entity.
     });
-    // Encounters images
+
     encounters.data?.forEach((e) => {
       if (e.images) {
         e.images.forEach((img) => addToMap(img, "Encounter", e.name));

@@ -1,0 +1,24 @@
+{
+  "images": "Bilder",
+  "searchPlaceholder": "Bilder suchen...",
+  "noImages": "Keine Bilder gefunden",
+  "noImagesDescription": "Sie haben noch keine Bilder hochgeladen.",
+  "delete": "Löschen",
+  "usedBy": "Verwendet von",
+  "unused": "Unbenutzt",
+  "folders": {
+    "players": "Spieler",
+    "battlemaps": "Kampfkarten",
+    "chapters": "Kapitel",
+    "opponents": "Gegner",
+    "others": "Andere"
+  },
+  "confirmDelete": "Sind Sie sicher, dass Sie dieses Bild löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+  "deleteSuccess": "Bild erfolgreich gelöscht",
+  "deleteError": "Fehler beim Löschen des Bildes",
+  "deleteAllUnused": "Alle ungenutzten löschen",
+  "confirmDeleteAllUnused": "Sind Sie sicher, dass Sie alle ungenutzten Bilder löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+  "selectImage": "Bild auswählen",
+  "selectImageDescription": "Wählen Sie ein bestehendes Bild aus Ihrer Bibliothek aus.",
+  "cancel": "Abbrechen"
+}

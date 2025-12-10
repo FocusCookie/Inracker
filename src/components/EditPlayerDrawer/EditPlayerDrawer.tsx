@@ -5,6 +5,7 @@ import EditPlayerForm from "../EditPlayerForm/EditPlayerForm";
 import { storeImage } from "@/lib/utils";
 import { useEditPlayer } from "@/hooks/useEditPlayer";
 import { CancelReason, OverlayMap } from "@/types/overlay";
+import { useTranslation } from "react-i18next";
 
 type OverlayProps = OverlayMap["player.edit"];
 
@@ -26,6 +27,7 @@ function EditPlayerDrawer({
   onEdit,
 }: Props) {
   const form = useEditPlayer();
+  const { t } = useTranslation("ComponentEditPlayerDrawer");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [closingReason, setClosingReason] = useState<
     null | "success" | CancelReason
@@ -94,8 +96,8 @@ function EditPlayerDrawer({
       onExitComplete={onExitComplete}
       open={open}
       onOpenChange={handleOpenChange}
-      description={"description"}
-      title={"Edit Player"}
+      description={""}
+      title={t("editPlayer")}
       cancelTrigger={
         <Button
           disabled={isLoading}
