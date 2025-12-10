@@ -26,6 +26,8 @@ import {
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import { CancelReason, OverlayMap } from "@/types/overlay";
+import { ImageSelectionDialog } from "../ImageSelectionDialog/ImageSelectionDialog";
+import { Image as ImageIcon } from "lucide-react";
 
 type OverlayProps = OverlayMap["chapter.create"];
 
@@ -48,6 +50,7 @@ function CreateChapterDrawer({
 }: Props) {
   const { t } = useTranslation("ComponentCreateChapterDrawer");
   const [isCreating, setIsCreating] = useState(false);
+  const [isImageSelectorOpen, setIsImageSelectorOpen] = useState(false);
   const [closingReason, setClosingReason] = useState<
     null | "success" | CancelReason
   >(null);
@@ -85,7 +88,11 @@ function CreateChapterDrawer({
       let battlemapFilePath: string | null = null;
 
       if (!!battlemap) {
-        battlemapFilePath = await storeImage(battlemap, "battlemaps");
+        if (battlemap instanceof File) {
+          battlemapFilePath = await storeImage(battlemap, "battlemaps");
+        } else {
+          battlemapFilePath = battlemap;
+        }
       }
 
       const created = await onCreate({
@@ -138,6 +145,11 @@ function CreateChapterDrawer({
       setPicturePreview(URL.createObjectURL(file));
       form.setValue("battlemap", file);
     }
+  }
+
+  function handleImageSelect(path: string) {
+    setPicturePreview(path);
+    form.setValue("battlemap", path);
   }
 
   function handleIconSelect(icon: string) {
@@ -255,6 +267,16 @@ function CreateChapterDrawer({
                   accept="image/*"
                 />
 
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setIsImageSelectorOpen(true)}
+                  title="Select existing image"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                </Button>
+
                 {!!picturePreview && (
                   <Button
                     type="button"
@@ -279,6 +301,11 @@ function CreateChapterDrawer({
           )}
         </Form>
       </div>
+      <ImageSelectionDialog
+        open={isImageSelectorOpen}
+        onOpenChange={setIsImageSelectorOpen}
+        onSelect={handleImageSelect}
+      />
     </Drawer>
   );
 }

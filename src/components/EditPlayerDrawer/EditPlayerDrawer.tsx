@@ -46,7 +46,11 @@ function EditPlayerDrawer({
       let pictureFilePath: string | null = player?.image || null;
 
       if (!!picture) {
-        pictureFilePath = await storeImage(picture, "players");
+        if (picture instanceof File) {
+          pictureFilePath = await storeImage(picture, "players");
+        } else {
+          pictureFilePath = picture;
+        }
       }
 
       const updatedPlayer = await onEdit({

@@ -58,7 +58,11 @@ function CreateOpponentDrawer({
 
       let pictureFilePath: string | null = null;
       if (values.image) {
-        pictureFilePath = await storeImage(values.image, "opponents");
+        if (values.image instanceof File) {
+          pictureFilePath = await storeImage(values.image, "opponents");
+        } else {
+          pictureFilePath = values.image;
+        }
       }
 
       const selectedImmunities = (values.immunities || [])

@@ -17,5 +17,8 @@
   "deleteSuccess": "Image deleted successfully",
   "deleteError": "Failed to delete image",
   "deleteAllUnused": "Delete All Unused",
-  "confirmDeleteAllUnused": "Are you sure you want to delete all unused images? This action cannot be undone."
+  "confirmDeleteAllUnused": "Are you sure you want to delete all unused images? This action cannot be undone.",
+  "selectImage": "Select Image",
+  "selectImageDescription": "Select an existing image from your library.",
+  "cancel": "Cancel"
 }

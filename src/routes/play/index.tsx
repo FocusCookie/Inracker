@@ -34,8 +34,8 @@ function RouteComponent() {
   });
 
   const chapterQuery = useQueryWithToast({
-    queryKey: ["chapter"],
-    queryFn: () => db.chapters.getById(chapterId),
+    queryKey: ["chapter", chapterId],
+    queryFn: () => db.chapters.get(chapterId),
     enabled: !!chapterId,
   });
 

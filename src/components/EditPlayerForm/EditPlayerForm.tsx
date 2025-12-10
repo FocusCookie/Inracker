@@ -16,6 +16,8 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
+import { ImageSelectionDialog } from "../ImageSelectionDialog/ImageSelectionDialog";
+import { Image as ImageIcon } from "lucide-react";
 
 type Props = {
   disabled: boolean;
@@ -28,6 +30,7 @@ function EditPlayerForm({ disabled, player, form }: Props) {
   const [picturePreview, setPicturePreview] = useState<string>(
     player?.image || "",
   );
+  const [isImageSelectorOpen, setIsImageSelectorOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState<number>(0); // to reset the input type file path after a reset
 
   useEffect(() => {
@@ -50,6 +53,11 @@ function EditPlayerForm({ disabled, player, form }: Props) {
       setPicturePreview(URL.createObjectURL(file));
       form.setValue("picture", file);
     }
+  }
+
+  function handleImageSelect(path: string) {
+    setPicturePreview(path);
+    form.setValue("picture", path);
   }
 
   function handleIconSelect(icon: string) {
@@ -149,6 +157,16 @@ function EditPlayerForm({ disabled, player, form }: Props) {
                     placeholder={t("picturePlaceholder")}
                     accept="image/*"
                   />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setIsImageSelectorOpen(true)}
+                    title="Select existing image"
+                    disabled={disabled}
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                  </Button>
                   {!!picturePreview && (
                     <Button
                       type="button"
@@ -210,6 +228,11 @@ function EditPlayerForm({ disabled, player, form }: Props) {
           />
         </div>
       </form>
+      <ImageSelectionDialog
+        open={isImageSelectorOpen}
+        onOpenChange={setIsImageSelectorOpen}
+        onSelect={handleImageSelect}
+      />
     </Form>
   );
 }

@@ -65,7 +65,11 @@ export default function CreatePlayerDrawer({
 
       let pictureFilePath: string | null = null;
       if (values.picture) {
-        pictureFilePath = await storeImage(values.picture, "players");
+        if (values.picture instanceof File) {
+          pictureFilePath = await storeImage(values.picture, "players");
+        } else {
+          pictureFilePath = values.picture;
+        }
       }
 
       const input: TCreatePlayer = {

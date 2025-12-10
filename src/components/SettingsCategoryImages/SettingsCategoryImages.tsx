@@ -1,7 +1,7 @@
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
 import defaultDb from "@/lib/database";
-import { BaseDirectory, readDir, remove } from "@tauri-apps/plugin-fs";
-import { IMAGE_FOLDERS, ImageFolder } from "@/lib/utils";
+import { BaseDirectory, remove } from "@tauri-apps/plugin-fs";
+import { IMAGE_FOLDERS } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { TypographyH1 } from "../ui/typographyH1";
 import {
@@ -24,38 +24,23 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
-import { convertFileSrc } from "@tauri-apps/api/core";
-import { appDataDir, join } from "@tauri-apps/api/path";
 
 import { useAllPlayers } from "@/hooks/usePlayers";
 import { useOpponents } from "@/hooks/useOpponents";
 import { useChapters } from "@/hooks/useChapters";
 import { useEncounters } from "@/hooks/useEncounters";
-import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast"; // For encounter opponents if needed or use existing hook
+import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
+import { useImages, ImageFile } from "@/hooks/useImages";
 
 type Props = {
   database?: typeof defaultDb;
-};
-
-type ImageFile = {
-  name: string;
-  path: string;
-  folder: ImageFolder;
-  assetUrl: string;
 };
 
 type UsageMap = Record<string, { type: string; name: string }[]>;
 
 function SettingsCategoryImages({ database = defaultDb }: Props) {
   const { t } = useTranslation("ComponentSettingsCategoryImages");
-  const [images, setImages] = useState<Record<ImageFolder, ImageFile[]>>({
-    players: [],
-    battlemaps: [],
-    chapters: [],
-    others: [],
-    opponents: [],
-  });
-  const [loading, setLoading] = useState(true);
+  const { images, loading, refresh: fetchImages } = useImages();
 
   const players = useAllPlayers(database);
   const opponents = useOpponents(database);
@@ -66,61 +51,6 @@ function SettingsCategoryImages({ database = defaultDb }: Props) {
     queryKey: ["all-encounter-opponents"],
     queryFn: () => database.encounterOpponents.getAllDetailed(),
   });
-
-  const fetchImages = async () => {
-    setLoading(true);
-    const newImages: Record<ImageFolder, ImageFile[]> = {
-      players: [],
-      battlemaps: [],
-      chapters: [],
-      others: [],
-      opponents: [],
-    };
-
-    try {
-      const appDataPath = await appDataDir();
-
-      for (const folder of IMAGE_FOLDERS) {
-        try {
-          const entries = await readDir(`images/${folder}`, {
-            baseDir: BaseDirectory.AppData,
-          });
-
-          for (const entry of entries) {
-            if (entry.isFile) {
-              // Construct asset URL for display
-              const filePath = await join(
-                appDataPath,
-                "images",
-                folder,
-                entry.name,
-              );
-              const assetUrl = convertFileSrc(filePath);
-
-              newImages[folder].push({
-                name: entry.name,
-                path: filePath,
-                folder: folder,
-                assetUrl: assetUrl,
-              });
-            }
-          }
-        } catch (e) {
-          // Folder might not exist yet, ignore
-          console.warn(`Could not read directory images/${folder}`, e);
-        }
-      }
-      setImages(newImages);
-    } catch (e) {
-      console.error("Failed to list images", e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchImages();
-  }, []);
 
   const usageMap: UsageMap = useMemo(() => {
     const map: UsageMap = {};
