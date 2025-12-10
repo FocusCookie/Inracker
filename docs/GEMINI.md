@@ -173,6 +173,48 @@ function MyOverlay({ entityId, initialEntityData, database }) {
 
 This pattern ensures that overlays remain dynamic and display the most up-to-date information, despite their decoupled rendering environment.
 
+### 6. Component Data Flow Rules
+
+- If the component uses data from the database and also manipulates the same data and nothing else, you can use `useQuery` and `useMutation` in the component itself. There is no need for passing the data through the props.
+- If the component mutates another data than it shows (e.g., the add players catalog, which mutates the party and not the players list), then pass the mutation function as a prop from the parent.
+
+### 7. Internationalization and localization
+
+This project uses react-i18next for handlin the internationalization and localization. If you want to add translations add them to `src/translations/[lng]/[namespace].json`. Also you need to update:
+
+- The `resources` in the`/src/i18next.ts` file.
+- Add the namespace and translation to the `/src/@types/i18next.d.ts` file.
+
+### Translation with i18n.t
+
+If you need to translate somethinge outside of an React Component use the i18n.t function. Important is that you seperate the namespce with a douple point :
+
+```ts
+import i18next from "i18next";
+
+i18next.t("ComponentCreatePlayerDrawer:minName"),
+```
+
+### Translation Templates
+
+You can use the hygen templates in order to create new translations files.
+
+```bash
+hygen translation new
+```
+
+### 8. Templates
+
+With hygen you can create components and translations.
+
+```bash
+hygen component new
+```
+
+```bash
+hygen translation new
+```
+
 ## Environment & Database
 
 - **Environment Variables:**
@@ -212,10 +254,35 @@ This pattern ensures that overlays remain dynamic and display the most up-to-dat
 
 ## Common Commands
 
-```bash
-npm run dev           # Web-only dev (mocked DB or limited functionality)
-npm run tauri dev     # Full Desktop app with hot reload
-npm run build         # Build web assets
-npm run storybook     # UI Component development
-```
+
+## Future Features
+
+- In settings: see all files that are in the app directory in order to delete files that are not used
+- Importing and Exporting databases
+
+## Todos
+
+- [ ] MP3 files
+      -- [ ] component where music can be selected that can be played during the game
+- [x] Effects need to have a boolean value for until long rest
+- [ ] Play&ChapterSelection: shortcut refactor to hook
+- [ ] Canvas
+  - [x] Show opponents when there are tokens for the encounters
+  - [x] make the elements movable like the tokens
+- [ ] Play screen
+  - [ ] Go back button and exit party button
+  - [ ] show the game states here if there are implemented
+- [ ] ActiveEffects connecting with players and opponents in chapter
+- [ ] effectCard - show duration and value in the opened card or as badges
+- [ ] need to store a game round and time state for the effects. time needs to be enabled somehow with a timer than rounds could be updated with a next round function
+- [x] settings dialog
+  - [x] immunites edit
+  - [x] resistances edit
+  - [ ] user settings
+- [ ] ui for round interaction
+- [ ] innitiative
+  - [ ] ui
+  - [ ] gamestate
+    - [ ] stored as an entity for each party
+  - [ ]
 
