@@ -10,7 +10,7 @@ import { CheckIcon, Pencil1Icon } from "@radix-ui/react-icons";
 import { Badge } from "../ui/badge";
 import { TypographyH4 } from "../ui/typographyH4";
 import MarkdownReader from "../MarkdownReader/MarkdownReader";
-import OpponentCard from "../OpponentCard/OpponentCard";
+import EncounterOpponentCard from "../EncounterOpponentCard/EncounterOpponentCard";
 import { toast } from "@/hooks/use-toast";
 import {
   Tooltip,
@@ -23,6 +23,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import {
   useDeleteEncounterOpponent,
   useEncounterOpponentsDetailed,
+  useUpdateEncounterOpponent,
 } from "@/hooks/useEncounterOpponents";
 import {
   useRemoveOpponentFromEncounter,
@@ -82,6 +83,7 @@ function EncounterSelection({
   const groupTokensIntoElementMutation = useGroupTokensIntoElement(database);
   const createTokensForEncounterMutation =
     useCreateTokensForEncounter(database);
+  const updateEncounterOpponentMutation = useUpdateEncounterOpponent(database);
 
   async function handleRemoveOpponent(opponentId: number) {
     if (!encounter) return;
@@ -102,6 +104,25 @@ function EncounterSelection({
         title: `Deleted ${opponent.icon} ${opponent.name}`,
       });
     }
+  }
+
+  function handleEditEncounterOpponent(opponent: any) {
+    openOverlay("encounter-opponent.edit", {
+      opponent,
+      onEdit: async (updatedOpponent) => {
+        await updateEncounterOpponentMutation.mutateAsync(updatedOpponent);
+        return updatedOpponent;
+      },
+      onDelete: async (id) => {
+        await handleRemoveOpponent(id);
+      },
+      onCancel: (reason) => {
+        console.log("Encounter opponent edit cancelled:", reason);
+      },
+      onComplete: (result) => {
+        console.log("Encounter opponent edit complete:", result);
+      },
+    });
   }
 
   function handleClose() {
@@ -312,16 +333,17 @@ function EncounterSelection({
                             };
                           })
                           .filter((encOpp) => encOpp.opponent !== undefined)
-                                                  .map((encOpp) => (
-                                                    <OpponentCard
-                                                      key={`opp-${encOpp.entity}`}
-                                                      // @ts-ignore
-                                                      opponent={encOpp.opponent}
-                                                      onRemove={handleRemoveOpponent}
-                                                      onSelectToken={onOpponentSelect}
-                                                    />
-                                                  ))}
-                                            </div>                  </ScrollArea>
+                          .map((encOpp) => (
+                            <EncounterOpponentCard
+                              key={`opp-${encOpp.entity}`}
+                              // @ts-ignore
+                              opponent={encOpp.opponent}
+                              onRemove={handleRemoveOpponent}
+                              onSelectToken={onOpponentSelect}
+                              onEdit={handleEditEncounterOpponent}
+                            />
+                          ))}
+                    </div>                  </ScrollArea>
                 </motion.div>
               )}
             </Dialog.Content>

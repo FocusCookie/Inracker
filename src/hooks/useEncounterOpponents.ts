@@ -51,3 +51,15 @@ export function useCreateMultipleEncounterOpponents(database = defaultDb) {
     },
   });
 }
+
+export function useUpdateEncounterOpponent(database = defaultDb) {
+  const queryClient = useQueryClient();
+  return useMutationWithErrorToast({
+    mutationFn: (opponent: EncounterOpponent) =>
+      database.encounterOpponents.update(opponent),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
+      queryClient.invalidateQueries({ queryKey: ["tokens"] });
+    },
+  });
+}

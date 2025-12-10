@@ -1,3 +1,10 @@
 {
-    
+  "title": "Gegner bearbeiten",
+  "descriptionText": "Bearbeite die Details dieses Gegners.",
+  "cancel": "Abbrechen",
+  "save": "Speichern",
+  "immunities": "Immunitäten",
+  "resistances": "Resistenzen",
+  "catalog": "Katalog",
+  "create": "Erstellen"
 }

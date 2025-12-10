@@ -6,7 +6,7 @@ import type { DBResistance, Resistance } from "@/types/resistances";
 import { DBEffect, Effect } from "./effect";
 import { Chapter, DBChapter } from "./chapters";
 import { Encounter } from "./encounter";
-import { Opponent, TCreateOpponent } from "./opponents";
+import { EncounterOpponent, Opponent, TCreateOpponent } from "./opponents";
 
 export type CancelReason = "cancel" | "dismissed" | "closed";
 
@@ -18,6 +18,7 @@ export type OverlaySuccessMap = {
   "effect.edit": Effect;
   "encounter.create": Encounter;
   "encounter.edit": Encounter;
+  "encounter-opponent.edit": EncounterOpponent;
   "opponent.create": Opponent;
   "opponent.edit": Opponent;
   "opponent.catalog": Opponent;
@@ -82,6 +83,13 @@ export type OverlayMap = {
     onComplete?: (result: OverlaySuccessMap["encounter.edit"]) => void;
     onCancel?: (reason: CancelReason) => void;
     onDelete: (encounter: Encounter["id"]) => Promise<DBEncounter>;
+  };
+  "encounter-opponent.edit": {
+    opponent: EncounterOpponent;
+    onEdit: (opponent: EncounterOpponent) => Promise<EncounterOpponent>;
+    onComplete: (result: OverlaySuccessMap["encounter-opponent.edit"]) => void;
+    onDelete: (opponentId: number) => Promise<void>;
+    onCancel?: (reason: CancelReason) => void;
   };
   "opponent.create": {
     onCreate: (opponent: Omit<Opponent, "id">) => Promise<Opponent>;

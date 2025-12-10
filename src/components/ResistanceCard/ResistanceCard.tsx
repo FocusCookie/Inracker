@@ -12,12 +12,16 @@ type Props = {
   actions?: React.ReactNode;
   onRemove?: (resistanceId: DBResistance["id"]) => void;
   onEdit?: (resistance: DBResistance) => void;
+  onDelete?: () => void;
 };
 
-function ResistanceCard({ resistance, actions, onRemove, onEdit }: Props) {
+function ResistanceCard({ resistance, actions, onRemove, onEdit, onDelete }: Props) {
   function handleRemoveResistance() {
     if (onRemove) {
       onRemove(resistance.id);
+    }
+    if (onDelete) {
+      onDelete();
     }
   }
 
@@ -46,7 +50,7 @@ function ResistanceCard({ resistance, actions, onRemove, onEdit }: Props) {
                   <Pencil1Icon />
                 </Button>
               )}
-              {onRemove && (
+              {(onRemove || onDelete) && (
                 <Button
                   variant="ghost"
                   size="icon"

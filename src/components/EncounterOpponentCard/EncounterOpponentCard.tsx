@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Opponent } from "@/types/opponents";
+import { EncounterOpponent } from "@/types/opponents";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import MarkdownReader from "../MarkdownReader/MarkdownReader";
@@ -33,13 +33,18 @@ import { DBEffect, Effect } from "@/types/effect";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Props = {
-  opponent: Opponent;
-  onRemove: (opponentId: Opponent["id"]) => void;
-  onEdit?: (opponent: Opponent) => void;
-  onSelectToken?: (opponentId: Opponent["id"]) => void;
+  opponent: EncounterOpponent;
+  onRemove: (opponentId: number) => void;
+  onEdit?: (opponent: EncounterOpponent) => void;
+  onSelectToken?: (opponentId: number) => void;
 };
 
-function OpponentCard({ opponent, onRemove, onEdit, onSelectToken }: Props) {
+function EncounterOpponentCard({
+  opponent,
+  onRemove,
+  onEdit,
+  onSelectToken,
+}: Props) {
   const { t } = useTranslation("ComponentOpponentCard");
   const [expanded, setExpanded] = useState(false);
   const contentRef = useRef(null);
@@ -88,15 +93,16 @@ function OpponentCard({ opponent, onRemove, onEdit, onSelectToken }: Props) {
             ))}
           </div>
         </div>
+
         <div className="ml-auto flex gap-2">
-          {onEdit && (
+          {onSelectToken && (
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              onClick={handleEditOpponent}
+              onClick={() => onSelectToken(opponent.id)}
             >
-              <Pencil1Icon />
+              <TargetIcon />
             </Button>
           )}
 
@@ -113,7 +119,7 @@ function OpponentCard({ opponent, onRemove, onEdit, onSelectToken }: Props) {
                   {t("confirmDelete")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
-              <AlertDialogFooter>
+              <AlertDialogFooter className="flex gap-4">
                 <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                 <AlertDialogAction onClick={handleRemoveOpponent}>
                   {t("delete")}
@@ -122,14 +128,14 @@ function OpponentCard({ opponent, onRemove, onEdit, onSelectToken }: Props) {
             </AlertDialogContent>
           </AlertDialog>
 
-          {onSelectToken && (
+          {onEdit && (
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              onClick={() => onSelectToken(opponent.id)}
+              onClick={handleEditOpponent}
             >
-              <TargetIcon />
+              <Pencil1Icon />
             </Button>
           )}
 
@@ -236,4 +242,4 @@ function OpponentCard({ opponent, onRemove, onEdit, onSelectToken }: Props) {
   );
 }
 
-export default OpponentCard;
+export default EncounterOpponentCard;

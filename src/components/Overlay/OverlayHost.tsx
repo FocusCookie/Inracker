@@ -23,6 +23,7 @@ import EditEncounterDrawer from "../EditEncounterDrawer/EditEncounterDrawer";
 import EncounterSelection from "../EncounterSelection/EncounterSelection";
 import OpponentsCatalog from "../OpponentsCatalog/OpponentsCatalog";
 import EditOpponentDrawer from "../EditOpponentDrawer/EditOpponentDrawer";
+import EditEncounterOpponentDrawer from "../EditEncounterOpponentDrawer/EditEncounterOpponentDrawer";
 
 type RuntimeOverlayProps = {
   open: boolean;
@@ -43,6 +44,7 @@ const registry: Record<OverlayKind, OverlayComponent<any>> = {
   "encounter.create": CreateEncounterDrawer,
   "encounter.edit": EditEncounterDrawer,
   "encounter.selection": EncounterSelection,
+  "encounter-opponent.edit": EditEncounterOpponentDrawer,
   "immunity.edit": EditImmunityDrawer,
   "immunity.create": CreateImmunityDrawer,
   "immunity.catalog": ImmunitiesCatalog,

@@ -8,7 +8,12 @@ export const useEditOpponent = (opponent: Opponent) => {
   const formSchema = editOpponentSchema;
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: opponent,
+    defaultValues: {
+      ...opponent,
+      resistances: opponent.resistances.map((r: { id: number }) => r.id),
+      immunities: opponent.immunities.map((i: { id: number }) => i.id),
+      effects: opponent.effects.map((e: { id: number }) => e.id),
+    },
   });
 
   return form;

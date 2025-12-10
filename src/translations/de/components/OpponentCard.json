@@ -3,5 +3,8 @@
   "details": "Details",
   "immunities": "Immunitäten",
   "resistances": "Resistenzen",
-  "effects": "Effekte"
+  "effects": "Effekte",
+  "delete": "Löschen",
+  "confirmDelete": "Bist du sicher, dass du diesen Gegner löschen möchtest?",
+  "cancel": "Abbrechen"
 }

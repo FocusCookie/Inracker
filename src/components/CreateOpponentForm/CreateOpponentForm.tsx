@@ -40,6 +40,13 @@ const CreateOpponentForm: CreateOpponentDrawerCompound = ({
   const [refreshKey, setRefreshKey] = useState<number>(0); // to reset the input type file path after a reset
   const childrenArray = React.Children.toArray(children);
 
+  React.useEffect(() => {
+    const image = form.getValues("image");
+    if (typeof image === "string" && image) {
+      setPicturePreview(image);
+    }
+  }, [form]);
+
   const immunitiesChild = childrenArray.find(
     (child) =>
       React.isValidElement(child) &&

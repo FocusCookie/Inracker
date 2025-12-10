@@ -5,5 +5,14 @@
   "create": "Create",
   "immunities": "Immunities",
   "catalog": "Catalog",
-  "resistances": "Resistances"
+  "resistances": "Resistances",
+  "icon": "Icon",
+  "profilePictureAlt": "Opponent image",
+  "opponentPicture": "Opponent Picture",
+  "picturePlaceholder": "Select an image",
+  "name": "Name",
+  "level": "Level",
+  "health": "Health",
+  "details": "Details",
+  "detailsDescription": "Detailed information about the opponent (supports Markdown)"
 }

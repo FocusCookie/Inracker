@@ -61,9 +61,9 @@ export const getDetailedOpponentById = async (
     resistances: dbResistances,
   } = dbOpponent;
 
-  const effectsIds = JSON.parse(dbEffects) as number[];
-  const immunitiesIds = JSON.parse(dbImmunities) as number[];
-  const resistancesIds = JSON.parse(dbResistances) as number[];
+  const effectsIds = (JSON.parse(dbEffects) as number[]).filter((id) => id != null);
+  const immunitiesIds = (JSON.parse(dbImmunities) as number[]).filter((id) => id != null);
+  const resistancesIds = (JSON.parse(dbResistances) as number[]).filter((id) => id != null);
   const labelList = JSON.parse(labels) as string[];
 
   let effects: Effect[] = [];
@@ -71,18 +71,30 @@ export const getDetailedOpponentById = async (
   let resistances: DBResistance[] = [];
 
   for (const effectId of effectsIds) {
-    const effect = await getEffectById(db, effectId);
-    effects.push(effect);
+    try {
+      const effect = await getEffectById(db, effectId);
+      effects.push(effect);
+    } catch (e) {
+      console.warn(`Failed to load effect ${effectId}`, e);
+    }
   }
 
   for (const immunityId of immunitiesIds) {
-    const immunity = await getImmunityById(db, immunityId);
-    immunities.push(immunity);
+    try {
+      const immunity = await getImmunityById(db, immunityId);
+      immunities.push(immunity);
+    } catch (e) {
+      console.warn(`Failed to load immunity ${immunityId}`, e);
+    }
   }
 
   for (const resistanceId of resistancesIds) {
-    const resistance = await getResistanceById(db, resistanceId);
-    resistances.push(resistance);
+    try {
+      const resistance = await getResistanceById(db, resistanceId);
+      resistances.push(resistance);
+    } catch (e) {
+      console.warn(`Failed to load resistance ${resistanceId}`, e);
+    }
   }
 
   const opponent: Opponent = {
@@ -139,16 +151,16 @@ export const createOpponent = async (
     "INSERT INTO opponents (details, effects, health, icon, image, immunities, labels, level, max_health, name, resistances) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *",
     [
       details,
-      JSON.stringify(effects.map((e) => e.id)),
+      JSON.stringify(effects.map((e: Effect) => e.id)),
       health,
       icon,
       image,
-      JSON.stringify(immunities.map((i) => i.id)),
+      JSON.stringify(immunities.map((i: DBImmunity) => i.id)),
       JSON.stringify(labels),
       level,
       max_health,
       name,
-      JSON.stringify(resistances.map((r) => r.id)),
+      JSON.stringify(resistances.map((r: DBResistance) => r.id)),
     ],
   );
 
@@ -252,9 +264,9 @@ export const getDetailedEncounterOpponentById = async (
     blueprint,
   } = dbOpponent;
 
-  const effectsIds = JSON.parse(dbEffects) as number[];
-  const immunitiesIds = JSON.parse(dbImmunities) as number[];
-  const resistancesIds = JSON.parse(dbResistances) as number[];
+  const effectsIds = (JSON.parse(dbEffects) as number[]).filter((id) => id != null);
+  const immunitiesIds = (JSON.parse(dbImmunities) as number[]).filter((id) => id != null);
+  const resistancesIds = (JSON.parse(dbResistances) as number[]).filter((id) => id != null);
   const labelList = JSON.parse(labels) as string[];
 
   let effects: Effect[] = [];
@@ -262,18 +274,30 @@ export const getDetailedEncounterOpponentById = async (
   let resistances: DBResistance[] = [];
 
   for (const effectId of effectsIds) {
-    const effect = await getEffectById(db, effectId);
-    effects.push(effect);
+    try {
+      const effect = await getEffectById(db, effectId);
+      effects.push(effect);
+    } catch (e) {
+      console.warn(`Failed to load effect ${effectId}`, e);
+    }
   }
 
   for (const immunityId of immunitiesIds) {
-    const immunity = await getImmunityById(db, immunityId);
-    immunities.push(immunity);
+    try {
+      const immunity = await getImmunityById(db, immunityId);
+      immunities.push(immunity);
+    } catch (e) {
+      console.warn(`Failed to load immunity ${immunityId}`, e);
+    }
   }
 
   for (const resistanceId of resistancesIds) {
-    const resistance = await getResistanceById(db, resistanceId);
-    resistances.push(resistance);
+    try {
+      const resistance = await getResistanceById(db, resistanceId);
+      resistances.push(resistance);
+    } catch (e) {
+      console.warn(`Failed to load resistance ${resistanceId}`, e);
+    }
   }
 
   const encounterOpponent: EncounterOpponent = {
@@ -353,16 +377,16 @@ export const createEncounterOpponent = async (
     "INSERT INTO encounter_opponents (details, effects, health, icon, image, immunities, labels, level, max_health, name, resistances, blueprint) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
     [
       details,
-      JSON.stringify(effects.map((e) => e.id)),
+      JSON.stringify(effects.map((e: Effect) => e.id)),
       health,
       icon,
       image,
-      JSON.stringify(immunities.map((i) => i.id)),
+      JSON.stringify(immunities.map((i: DBImmunity) => i.id)),
       JSON.stringify(labels),
       level,
       max_health,
       name,
-      JSON.stringify(resistances.map((r) => r.id)),
+      JSON.stringify(resistances.map((r: DBResistance) => r.id)),
       blueprint,
     ],
   );
@@ -501,7 +525,14 @@ export const opponents = {
     const db = await connect();
     return createOpponent(db, opponent);
   },
-  // TODO: Add getById, update, delete if needed for base opponents
+  update: async (opponent: Opponent) => {
+    const db = await connect();
+    return updateOpponent(db, opponent);
+  },
+  delete: async (id: number) => {
+    const db = await connect();
+    return deleteOpponentById(db, id);
+  },
 };
 
 export const encounterOpponents = {
@@ -523,6 +554,10 @@ export const encounterOpponents = {
   createMultiple: async (opponents: Array<Omit<EncounterOpponent, "id">>) => {
     const db = await connect();
     return createEncounterOpponents(db, opponents);
+  },
+  update: async (opponent: EncounterOpponent) => {
+    const db = await connect();
+    return updateEncounterOpponent(db, opponent);
   },
   delete: async (id: number) => {
     const db = await connect();

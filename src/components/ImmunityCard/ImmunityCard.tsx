@@ -12,12 +12,16 @@ type Props = {
   actions?: React.ReactNode;
   onRemove?: (immunityId: DBImmunity["id"]) => void;
   onEdit?: (immunity: DBImmunity) => void;
+  onDelete?: () => void;
 };
 
-function ImmunityCard({ immunity, actions, onRemove, onEdit }: Props) {
+function ImmunityCard({ immunity, actions, onRemove, onEdit, onDelete }: Props) {
   function handleRemoveImmunity() {
     if (onRemove) {
       onRemove(immunity.id);
+    }
+    if (onDelete) {
+      onDelete();
     }
   }
 
@@ -46,7 +50,7 @@ function ImmunityCard({ immunity, actions, onRemove, onEdit }: Props) {
                   <Pencil1Icon />
                 </Button>
               )}
-              {onRemove && (
+              {(onRemove || onDelete) && (
                 <Button
                   variant="ghost"
                   size="icon"

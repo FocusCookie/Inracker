@@ -177,7 +177,7 @@ function SettingsCategoryImages({ database = defaultDb }: Props) {
                   {t("confirmDeleteAllUnused")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
-              <AlertDialogFooter>
+              <AlertDialogFooter className="flex gap-4">
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDeleteAllUnused}
@@ -280,8 +280,10 @@ function SettingsCategoryImages({ database = defaultDb }: Props) {
                                   {t("confirmDelete")}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogFooter className="flex gap-4">
+                                <AlertDialogCancel>
+                                  {t("cancel")}
+                                </AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => handleDelete(file)}
                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
