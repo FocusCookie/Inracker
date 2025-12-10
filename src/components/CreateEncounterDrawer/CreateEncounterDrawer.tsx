@@ -32,11 +32,17 @@ import db from "@/lib/database";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import { TCreateEncounter } from "@/schemas/createEncounter";
 import { useOverlayStore } from "@/stores/useOverlayStore";
-import { Token } from "@/types/tokens";
 import { useSearch } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEncounterStore } from "@/stores/useEncounterStore";
 import { useShallow } from "zustand/shallow";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { InfoIcon } from "lucide-react";
+import {
+  useCreateEncounterOpponent,
+  useDeleteEncounterOpponent,
+} from "@/hooks/useEncounterOpponents";
+import { useOpponents } from "@/hooks/useOpponents";
 
 type OverlayProps = OverlayMap["encounter.create"];
 
@@ -66,6 +72,9 @@ function CreateEncounterDrawer({
   const form = useCreateEncounter();
   const { chapterId } = useSearch({ from: "/play/" });
 
+  const createEncounterOpponent = useCreateEncounterOpponent();
+  const deleteEncounterOpponent = useDeleteEncounterOpponent();
+
   const { setCurrentColor, setCurrentIcon, setCurrenTitle } = useEncounterStore(
     useShallow((state) => ({
       setCurrentColor: state.setCurrentColor,
@@ -74,9 +83,11 @@ function CreateEncounterDrawer({
     })),
   );
 
-  const opponents = useQueryWithToast({
-    queryKey: ["opponents"],
-    queryFn: () => db.opponents.getAllDetailed(),
+  const opponentsQuery = useOpponents();
+
+  const encounterOpponentsQuery = useQueryWithToast({
+    queryKey: ["encounter-opponents"],
+    queryFn: () => db.encounterOpponents.getAllDetailed(),
   });
 
   const { fields, remove, append } = useFieldArray({
@@ -132,11 +143,14 @@ function CreateEncounterDrawer({
     setType(value);
   }
 
-  const handleRemoveOpponent = (id: EncounterOpponent["id"]) => {
+  const handleRemoveOpponent = async (id: EncounterOpponent["id"]) => {
     const currentOpponents = form.getValues("opponents") || [];
     const updatedOpponents = currentOpponents.filter(
       (opponentId: number) => opponentId !== id,
     );
+
+    await deleteEncounterOpponent.mutateAsync(id);
+
     form.setValue("opponents", updatedOpponents);
   };
 
@@ -150,25 +164,19 @@ function CreateEncounterDrawer({
             "Chapter id is missing in creating the token for the opponent",
           );
 
-        const token: Omit<Token, "id"> = {
-          type: "opponent",
-          // @ts-ignore
-          entity: createdOpponent.id,
-          coordinates: { x: 0, y: 0 },
-          chapter: chapterId,
-        };
-
-        await db.tokens.create(token);
-
         return createdOpponent;
       },
-      onComplete: (opponent) => {
+      onComplete: async (opponent) => {
         const currentOpponents = form.getValues("opponents") || [];
-        form.setValue("opponents", [...currentOpponents, opponent.id]);
-        opponents.refetch();
+        const encounterOpponent = await createEncounterOpponent.mutateAsync({
+          opponent: { ...opponent, blueprint: opponent.id },
+          chapterId: Number(chapterId),
+        });
 
-        queryClient.invalidateQueries({ queryKey: ["opponents"] });
-        queryClient.invalidateQueries({ queryKey: ["tokens"] });
+        form.setValue("opponents", [...currentOpponents, encounterOpponent.id]);
+
+        opponentsQuery.refetch();
+        // Hook handles invalidation for encounter-opponents and tokens
       },
       onCancel: (reason) => {
         console.log("Opponent creation cancelled:", reason);
@@ -176,24 +184,32 @@ function CreateEncounterDrawer({
     });
   }
 
-  /*
   function handleOpenOpponentsCatalog() {
     openOverlay("opponent.catalog", {
+      database: db,
       onSelect: async (opponent) => {
         const currentOpponents = form.getValues("opponents") || [];
-        form.setValue("opponents", [...currentOpponents, opponent.id]);
+
+        const encounterOpponent = await createEncounterOpponent.mutateAsync({
+          opponent: { ...opponent, blueprint: opponent.id },
+          chapterId: Number(chapterId),
+        });
+
+        form.setValue("opponents", [...currentOpponents, encounterOpponent.id]);
+        // Hook handles invalidation
       },
       onCancel: (reason) => {
         console.log("Opponent catalog cancelled:", reason);
       },
     });
   }
-  */
 
   const selectedOpponents =
     form
       .watch("opponents")
-      ?.map((id: number) => opponents.data?.find((op) => op.id === id))
+      ?.map((id: number) =>
+        encounterOpponentsQuery.data?.find((op) => op.id === id),
+      )
       .filter((opponent): opponent is Opponent => opponent !== undefined) || [];
 
   function handleColorChange(value: string) {
@@ -204,12 +220,17 @@ function CreateEncounterDrawer({
   function handleTitleChange(event: ChangeEvent<HTMLInputElement>) {
     const { value } = event.target;
 
-    console.log({ value });
-
     form.setValue("name", value);
     setCurrenTitle(value);
   }
-
+  /*
+      TODO: Also es muss klarer getrennt sein wie und wann encounterOpponents
+      erstellt werden. sie sollten vor dem anlegen des encounters angelegt
+      werden und dann die opponent ids im encounter entsprechen. Vorher hatte
+      ich das in db.encounter.create gemacht. Auch muss beim erstellen eines
+      encounterOpponent ein token angelegt werden.... hier auch auswählen ob
+      einzeln oder in create
+    */
   return (
     <Drawer
       open={open}
@@ -643,12 +664,20 @@ function CreateEncounterDrawer({
 
                           <Button
                             type="button"
-                            // onClick={handleOpenOpponentsCatalog}
+                            onClick={handleOpenOpponentsCatalog}
                           >
                             {t("catalog")}
                           </Button>
                         </div>
                       </div>
+
+                      <Alert>
+                        <InfoIcon />
+                        <AlertTitle>{t("encounterOpponents")}</AlertTitle>
+                        <AlertDescription>
+                          {t("encounterOpponentsDescription")}
+                        </AlertDescription>
+                      </Alert>
 
                       <div className="flex flex-col gap-4">
                         {selectedOpponents.map(

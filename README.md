@@ -109,6 +109,7 @@ hygen translation new
 - [ ] MP3 files
       -- [ ] component where music can be selected that can be played during the game
 - [x] Effects need to have a boolean value for until long rest
+- [ ] Play&ChapterSelection: shortcut refactor to hook
 - [ ] Canvas
   - [x] Show opponents when there are tokens for the encounters
   - [x] make the elements movable like the tokens

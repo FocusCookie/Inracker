@@ -20,6 +20,10 @@ import EditResistanceDrawer from "../EditResistanceDrawer/EditResistanceDrawer";
 import CreateEncounterDrawer from "../CreateEncounterDrawer/CreateEncounterDrawer";
 import CreateOpponentDrawer from "../CreateOpponentDrawer/CreateOpponentDrawer";
 import EditEncounterDrawer from "../EditEncounterDrawer/EditEncounterDrawer";
+import EncounterSelection from "../EncounterSelection/EncounterSelection";
+import OpponentsCatalog from "../OpponentsCatalog/OpponentsCatalog";
+import EditOpponentDrawer from "../EditOpponentDrawer/EditOpponentDrawer";
+import EditEncounterOpponentDrawer from "../EditEncounterOpponentDrawer/EditEncounterOpponentDrawer";
 
 type RuntimeOverlayProps = {
   open: boolean;
@@ -37,20 +41,24 @@ const registry: Record<OverlayKind, OverlayComponent<any>> = {
   "effect.create": CreateEffectDrawer,
   "effect.catalog": EffectsCatalog,
   "effect.edit": EditEffectDrawer,
+  "encounter.create": CreateEncounterDrawer,
+  "encounter.edit": EditEncounterDrawer,
+  "encounter.selection": EncounterSelection,
+  "encounter-opponent.edit": EditEncounterOpponentDrawer,
   "immunity.edit": EditImmunityDrawer,
+  "immunity.create": CreateImmunityDrawer,
+  "immunity.catalog": ImmunitiesCatalog,
+  "opponent.create": CreateOpponentDrawer,
+  "opponent.edit": EditOpponentDrawer,
+  "opponent.catalog": OpponentsCatalog,
   "party.create": CreatePartyDrawer,
   "party.edit": PartyEditDrawer,
   "player.create": CreatePlayerDrawer,
   "player.catalog": PlayerCatalog,
   "player.edit": EditPlayerDrawer,
-  "immunity.create": CreateImmunityDrawer,
   "resistance.create": CreateResistanceDrawer,
-  "immunity.catalog": ImmunitiesCatalog,
   "resistance.catalog": ResistancesCatalog,
   "resistance.edit": EditResistanceDrawer,
-  "encounter.create": CreateEncounterDrawer,
-  "encounter.edit": EditEncounterDrawer,
-  "opponent.create": CreateOpponentDrawer,
   settings: SettingsDrawer,
 };
 

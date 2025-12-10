@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const IMAGE_FOLDERS = [
+export const IMAGE_FOLDERS = [
   "players",
   "battlemaps",
   "chapters",

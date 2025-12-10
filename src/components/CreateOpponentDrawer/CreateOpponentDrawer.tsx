@@ -3,7 +3,7 @@ import Drawer from "../Drawer/Drawer";
 import { Button } from "../ui/button";
 import { storeImage } from "@/lib/utils";
 import CreateOpponentForm from "../CreateOpponentForm/CreateOpponentForm";
-import { TypographyH2 } from "../ui/typographyh2";
+import { TypographyH2 } from "../ui/typographyH2";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
 import ResistanceCard from "../ResistanceCard/ResistanceCard";
 import { useState } from "react";
@@ -58,14 +58,28 @@ function CreateOpponentDrawer({
 
       let pictureFilePath: string | null = null;
       if (values.image) {
-        pictureFilePath = await storeImage(values.image, "opponents");
+        if (values.image instanceof File) {
+          pictureFilePath = await storeImage(values.image, "opponents");
+        } else {
+          pictureFilePath = values.image;
+        }
       }
+
+      const selectedImmunities = (values.immunities || [])
+        .map((id) => immunities.data?.find((i) => i.id === id))
+        .filter((i): i is DBImmunity => !!i);
+
+      const selectedResistances = (values.resistances || [])
+        .map((id) => resistances.data?.find((r) => r.id === id))
+        .filter((r): r is DBResistance => !!r);
 
       const input: Omit<Opponent, "id"> = {
         ...values,
         health: values.max_health,
         image: pictureFilePath || "",
         effects: [],
+        immunities: selectedImmunities,
+        resistances: selectedResistances,
       };
 
       const created = await onCreate(input);

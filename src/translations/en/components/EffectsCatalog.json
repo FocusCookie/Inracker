@@ -6,5 +6,6 @@
   "loading": "Loading effects...",
   "noEffects": "No effects available",
   "noEffectsDescription": "There are no effects yet. Create one now!",
-  "createEffect": "Create effect"
+  "createEffect": "Create effect",
+  "add": "Add"
 }

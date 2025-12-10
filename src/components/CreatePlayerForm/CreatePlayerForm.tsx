@@ -15,6 +15,8 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
+import { ImageSelectionDialog } from "../ImageSelectionDialog/ImageSelectionDialog";
+import { Image as ImageIcon } from "lucide-react";
 
 type Props = {
   disabled: boolean;
@@ -34,6 +36,7 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
 }) => {
   const { t } = useTranslation("ComponentCreatePlayerDrawer");
   const [picturePreview, setPicturePreview] = useState<string>("");
+  const [isImageSelectorOpen, setIsImageSelectorOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState<number>(0); // to reset the input type file path after a reset
   const childrenArray = React.Children.toArray(children);
 
@@ -62,6 +65,11 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
       setPicturePreview(URL.createObjectURL(file));
       form.setValue("picture", file);
     }
+  }
+
+  function handleImageSelect(path: string) {
+    setPicturePreview(path);
+    form.setValue("picture", path);
   }
 
   function handleIconSelect(icon: string) {
@@ -161,6 +169,16 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
                     placeholder={t("picturePlaceholder")}
                     accept="image/*"
                   />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setIsImageSelectorOpen(true)}
+                    title="Select existing image"
+                    disabled={disabled}
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                  </Button>
                   {!!picturePreview && (
                     <Button
                       type="button"
@@ -224,6 +242,11 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
 
         {resistancesChild}
       </form>
+      <ImageSelectionDialog
+        open={isImageSelectorOpen}
+        onOpenChange={setIsImageSelectorOpen}
+        onSelect={handleImageSelect}
+      />
     </Form>
   );
 };

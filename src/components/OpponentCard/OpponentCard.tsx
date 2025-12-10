@@ -13,21 +13,33 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   Pencil1Icon,
-  Pencil2Icon,
+  TargetIcon,
 } from "@radix-ui/react-icons";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
 import { DBImmunity } from "@/types/immunitiy";
 import { DBResistance } from "@/types/resistances";
 import EffectCard from "../EffectCard/EffectCard";
-import { DBEffect } from "@/types/effect";
+import { DBEffect, Effect } from "@/types/effect";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Props = {
   opponent: Opponent;
   onRemove: (opponentId: Opponent["id"]) => void;
   onEdit?: (opponent: Opponent) => void;
+  onSelectToken?: (opponentId: Opponent["id"]) => void;
 };
 
-function OpponentCard({ opponent, onRemove, onEdit }: Props) {
+function OpponentCard({ opponent, onRemove, onEdit, onSelectToken }: Props) {
   const { t } = useTranslation("ComponentOpponentCard");
   const [expanded, setExpanded] = useState(false);
   const contentRef = useRef(null);
@@ -53,10 +65,18 @@ function OpponentCard({ opponent, onRemove, onEdit }: Props) {
   return (
     <div className="flex flex-col rounded-md border p-4">
       <div className="flex items-start justify-start gap-4">
-        <Avatar>
-          <AvatarImage src={opponent?.image || undefined} alt={opponent.name} />
-          <AvatarFallback>{opponent.icon}</AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <Avatar>
+            <AvatarImage
+              src={opponent?.image || undefined}
+              alt={opponent.name}
+            />
+            <AvatarFallback>{opponent.icon}</AvatarFallback>
+          </Avatar>
+          <span className="absolute -top-2 -left-2 rounded-full bg-white shadow">
+            {opponent.icon}
+          </span>
+        </div>
         <div className="flex flex-col">
           <h3 className="text-lg font-bold">{opponent.name}</h3>
           <div className="flex items-center gap-2">
@@ -80,14 +100,38 @@ function OpponentCard({ opponent, onRemove, onEdit }: Props) {
             </Button>
           )}
 
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={handleRemoveOpponent}
-          >
-            <TrashIcon />
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button type="button" variant="ghost" size="icon">
+                <TrashIcon />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("delete")}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("confirmDelete")}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleRemoveOpponent}>
+                  {t("delete")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          {onSelectToken && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => onSelectToken(opponent.id)}
+            >
+              <TargetIcon />
+            </Button>
+          )}
 
           <Button
             variant="ghost"
@@ -134,7 +178,7 @@ function OpponentCard({ opponent, onRemove, onEdit }: Props) {
                   }
                 >
                   <div className="flex w-full flex-col gap-4">
-                    {opponent.effects.map((effect: DBEffect) => (
+                    {opponent.effects.map((effect: Effect) => (
                       <EffectCard
                         key={`opponent-${opponent.id}-effect-${effect.id}`}
                         effect={effect}

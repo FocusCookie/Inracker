@@ -1,66 +1,45 @@
 import React, { useState } from "react";
 import defaultDb from "@/lib/database";
 import { Input } from "../ui/input";
-import { DBEffect, Effect } from "@/types/effect";
+import { Effect } from "@/types/effect";
 import { useTranslation } from "react-i18next";
 import SettingEffectCard from "../SettingEffectCard/SettingEffectCard";
 import { useOverlayStore } from "@/stores/useOverlayStore";
-import { useQueryClient } from "@tanstack/react-query";
-import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { TypographyH1 } from "../ui/typographyH1";
 import { toast } from "@/hooks/use-toast";
-import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { MoonIcon } from "lucide-react";
 import { Button } from "../ui/button";
+import {
+  useCreateEffect,
+  useDeleteEffect,
+  useEffects,
+  useUpdateEffect,
+} from "@/hooks/useEffects";
 
 type Props = {
   database: typeof defaultDb;
 };
 
 function SettingsCategoryEffects({ database = defaultDb }: Props) {
-  const queryClient = useQueryClient();
   const { t } = useTranslation("ComponentSettingsCategoryEffects");
   const openOverlay = useOverlayStore((s) => s.open);
   const [search, setSearch] = useState<string>("");
 
-  const effects = useQueryWithToast({
-    queryKey: ["effects"],
-    queryFn: () => database.effects.getAll(),
-  });
-
-  const createEffect = useMutationWithErrorToast({
-    mutationFn: database.effects.create,
-    onSuccess: (effect: Effect) => {
-      queryClient.invalidateQueries({ queryKey: ["effects"] });
-      toast({
-        variant: "default",
-        title: `Created ${effect.icon} ${effect.name}`,
-      });
-    },
-  });
-
-  const editEffect = useMutationWithErrorToast({
-    mutationFn: database.effects.update,
-    onSuccess: (_effect: Effect) => {
-      queryClient.invalidateQueries({ queryKey: ["effects"] });
-    },
-  });
-
-  const deleteEffect = useMutationWithErrorToast({
-    mutationFn: database.effects.delete,
-    onSuccess: (effect: DBEffect) => {
-      queryClient.invalidateQueries({ queryKey: ["effects"] });
-      toast({
-        title: `Deleted ${effect.icon} ${effect.name} successfully`,
-      });
-    },
-  });
+  const effects = useEffects(database);
+  const createEffect = useCreateEffect(database);
+  const editEffect = useUpdateEffect(database);
+  const deleteEffect = useDeleteEffect(database);
 
   function handleOpenCreateEffect() {
     openOverlay("effect.create", {
       onCreate: (effect) => createEffect.mutateAsync(effect),
-      onComplete: (effect) => console.log("Created effect ", effect),
+      onComplete: (effect) => {
+        toast({
+          variant: "default",
+          title: `Created ${effect.icon} ${effect.name}`,
+        });
+      },
     });
   }
 
@@ -76,7 +55,11 @@ function SettingsCategoryEffects({ database = defaultDb }: Props) {
   }
 
   async function handleDeleteEffect(effectId: Effect["id"]) {
-    await deleteEffect.mutateAsync(effectId);
+    const effect = await deleteEffect.mutateAsync(effectId);
+
+    toast({
+      title: `Deleted ${effect.icon} ${effect.name} successfully`,
+    });
   }
 
   return (

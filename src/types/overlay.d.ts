@@ -1,3 +1,4 @@
+import db from "@/lib/database";
 import type { Party } from "@/types/party";
 import type { Player, TCreatePlayer } from "@/types/player";
 import type { DBImmunity, Immunity } from "@/types/immunitiy";
@@ -5,7 +6,7 @@ import type { DBResistance, Resistance } from "@/types/resistances";
 import { DBEffect, Effect } from "./effect";
 import { Chapter, DBChapter } from "./chapters";
 import { Encounter } from "./encounter";
-import { Opponent, TCreateOpponent } from "./opponents";
+import { EncounterOpponent, Opponent, TCreateOpponent } from "./opponents";
 
 export type CancelReason = "cancel" | "dismissed" | "closed";
 
@@ -17,7 +18,10 @@ export type OverlaySuccessMap = {
   "effect.edit": Effect;
   "encounter.create": Encounter;
   "encounter.edit": Encounter;
+  "encounter-opponent.edit": EncounterOpponent;
   "opponent.create": Opponent;
+  "opponent.edit": Opponent;
+  "opponent.catalog": Opponent;
   "party.create": { partyId: Party["id"] };
   "party.edit": { partyId: Party["id"] };
   "player.create": Player;
@@ -43,7 +47,7 @@ export type OverlayMap = {
     chapter: Chapter;
     onEdit: (chapter: Chapter) => Promise<Chapter>;
     onDelete: (chapterId: Chapter["id"]) => Promise<DBChapter>;
-    onComplete: (result: OverlaySuccessMap["chapter.edit"]) => void;
+    onComplete: (result: Chapter) => void;
     onCancel?: (reason: CancelReason) => void;
   };
   "effect.create": {
@@ -58,13 +62,20 @@ export type OverlayMap = {
     onCancel?: (reason: CancelReason) => void;
   };
   "effect.catalog": {
-    onSelect: (effect: DBEffect) => Promise<void>;
+    database?: typeof db;
+    onSelect: (effect: Effect) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
   };
   "encounter.create": {
     onCreate: (encounter: Omit<Encounter, "id">) => Promise<Encounter>;
     onComplete: (result: OverlaySuccessMap["encounter.create"]) => void;
     onCancel?: (reason: CancelReason) => void;
+  };
+  "encounter.selection": {
+    encounterId: Encounter["id"];
+    chapterId: Chapter["id"];
+    onCancel?: (reason: CancelReason) => void;
+    onOpponentSelect?: (opponentId: number) => void;
   };
   "encounter.edit": {
     encounter: Encounter;
@@ -73,9 +84,27 @@ export type OverlayMap = {
     onCancel?: (reason: CancelReason) => void;
     onDelete: (encounter: Encounter["id"]) => Promise<DBEncounter>;
   };
+  "encounter-opponent.edit": {
+    opponent: EncounterOpponent;
+    onEdit: (opponent: EncounterOpponent) => Promise<EncounterOpponent>;
+    onComplete: (result: OverlaySuccessMap["encounter-opponent.edit"]) => void;
+    onDelete: (opponentId: number) => Promise<void>;
+    onCancel?: (reason: CancelReason) => void;
+  };
   "opponent.create": {
     onCreate: (opponent: Omit<Opponent, "id">) => Promise<Opponent>;
     onComplete: (result: OverlaySuccessMap["opponent.create"]) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "opponent.edit": {
+    opponent: Opponent;
+    onEdit: (opponent: Opponent) => Promise<Opponent>;
+    onComplete: (result: OverlaySuccessMap["opponent.edit"]) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "opponent.catalog": {
+    database: typeof db;
+    onSelect: (opponent: Opponent) => void;
     onCancel?: (reason: CancelReason) => void;
   };
   "party.create": {
@@ -91,6 +120,7 @@ export type OverlayMap = {
     onDelete: (partyId: Party["id"]) => Promise<Party["id"]>;
   };
   "player.create": {
+    database?: typeof db;
     onCreate: (player: TCreatePlayer) => Promise<Player>;
     onComplete: (result: OverlaySuccessMap["player.create"]) => void;
     onCancel?: (reason: CancelReason) => void;
@@ -113,6 +143,7 @@ export type OverlayMap = {
     onCancel?: (reason: CancelReason) => void;
   };
   "immunity.catalog": {
+    database?: typeof db;
     onSelect: (immunity: DBImmunity) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
   };
@@ -128,6 +159,7 @@ export type OverlayMap = {
     onCancel?: (reason: CancelReason) => void;
   };
   "resistance.catalog": {
+    database?: typeof db;
     onSelect: (restistance: DBResistance) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
   };

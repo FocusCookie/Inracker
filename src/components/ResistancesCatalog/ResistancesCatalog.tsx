@@ -8,12 +8,15 @@ import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { MoonIcon } from "@radix-ui/react-icons";
 import { useOverlayStore } from "@/stores/useOverlayStore";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
-import db from "@/lib/database";
 import type { OverlayMap } from "@/types/overlay";
+import { useCreateResistance } from "@/hooks/useResistances";
+import { toast } from "@/hooks/use-toast";
+import database from "@/lib/database";
 
 type OverlayProps = OverlayMap["resistance.catalog"];
 
 type RuntimeProps = {
+  database: typeof database;
   open: boolean;
   onOpenChange: (state: boolean) => void;
   onExitComplete: () => void;
@@ -21,6 +24,7 @@ type RuntimeProps = {
 type Props = OverlayProps & RuntimeProps;
 
 export default function ResistancesCatalog({
+  database,
   open,
   onSelect,
   onCancel,
@@ -31,19 +35,24 @@ export default function ResistancesCatalog({
   const { t } = useTranslation("ComponentResistanceCatalog");
   const openOverlay = useOverlayStore((s) => s.open);
 
+  const createResistance = useCreateResistance(database);
+
   const resistances = useQueryWithToast({
     queryKey: ["resistances"],
-    queryFn: () => db.resistances.getAll(),
+    queryFn: () => database.resistances.getAll(),
   });
 
   function handleCreateResistance() {
     openOverlay("resistance.create", {
       onCreate: async (resistance) => {
-        const created = await db.resistances.create(resistance);
+        const created = await createResistance.mutateAsync(resistance);
         return created;
       },
-      onComplete: () => {
+      onComplete: (resistance) => {
         resistances.refetch();
+        toast({
+          title: `Created ${resistance.icon} ${resistance.name}`,
+        });
       },
       onCancel: (reason) => {
         console.log("Resistance creation cancelled:", reason);

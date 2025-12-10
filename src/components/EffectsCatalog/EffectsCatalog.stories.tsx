@@ -3,14 +3,9 @@ import { fn } from "@storybook/test";
 
 import EffectsCatalog from "./EffectsCatalog";
 
-const meta = {
-  title: "Components/EffectsCatalog",
-  component: EffectsCatalog,
-  args: {
-    open: true,
-    onOpenChange: fn(),
-    onAdd: fn(),
-    effects: [
+const mockDatabase = {
+  effects: {
+    getAll: fn(() => [
       {
         description: "descriptive text",
         duration: 4,
@@ -31,7 +26,23 @@ const meta = {
         type: "negative",
         value: 1,
       },
-    ],
+    ]),
+    create: fn(),
+  },
+};
+
+const meta = {
+  title: "Components/EffectsCatalog",
+  component: EffectsCatalog,
+  args: {
+    // @ts-ignore
+    database: mockDatabase,
+    open: true,
+    onOpenChange: fn(),
+    onAdd: fn(),
+    onExitComplete: fn(),
+    onCancel: fn(),
+    onSelect: fn(),
   },
   decorators: [
     (Story) => (
@@ -44,5 +55,5 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
-  // args: {},
+  args: {},
 };

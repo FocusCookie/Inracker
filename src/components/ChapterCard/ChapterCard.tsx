@@ -71,6 +71,11 @@ function ChapterCard({ chapter, onEdit, onPlay, animationDelay }: Props) {
 
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="flex gap-2 capitalize">
+                {chapter.completedExperience ?? 0} /{" "}
+                {chapter.totalExperience ?? 0} XP
+              </Badge>
+
+              <Badge variant="outline" className="flex gap-2 capitalize">
                 {chapterStateIcon} {chapter.state}
               </Badge>
 

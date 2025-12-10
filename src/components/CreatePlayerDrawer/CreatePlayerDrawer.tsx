@@ -2,7 +2,6 @@ import { storeImage } from "@/lib/utils";
 import { TCreatePlayer } from "@/types/player";
 import CreatePlayerForm from "../CreatePlayerForm/CreatePlayerForm";
 import Drawer from "../Drawer/Drawer";
-import { TypographyH2 } from "../ui/typographyh2";
 import { DBImmunity } from "@/types/immunitiy";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
 import { DBResistance } from "@/types/resistances";
@@ -11,13 +10,19 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useOverlayStore } from "@/stores/useOverlayStore";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
-import { useCreatePlayer } from "@/hooks/useCreatePlayer";
-import db from "@/lib/database";
+import { useCreatePlayer as useCreatePlayerForm } from "@/hooks/useCreatePlayer";
+import database from "@/lib/database";
 import type { CancelReason, OverlayMap } from "@/types/overlay";
 import { Button } from "../ui/button";
+import { TypographyH2 } from "../ui/typographyH2";
+import { useCreateImmunity } from "@/hooks/useImmunities";
+import { useCreateResistance } from "@/hooks/useResistances";
+import { toast } from "@/hooks/use-toast";
+
 type OverlayProps = OverlayMap["player.create"];
 
 type RuntimeProps = {
+  database: typeof database;
   open: boolean;
   onOpenChange: (state: boolean) => void;
   onExitComplete: () => void;
@@ -25,6 +30,7 @@ type RuntimeProps = {
 type Props = OverlayProps & RuntimeProps;
 
 export default function CreatePlayerDrawer({
+  database,
   open,
   onCreate,
   onComplete,
@@ -38,16 +44,19 @@ export default function CreatePlayerDrawer({
   const [closingReason, setClosingReason] = useState<
     null | "success" | CancelReason
   >(null);
-  const form = useCreatePlayer();
+  const form = useCreatePlayerForm();
+
+  const createImmunity = useCreateImmunity(database);
+  const createResistance = useCreateResistance(database);
 
   const immunities = useQueryWithToast({
     queryKey: ["immunities"],
-    queryFn: () => db.immunitites.getAll(),
+    queryFn: () => database.immunitites.getAll(),
   });
 
   const resistances = useQueryWithToast({
     queryKey: ["resistances"],
-    queryFn: () => db.resistances.getAll(),
+    queryFn: () => database.resistances.getAll(),
   });
 
   async function handleSubmit(values: any) {
@@ -56,7 +65,11 @@ export default function CreatePlayerDrawer({
 
       let pictureFilePath: string | null = null;
       if (values.picture) {
-        pictureFilePath = await storeImage(values.picture, "players");
+        if (values.picture instanceof File) {
+          pictureFilePath = await storeImage(values.picture, "players");
+        } else {
+          pictureFilePath = values.picture;
+        }
       }
 
       const input: TCreatePlayer = {
@@ -106,7 +119,7 @@ export default function CreatePlayerDrawer({
   function handleCreateImmunity() {
     openOverlay("immunity.create", {
       onCreate: async (immunity) => {
-        const createdImmunity = await db.immunitites.create(immunity);
+        const createdImmunity = await createImmunity.mutateAsync(immunity);
 
         return createdImmunity;
       },
@@ -115,6 +128,9 @@ export default function CreatePlayerDrawer({
         form.setValue("immunities", [...currentImmunities, immunity.id]);
 
         immunities.refetch();
+        toast({
+          title: `Created ${immunity.icon} ${immunity.name}`,
+        });
       },
       onCancel: (reason) => {
         console.log("Immunity creation cancelled:", reason);
@@ -125,7 +141,7 @@ export default function CreatePlayerDrawer({
   function handleCreateResistance() {
     openOverlay("resistance.create", {
       onCreate: async (resistance) => {
-        const created = await db.resistances.create(resistance);
+        const created = await createResistance.mutateAsync(resistance);
 
         return created;
       },
@@ -135,6 +151,9 @@ export default function CreatePlayerDrawer({
 
         console.log(form.getValues("resistances"));
         resistances.refetch();
+        toast({
+          title: `Created ${resistance.icon} ${resistance.name}`,
+        });
       },
       onCancel: (reason) => {
         console.log("Resistance creation cancelled:", reason);
@@ -144,6 +163,7 @@ export default function CreatePlayerDrawer({
 
   function handleOpenImmunityCatalog() {
     openOverlay("immunity.catalog", {
+      database,
       onSelect: async (immunity) => {
         const currentImmunities = form.getValues("immunities");
         form.setValue("immunities", [...currentImmunities, immunity.id]);
@@ -156,6 +176,7 @@ export default function CreatePlayerDrawer({
 
   function handleOpenResistanceCatalog() {
     openOverlay("resistance.catalog", {
+      database,
       onSelect: async (resistances) => {
         const currentResistances = form.getValues("resistances");
         form.setValue("resistances", [...currentResistances, resistances.id]);

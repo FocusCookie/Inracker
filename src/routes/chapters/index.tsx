@@ -1,9 +1,10 @@
-import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
-import db from "@/lib/database";
+import { useChaptersQuery } from "@/hooks/useChapters";
+import { usePartyQuery } from "@/hooks/useParties";
 import ChapterSelection from "@/pages/ChapterSelection/ChapterSelection";
 import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useEffect } from "react";
+import database from "@/lib/database";
 
 type ChapterSearch = {
   partyId: number | null;
@@ -32,25 +33,18 @@ function RouteComponent() {
     select: (search) => search.partyId,
   });
 
-  const chapters = useQueryWithToast({
-    queryKey: ["chapters"],
-    queryFn: () => db.chapters.getChaptersByPartyId(partyId!),
-    enabled: !!partyId,
-  });
-
-  const party = useQueryWithToast({
-    queryKey: ["party"],
-    queryFn: () => db.parties.getDetailedById(partyId!),
-    enabled: !!partyId,
-  });
+  const chapters = useChaptersQuery(partyId, database);
+  const party = usePartyQuery(partyId, database);
 
   return !!party.data ? (
     <ChapterSelection
+      database={database}
       isLoading={chapters.isLoading || party.isLoading}
       chapters={chapters.data || []}
       party={party.data}
     />
   ) : (
+    //TODO: create nice 404 page for this
     <span>No Party ID set</span>
   );
 }

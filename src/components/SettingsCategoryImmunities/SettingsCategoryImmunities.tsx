@@ -5,58 +5,41 @@ import { DBImmunity } from "@/types/immunitiy";
 import { useTranslation } from "react-i18next";
 import SettingImmunityCard from "../SettingImmunityCard/SettingImmunityCard";
 import { useOverlayStore } from "@/stores/useOverlayStore";
-import { useQueryClient } from "@tanstack/react-query";
-import { useMutationWithErrorToast } from "@/hooks/useMutationWithErrorToast";
 import { TypographyH1 } from "../ui/typographyH1";
 import { toast } from "@/hooks/use-toast";
-import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { MoonIcon } from "lucide-react";
 import { Button } from "../ui/button";
+import {
+  useCreateImmunity,
+  useDeleteImmunity,
+  useImmunities,
+  useUpdateImmunity,
+} from "@/hooks/useImmunities";
 
 type Props = {
   database?: typeof defaultDb;
 };
 
 function SettingsCategoryImmunities({ database = defaultDb }: Props) {
-  const queryClient = useQueryClient();
   const { t } = useTranslation("ComponentSettingsCategoryImmunities");
   const openOverlay = useOverlayStore((s) => s.open);
   const [search, setSearch] = useState<string>("");
 
-  const immunities = useQueryWithToast({
-    queryKey: ["immunities"],
-    queryFn: () => database.immunitites.getAll(),
-  });
-
-  const createImmunity = useMutationWithErrorToast({
-    mutationFn: database.immunitites.create,
-    onSuccess: (_immunity: DBImmunity) => {
-      queryClient.invalidateQueries({ queryKey: ["immunities"] });
-    },
-  });
-
-  const editImmunity = useMutationWithErrorToast({
-    mutationFn: database.immunitites.update,
-    onSuccess: (_immunity: DBImmunity) => {
-      queryClient.invalidateQueries({ queryKey: ["immunities"] });
-    },
-  });
-
-  const deleteImmunity = useMutationWithErrorToast({
-    mutationFn: database.immunitites.delete,
-    onSuccess: (immunity: DBImmunity) => {
-      queryClient.invalidateQueries({ queryKey: ["immunities"] });
-      toast({
-        title: `Deleted ${immunity.icon} ${immunity.name} successfully`,
-      });
-    },
-  });
+  const immunities = useImmunities(database);
+  const createImmunity = useCreateImmunity(database);
+  const editImmunity = useUpdateImmunity(database);
+  const deleteImmunity = useDeleteImmunity(database);
 
   function handleOpenCreateImmunity() {
     openOverlay("immunity.create", {
       onCreate: (immunity) => createImmunity.mutateAsync(immunity),
-      onComplete: (immunity) => console.log("crated immunity ", immunity),
+      onComplete: (immunity) => {
+        toast({
+          variant: "default",
+          title: `Created ${immunity.icon} ${immunity.name}`,
+        });
+      },
     });
   }
 
@@ -74,7 +57,11 @@ function SettingsCategoryImmunities({ database = defaultDb }: Props) {
   }
 
   async function handleDeleteImmunity(immunityId: DBImmunity["id"]) {
-    await deleteImmunity.mutateAsync(immunityId);
+    const immunity = await deleteImmunity.mutateAsync(immunityId);
+
+    toast({
+      title: `Deleted ${immunity.icon} ${immunity.name} successfully`,
+    });
   }
 
   return (

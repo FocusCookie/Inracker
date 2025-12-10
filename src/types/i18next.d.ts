@@ -1,4 +1,11 @@
 import "i18next";
+import ComponentEditPlayerDrawer from "@/translations/en/component/EditPlayerDrawer.json";
+import ComponentSettingsOpponentCard from "@/translations/en/component/SettingsOpponentCard.json";
+import ComponentEditOpponentDrawer from "@/translations/en/component/EditOpponentDrawer.json";
+import ComponentEncounterOpponentEditDrawer from "@/translations/en/component/EncounterOpponentEditDrawer.json";
+import ComponentEncounterSelection from "@/translations/en/component/EncounterSelection.json";
+import ComponentCanvas from "@/translations/en/component/Canvas.json";
+import PagePlay from "@/translations/en/page/Play.json";
 import ComponentEditEncounterDrawer from "@/translations/en/component/EditEncounterDrawer.json";
 import ComponentSettingsCategoryOpponents from "@/translations/en/component/SettingsCategoryOpponents.json";
 import ComponentSettingsCategoryResistances from "@/translations/en/component/SettingsCategoryResistances.json";
@@ -6,6 +13,7 @@ import ComponentSettingsCategoryImmunities from "@/translations/en/component/Set
 import ComponentSettingsCategoryEffects from "@/translations/en/component/SettingsCategoryEffects.json";
 import ComponentSettingsCategoryPlayers from "@/translations/en/component/SettingsCategoryPlayers.json";
 import ComponentSettingsCategoryGeneral from "@/translations/en/component/SettingsCategoryGeneral.json";
+import ComponentSettingsCategoryImages from "@/translations/en/components/SettingsCategoryImages.json";
 import ComponentSettingsSidebar from "@/translations/en/component/SettingsSidebar.json";
 import ComponentCatalog from "@/translations/en/component/Catalog.json";
 import ComponentEditResistanceDrawer from "@/translations/en/component/EditResistanceDrawer.json";
@@ -51,6 +59,12 @@ declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
       // hygen-components - DO NOT DELETE THIS LINE
+      ComponentEditPlayerDrawer: typeof ComponentEditPlayerDrawer;
+      ComponentSettingsOpponentCard: typeof ComponentSettingsOpponentCard;
+      ComponentEditOpponentDrawer: typeof ComponentEditOpponentDrawer;
+      ComponentEncounterOpponentEditDrawer: typeof ComponentEncounterOpponentEditDrawer;
+      ComponentEncounterSelection: typeof ComponentEncounterSelection;
+      ComponentCanvas: typeof ComponentCanvas;
       ComponentEditEncounterDrawer: typeof ComponentEditEncounterDrawer;
       ComponentSettingsCategoryOpponents: typeof ComponentSettingsCategoryOpponents;
       ComponentSettingsCategoryResistances: typeof ComponentSettingsCategoryResistances;
@@ -58,6 +72,7 @@ declare module "i18next" {
       ComponentSettingsCategoryEffects: typeof ComponentSettingsCategoryEffects;
       ComponentSettingsCategoryPlayers: typeof ComponentSettingsCategoryPlayers;
       ComponentSettingsCategoryGeneral: typeof ComponentSettingsCategoryGeneral;
+      ComponentSettingsCategoryImages: typeof ComponentSettingsCategoryImages;
       ComponentSettingsSidebar: typeof ComponentSettingsSidebar;
       ComponentCatalog: typeof ComponentCatalog;
       ComponentEditResistanceDrawer: typeof ComponentEditResistanceDrawer;
@@ -98,6 +113,7 @@ declare module "i18next" {
       HookUseMutationWithErrorTaost: typeof HookUseMutationWithErrorTaost;
 
       // hygen-pages - DO NOT DELETE THIS LINE
+      PagePlay: typeof PagePlay;
       PageWelcome: typeof PageWelcome;
       PagePartySelection: typeof PagePartySelection;
       PageChapterSelection: typeof PageChapterSelection;

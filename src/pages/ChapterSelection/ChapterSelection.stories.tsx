@@ -4,6 +4,11 @@ import ChapterSelection from "./ChapterSelection";
 import { fn } from "@storybook/test";
 
 const mockDatabase = {
+  chapters: {
+    create: fn,
+    update: fn,
+    edit: fn,
+  },
   players: {
     create: fn,
     update: fn,

@@ -1,6 +1,7 @@
 import { Effect } from "@/types/effect";
 import { DBImmunity } from "@/types/immunitiy";
 import { Player, TCreatePlayer } from "@/types/player";
+import { DBResistance } from "@/types/resistances";
 
 const players: Player[] = [
   {
@@ -75,8 +76,27 @@ const immunities: DBImmunity[] = [
   },
 ];
 
+const resistances: DBResistance[] = [
+  {
+    id: 1,
+    name: "Fire Resistance",
+    icon: "🔥",
+    description: "Resistant to fire damage.",
+  },
+  {
+    id: 2,
+    name: "Frost Resistance",
+    icon: "❄️",
+    description: "Resistant to frost damage.",
+  },
+];
+
 export const db = {
   players: {
+    getAll: async (): Promise<Player[]> => {
+      console.log("STORYBOOK MOCK: getAll players");
+      return Promise.resolve(players);
+    },
     getAllDetailed: async (): Promise<Player[]> => {
       console.log("STORYBOOK MOCK: getAllDetailed players");
       return Promise.resolve(players);
@@ -101,8 +121,17 @@ export const db = {
       }
       return Promise.resolve(player);
     },
-    deletePlayerById: async (playerId: number): Promise<Player> => {
+    delete: async (playerId: number): Promise<Player> => {
       console.log("STORYBOOK MOCK: delete player", playerId);
+      const index = players.findIndex((p) => p.id === playerId);
+      const deletedPlayer = players[index];
+      if (index !== -1) {
+        players.splice(index, 1);
+      }
+      return Promise.resolve(deletedPlayer);
+    },
+    deletePlayerById: async (playerId: number): Promise<Player> => {
+      console.log("STORYBOOK MOCK: delete player (deletePlayerById)", playerId);
       const index = players.findIndex((p) => p.id === playerId);
       const deletedPlayer = players[index];
       if (index !== -1) {
@@ -120,7 +149,7 @@ export const db = {
       console.log("STORYBOOK MOCK: create effect", effect);
       const newEffect: Effect = {
         ...effect,
-        id: Math.max(...effects.map(e => e.id)) + 1,
+        id: Math.max(...effects.map((e) => e.id)) + 1,
       };
       effects.push(newEffect);
       return Promise.resolve(newEffect);
@@ -152,7 +181,7 @@ export const db = {
       console.log("STORYBOOK MOCK: create immunity", immunity);
       const newImmunity: DBImmunity = {
         ...immunity,
-        id: Math.max(...immunities.map(i => i.id)) + 1,
+        id: Math.max(...immunities.map((i) => i.id)) + 1,
       };
       immunities.push(newImmunity);
       return Promise.resolve(newImmunity);
@@ -173,6 +202,78 @@ export const db = {
         immunities.splice(index, 1);
       }
       return Promise.resolve(deletedImmunity);
+    },
+  },
+  resistances: {
+    getAll: async (): Promise<DBResistance[]> => {
+      console.log("STORYBOOK MOCK: getAll resistances");
+      return Promise.resolve(resistances);
+    },
+    create: async (
+      resistance: Omit<DBResistance, "id">,
+    ): Promise<DBResistance> => {
+      console.log("STORYBOOK MOCK: create resistance", resistance);
+      const newResistance: DBResistance = {
+        ...resistance,
+        id: Math.max(...resistances.map((r) => r.id)) + 1,
+      };
+      resistances.push(newResistance);
+      return Promise.resolve(newResistance);
+    },
+    update: async (resistance: DBResistance): Promise<DBResistance> => {
+      console.log("STORYBOOK MOCK: update resistance", resistance);
+      const index = resistances.findIndex((r) => r.id === resistance.id);
+      if (index !== -1) {
+        resistances[index] = resistance;
+      }
+      return Promise.resolve(resistance);
+    },
+    delete: async (resistanceId: number): Promise<DBResistance> => {
+      console.log("STORYBOOK MOCK: delete resistance", resistanceId);
+      const index = resistances.findIndex((r) => r.id === resistanceId);
+      const deletedResistance = resistances[index];
+      if (index !== -1) {
+        resistances.splice(index, 1);
+      }
+      return Promise.resolve(deletedResistance);
+    },
+  },
+  tokens: {
+    createOpponentsTokensByEncounter: async () => {
+      console.log("STORYBOOK MOCK: createOpponentsTokensByEncounter");
+      return Promise.resolve([]);
+    },
+    update: async (token: any) => {
+      console.log("STORYBOOK MOCK: update token", token);
+      return Promise.resolve(token);
+    },
+  },
+  encounters: {
+    create: async (encounter: any) => {
+      console.log("STORYBOOK MOCK: create encounter", encounter);
+      return Promise.resolve({ ...encounter, id: Math.random() });
+    },
+    update: async (encounter: any) => {
+      console.log("STORYBOOK MOCK: update encounter", encounter);
+      return Promise.resolve(encounter);
+    },
+    delete: async (id: number) => {
+      console.log("STORYBOOK MOCK: delete encounter", id);
+      return Promise.resolve({ id } as any);
+    },
+  },
+  chapters: {
+    addEncounter: async () => {
+      console.log("STORYBOOK MOCK: addEncounter");
+      return Promise.resolve({} as any);
+    },
+    updateProperty: async () => {
+      console.log("STORYBOOK MOCK: updateProperty");
+      return Promise.resolve({} as any);
+    },
+    delete: async (id: number) => {
+      console.log("STORYBOOK MOCK: delete chapter", id);
+      return Promise.resolve({ id } as any);
     },
   },
 };

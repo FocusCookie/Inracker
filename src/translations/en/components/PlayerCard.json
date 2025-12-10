@@ -1,15 +1,7 @@
 {
   "addImmunity": "Add Immunity",
-  "addResistance": "Resistance",
+  "addResistance": "Add Resistance",
   "removeFromGroup": "Remove from Group",
   "editPlayer": "Edit Player",
-  "overview": "Overview",
-  "details": "Details",
-  "remove": "Remove",
-  "addEffect": "Add Effect",
-  "level": "Level",
-  "immunitites": "Immunities",
-  "resistances": "Resistances",
-  "positiveEffects": "Positive Effects",
-  "negativeEffects": "Negative Effects"
+  "selectToken": "Select Token"
 }

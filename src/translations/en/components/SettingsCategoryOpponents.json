@@ -1,3 +1,8 @@
 {
-    
+  "opponents": "Opponents",
+  "createOpponent": "Create Opponent",
+  "noOpponents": "No opponents",
+  "noOpponentsDescription": "You have not created any opponent yet. Create one to get started.",
+  "searchPlaceholder": "Search for opponents..."
 }
+

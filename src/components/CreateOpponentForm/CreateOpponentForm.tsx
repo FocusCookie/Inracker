@@ -1,5 +1,6 @@
 import { TrashIcon } from "@radix-ui/react-icons";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import IconPicker from "../IconPicker/IconPicker";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
@@ -14,8 +15,8 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
-import LabelInput from "../LabelInput/LabelInput";
-import { useTranslation } from "react-i18next";
+import { ImageSelectionDialog } from "../ImageSelectionDialog/ImageSelectionDialog";
+import { Image as ImageIcon } from "lucide-react";
 
 type Props = {
   disabled: boolean;
@@ -33,10 +34,18 @@ const CreateOpponentForm: CreateOpponentDrawerCompound = ({
   form,
   children,
 }) => {
-  const { t } = useTranslation("ComponentCreateOpponentForm");
+  const { t } = useTranslation("ComponentCreateOpponentDrawer");
   const [picturePreview, setPicturePreview] = useState<string>("");
+  const [isImageSelectorOpen, setIsImageSelectorOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState<number>(0); // to reset the input type file path after a reset
   const childrenArray = React.Children.toArray(children);
+
+  React.useEffect(() => {
+    const image = form.getValues("image");
+    if (typeof image === "string" && image) {
+      setPicturePreview(image);
+    }
+  }, [form]);
 
   const immunitiesChild = childrenArray.find(
     (child) =>
@@ -66,147 +75,152 @@ const CreateOpponentForm: CreateOpponentDrawerCompound = ({
     }
   }
 
+  function handleImageSelect(path: string) {
+    setPicturePreview(path);
+    form.setValue("image", path);
+  }
+
   function handleIconSelect(icon: string) {
     form.setValue("icon", icon);
   }
 
   return (
-    <div className="scrollable-y overflow-y-scroll pb-2">
-      <Form {...form}>
-        <form className="flex flex-col gap-6">
-          <div className="flex flex-col gap-4">
-            <div className="flex w-full items-start gap-2">
-              <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
-                <FormLabel>{t("icon")}</FormLabel>
-                <IconPicker
-                  initialIcon={form.getValues("icon")}
-                  disabled={disabled}
-                  onIconClick={handleIconSelect}
-                />
-                <FormMessage />
-              </div>
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }: { field: any }) => (
-                  <FormItem className="w-full px-0.5">
-                    <FormLabel>{t("name")}</FormLabel>
-                    <FormControl>
-                      <Input disabled={disabled} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+    <Form {...form}>
+      <form className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-start gap-2">
+            <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
+              <FormLabel>{t("icon")}</FormLabel>
+              <IconPicker
+                initialIcon={form.getValues("icon")}
+                disabled={disabled}
+                onIconClick={handleIconSelect}
               />
-            </div>
-            <div className="flex items-start gap-2">
-              <FormField
-                control={form.control}
-                name="level"
-                render={({ field }: { field: any }) => (
-                  <FormItem className="w-1/2 px-0.5">
-                    <FormLabel>{t("level")}</FormLabel>
-                    <FormControl>
-                      <Input type="number" disabled={disabled} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="max_health"
-                render={({ field }: { field: any }) => (
-                  <FormItem className="w-1/2 px-0.5">
-                    <FormLabel>{t("health")}</FormLabel>
-                    <FormControl>
-                      <Input type="number" disabled={disabled} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <FormField
-              control={form.control}
-              name="labels"
-              render={() => (
-                <FormItem className="mb-1.5 w-full px-0.5">
-                  <FormControl>
-                    <LabelInput
-                      control={form.control}
-                      name="labels"
-                      label={t("labels")}
-                      disabled={disabled}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex items-start gap-2 pl-1">
-              <Avatar className="mt-5">
-                <AvatarImage
-                  src={picturePreview}
-                  alt={t("profilePictureAlt")}
-                />
-                <AvatarFallback>
-                  {form.watch("name").slice(0, 2)}
-                </AvatarFallback>
-              </Avatar>
-              <FormItem className="mb-1.5 w-full px-0.5">
-                <FormLabel>{t("picture")}</FormLabel>
-                <FormControl>
-                  <div className="flex w-full gap-2">
-                    <Input
-                      key={`refresh-key-${refreshKey}`}
-                      className="grow"
-                      onChange={handleFileChange}
-                      type="file"
-                      disabled={disabled}
-                      placeholder={t("picturePlaceholder")}
-                      accept="image/*"
-                    />
-                    {!!picturePreview && (
-                      <Button
-                        type="button"
-                        onClick={handleResetPicture}
-                        variant="destructive"
-                        size="icon"
-                      >
-                        <TrashIcon />
-                      </Button>
-                    )}
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+              <FormMessage />
             </div>
 
             <FormField
               control={form.control}
-              name="details"
+              name="name"
               render={({ field }: { field: any }) => (
-                <FormItem className="flex flex-col gap-1 px-0.5">
-                  <FormLabel>{t("details")}</FormLabel>
-                  <FormDescription>{t("detailsDescription")}</FormDescription>
-                  <FormControl className="rounded-md border">
-                    <Textarea
-                      readOnly={disabled}
-                      {...field}
-                      placeholder={t("detailsPlaceholder")}
-                    />
+                <FormItem className="w-full px-0.5">
+                  <FormLabel>{t("name")}</FormLabel>
+                  <FormControl>
+                    <Input disabled={disabled} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-          {immunitiesChild}
-          {resistancesChild}
-        </form>
-      </Form>
-    </div>
+
+          <div className="flex items-start gap-2 pl-1">
+            <FormField
+              control={form.control}
+              name="level"
+              render={({ field }: { field: any }) => (
+                <FormItem className="w-full px-0.5">
+                  <FormLabel>{t("level")}</FormLabel>
+                  <FormControl>
+                    <Input type="number" disabled={disabled} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="max_health"
+              render={({ field }: { field: any }) => (
+                <FormItem className="w-full px-0.5">
+                  <FormLabel>{t("health")}</FormLabel>
+                  <FormControl>
+                    <Input type="number" disabled={disabled} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="flex items-start gap-2 pl-1">
+            <Avatar className="mt-5">
+              <AvatarImage src={picturePreview} alt={t("profilePictureAlt")} />
+              <AvatarFallback>{form.watch("name").slice(0, 2)}</AvatarFallback>
+            </Avatar>
+
+            <FormItem className="mb-1.5 w-full px-0.5">
+              <FormLabel>{t("opponentPicture")}</FormLabel>
+              <FormControl>
+                <div className="flex w-full gap-2">
+                  <Input
+                    key={`refresh-key-${refreshKey}`}
+                    className="grow"
+                    onChange={handleFileChange}
+                    type="file"
+                    disabled={disabled}
+                    placeholder={t("picturePlaceholder")}
+                    accept="image/*"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setIsImageSelectorOpen(true)}
+                    title="Select existing image"
+                    disabled={disabled}
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                  </Button>
+                  {!!picturePreview && (
+                    <Button
+                      type="button"
+                      onClick={handleResetPicture}
+                      variant="destructive"
+                      size="icon"
+                    >
+                      <TrashIcon />
+                    </Button>
+                  )}
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </div>
+
+          <FormField
+            control={form.control}
+            name="details"
+            render={({ field }: { field: any }) => (
+              <FormItem className="flex flex-col gap-1 px-0.5">
+                <FormLabel>{t("details")}</FormLabel>
+                <FormDescription>{t("detailsDescription")}</FormDescription>
+
+                <FormControl className="rounded-md border">
+                  <Textarea
+                    readOnly={disabled}
+                    {...field}
+                    placeholder="Enter some description"
+                  />
+                </FormControl>
+
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {immunitiesChild}
+
+        {resistancesChild}
+      </form>
+      <ImageSelectionDialog
+        open={isImageSelectorOpen}
+        onOpenChange={setIsImageSelectorOpen}
+        onSelect={handleImageSelect}
+      />
+    </Form>
   );
 };
 

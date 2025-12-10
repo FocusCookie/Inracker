@@ -1,6 +1,6 @@
 {
   "title": "Begegnung bearbeiten",
-  "titleDescription": "Nehmen Sie hier Änderungen an Ihrer Begegnung vor. Klicken Sie auf ‚Speichern‘, wenn Sie fertig sind.",
+  "titleDescription": "Nimm hier Änderungen an deiner Begegnung vor. Klicke auf ‚Speichern‘, wenn du fertig bist.",
   "name": "Name",
   "namePlaceholder": "Name der Begegnung",
   "nameValidation": "Der Name muss mindestens 2 Zeichen lang sein.",
@@ -9,14 +9,16 @@
   "icon": "Symbol",
   "color": "Farbe",
   "status": "Status",
-  "statusPlaceholder": "Wählen Sie einen Status",
+  "statusPlaceholder": "Wähle einen Status",
   "draft": "Entwurf",
   "ongoing": "Laufend",
   "completed": "Abgeschlossen",
+  "completionState": "Status",
+  "open": "Offen",
   "save": "Änderungen speichern",
   "delete": "Löschen",
   "cancel": "Abbrechen",
-  "areYouSure": "Sind Sie sich absolut sicher?",
+  "areYouSure": "Bist du dir absolut sicher?",
   "deleteNote": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird die Begegnung dauerhaft gelöscht.",
   "yesDelete": "Ja, Begegnung löschen",
   "white": "Weiß",
@@ -52,6 +54,7 @@
   "addDifficulty": "Schwierigkeit hinzufügen",
   "opponents": "Gegner",
   "createOpponent": "Gegner erstellen",
-  "catalog": "Katalog"
+  "catalog": "Katalog",
+  "encounterOpponents": "Begegnungsgegner",
+  "encounterOpponentsDescription": "Gegner, die du aus dem Katalog auswählst, werden als eigene Begegnungsgegner dupliziert. So kannst du die Katalogvorlagen verwenden und bei Bedarf die Details jedes Gegners anpassen."
 }
-

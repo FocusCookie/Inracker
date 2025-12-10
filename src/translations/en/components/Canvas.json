@@ -1,0 +1,14 @@
+{
+  "edit": "Edit",
+  "select": "Select",
+  "hide": "Hide",
+  "show": "Show",
+  "playerTokens": "Player Tokens",
+  "opponentTokens": "Opponent Tokens",
+  "zoomOut": "Zoom Out",
+  "zoomIn": "Zoom In",
+  "drawEncounter": "Draw Encounter",
+  "resetZoom": "Reset Zoom",
+  "deselect": "Stop Resizing",
+  "resize": "Resize"
+}

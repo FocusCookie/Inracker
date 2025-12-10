@@ -1,7 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import PartySelection from "./PartySelection";
 import { fn } from "@storybook/test";
-import CreatePartyDrawer from "@/components/CreatePartyDrawer/CreatePartyDrawer";
+
+const mockDatabase = {
+  parties: {
+    create: fn(),
+    update: fn(),
+    delete: fn(),
+    getById: fn(),
+    addPlayer: fn(),
+    removePlayer: fn(),
+  },
+};
 
 const meta = {
   title: "Pages/PartySelection",
@@ -15,17 +25,19 @@ const meta = {
     ),
   ],
   args: {
-    parties: [],
-    renderCreatePartyDrawer: (
-      <CreatePartyDrawer
-        isCreating={false}
-        onCreate={fn()}
-        onOpenChange={fn()}
-        open
-      />
-    ),
-    loading: false,
-    onEditParty: fn(),
+    // @ts-ignore
+    database: mockDatabase,
+    parties: [
+      {
+        name: "test adventure",
+        id: 1,
+        description: "lorem ipsum magic",
+        icon: "🥳",
+        players: [],
+      },
+    ],
+    isLoading: false,
+    onPartySelect: fn(),
   },
 } satisfies Meta<typeof PartySelection>;
 

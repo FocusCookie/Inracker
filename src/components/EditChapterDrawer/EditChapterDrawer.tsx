@@ -36,6 +36,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
+import { ImageSelectionDialog } from "../ImageSelectionDialog/ImageSelectionDialog";
+import { Image as ImageIcon } from "lucide-react";
 
 import { CancelReason, OverlayMap } from "@/types/overlay";
 
@@ -61,6 +63,7 @@ function EditChapterDrawer({
 }: Props) {
   const { t } = useTranslation("ComponentEditChapterDrawer");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isImageSelectorOpen, setIsImageSelectorOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState<number>(0); // to reset the input type file path after a reset
   const [picturePreview, setPicturePreview] = useState<string>(
     chapter?.battlemap || "",
@@ -112,7 +115,11 @@ function EditChapterDrawer({
       let battlemapFilePath: string | null = null;
 
       if (!!battlemap) {
-        battlemapFilePath = await storeImage(battlemap, "battlemaps");
+        if (battlemap instanceof File) {
+          battlemapFilePath = await storeImage(battlemap, "battlemaps");
+        } else {
+          battlemapFilePath = battlemap;
+        }
       }
 
       const updatedChapter = await onEdit({
@@ -170,6 +177,11 @@ function EditChapterDrawer({
     }
   }
 
+  function handleImageSelect(path: string) {
+    setPicturePreview(path);
+    form.setValue("battlemap", path);
+  }
+
   function handleIconSelect(icon: string) {
     form.setValue("icon", icon);
   }
@@ -178,7 +190,7 @@ function EditChapterDrawer({
     try {
       setIsLoading(true);
       await onDelete(chapter.id);
-      onComplete({ chapterId: chapter.id });
+      onComplete(chapter);
       setClosingReason("success");
       onOpenChange(false);
       form.reset();
@@ -198,17 +210,13 @@ function EditChapterDrawer({
       title={t("title")}
       actions={
         <>
-          <Button loading={isLoading} onClick={form.handleSubmit(onSubmit)}>
+          <Button disabled={isLoading} onClick={form.handleSubmit(onSubmit)}>
             {t("save")}
           </Button>
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button
-                variant="destructive"
-                loading={isLoading}
-                disabled={isLoading}
-              >
+              <Button variant="destructive" disabled={isLoading}>
                 {t("delete")}
               </Button>
             </AlertDialogTrigger>
@@ -329,6 +337,16 @@ function EditChapterDrawer({
                   accept="image/*"
                 />
 
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setIsImageSelectorOpen(true)}
+                  title="Select existing image"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                </Button>
+
                 {!!picturePreview && (
                   <Button
                     type="button"
@@ -353,9 +371,13 @@ function EditChapterDrawer({
           )}
         </Form>
       </div>
+      <ImageSelectionDialog
+        open={isImageSelectorOpen}
+        onOpenChange={setIsImageSelectorOpen}
+        onSelect={handleImageSelect}
+      />
     </Drawer>
   );
 }
 
 export default EditChapterDrawer;
-

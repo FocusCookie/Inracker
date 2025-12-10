@@ -183,6 +183,12 @@ pub fn run() {
             )",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 12,
+            description: "add completed to encounters table",
+            sql: "ALTER TABLE encounters ADD COLUMN completed BOOLEAN DEFAULT 0;",
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()

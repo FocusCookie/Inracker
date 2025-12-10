@@ -1,0 +1,10 @@
+{
+  "groupAllOpponentsIntoElement": "Ziehe alle Gegner Tokens dieser Begegnung in das Begegnungselement.",
+  "editEncounter": "Begegnung editieren",
+  "markAsComplete": "Als abgeschlossen markieren",
+  "markAsIncomplete": "Als nicht abgeschlossen markieren",
+  "closeEncounter": "Schließe Begegnung",
+  "fight": "Kampf",
+  "note": "Notiz",
+  "roll": "Würfeln"
+}

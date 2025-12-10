@@ -1,0 +1,10 @@
+{
+  "groupAllOpponentsIntoElement": "Move all Opponentstokens into the Encounter element.",
+  "editEncounter": "Edit Encounter",
+  "markAsComplete": "Mark as complete",
+  "markAsIncomplete": "Mark as incomplete",
+  "closeEncounter": "Close Encounter",
+  "fight": "Fight",
+  "note": "Note",
+  "roll": "Roll"
+}

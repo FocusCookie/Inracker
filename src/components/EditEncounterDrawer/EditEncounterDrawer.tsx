@@ -37,7 +37,7 @@ import {
 import { CancelReason, OverlayMap } from "@/types/overlay";
 import { Encounter } from "@/types/encounter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { TrashIcon } from "@radix-ui/react-icons";
+import { TrashIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
 import { EncounterOpponent, Opponent } from "@/types/opponents";
@@ -46,6 +46,12 @@ import { useOverlayStore } from "@/stores/useOverlayStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import { Token } from "@/types/tokens";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { InfoIcon } from "lucide-react";
+import {
+  useCreateMultipleEncounterOpponents,
+  useDeleteEncounterOpponent,
+} from "@/hooks/useEncounterOpponents";
 
 type OverlayProps = OverlayMap["encounter.edit"];
 
@@ -76,10 +82,21 @@ function EditEncounterDrawer({
   const [closingReason, setClosingReason] = useState<
     null | "success" | CancelReason
   >(null);
+  const [encounterOpponentsToAttache, setEncounterOpponentsToAttache] =
+    useState<Array<Omit<Encounter, "id">>>([]);
+
+  const createMultipleEncounterOpponents =
+    useCreateMultipleEncounterOpponents(db);
+  const deleteEncounterOpponent = useDeleteEncounterOpponent(db);
 
   const opponentsQuery = useQueryWithToast({
     queryKey: ["opponents"],
     queryFn: () => db.opponents.getAllDetailed(),
+  });
+
+  const encounterOpponentsQuery = useQueryWithToast({
+    queryKey: ["encounter-opponents"],
+    queryFn: () => db.encounterOpponents.getAllDetailed(),
   });
 
   const formSchema = z.object({
@@ -95,6 +112,7 @@ function EditEncounterDrawer({
       .array(z.object({ value: z.number(), description: z.string() }))
       .optional(),
     opponents: z.array(z.number()).optional(),
+    completed: z.boolean().optional(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -110,6 +128,7 @@ function EditEncounterDrawer({
       skill: encounter.skill || "",
       difficulties: [],
       opponents: [],
+      completed: encounter.completed || false,
     },
   });
 
@@ -131,6 +150,7 @@ function EditEncounterDrawer({
         skill: encounter.skill || "",
         difficulties: encounter.difficulties || [],
         opponents: encounter.opponents || [],
+        completed: encounter.completed || false,
       });
       setType(encounter.type);
     }
@@ -138,13 +158,28 @@ function EditEncounterDrawer({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      if (JSON.stringify(encounter) === JSON.stringify(values))
-        console.log("NO DIFFERENCE!");
-      console.log("DIFFEREN!!!");
       setIsLoading(true);
+
+      const existingEncounterOpponents = encounter.opponents || [];
+      // Map opponents to include blueprint ID
+      const opponentsToCreate = encounterOpponentsToAttache.map((opp: any) => ({
+        ...opp,
+        blueprint: opp.id,
+      }));
+
+      const newEncounterOpponents =
+        await createMultipleEncounterOpponents.mutateAsync(opponentsToCreate);
+
       const updatedEncounter = await onEdit({
         ...encounter,
         ...values,
+        opponents: [
+          ...existingEncounterOpponents,
+          //@ts-ignore
+          ...newEncounterOpponents.map(
+            (encOpp: EncounterOpponent) => encOpp.id,
+          ),
+        ],
         element: {
           ...encounter.element,
           icon: values.icon,
@@ -153,6 +188,7 @@ function EditEncounterDrawer({
       });
 
       if (onComplete) onComplete(updatedEncounter);
+
       setClosingReason("success");
       onOpenChange(false);
 
@@ -209,11 +245,19 @@ function EditEncounterDrawer({
     setType(value);
   }
 
+  function handleRemoveEncounterOpponentToAttache(index: number) {
+    setEncounterOpponentsToAttache((current) =>
+      current.filter((_, encOpIndex) => encOpIndex !== index),
+    );
+  }
+
   async function handleRemoveOpponent(id: EncounterOpponent["id"]) {
     const currentOpponents = form.getValues("opponents") || [];
     const updatedOpponents = currentOpponents.filter(
       (opponentId: number) => opponentId !== id,
     );
+
+    await deleteEncounterOpponent.mutateAsync(id);
 
     form.setValue("opponents", updatedOpponents);
 
@@ -221,6 +265,7 @@ function EditEncounterDrawer({
 
     try {
       setIsLoading(true);
+
       const updatedEncounter = await onEdit({
         ...encounter,
         ...formValues,
@@ -245,24 +290,34 @@ function EditEncounterDrawer({
     openOverlay("opponent.create", {
       onCreate: async (opponent) => {
         const createdOpponent = await db.opponents.create(opponent);
+        const encounterOpponent = await db.encounterOpponents.create({
+          ...createdOpponent,
+          blueprint: createdOpponent.id,
+        });
+
         if (chapterId === null)
           throw new Error(
             "Chapter id is missing in creating the token for the opponent",
           );
+
         const token: Omit<Token, "id"> = {
           type: "opponent",
-          entity: createdOpponent.id,
+          entity: encounterOpponent.id,
           coordinates: { x: 0, y: 0 },
-          chapter: chapterId,
+          chapter: Number(chapterId),
         };
+
         await db.tokens.create(token);
-        return createdOpponent;
+
+        return encounterOpponent;
       },
       onComplete: (opponent) => {
         const currentOpponents = form.getValues("opponents") || [];
+
         form.setValue("opponents", [...currentOpponents, opponent.id]);
         opponentsQuery.refetch();
         queryClient.invalidateQueries({ queryKey: ["opponents"] });
+        queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
         queryClient.invalidateQueries({ queryKey: ["tokens"] });
       },
       onCancel: (reason) => {
@@ -274,8 +329,25 @@ function EditEncounterDrawer({
   const selectedOpponents =
     form
       .watch("opponents")
-      ?.map((id: number) => opponentsQuery.data?.find((op) => op.id === id))
+      ?.map((id: number) =>
+        encounterOpponentsQuery.data?.find((op) => op.id === id),
+      )
       .filter((opponent): opponent is Opponent => opponent !== undefined) || [];
+
+  function handleOpenOpponentsCatalog() {
+    openOverlay("opponent.catalog", {
+      database: db,
+      onSelect: async (selectedOpponent: Opponent) => {
+        setEncounterOpponentsToAttache((current) => [
+          ...current,
+          selectedOpponent,
+        ]);
+      },
+      onCancel: (reason) => {
+        console.log("Opponent catalog cancelled:", reason);
+      },
+    });
+  }
 
   return (
     <Drawer
@@ -338,11 +410,12 @@ function EditEncounterDrawer({
                   />
                   <FormMessage />
                 </div>
+
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
-                    <FormItem className="w-full grow px-0.5">
+                    <FormItem className="grow px-0.5">
                       <FormLabel>{t("name")}</FormLabel>
                       <FormControl>
                         <Input
@@ -350,6 +423,28 @@ function EditEncounterDrawer({
                           placeholder={t("namePlaceholder")}
                           {...field}
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="completed"
+                  render={({ field }) => (
+                    <FormItem className="flex w-40 flex-col gap-1 px-0.5 pt-1.5">
+                      <FormLabel>{t("completionState")}</FormLabel>
+                      <FormControl>
+                        <Button
+                          type="button"
+                          variant={field.value ? "success" : "outline"}
+                          className="w-full"
+                          onClick={() => field.onChange(!field.value)}
+                        >
+                          <CheckIcon />
+                          {field.value ? t("completed") : t("open")}
+                        </Button>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -713,9 +808,22 @@ function EditEncounterDrawer({
                           >
                             {t("createOpponent")}
                           </Button>
-                          <Button type="button">{t("catalog")}</Button>
+                          <Button
+                            onClick={handleOpenOpponentsCatalog}
+                            type="button"
+                          >
+                            {t("catalog")}
+                          </Button>
                         </div>
                       </div>
+
+                      <Alert>
+                        <InfoIcon />
+                        <AlertTitle>{t("encounterOpponents")}</AlertTitle>
+                        <AlertDescription>
+                          {t("encounterOpponentsDescription")}
+                        </AlertDescription>
+                      </Alert>
 
                       <div className="flex flex-col gap-4">
                         {selectedOpponents.map(
@@ -728,6 +836,27 @@ function EditEncounterDrawer({
                                 <OpponentCard
                                   opponent={opponent}
                                   onRemove={handleRemoveOpponent}
+                                  onEdit={undefined}
+                                />
+                              </div>
+                            </div>
+                          ),
+                        )}
+
+                        {encounterOpponentsToAttache.map(
+                          (opponent: EncounterOpponent, index: number) => (
+                            <div
+                              key={`encounter-opponent-to-attache-${index}`}
+                              className="flex items-center gap-2"
+                            >
+                              <div className="grow">
+                                <OpponentCard
+                                  opponent={opponent}
+                                  onRemove={() =>
+                                    handleRemoveEncounterOpponentToAttache(
+                                      index,
+                                    )
+                                  }
                                   onEdit={undefined}
                                 />
                               </div>

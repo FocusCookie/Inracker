@@ -3,5 +3,8 @@
   "details": "Details",
   "immunities": "Immunities",
   "resistances": "Resistances",
-  "effects": "Effects"
+  "effects": "Effects",
+  "delete": "Delete",
+  "confirmDelete": "Are you sure you want to delete this opponent?",
+  "cancel": "Cancel"
 }

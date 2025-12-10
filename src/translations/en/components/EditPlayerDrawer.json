@@ -17,5 +17,7 @@
   "overviewDescription": "This is where you can jot down permanent notes about the character. They are the first information to open on a player, allowing for easy reference during your sessions.",
   "detailsDescription": "This section is for all the essential skills and additional important information about the character. Expand it when you need to access specific details during your adventures!",
   "details": "Details",
-  "select": "Select"
+  "select": "Select",
+  "editPlayerDescription": "Edit the player as you wish.",
+  "editPlayer": "Edit Player"
 }

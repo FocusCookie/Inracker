@@ -2,7 +2,7 @@
   "addImmunity": "Immunität hinzufügen",
   "addResistance": "Wiederstand hinzufügen",
   "removeFromGroup": "Aus Gruppe entfernen",
-  "editPlayer": "Charcter editieren",
+  "editPlayer": "Spieler editieren",
   "overview": "Übersicht",
   "details": "Details",
   "remove": "Entfernen",
@@ -11,5 +11,6 @@
   "immunitites": "Immunitäten",
   "resistances": "Wiederstände",
   "positiveEffects": "Positive Effekte",
-  "negativeEffects": "Negative Effekte"
+  "negativeEffects": "Negative Effekte",
+  "selectToken": "Token auswählen"
 }
