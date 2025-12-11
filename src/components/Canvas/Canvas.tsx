@@ -182,6 +182,15 @@ function Canvas({
   const draggedElement = useRef<(ClickableCanvasElement & { id: any }) | null>(
     null,
   );
+  const dragElementsInitialCoords = useRef<
+    {
+      element: Element;
+      attrX: string;
+      attrY: string;
+      initialX: number;
+      initialY: number;
+    }[]
+  >([]);
   const dragElementStartPos = useRef<{ x: number; y: number } | null>(null);
   const temporaryElementPosition = useRef<{ x: number; y: number } | null>(
     null,
@@ -537,6 +546,40 @@ function Canvas({
     };
     draggedToken.current = token;
 
+    dragElementsInitialCoords.current = [];
+    const group = svg.querySelector(`g[data-token-group-id="${token.id}"]`);
+    if (group) {
+      const children = group.querySelectorAll("circle, image, text");
+      children.forEach((child) => {
+        const xAttr = child.tagName === "circle" ? "cx" : "x";
+        const yAttr = child.tagName === "circle" ? "cy" : "y";
+        const initialX = parseFloat(child.getAttribute(xAttr) || "0");
+        const initialY = parseFloat(child.getAttribute(yAttr) || "0");
+        dragElementsInitialCoords.current.push({
+          element: child,
+          attrX: xAttr,
+          attrY: yAttr,
+          initialX,
+          initialY,
+        });
+      });
+    }
+
+    if (selectedToken && selectedToken.id === token.id) {
+      const ring = svg.querySelector("#selection-ring");
+      if (ring) {
+        const initialX = parseFloat(ring.getAttribute("cx") || "0");
+        const initialY = parseFloat(ring.getAttribute("cy") || "0");
+        dragElementsInitialCoords.current.push({
+          element: ring,
+          attrX: "cx",
+          attrY: "cy",
+          initialX,
+          initialY,
+        });
+      }
+    }
+
     window.addEventListener("mousemove", handleTokenDragMove);
     window.addEventListener("mouseup", handleTokenDragEnd);
   };
@@ -560,14 +603,15 @@ function Canvas({
 
     temporaryTokenPosition.current = newPosition;
 
-    const tokenImage = svgRef.current.querySelector(
-      `[data-token-id="${draggedToken.current.id}"]`,
-    );
+    const deltaX = newPosition.x - draggedToken.current.coordinates.x;
+    const deltaY = newPosition.y - draggedToken.current.coordinates.y;
 
-    if (tokenImage) {
-      tokenImage.setAttribute("x", newPosition.x.toString());
-      tokenImage.setAttribute("y", newPosition.y.toString());
-    }
+    dragElementsInitialCoords.current.forEach(
+      ({ element, attrX, attrY, initialX, initialY }) => {
+        element.setAttribute(attrX, (initialX + deltaX).toString());
+        element.setAttribute(attrY, (initialY + deltaY).toString());
+      },
+    );
   };
 
   const handleTokenDragEnd = () => {
@@ -582,6 +626,7 @@ function Canvas({
     draggedToken.current = null;
     dragTokenStartPos.current = null;
     temporaryTokenPosition.current = null;
+    dragElementsInitialCoords.current = [];
 
     window.removeEventListener("mousemove", handleTokenDragMove);
     window.removeEventListener("mouseup", handleTokenDragEnd);
@@ -1133,6 +1178,7 @@ function Canvas({
               <ContextMenu key={"player-" + token.id}>
                 <ContextMenuTrigger asChild>
                   <g
+                    data-token-group-id={token.id}
                     className={cn(
                       "group focus:outline-none focus-visible:outline-none",
                       (tokenVisibility[token.id] ?? true)
@@ -1158,7 +1204,7 @@ function Canvas({
 
                     <g>
                       <text
-                        className="text-4xl"
+                        className="text-4xl select-none pointer-events-none"
                         x={token.coordinates.x}
                         y={token.coordinates.y + 32}
                       >
@@ -1183,7 +1229,7 @@ function Canvas({
                     />
                     <g>
                       <text
-                        className="text-4xl"
+                        className="text-4xl select-none pointer-events-none"
                         x={token.coordinates.x}
                         y={token.coordinates.y + 32}
                       >
@@ -1212,6 +1258,7 @@ function Canvas({
               <ContextMenu key={"opponent-" + token.id}>
                 <ContextMenuTrigger asChild>
                   <g
+                    data-token-group-id={token.id}
                     className={cn(
                       "group outline-4 focus:outline-none focus-visible:outline-none",
                       (tokenVisibility[token.id] ?? true)
@@ -1240,7 +1287,7 @@ function Canvas({
                         ></circle>
 
                         <text
-                          className="text-4xl"
+                          className="text-4xl select-none pointer-events-none"
                           x={token.coordinates.x + 32}
                           y={token.coordinates.y + 64}
                         >
@@ -1268,7 +1315,7 @@ function Canvas({
                     {opponent.image && (
                       <g>
                         <text
-                          className="text-4xl"
+                          className="text-4xl select-none pointer-events-none"
                           x={token.coordinates.x}
                           y={token.coordinates.y + 32}
                         >
