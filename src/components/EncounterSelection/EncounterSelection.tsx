@@ -1,11 +1,13 @@
 import * as Dialog from "@radix-ui/react-dialog";
+import { useState } from "react";
 import db from "@/lib/database";
+import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { OverlayMap } from "@/types/overlay";
 import { Button } from "../ui/button";
 import { useOverlayStore } from "@/stores/useOverlayStore";
 import { EncounterDifficulty } from "@/types/encounter";
-import { ShrinkIcon, XIcon } from "lucide-react";
+import { ShrinkIcon, XIcon, Maximize2, Minimize2 } from "lucide-react";
 import { CheckIcon, Pencil1Icon } from "@radix-ui/react-icons";
 import { Badge } from "../ui/badge";
 import { TypographyH4 } from "../ui/typographyH4";
@@ -73,6 +75,7 @@ function EncounterSelection({
   const { t } = useTranslation("ComponentEncounterSelection");
   const openOverlay = useOverlayStore((s) => s.open);
   const { data: encounter } = useEncounterQuery(encounterId, database);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const encounterOpponents = useEncounterOpponentsDetailed(database);
   const deleteEncounterOpponent = useDeleteEncounterOpponent(database);
@@ -202,7 +205,10 @@ function EncounterSelection({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: "100%" }}
                   transition={{ type: "tween", duration: 0.2 }}
-                  className={`shadow-4xl border-opacity-50 fixed bottom-4 left-[calc(50%+64px)] flex w-md -translate-x-1/2 flex-col rounded-t-lg border-t-4 border-r-4 border-l-4 bg-white`}
+                  className={cn(
+                    "shadow-4xl border-opacity-50 fixed bottom-4 left-[calc(50%+64px)] flex -translate-x-1/2 flex-col rounded-t-lg border-t-4 border-r-4 border-l-4 bg-white",
+                    isExpanded ? "h-[80vh] w-[80vw]" : "w-md",
+                  )}
                   onClick={(e) => e.stopPropagation()}
                   style={{ borderColor: encounter.element.color }}
                 >
@@ -222,6 +228,21 @@ function EncounterSelection({
                           <Button size="icon" onClick={handleClose}>
                             <XIcon />
                           </Button>
+
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => setIsExpanded(!isExpanded)}
+                              >
+                                {isExpanded ? <Minimize2 /> : <Maximize2 />}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{isExpanded ? "Minimize" : "Maximize"}</p>
+                            </TooltipContent>
+                          </Tooltip>
 
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -308,7 +329,12 @@ function EncounterSelection({
                     </div>
                   </div>
 
-                  <ScrollArea className="h-96 overflow-hidden">
+                  <ScrollArea
+                    className={cn(
+                      "overflow-hidden",
+                      isExpanded ? "flex-1" : "h-96",
+                    )}
+                  >
                     <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
                       {!!encounter.description && (
                         <MarkdownReader markdown={encounter.description} />
