@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Textarea } from "../ui/textarea";
+import { MarkdownEditor } from "../MarkdownEditor/MarkdownEditor";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -649,12 +649,11 @@ function EditEncounterDrawer({
                   <FormItem className="w-full px-0.5">
                     <FormLabel>{t("description")}</FormLabel>
                     <FormControl>
-                      <Textarea
-                        disabled={isLoading}
-                        placeholder={t("descriptionPlaceholder")}
-                        {...field}
-                      />
-                    </FormControl>
+                                          <MarkdownEditor
+                                            disabled={isLoading}
+                                            placeholder={t("descriptionPlaceholder")}
+                                            {...field}
+                                          />                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

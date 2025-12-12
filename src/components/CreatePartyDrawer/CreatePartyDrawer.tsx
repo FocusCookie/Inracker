@@ -7,7 +7,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { MarkdownEditor } from "@/components/MarkdownEditor/MarkdownEditor";
 import Drawer from "../Drawer/Drawer";
 import IconPicker from "../IconPicker/IconPicker";
 import { Button } from "../ui/button";
@@ -154,7 +154,7 @@ export default function CreatePartyDrawer({
               <FormItem className="px-0.5">
                 <FormLabel>{t("description")}</FormLabel>
                 <FormControl>
-                  <Textarea disabled={isCreating} placeholder="" {...field} />
+                  <MarkdownEditor disabled={isCreating} placeholder="" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

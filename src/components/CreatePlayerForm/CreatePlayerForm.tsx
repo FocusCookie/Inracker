@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
+import { MarkdownEditor } from "../MarkdownEditor/MarkdownEditor";
 import { ImageSelectionDialog } from "../ImageSelectionDialog/ImageSelectionDialog";
 import { Image as ImageIcon } from "lucide-react";
 
@@ -204,8 +204,8 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
                 <FormDescription>{t("overviewDescription")}</FormDescription>
 
                 <FormControl className="rounded-md border">
-                  <Textarea
-                    readOnly={disabled}
+                  <MarkdownEditor
+                    disabled={disabled}
                     {...field}
                     placeholder="Enter some Overview"
                   />
@@ -225,8 +225,8 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
                 <FormDescription>{t("detailsDescription")}</FormDescription>
 
                 <FormControl className="rounded-md border">
-                  <Textarea
-                    readOnly={disabled}
+                  <MarkdownEditor
+                    disabled={disabled}
                     {...field}
                     placeholder="Enter some description"
                   />

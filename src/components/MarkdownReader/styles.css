@@ -1,19 +1,19 @@
-.markdown-reader > table {
+.markdown-reader table {
   width: 100%;
   text-align: left;
   margin-bottom: 1rem;
 }
 
-.markdown-reader > table > thead > tr > th {
+.markdown-reader table > thead > tr > th {
   font-size: 1.5rem;
 }
 
-.markdown-reader > ul > li {
+.markdown-reader ul > li {
   padding-left: 0rem;
   margin-left: 1.5rem;
   list-style-type: disc;
 }
-.markdown-reader > ol > li {
+.markdown-reader ol > li {
   padding-left: 0rem;
   margin-left: 1.5rem;
   list-style-type: decimal;

@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Textarea } from "../ui/textarea";
+import { MarkdownEditor } from "../MarkdownEditor/MarkdownEditor";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -315,7 +315,7 @@ function EditChapterDrawer({
                 <FormLabel>{t("description")}</FormLabel>
 
                 <FormControl>
-                  <Textarea disabled={isLoading} placeholder="" {...field} />
+                  <MarkdownEditor disabled={isLoading} placeholder="" {...field} />
                 </FormControl>
 
                 <FormMessage />

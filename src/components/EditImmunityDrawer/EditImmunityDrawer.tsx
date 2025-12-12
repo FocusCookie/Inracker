@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
+import { MarkdownEditor } from "../MarkdownEditor/MarkdownEditor";
 import { CancelReason, OverlayMap } from "@/types/overlay";
 
 type OverlayProps = OverlayMap["immunity.edit"];
@@ -120,7 +120,7 @@ function EditImmunityDrawer({
       onOpenChange={handleOpenChange}
       title={t("title")}
       actions={
-        <Button loading={isLoading} onClick={form.handleSubmit(onSubmit)}>
+        <Button disabled={isLoading} onClick={form.handleSubmit(onSubmit)}>
           {t("edit")}
         </Button>
       }
@@ -178,8 +178,8 @@ function EditImmunityDrawer({
                   <FormLabel>{t("description")}</FormLabel>
 
                   <FormControl className="rounded-md border">
-                    <Textarea
-                      readOnly={isLoading}
+                    <MarkdownEditor
+                      disabled={isLoading}
                       {...field}
                       placeholder="Type your message here."
                     />

@@ -16,7 +16,7 @@ import {
 } from "../ui/form";
 import IconPicker from "../IconPicker/IconPicker";
 import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
+import { MarkdownEditor } from "../MarkdownEditor/MarkdownEditor";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 import {
   Tooltip,
@@ -204,8 +204,8 @@ function CreateEffectDrawer({
                   <FormLabel>{t("description")}</FormLabel>
 
                   <FormControl className="rounded-md border">
-                    <Textarea
-                      readOnly={isCreating}
+                    <MarkdownEditor
+                      disabled={isCreating}
                       {...field}
                       placeholder={t("descriptionPlaceholder")}
                     />

@@ -7,7 +7,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { MarkdownEditor } from "@/components/MarkdownEditor/MarkdownEditor";
 import { Controller, useFieldArray } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Button } from "../ui/button";
@@ -490,7 +490,7 @@ function CreateEncounterDrawer({
                   <FormItem className="w-full px-0.5">
                     <FormLabel>{t("description")}</FormLabel>
                     <FormControl>
-                      <Textarea
+                      <MarkdownEditor
                         disabled={isCreating}
                         placeholder={t("descriptionPlaceholder")}
                         {...field}

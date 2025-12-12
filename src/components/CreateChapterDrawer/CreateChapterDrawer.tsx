@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Textarea } from "../ui/textarea";
+import { MarkdownEditor } from "../MarkdownEditor/MarkdownEditor";
 import { CancelReason, OverlayMap } from "@/types/overlay";
 import { ImageSelectionDialog } from "../ImageSelectionDialog/ImageSelectionDialog";
 import { Image as ImageIcon } from "lucide-react";
@@ -245,7 +245,11 @@ function CreateChapterDrawer({
                 <FormLabel>{t("description")}</FormLabel>
 
                 <FormControl>
-                  <Textarea disabled={isCreating} placeholder="" {...field} />
+                  <MarkdownEditor
+                    disabled={isCreating}
+                    placeholder=""
+                    {...field}
+                  />
                 </FormControl>
 
                 <FormMessage />
