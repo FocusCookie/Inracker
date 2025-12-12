@@ -131,7 +131,7 @@ function PlayerCard({
   return (
     <>
       {expanded ? (
-        <div className="flex h-full w-[576px] gap-2">
+        <div className="flex h-full w-full gap-2">
           <div className="w-16">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
