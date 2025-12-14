@@ -96,7 +96,7 @@ function Play({
     from: "/play/",
   });
   const { t } = useTranslation("PagePlay");
-  const navigate = useNavigate({ from: "/play/" });
+  const navigate = useNavigate({ from: "/play" });
   const queryClient = useQueryClient();
   const openOverlay = useOverlayStore((s) => s.open);
   const keysPressed = useRef<Record<string, boolean>>({});
@@ -421,7 +421,8 @@ function Play({
 
   function handleExitPlay() {
     navigate({
-      to: `/chapters?partyId=${partyId}`,
+      to: "/chapters",
+      search: { partyId },
     });
   }
 
