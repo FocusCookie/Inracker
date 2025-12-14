@@ -14,7 +14,6 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/shallow";
 import { useOverlayStore } from "@/stores/useOverlayStore";
-import { EditEncounterOpponentDrawer } from "@/components/EditEncounterOpponentDrawer";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -25,6 +24,7 @@ import {
 import { CircleX, Swords, UsersRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Tooltip,
   TooltipContent,
@@ -84,6 +84,7 @@ function Canvas({
   onElementMove,
 }: Props) {
   const { t } = useTranslation("ComponentCanvas");
+  const queryClient = useQueryClient();
   const svgRef = useRef<SVGSVGElement>(null);
   const backgroundImage = useRef<HTMLImageElement | null>(null);
   const [isPlayersPanelOpen, setIsPlayersPanelOpen] = useState<boolean>(false);
@@ -1333,11 +1334,22 @@ function Canvas({
                   </ContextMenuItem>
                   <ContextMenuItem
                     onClick={() =>
-                      useOverlayStore
-                        .getState()
-                        .open("edit.encounterOpponent", {
-                          encounterOpponent: opponent,
-                        })
+                      useOverlayStore.getState().open("encounter-opponent.edit", {
+                        opponent: opponent,
+                        onEdit: async (opp) => {
+                          const result =
+                            await database.encounterOpponents.update(opp);
+                          return result;
+                        },
+                        onDelete: async (id) => {
+                          await database.encounterOpponents.delete(id);
+                        },
+                        onComplete: () => {
+                          queryClient.invalidateQueries({
+                            queryKey: ["encounter-opponents"],
+                          });
+                        },
+                      })
                     }
                   >
                     {t("edit")}
