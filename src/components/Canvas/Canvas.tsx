@@ -13,6 +13,8 @@ import {
 } from "@radix-ui/react-icons";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/shallow";
+import { useOverlayStore } from "@/stores/useOverlayStore";
+import { EditEncounterOpponentDrawer } from "@/components/EditEncounterOpponentDrawer";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -1326,9 +1328,19 @@ function Canvas({
                   </g>
                 </ContextMenuTrigger>
                 <ContextMenuContent className="w-40">
-                  <ContextMenuLabel>{opponent.name}</ContextMenuLabel>
                   <ContextMenuItem onClick={() => onTokenSelect(token)}>
                     {t("select")}
+                  </ContextMenuItem>
+                  <ContextMenuItem
+                    onClick={() =>
+                      useOverlayStore
+                        .getState()
+                        .open("edit.encounterOpponent", {
+                          encounterOpponent: opponent,
+                        })
+                    }
+                  >
+                    {t("edit")}
                   </ContextMenuItem>
                   <ContextMenuItem onClick={() => toggleToken(token)}>
                     {(tokenVisibility[token.id] ?? true) ? "Hide" : "Show"}
