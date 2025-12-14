@@ -69,7 +69,7 @@ const PlayLayout: PlayLayoutCompound = ({
         <motion.aside
           key="aside"
           className={cn(
-            "absolute top-0 bottom-0 left-0 w-24 rounded-md bg-white p-4",
+            "absolute top-0 bottom-0 left-0 w-24 rounded-md bg-white p-4 pr-0",
             isAsideFloating && "shadow-2xl",
           )}
           animate={{
@@ -80,8 +80,8 @@ const PlayLayout: PlayLayoutCompound = ({
         >
           <div className="flex h-full flex-col">
             <div className="grow gap-4 overflow-hidden">
-              <ScrollArea className="h-full pr-3">
-                <div className="flex h-full w-full flex-col gap-4 pt-0.5">
+              <ScrollArea className="h-full">
+                <div className="flex h-full w-full flex-col gap-4 pt-0.5 pl-0.5 pr-4">
                   {playersChild}
                 </div>
               </ScrollArea>
@@ -89,7 +89,7 @@ const PlayLayout: PlayLayoutCompound = ({
 
             <div
               className={cn(
-                "flex w-full flex-col items-center gap-2",
+                "flex w-full flex-col items-center gap-2 pr-4",
                 isAsideOpen ? "items-end" : "items-center",
               )}
             >

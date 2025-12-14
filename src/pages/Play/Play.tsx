@@ -96,7 +96,7 @@ function Play({
     from: "/play/",
   });
   const { t } = useTranslation("PagePlay");
-  const navigate = useNavigate();
+  const navigate = useNavigate({ from: "/play" });
   const queryClient = useQueryClient();
   const openOverlay = useOverlayStore((s) => s.open);
   const keysPressed = useRef<Record<string, boolean>>({});
@@ -367,7 +367,12 @@ function Play({
 
   function handleTokenSelect(token: Token | null) {
     navigate({
-      search: (prev) => ({ ...prev, selectedToken: token?.id || null }),
+      search: (prev) => ({
+        ...prev,
+        selectedToken: token?.id || null,
+        partyId: prev.partyId || partyId || null,
+        chapterId: prev.chapterId || chapter.id || null,
+      }),
     });
   }
 
@@ -416,7 +421,8 @@ function Play({
 
   function handleExitPlay() {
     navigate({
-      to: `/chapters?partyId=${partyId}`,
+      to: "/chapters",
+      search: { partyId },
     });
   }
 

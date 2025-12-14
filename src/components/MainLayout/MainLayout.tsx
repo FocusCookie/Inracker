@@ -65,7 +65,7 @@ const MainLayout: MainLayoutCompound = ({ isAsideOpen, children }) => {
       >
         <div className="flex h-full flex-col gap-4 overflow-hidden">
           <ScrollArea className="h-full">
-            <div className="flex h-full flex-col gap-4 pt-0.5 pl-0.5">
+            <div className="flex h-full flex-col gap-4 pt-0.5 pl-0.5 pr-4">
               {playersChild}
             </div>
           </ScrollArea>

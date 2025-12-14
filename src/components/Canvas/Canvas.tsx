@@ -13,6 +13,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/shallow";
+import { useOverlayStore } from "@/stores/useOverlayStore";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -23,6 +24,7 @@ import {
 import { CircleX, Swords, UsersRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Tooltip,
   TooltipContent,
@@ -82,6 +84,7 @@ function Canvas({
   onElementMove,
 }: Props) {
   const { t } = useTranslation("ComponentCanvas");
+  const queryClient = useQueryClient();
   const svgRef = useRef<SVGSVGElement>(null);
   const backgroundImage = useRef<HTMLImageElement | null>(null);
   const [isPlayersPanelOpen, setIsPlayersPanelOpen] = useState<boolean>(false);
@@ -1243,6 +1246,32 @@ function Canvas({
                   <ContextMenuItem onClick={() => onTokenSelect(token)}>
                     {t("select")}
                   </ContextMenuItem>
+                  <ContextMenuItem
+                    onClick={() =>
+                      useOverlayStore.getState().open("player.edit", {
+                        player: player,
+                        onEdit: async (updatedPlayer) => {
+                          const result = await database.players.update(
+                            updatedPlayer,
+                          );
+                          return result;
+                        },
+                        onComplete: () => {
+                          queryClient.invalidateQueries({
+                            queryKey: ["players"],
+                          });
+                          queryClient.invalidateQueries({
+                            queryKey: ["party"],
+                          });
+                          queryClient.invalidateQueries({
+                            queryKey: ["parties"],
+                          });
+                        },
+                      })
+                    }
+                  >
+                    {t("edit")}
+                  </ContextMenuItem>
                   <ContextMenuItem onClick={() => toggleToken(token)}>
                     {(tokenVisibility[token.id] ?? true)
                       ? t("hide")
@@ -1326,9 +1355,30 @@ function Canvas({
                   </g>
                 </ContextMenuTrigger>
                 <ContextMenuContent className="w-40">
-                  <ContextMenuLabel>{opponent.name}</ContextMenuLabel>
                   <ContextMenuItem onClick={() => onTokenSelect(token)}>
                     {t("select")}
+                  </ContextMenuItem>
+                  <ContextMenuItem
+                    onClick={() =>
+                      useOverlayStore.getState().open("encounter-opponent.edit", {
+                        opponent: opponent,
+                        onEdit: async (opp) => {
+                          const result =
+                            await database.encounterOpponents.update(opp);
+                          return result;
+                        },
+                        onDelete: async (id) => {
+                          await database.encounterOpponents.delete(id);
+                        },
+                        onComplete: () => {
+                          queryClient.invalidateQueries({
+                            queryKey: ["encounter-opponents"],
+                          });
+                        },
+                      })
+                    }
+                  >
+                    {t("edit")}
                   </ContextMenuItem>
                   <ContextMenuItem onClick={() => toggleToken(token)}>
                     {(tokenVisibility[token.id] ?? true) ? "Hide" : "Show"}
