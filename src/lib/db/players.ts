@@ -190,17 +190,17 @@ export const updatePlayer = async (
     [
       id, // 1
       details, // 2
-      JSON.stringify(effects.map((id) => id)), // 3
+      JSON.stringify(effects.map((e) => e.id)), // 3
       ep, // 4
       health, // 5
       max_health, // 6
       image, // 7
       icon, // 8
-      JSON.stringify(immunities.map((id) => id)), // 9
+      JSON.stringify(immunities.map((i) => i.id)), // 9
       level, // 10
       name, // 11
       overview, // 12
-      JSON.stringify(resistances.map((id) => id)), // 13
+      JSON.stringify(resistances.map((r) => r.id)), // 13
       role, // 14
     ],
   );

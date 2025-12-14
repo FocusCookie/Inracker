@@ -80,8 +80,8 @@ const PlayLayout: PlayLayoutCompound = ({
         >
           <div className="flex h-full flex-col">
             <div className="grow gap-4 overflow-hidden">
-              <ScrollArea className="h-full">
-                <div className="flex h-full flex-col gap-4 pt-0.5">
+              <ScrollArea className="h-full pr-3">
+                <div className="flex h-full w-full flex-col gap-4 pt-0.5">
                   {playersChild}
                 </div>
               </ScrollArea>

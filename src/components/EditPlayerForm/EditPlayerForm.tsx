@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
+import { MarkdownEditor } from "../MarkdownEditor/MarkdownEditor";
 import { ImageSelectionDialog } from "../ImageSelectionDialog/ImageSelectionDialog";
 import { Image as ImageIcon } from "lucide-react";
 
@@ -192,9 +192,9 @@ function EditPlayerForm({ disabled, player, form }: Props) {
                 <FormDescription>{t("overviewDescription")}</FormDescription>
 
                 <FormControl className="rounded-md border">
-                  <Textarea
+                  <MarkdownEditor
                     className="scrollable-y overflow-y-scroll rounded pr-0.5"
-                    readOnly={disabled}
+                    disabled={disabled}
                     {...field}
                     placeholder="Enter some Overview"
                   />
@@ -214,9 +214,9 @@ function EditPlayerForm({ disabled, player, form }: Props) {
                 <FormDescription>{t("detailsDescription")}</FormDescription>
 
                 <FormControl className="rounded-md border">
-                  <Textarea
+                  <MarkdownEditor
                     className="scrollable-y overflow-y-scroll rounded pr-0.5"
-                    readOnly={disabled}
+                    disabled={disabled}
                     {...field}
                     placeholder="Enter some description"
                   />
@@ -238,3 +238,4 @@ function EditPlayerForm({ disabled, player, form }: Props) {
 }
 
 export default EditPlayerForm;
+

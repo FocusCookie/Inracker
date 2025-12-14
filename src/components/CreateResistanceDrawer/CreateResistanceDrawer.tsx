@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
+import { MarkdownEditor } from "../MarkdownEditor/MarkdownEditor";
 import { useState } from "react";
 import type { CancelReason, OverlayMap } from "@/types/overlay";
 
@@ -164,7 +164,7 @@ export default function CreateResistanceDrawer({
               <FormItem className="px-0.5">
                 <FormLabel>{t("description")}</FormLabel>
                 <FormControl>
-                  <Textarea
+                  <MarkdownEditor
                     disabled={isCreating}
                     placeholder={t("descriptionPlaceholder")}
                     {...field}

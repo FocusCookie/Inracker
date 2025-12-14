@@ -16,7 +16,7 @@ import {
 } from "../ui/form";
 import IconPicker from "../IconPicker/IconPicker";
 import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
+import { MarkdownEditor } from "../MarkdownEditor/MarkdownEditor";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 import {
   Tooltip,
@@ -159,7 +159,9 @@ function EditEffectDrawer({
       onOpenChange={handleOpenChange}
       title={t("title")}
       actions={
-        <Button onClick={form.handleSubmit(onSubmit)}>{t("edit")}</Button>
+        <Button disabled={isLoading} onClick={form.handleSubmit(onSubmit)}>
+          {t("edit")}
+        </Button>
       }
       cancelTrigger={
         <Button
@@ -215,8 +217,8 @@ function EditEffectDrawer({
                     <FormLabel>{t("description")}</FormLabel>
 
                     <FormControl className="rounded-md border">
-                      <Textarea
-                        readOnly={isLoading}
+                      <MarkdownEditor
+                        disabled={isLoading}
                         {...field}
                         placeholder={t("descriptionPlaceholder")}
                       />
