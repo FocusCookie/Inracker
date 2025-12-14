@@ -16,6 +16,7 @@ export function MusicPlayer({ className }: { className?: string }) {
 
   return (
     <motion.div
+      layout
       initial={false}
       animate={{
         width: isMinimized ? 122 : 384,
@@ -28,14 +29,17 @@ export function MusicPlayer({ className }: { className?: string }) {
         className,
       )}
     >
-      <div
+      <motion.div
+        layout
         className={cn(
           "flex items-center p-1",
           isMinimized ? "gap-2" : "justify-between",
         )}
       >
-        <span className="ml-2 font-bold text-slate-800">🎶</span>
-        <div className="flex gap-2">
+        <motion.span layout className="ml-2 font-bold text-slate-800">
+          🎶
+        </motion.span>
+        <motion.div layout className="flex gap-2">
           <Button
             size="icon"
             variant="ghost"
@@ -56,8 +60,8 @@ export function MusicPlayer({ className }: { className?: string }) {
           >
             <XIcon className="h-4 w-4 text-slate-700" />
           </Button>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       <div
         className={cn(
