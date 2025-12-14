@@ -1246,6 +1246,32 @@ function Canvas({
                   <ContextMenuItem onClick={() => onTokenSelect(token)}>
                     {t("select")}
                   </ContextMenuItem>
+                  <ContextMenuItem
+                    onClick={() =>
+                      useOverlayStore.getState().open("player.edit", {
+                        player: player,
+                        onEdit: async (updatedPlayer) => {
+                          const result = await database.players.update(
+                            updatedPlayer,
+                          );
+                          return result;
+                        },
+                        onComplete: () => {
+                          queryClient.invalidateQueries({
+                            queryKey: ["players"],
+                          });
+                          queryClient.invalidateQueries({
+                            queryKey: ["party"],
+                          });
+                          queryClient.invalidateQueries({
+                            queryKey: ["parties"],
+                          });
+                        },
+                      })
+                    }
+                  >
+                    {t("edit")}
+                  </ContextMenuItem>
                   <ContextMenuItem onClick={() => toggleToken(token)}>
                     {(tokenVisibility[token.id] ?? true)
                       ? t("hide")
