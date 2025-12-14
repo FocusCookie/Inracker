@@ -113,6 +113,7 @@ function EditEncounterDrawer({
       .optional(),
     opponents: z.array(z.number()).optional(),
     completed: z.boolean().optional(),
+    soundcloud: z.string().optional(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -129,6 +130,7 @@ function EditEncounterDrawer({
       difficulties: [],
       opponents: [],
       completed: encounter.completed || false,
+      soundcloud: encounter.soundcloud || "",
     },
   });
 
@@ -151,6 +153,7 @@ function EditEncounterDrawer({
         difficulties: encounter.difficulties || [],
         opponents: encounter.opponents || [],
         completed: encounter.completed || false,
+        soundcloud: encounter.soundcloud || "",
       });
       setType(encounter.type);
     }
@@ -654,6 +657,25 @@ function EditEncounterDrawer({
                                             placeholder={t("descriptionPlaceholder")}
                                             {...field}
                                           />                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="soundcloud"
+                render={({ field }) => (
+                  <FormItem className="w-full px-0.5">
+                    <FormLabel>SoundCloud</FormLabel>
+                    <FormControl>
+                      <Input
+                        disabled={isLoading}
+                        placeholder="SoundCloud Link (e.g. https://soundcloud.com/...)"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -63,3 +63,26 @@ export async function deleteImage(fileName: string, folder: ImageFolder) {
     return false;
   }
 }
+
+export function getSoundCloudEmbedUrl(input: string): string | null {
+  if (!input) return null;
+
+  // Handle iframe code
+  if (input.includes("<iframe")) {
+    const srcMatch = input.match(/src="([^"]+)"/);
+    return srcMatch ? srcMatch[1] : null;
+  }
+
+  // Handle SoundCloud URL (https://soundcloud.com/...)
+  if (input.includes("soundcloud.com") && !input.includes("w.soundcloud.com/player")) {
+     const encodedUrl = encodeURIComponent(input);
+     return `https://w.soundcloud.com/player/?url=${encodedUrl}&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true`;
+  }
+  
+  // Handle widget URL directly
+  if (input.includes("w.soundcloud.com/player")) {
+      return input;
+  }
+
+  return null;
+}

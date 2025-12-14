@@ -501,6 +501,25 @@ function CreateEncounterDrawer({
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="soundcloud"
+                render={({ field }) => (
+                  <FormItem className="w-full px-0.5">
+                    <FormLabel>SoundCloud</FormLabel>
+                    <FormControl>
+                      <Input
+                        disabled={isCreating}
+                        placeholder="SoundCloud Link (e.g. https://soundcloud.com/...)"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <div className="flex flex-col gap-1">
                 <FormLabel>{t("type")}</FormLabel>
 

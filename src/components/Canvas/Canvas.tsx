@@ -32,6 +32,7 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { CanvasElementNode } from "./CanvasElementNode";
+import { MusicPlayer } from "@/components/MusicPlayer/MusicPlayer";
 
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
@@ -1523,6 +1524,8 @@ function Canvas({
           )}
         </div>
       )}
+
+      <MusicPlayer />
 
       <div className="absolute bottom-4 left-4 flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
         <TooltipProvider>

@@ -143,26 +143,57 @@ export const createEncounter = async (
     type,
     element,
     completed,
+    soundcloud,
   } = encounter;
 
-  const result = await db.execute(
-    "INSERT INTO encounters(name,description,color,dice,difficulties,experience,images,opponents,passed,skill,type, element, completed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *",
-    [
-      name,
-      description,
-      color,
-      dice,
-      difficulties,
-      experience,
-      images,
-      opponents,
-      passed,
-      skill,
-      type,
-      element,
-      completed,
-    ],
-  );
+  let result;
+  try {
+    result = await db.execute(
+      "INSERT INTO encounters(name,description,color,dice,difficulties,experience,images,opponents,passed,skill,type, element, completed, soundcloud) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *",
+      [
+        name,
+        description,
+        color,
+        dice,
+        difficulties,
+        experience,
+        images,
+        opponents,
+        passed,
+        skill,
+        type,
+        element,
+        completed,
+        soundcloud,
+      ],
+    );
+  } catch (error: any) {
+    if (error.toString().includes("no column named soundcloud")) {
+      console.warn(
+        "SoundCloud column missing, saving without it. Restart app to fix.",
+      );
+      result = await db.execute(
+        "INSERT INTO encounters(name,description,color,dice,difficulties,experience,images,opponents,passed,skill,type, element, completed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *",
+        [
+          name,
+          description,
+          color,
+          dice,
+          difficulties,
+          experience,
+          images,
+          opponents,
+          passed,
+          skill,
+          type,
+          element,
+          completed,
+        ],
+      );
+    } else {
+      throw error;
+    }
+  }
 
   const createdEncounter = await getDetailedEncounterById(
     db,
@@ -191,26 +222,58 @@ export const updateEncounter = async (
     type,
     element,
     completed,
+    soundcloud,
   } = encounter;
-  await db.execute(
-    "UPDATE encounters SET name = $2, description = $3, color = $4, dice = $5, difficulties = $6, experience = $7, images = $8, opponents = $9, passed = $10, skill = $11, type = $12, element = $13, completed = $14 WHERE id = $1",
-    [
-      id,
-      name,
-      description,
-      color,
-      dice,
-      difficulties,
-      experience,
-      images,
-      opponents,
-      passed,
-      skill,
-      type,
-      element,
-      completed,
-    ],
-  );
+
+  try {
+    await db.execute(
+      "UPDATE encounters SET name = $2, description = $3, color = $4, dice = $5, difficulties = $6, experience = $7, images = $8, opponents = $9, passed = $10, skill = $11, type = $12, element = $13, completed = $14, soundcloud = $15 WHERE id = $1",
+      [
+        id,
+        name,
+        description,
+        color,
+        dice,
+        difficulties,
+        experience,
+        images,
+        opponents,
+        passed,
+        skill,
+        type,
+        element,
+        completed,
+        soundcloud,
+      ],
+    );
+  } catch (error: any) {
+    if (error.toString().includes("no column named soundcloud")) {
+      console.warn(
+        "SoundCloud column missing, saving without it. Restart app to fix.",
+      );
+      await db.execute(
+        "UPDATE encounters SET name = $2, description = $3, color = $4, dice = $5, difficulties = $6, experience = $7, images = $8, opponents = $9, passed = $10, skill = $11, type = $12, element = $13, completed = $14 WHERE id = $1",
+        [
+          id,
+          name,
+          description,
+          color,
+          dice,
+          difficulties,
+          experience,
+          images,
+          opponents,
+          passed,
+          skill,
+          type,
+          element,
+          completed,
+        ],
+      );
+    } else {
+      throw error;
+    }
+  }
 
   return getDetailedEncounterById(db, id);
 };

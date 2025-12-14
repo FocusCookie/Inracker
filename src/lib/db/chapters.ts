@@ -148,6 +148,40 @@ export const updateChapterProperty = async <
   return getDetailedChapterById(db, chapterId);
 };
 
+export const addEncounterToChapter = async (
+  db: TauriDatabase,
+  chapterId: number,
+  encounterId: number,
+): Promise<Chapter> => {
+  const chapter = await getChapterById(db, chapterId);
+  const encounters = JSON.parse(chapter.encounters) as number[];
+  encounters.push(encounterId);
+
+  await db.execute("UPDATE chapters SET encounters = $2 WHERE id = $1", [
+    chapterId,
+    JSON.stringify(encounters),
+  ]);
+
+  return getDetailedChapterById(db, chapterId);
+};
+
+export const removeEncounterFromChapter = async (
+  db: TauriDatabase,
+  chapterId: number,
+  encounterId: number,
+): Promise<Chapter> => {
+  const chapter = await getChapterById(db, chapterId);
+  const encounters = JSON.parse(chapter.encounters) as number[];
+  const updatedEncounters = encounters.filter((id) => id !== encounterId);
+
+  await db.execute("UPDATE chapters SET encounters = $2 WHERE id = $1", [
+    chapterId,
+    JSON.stringify(updatedEncounters),
+  ]);
+
+  return getDetailedChapterById(db, chapterId);
+};
+
 export const deleteChapterById = async (
   db: TauriDatabase,
   id: Chapter["id"],
@@ -241,6 +275,22 @@ export const chapters = {
   update: async (chapter: Chapter) => {
     const db = await connect();
     return updateChapter(db, chapter);
+  },
+  updateProperty: async <T extends keyof Chapter, V extends Chapter[T]>(
+    id: number,
+    property: T,
+    value: V,
+  ) => {
+    const db = await connect();
+    return updateChapterProperty(db, id, property, value);
+  },
+  addEncounter: async (chapterId: number, encounterId: number) => {
+    const db = await connect();
+    return addEncounterToChapter(db, chapterId, encounterId);
+  },
+  removeEncounter: async (chapterId: number, encounterId: number) => {
+    const db = await connect();
+    return removeEncounterFromChapter(db, chapterId, encounterId);
   },
   delete: async (id: number) => {
     const db = await connect();
