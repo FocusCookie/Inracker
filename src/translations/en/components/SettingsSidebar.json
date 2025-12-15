@@ -3,11 +3,11 @@
   "general": "General",
   "images": "Images",
   "players": "Players",
-  "opponents": "Opponents",
   "statuses": "Statuses",
   "effects": "Effects",
   "immunities": "Immunities",
   "resistances": "Resistances",
-  "cleanup": "Cleanup",
-  "close": "Close"
+  "opponents": "Opponents",
+  "close": "Close",
+  "audio": "Audio"
 }

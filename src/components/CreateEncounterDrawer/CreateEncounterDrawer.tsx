@@ -43,6 +43,7 @@ import {
   useDeleteEncounterOpponent,
 } from "@/hooks/useEncounterOpponents";
 import { useOpponents } from "@/hooks/useOpponents";
+import { storeAudio } from "@/lib/utils";
 
 type OverlayProps = OverlayMap["encounter.create"];
 
@@ -494,6 +495,50 @@ function CreateEncounterDrawer({
                         disabled={isCreating}
                         placeholder={t("descriptionPlaceholder")}
                         {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="soundcloud"
+                render={({ field }) => (
+                  <FormItem className="w-full px-0.5">
+                    <FormLabel>SoundCloud</FormLabel>
+                    <FormControl>
+                      <Input
+                        disabled={isCreating}
+                        placeholder="SoundCloud Link (e.g. https://soundcloud.com/...)"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="musicFile"
+                render={({ field }) => (
+                  <FormItem className="w-full px-0.5">
+                    <FormLabel>Music File</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="file"
+                        accept="audio/*"
+                        disabled={isCreating}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const url = await storeAudio(file);
+                            if (url) field.onChange(url);
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />

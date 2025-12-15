@@ -1,0 +1,13 @@
+{
+  "audioFiles": "Audiodateien",
+  "deleteAllUnused": "Alle ungenutzten löschen",
+  "confirmDeleteAllUnused": "Sind Sie sicher, dass Sie alle ungenutzten Audiodateien löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+  "delete": "Löschen",
+  "cancel": "Abbrechen",
+  "deleteSuccess": "Audiodatei(en) erfolgreich gelöscht",
+  "deleteError": "Fehler beim Löschen der Audiodatei(en)",
+  "usedBy": "Verwendet von",
+  "unused": "Ungenutzt",
+  "confirmDelete": "Sind Sie sicher, dass Sie diese Audiodatei löschen möchten?",
+  "noAudio": "Keine Audiodateien gefunden"
+}

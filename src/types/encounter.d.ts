@@ -26,6 +26,8 @@ export type DBEncounter = {
   skill: string | null;
   type: EncounterType;
   completed: string;
+  soundcloud: string | null;
+  music_file: string | null;
 };
 
 export type Encounter = Prettify<
@@ -39,5 +41,7 @@ export type Encounter = Prettify<
     passed: boolean;
     element: CanvasElement;
     completed: boolean;
+    soundcloud: string | null;
+    musicFile: string | null;
   }
 >;

@@ -7,7 +7,13 @@ import { OverlayMap } from "@/types/overlay";
 import { Button } from "../ui/button";
 import { useOverlayStore } from "@/stores/useOverlayStore";
 import { EncounterDifficulty } from "@/types/encounter";
-import { ShrinkIcon, XIcon, Maximize2, Minimize2 } from "lucide-react";
+import {
+  ShrinkIcon,
+  XIcon,
+  Maximize2,
+  Minimize2,
+  PlayIcon,
+} from "lucide-react";
 import { CheckIcon, Pencil1Icon } from "@radix-ui/react-icons";
 import { Badge } from "../ui/badge";
 import { TypographyH4 } from "../ui/typographyH4";
@@ -38,6 +44,8 @@ import {
   useGroupTokensIntoElement,
 } from "@/hooks/useTokens";
 import { useEncounterQuery } from "@/hooks/useEncounters";
+import { getSoundCloudEmbedUrl } from "@/lib/utils";
+import { useMusicStore } from "@/stores/useMusicStore";
 
 type OverlayProps = OverlayMap["encounter.selection"];
 
@@ -74,6 +82,7 @@ function EncounterSelection({
 }: Props) {
   const { t } = useTranslation("ComponentEncounterSelection");
   const openOverlay = useOverlayStore((s) => s.open);
+  const setTrack = useMusicStore((s) => s.setTrack);
   const { data: encounter } = useEncounterQuery(encounterId, database);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -340,6 +349,38 @@ function EncounterSelection({
                         <MarkdownReader markdown={encounter.description} />
                       )}
 
+                      {encounter.soundcloud && (
+                        <div className="flex items-center justify-between rounded-lg border bg-neutral-50 p-2">
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <span className="text-sm font-medium text-neutral-700">
+                              Soundtrack
+                            </span>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => setTrack(encounter.soundcloud!)}
+                          >
+                            <PlayIcon className="mr-2 h-4 w-4" /> Play
+                          </Button>
+                        </div>
+                      )}
+
+                      {encounter.musicFile && (
+                        <div className="flex items-center justify-between rounded-lg border bg-neutral-50 p-2">
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <span className="text-sm font-medium text-neutral-700">
+                              Music File
+                            </span>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => setTrack(encounter.musicFile!)}
+                          >
+                            <PlayIcon className="mr-2 h-4 w-4" /> Play
+                          </Button>
+                        </div>
+                      )}
+
                       {encounter.type === "roll" &&
                         encounter?.difficulties &&
                         encounter.difficulties.map((diff, index) => (
@@ -369,7 +410,8 @@ function EncounterSelection({
                               onEdit={handleEditEncounterOpponent}
                             />
                           ))}
-                    </div>                  </ScrollArea>
+                    </div>{" "}
+                  </ScrollArea>
                 </motion.div>
               )}
             </Dialog.Content>
