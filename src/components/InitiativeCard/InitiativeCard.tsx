@@ -17,18 +17,23 @@ export type EncounterOpponentEntity = {
   position: number;
 } & EncounterOpponent;
 
+type Entity = PlayerEntity | EncounterOpponentEntity;
+
 type Props = {
-  entity: Player | EncounterOpponent;
+  entity: Entity;
   isActive: boolean;
+  onClick?: (entity: Entity) => void;
 };
 
-function InitiativeCard({ entity, isActive }: Props) {
+function InitiativeCard({ entity, isActive, onClick }: Props) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div
+        <button
+          onClick={() => onClick?.(entity)}
           className={cn(
-            "relative flex h-28 w-22 flex-col overflow-hidden rounded-lg bg-white outline-1 outline-white",
+            "relative flex h-28 w-22 cursor-pointer flex-col overflow-hidden rounded-lg bg-white outline-1 outline-white transition-all",
+            "outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
             isActive && "shadow-2xl",
           )}
         >
@@ -60,7 +65,7 @@ function InitiativeCard({ entity, isActive }: Props) {
               {entity.health} / {entity.max_health}
             </span>
           </div>
-        </div>
+        </button>
       </TooltipTrigger>
       <TooltipContent>{entity.name}</TooltipContent>
     </Tooltip>

@@ -12,9 +12,15 @@ type Props = {
   entities: Entity[];
   activePosition: number;
   maxVisible?: number;
+  onCardClick?: (entity: Entity) => void;
 };
 
-function Initiative({ entities, activePosition, maxVisible = 6 }: Props) {
+function Initiative({
+  entities,
+  activePosition,
+  maxVisible = 6,
+  onCardClick,
+}: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<Map<number, HTMLDivElement>>(new Map());
   const showButtons = entities.length > maxVisible;
@@ -67,7 +73,7 @@ function Initiative({ entities, activePosition, maxVisible = 6 }: Props) {
         {entities.map((entity) => (
           <div
             key={entity.id}
-            className="flex-shrink-0 px-1"
+            className="flex-shrink-0"
             ref={(el) => {
               if (el) {
                 cardsRef.current.set(entity.position, el);
@@ -79,6 +85,7 @@ function Initiative({ entities, activePosition, maxVisible = 6 }: Props) {
             <InitiativeCard
               entity={entity}
               isActive={entity.position === activePosition}
+              onClick={onCardClick}
             />
           </div>
         ))}
