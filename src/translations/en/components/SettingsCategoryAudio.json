@@ -1,0 +1,13 @@
+{
+  "audioFiles": "Audio Files",
+  "deleteAllUnused": "Delete All Unused",
+  "confirmDeleteAllUnused": "Are you sure you want to delete all unused audio files? This action cannot be undone.",
+  "delete": "Delete",
+  "cancel": "Cancel",
+  "deleteSuccess": "Audio file(s) deleted successfully",
+  "deleteError": "Failed to delete audio file(s)",
+  "usedBy": "Used by",
+  "unused": "Unused",
+  "confirmDelete": "Are you sure you want to delete this audio file?",
+  "noAudio": "No audio files found"
+}

@@ -14,6 +14,7 @@ import SettingsCategoryEffects from "../SettingsCategoryEffects/SettingsCategory
 import SettingsCategoryImmunities from "../SettingsCategoryImmunities/SettingsCategoryImmunities";
 import SettingsCategoryResistances from "../SettingsCategoryResistances/SettingsCategoryResistances";
 import SettingsCategoryOpponents from "../SettingsCategoryOpponents/SettingsCategoryOpponents";
+import SettingsCategoryAudio from "../SettingsCategoryAudio/SettingsCategoryAudio";
 
 type OverlayProps = OverlayMap["settings"];
 
@@ -57,6 +58,9 @@ function SettingsDrawer({
 
       case "images":
         return <SettingsCategoryImages database={database} />;
+
+      case "audio":
+        return <SettingsCategoryAudio database={database} />;
 
       case "players":
         return <SettingsCategoryPlayers database={database} />;

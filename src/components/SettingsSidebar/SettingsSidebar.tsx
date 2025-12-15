@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Gem,
   Image,
+  Music,
   NotebookTabs,
   PanelLeft,
   PersonStanding,
@@ -36,6 +37,7 @@ import { useTranslation } from "react-i18next";
 export type SettingsCategory =
   | "general"
   | "images"
+  | "audio"
   | "players"
   | "effects"
   | "immunities"
@@ -89,6 +91,17 @@ function SettingsSidebar({ activeItem, onClose, onSelect }: Props) {
                 >
                   <Image />
                   <span>{t("images")}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip={t("audio")}
+                  isActive={activeItem === "audio"}
+                  onClick={() => onSelect("audio")}
+                >
+                  <Music />
+                  <span>{t("audio")}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 

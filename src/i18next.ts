@@ -28,6 +28,8 @@ import ComponentSettingsCategoryGeneralEN from "@/translations/en/components/Set
 import ComponentSettingsCategoryGeneralDE from "@/translations/de/components/SettingsCategoryGeneral.json";
 import ComponentSettingsCategoryImagesEN from "@/translations/en/components/SettingsCategoryImages.json";
 import ComponentSettingsCategoryImagesDE from "@/translations/de/components/SettingsCategoryImages.json";
+import ComponentSettingsCategoryAudioEN from "@/translations/en/components/SettingsCategoryAudio.json";
+import ComponentSettingsCategoryAudioDE from "@/translations/de/components/SettingsCategoryAudio.json";
 import ComponentSettingsSidebarEN from "@/translations/en/components/SettingsSidebar.json";
 import ComponentSettingsSidebarDE from "@/translations/de/components/SettingsSidebar.json";
 import ComponentEditResistanceDrawerEN from "@/translations/en/components/EditResistanceDrawer.json";
@@ -123,6 +125,7 @@ const resources = {
     ComponentSettingsCategoryPlayers: ComponentSettingsCategoryPlayersEN,
     ComponentSettingsCategoryGeneral: ComponentSettingsCategoryGeneralEN,
     ComponentSettingsCategoryImages: ComponentSettingsCategoryImagesEN,
+    ComponentSettingsCategoryAudio: ComponentSettingsCategoryAudioEN,
     ComponentSettingsSidebar: ComponentSettingsSidebarEN,
     ComponentCatalog: ComponentCatalogEN,
     ComponentEditResistanceDrawer: ComponentEditResistanceDrawerEN,
@@ -183,6 +186,7 @@ const resources = {
     ComponentSettingsCategoryPlayers: ComponentSettingsCategoryPlayersDE,
     ComponentSettingsCategoryGeneral: ComponentSettingsCategoryGeneralDE,
     ComponentSettingsCategoryImages: ComponentSettingsCategoryImagesDE,
+    ComponentSettingsCategoryAudio: ComponentSettingsCategoryAudioDE,
     ComponentSettingsSidebar: ComponentSettingsSidebarDE,
     ComponentCatalog: ComponentCatalogDE,
     ComponentEditResistanceDrawer: ComponentEditResistanceDrawerDE,
