@@ -50,7 +50,6 @@ Inracker is a Dungeon Master Tool for playing Dungeons and Dragons and other TTR
 The frontend interacts with the "backend" (the `database.ts` layer) exclusively via **TanStack Query**. To maintain clean separation and reusability, we use the **Entity Hook Pattern**.
 
 - **Entity Hook Pattern:**
-
   - Create a dedicated hook file for each domain entity (e.g., `src/hooks/useOpponents.ts`, `src/hooks/useEncounterOpponents.ts`).
   - These hooks **export individual functions** (e.g., `export function useCreateOpponent(database = defaultDb)`) wrapping `useQuery` (for reading) and `useMutation` (for writing).
   - **Dependency Injection:** Each hook function should accept an optional `database` parameter (defaulting to the global `database` instance). This allows for easier testing by injecting a mock database.
@@ -58,7 +57,6 @@ The frontend interacts with the "backend" (the `database.ts` layer) exclusively 
   - **Responsibility:** The hook handles cache invalidation (`queryClient.invalidateQueries`) upon success. The Component simply calls `create.mutate(data)`.
 
 - **Atomic Operations (No Chaining in UI):**
-
   - **Rule:** If an action requires multiple database steps (e.g., "Create Opponent" AND "Create Token"), **do not chain promises in the React component**.
   - **Solution:** Create a single, atomic async function in `src/lib/database.ts` (e.g., `createEncounterOpponentWithToken`) that performs all steps. The hook and UI should treat this as one operation.
 
@@ -74,10 +72,10 @@ The frontend interacts with the "backend" (the `database.ts` layer) exclusively 
         queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] }),
     });
   }
-  
+
   // In Component
   import { useCreateEncounterOpponent } from "@/hooks/useEncounterOpponents";
-  
+
   function MyComponent({ database }) {
     const createOpponent = useCreateEncounterOpponent(database);
     // ...
@@ -135,13 +133,14 @@ Overlays (Drawers, Dialogs) are managed centrally to ensure clean state manageme
 
 When an overlay/drawer component (managed by `OverlayHost` and `useOverlayStore`) needs to display or react to real-time changes in data that is stored in the database, it's crucial to understand the data flow.
 
-*   **The Challenge:** Overlays receive their initial `props` as a static snapshot when `useOverlayStore.getState().open(type, props)` is called. Since these props are stored in a Zustand store and the overlay renders in a portal, it is effectively "disconnected" from the direct React component tree that might be observing live data via TanStack Query.
-*   **The Solution:** For overlays to reflect immediate database changes (e.g., after a mutation and query invalidation), the overlay component itself must **subscribe directly to the relevant TanStack Query hook**.
+- **The Challenge:** Overlays receive their initial `props` as a static snapshot when `useOverlayStore.getState().open(type, props)` is called. Since these props are stored in a Zustand store and the overlay renders in a portal, it is effectively "disconnected" from the direct React component tree that might be observing live data via TanStack Query.
+- **The Solution:** For overlays to reflect immediate database changes (e.g., after a mutation and query invalidation), the overlay component itself must **subscribe directly to the relevant TanStack Query hook**.
 
 **Pattern:**
-1.  Pass minimal identifying information (like an `id`) as a prop to the overlay. If initial display of a full object is necessary before the query loads, pass the full object as an `initialData` prop.
-2.  Inside the overlay component, use a TanStack Query `useQuery` hook (e.g., `useEncounterQuery(id, initialData, database)`) to fetch the latest data based on the ID.
-3.  Use the `data` returned by this query hook as the source of truth for rendering the overlay's UI. This ensures that when related mutations invalidate the query, the overlay component re-renders with the fresh data from the cache.
+
+1. Pass minimal identifying information (like an `id`) as a prop to the overlay. If initial display of a full object is necessary before the query loads, pass the full object as an `initialData` prop.
+2. Inside the overlay component, use a TanStack Query `useQuery` hook (e.g., `useEncounterQuery(id, initialData, database)`) to fetch the latest data based on the ID.
+3. Use the `data` returned by this query hook as the source of truth for rendering the overlay's UI. This ensures that when related mutations invalidate the query, the overlay component re-renders with the fresh data from the cache.
 
 **Example (simplified):**
 
@@ -151,7 +150,11 @@ import { useMyEntityQuery } from "@/hooks/useMyEntities"; // TanStack Query hook
 
 function MyOverlay({ entityId, initialEntityData, database }) {
   // Subscribe to live data for the entity
-  const { data: liveEntity } = useMyEntityQuery(entityId, initialEntityData, database);
+  const { data: liveEntity } = useMyEntityQuery(
+    entityId,
+    initialEntityData,
+    database,
+  );
 
   // Use 'liveEntity' for all rendering logic
   if (!liveEntity) return <Loader />;
@@ -160,7 +163,11 @@ function MyOverlay({ entityId, initialEntityData, database }) {
     <div>
       {/* Display properties of liveEntity */}
       <p>{liveEntity.name}</p>
-      <button onClick={() => updateMutation.mutate({ ...liveEntity, someProp: newValue })}>
+      <button
+        onClick={() =>
+          updateMutation.mutate({ ...liveEntity, someProp: newValue })
+        }
+      >
         Update
       </button>
     </div>
@@ -239,26 +246,29 @@ hygen translation new
 ## Development Workflow
 
 1. **Modify Schema:**
-    - Update migrations in `src-tauri/src/lib.rs`.
-    - Update TypeScript types in `src/types/`.
+   - Update migrations in `src-tauri/src/lib.rs`.
+   - Update TypeScript types in `src/types/`.
 2. **Update Data Layer:**
-    - Add/Update functions in `src/lib/database.ts` to handle the new schema.
+   - Add/Update functions in `src/lib/database.ts` to handle the new schema.
 3. **Update State/UI:**
-    - Create/Update TanStack Query hooks (in `src/hooks/` or co-located).
-    - If a new Overlay is needed:
-      - Create the component.
-      - Register it in `src/components/Overlay/OverlayHost.tsx`.
-      - Add types to `src/types/overlay.ts`.
+   - Create/Update TanStack Query hooks (in `src/hooks/` or co-located).
+   - If a new Overlay is needed:
+     - Create the component.
+     - Register it in `src/components/Overlay/OverlayHost.tsx`.
+     - Add types to `src/types/overlay.ts`.
 4. **Scaffold:**
-    - Use `hygen component new` or `hygen translation new` to speed up boilerplate.
+   - Use `hygen component new` or `hygen translation new` to speed up boilerplate.
 
 ## Common Commands
-
 
 ## Future Features
 
 - In settings: see all files that are in the app directory in order to delete files that are not used
 - Importing and Exporting databases
+
+## GIT
+
+Do not self commit. The user will make the commits.
 
 ## Todos
 
@@ -285,4 +295,3 @@ hygen translation new
   - [ ] gamestate
     - [ ] stored as an entity for each party
   - [ ]
-
