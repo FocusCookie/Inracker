@@ -365,6 +365,22 @@ function EncounterSelection({
                         </div>
                       )}
 
+                      {encounter.musicFile && (
+                        <div className="flex items-center justify-between rounded-lg border bg-neutral-50 p-2">
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <span className="text-sm font-medium text-neutral-700">
+                              Music File
+                            </span>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => setTrack(encounter.musicFile!)}
+                          >
+                            <PlayIcon className="mr-2 h-4 w-4" /> Play
+                          </Button>
+                        </div>
+                      )}
+
                       {encounter.type === "roll" &&
                         encounter?.difficulties &&
                         encounter.difficulties.map((diff, index) => (

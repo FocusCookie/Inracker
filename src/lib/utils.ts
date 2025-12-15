@@ -24,6 +24,34 @@ export async function createTauriAppDataSubfolders() {
       recursive: true,
     });
   }
+  await mkdir("audio", {
+    baseDir: BaseDirectory.AppData,
+    recursive: true,
+  });
+}
+
+export async function storeAudio(audio: File) {
+  if (audio instanceof File) {
+    try {
+      const fileName = `${Date.now()}-${audio.name}`;
+      const filePath = `audio/${fileName}`;
+      const buffer = await audio.arrayBuffer();
+
+      await writeFile(filePath, new Uint8Array(buffer), {
+        baseDir: BaseDirectory.AppData,
+      });
+
+      const appDataDirPath = await appDataDir();
+      const appFilePath = await join(appDataDirPath, filePath);
+      const assetUrl = convertFileSrc(appFilePath);
+
+      return assetUrl;
+    } catch (error) {
+      console.error("Error saving audio file:", error);
+    }
+  }
+
+  return null;
 }
 
 export async function storeImage(picture: File | string, folder: ImageFolder) {

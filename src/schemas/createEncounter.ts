@@ -22,6 +22,7 @@ export const createEncounterSchema = z.object({
   completed: z.boolean().optional(),
   skill: z.string().optional(),
   soundcloud: z.string().optional(),
+  musicFile: z.string().optional(),
   type: z.enum(["note", "roll", "fight"]),
 });
 

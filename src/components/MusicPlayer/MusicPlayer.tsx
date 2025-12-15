@@ -10,9 +10,10 @@ export function MusicPlayer({ className }: { className?: string }) {
 
   if (!currentTrackUrl) return null;
 
-  const embedUrl = getSoundCloudEmbedUrl(currentTrackUrl);
-
-  if (!embedUrl) return null;
+  const isEmbed =
+    currentTrackUrl.includes("soundcloud.com") ||
+    currentTrackUrl.includes("<iframe");
+  const embedUrl = isEmbed ? getSoundCloudEmbedUrl(currentTrackUrl) : null;
 
   return (
     <motion.div
@@ -32,7 +33,7 @@ export function MusicPlayer({ className }: { className?: string }) {
       <motion.div
         layout
         className={cn(
-          "flex items-center p-1",
+          "flex items-center p-1 px-2",
           isMinimized ? "gap-2" : "justify-between",
         )}
       >
@@ -69,14 +70,20 @@ export function MusicPlayer({ className }: { className?: string }) {
           isMinimized ? "pointer-events-none opacity-0" : "opacity-100",
         )}
       >
-        <iframe
-          width="100%"
-          height="100%"
-          scrolling="no"
-          frameBorder="0"
-          allow="autoplay"
-          src={embedUrl}
-        />
+        {isEmbed && embedUrl ? (
+          <iframe
+            width="100%"
+            height="100%"
+            scrolling="no"
+            frameBorder="0"
+            allow="autoplay"
+            src={embedUrl}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <audio controls autoPlay src={currentTrackUrl} className="w-full" />
+          </div>
+        )}
       </div>
     </motion.div>
   );

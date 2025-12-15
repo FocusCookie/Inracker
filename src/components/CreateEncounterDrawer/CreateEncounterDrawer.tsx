@@ -43,6 +43,7 @@ import {
   useDeleteEncounterOpponent,
 } from "@/hooks/useEncounterOpponents";
 import { useOpponents } from "@/hooks/useOpponents";
+import { storeAudio } from "@/lib/utils";
 
 type OverlayProps = OverlayMap["encounter.create"];
 
@@ -513,6 +514,31 @@ function CreateEncounterDrawer({
                         placeholder="SoundCloud Link (e.g. https://soundcloud.com/...)"
                         {...field}
                         value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="musicFile"
+                render={({ field }) => (
+                  <FormItem className="w-full px-0.5">
+                    <FormLabel>Music File</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="file"
+                        accept="audio/*"
+                        disabled={isCreating}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const url = await storeAudio(file);
+                            if (url) field.onChange(url);
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />

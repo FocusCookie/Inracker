@@ -195,6 +195,12 @@ pub fn run() {
             sql: "ALTER TABLE encounters ADD COLUMN soundcloud TEXT;",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 14,
+            description: "add music_file to encounters table",
+            sql: "ALTER TABLE encounters ADD COLUMN music_file TEXT;",
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()

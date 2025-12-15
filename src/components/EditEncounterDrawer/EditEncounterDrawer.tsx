@@ -52,6 +52,7 @@ import {
   useCreateMultipleEncounterOpponents,
   useDeleteEncounterOpponent,
 } from "@/hooks/useEncounterOpponents";
+import { storeAudio } from "@/lib/utils";
 
 type OverlayProps = OverlayMap["encounter.edit"];
 
@@ -114,6 +115,7 @@ function EditEncounterDrawer({
     opponents: z.array(z.number()).optional(),
     completed: z.boolean().optional(),
     soundcloud: z.string().optional(),
+    musicFile: z.string().optional(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -131,6 +133,7 @@ function EditEncounterDrawer({
       opponents: [],
       completed: encounter.completed || false,
       soundcloud: encounter.soundcloud || "",
+      musicFile: encounter.musicFile || "",
     },
   });
 
@@ -154,6 +157,7 @@ function EditEncounterDrawer({
         opponents: encounter.opponents || [],
         completed: encounter.completed || false,
         soundcloud: encounter.soundcloud || "",
+        musicFile: encounter.musicFile || "",
       });
       setType(encounter.type);
     }
@@ -674,6 +678,31 @@ function EditEncounterDrawer({
                         placeholder="SoundCloud Link (e.g. https://soundcloud.com/...)"
                         {...field}
                         value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="musicFile"
+                render={({ field }) => (
+                  <FormItem className="w-full px-0.5">
+                    <FormLabel>Music File</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="file"
+                        accept="audio/*"
+                        disabled={isLoading}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const url = await storeAudio(file);
+                            if (url) field.onChange(url);
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
