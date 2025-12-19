@@ -2,6 +2,7 @@ import { Effect, EffectDurationType } from "./effect";
 import { Prettify } from "./utils";
 
 type EntityType = "player" | "opponent";
+type Tick = "start" | "end";
 
 export type DBActiveEffect = {
   readonly id: number;
@@ -11,6 +12,11 @@ export type DBActiveEffect = {
   remaining_duration: number | null;
   duration_type: EffectDurationType;
   created_at: string;
+  /*
+   * in seconds
+   * */
+  total_duration: number;
+  tick_on: Tick;
 };
 
 export type ActiveEffect = Prettify<{
@@ -21,4 +27,12 @@ export type ActiveEffect = Prettify<{
   remainingDuration: number | null;
   durationType: EffectDurationType;
   createdAt: string;
+  /*
+   * in seconds
+   * */
+  totalDuration: number;
+  /*
+   * defines if an effect ends on a start or end of a round
+   * */
+  tickOn: Tick;
 }>;

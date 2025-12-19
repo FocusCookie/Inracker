@@ -201,6 +201,69 @@ pub fn run() {
             sql: "ALTER TABLE encounters ADD COLUMN music_file TEXT;",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 15,
+            description: "add total_duration and tick_on to active_effects ",
+            sql: "ALTER TABLE active_effects ADD COLUMN total_duration INTEGER DEFAULT 0;
+                ALTER TABLE active_effects ADD COLUMN tick_on TEXT DEFAULT 'start'; -- start, end 
+            ",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 16,
+            description: "create settings table key value store",
+            sql: "CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            );
+            INSERT OR IGNORE INTO settings (key, value) VALUES ('seconds_per_round', '6');
+            ",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 17,
+            description: "create combats table",
+            sql: "CREATE TABLE IF NOT EXISTS combats (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                chapter_id INTEGER NOT NULL,
+                round INTEGER DEFAULT 1,
+                active_participant_id INTEGER, 
+                status TEXT DEFAULT 'running', --  running, paused or finished
+                started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(chapter_id) REFERENCES chapters(id)
+            )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 18,
+            description: "create combat_participants table",
+            sql: "CREATE TABLE IF NOT EXISTS combat_participants (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                combat_id TEXT NOT NULL,
+                token_id TEXT,
+                name TEXT, -- Snapshot of name or custom label
+                initiative INTEGER NOT NULL,
+                is_hidden BOOLEAN DEFAULT 0, -- GM-only visibility
+                has_acted BOOLEAN DEFAULT 0, -- Useful for reaction tracking
+                FOREIGN KEY(combat_id) REFERENCES combats(id)
+            );",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 19,
+            description: "create combat_logs table",
+            sql: "CREATE TABLE IF NOT EXISTS combat_los (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                combat_id TEXT NOT NULL,
+                round INTEGER NOT NULL,
+                turn_index INTEGER NOT NULL,
+                type TEXT NOT NULL, 
+                payload JSON NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(combat_id) REFERENCES combats(id)
+            );",
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()
