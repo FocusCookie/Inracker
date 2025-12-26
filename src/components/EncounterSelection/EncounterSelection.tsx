@@ -44,7 +44,6 @@ import {
   useGroupTokensIntoElement,
 } from "@/hooks/useTokens";
 import { useEncounterQuery } from "@/hooks/useEncounters";
-import { getSoundCloudEmbedUrl } from "@/lib/utils";
 import { useMusicStore } from "@/stores/useMusicStore";
 
 type OverlayProps = OverlayMap["encounter.selection"];
