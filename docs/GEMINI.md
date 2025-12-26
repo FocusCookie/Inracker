@@ -269,29 +269,3 @@ hygen translation new
 ## GIT
 
 Do not self commit. The user will make the commits.
-
-## Todos
-
-- [ ] MP3 files
-      -- [ ] component where music can be selected that can be played during the game
-- [x] Effects need to have a boolean value for until long rest
-- [ ] Play&ChapterSelection: shortcut refactor to hook
-- [ ] Canvas
-  - [x] Show opponents when there are tokens for the encounters
-  - [x] make the elements movable like the tokens
-- [ ] Play screen
-  - [ ] Go back button and exit party button
-  - [ ] show the game states here if there are implemented
-- [ ] ActiveEffects connecting with players and opponents in chapter
-- [ ] effectCard - show duration and value in the opened card or as badges
-- [ ] need to store a game round and time state for the effects. time needs to be enabled somehow with a timer than rounds could be updated with a next round function
-- [x] settings dialog
-  - [x] immunites edit
-  - [x] resistances edit
-  - [ ] user settings
-- [ ] ui for round interaction
-- [ ] innitiative
-  - [ ] ui
-  - [ ] gamestate
-    - [ ] stored as an entity for each party
-  - [ ]
