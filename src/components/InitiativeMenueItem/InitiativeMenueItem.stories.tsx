@@ -15,24 +15,34 @@ type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
   args: {
-    player: {
-      id: 1,
-      name: "Player 1",
-      level: 5,
-      health: 20,
-      max_health: 20,
-      ep: 0,
-      image: "",
-      icon: "🧝",
-      details: "Some player details",
-      overview: "Player overview",
-      role: "Fighter",
-      effects: [],
-      immunities: [],
-      resistances: [],
+    entity: {
+      type: "player",
+      properties: {
+        id: 1,
+        name: "Player 1",
+        level: 5,
+        health: 20,
+        max_health: 20,
+        ep: 0,
+        image: "",
+        icon: "🧝",
+        details: "Some player details",
+        overview: "Player overview",
+        role: "Fighter",
+        effects: [],
+        immunities: [],
+        resistances: [],
+      },
     },
-    onRemove: fn(),
-    onInitiativeChange: fn(),
+    onRemove: fn((entity) =>
+      console.log(
+        `Removed ${entity.type} with id: ${entity.properties.id}`,
+      ),
+    ),
+    onInitiativeChange: fn((entity, value) =>
+      console.log(
+        `Changed ${entity.type} with id: ${entity.properties.id} to initiative: ${value}`,
+      ),
+    ),
   },
 };
-

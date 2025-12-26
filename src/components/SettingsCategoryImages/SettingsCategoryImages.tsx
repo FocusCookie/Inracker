@@ -231,7 +231,7 @@ function SettingsCategoryImages({ database = defaultDb }: Props) {
                           />
                         </div>
 
-                        <div className="flex min-w-0 flex-grow flex-col gap-2">
+                        <div className="flex min-w-0 grow flex-col gap-2">
                           <p
                             className="truncate text-sm font-medium"
                             title={file.name}

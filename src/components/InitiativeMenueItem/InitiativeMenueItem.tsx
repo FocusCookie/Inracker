@@ -1,39 +1,51 @@
 import { useState, KeyboardEvent, ChangeEvent } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Player } from "@/types/player";
-import { Badge } from "../ui/badge";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { TrashIcon } from "lucide-react";
 import "./InitiativeMenueItem.css";
+import { InitiativeMenuEntity } from "@/types/initiative";
+import { useTranslation } from "react-i18next";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+
 
 type Props = {
-  player: Player;
-  onRemove: (playerId: Player["id"]) => void;
-  onInitiativeChange?: (playerId: Player["id"], value: number) => void;
+  entity: InitiativeMenuEntity;
+  onRemove: (entity: InitiativeMenuEntity) => void;
+  onInitiativeChange?: (entity: InitiativeMenuEntity, value: number) => void;
 };
 
-function InitiativeMenueItem({ player, onRemove, onInitiativeChange }: Props) {
-  const [value, setValue] = useState("");
+function InitiativeMenueItem({ entity, onRemove, onInitiativeChange }: Props) {
+  const { t } = useTranslation("ComponentInitiativeMenuItem");
+  const [inputValue, setInputValue] = useState("");
+  const [committedValue, setCommittedValue] = useState(0);
 
   function handleRemove() {
-    onRemove(player.id);
+    onRemove(entity);
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
-    setValue(e.target.value);
+    setInputValue(e.target.value);
   }
 
   function handleBlur() {
     if (onInitiativeChange) {
-      const num = value === "" ? 0 : Number(value);
-      onInitiativeChange(player.id, isNaN(num) ? 0 : num);
+      const num = inputValue === "" ? 0 : Number(inputValue);
+      if (num !== committedValue) {
+        onInitiativeChange(entity, isNaN(num) ? 0 : num);
+        setCommittedValue(isNaN(num) ? 0 : num);
+      }
     }
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
-      e.currentTarget.blur();
+      e.currentTarget.blur(); // This will trigger handleBlur
     }
   }
 
@@ -41,33 +53,53 @@ function InitiativeMenueItem({ player, onRemove, onInitiativeChange }: Props) {
     <div className="initiativeMenueItem flex justify-between gap-2">
       <div className="flex items-center gap-2">
         <Avatar className="h-8 w-8">
-          <AvatarImage src={player.image || undefined} alt={player.name} />
-          <AvatarFallback>{player.icon}</AvatarFallback>
+          <AvatarImage
+            src={entity.properties.image || undefined}
+            alt={entity.properties.name}
+          />
+          <AvatarFallback>{entity.properties.icon}</AvatarFallback>
         </Avatar>
 
-        <strong>
-          {player.name} <Badge variant="outline">LVL {player.level}</Badge>
-        </strong>
+        <strong>{entity.properties.name}</strong>
       </div>
 
       <div className="flex items-center gap-1">
-        <Button size="icon" variant="ghost" onClick={handleRemove}>
-          <TrashIcon />
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" onClick={handleRemove}>
+                <TrashIcon />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t("remove", { name: entity.properties.name })}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
-        <Input
-          className="w-[5ch] text-center"
-          type="number"
-          placeholder="0"
-          value={value}
-          onChange={handleInputChange}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-        />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <Input
+                  className="w-[5ch] text-center"
+                  type="number"
+                  placeholder="0"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t("initiative", { name: entity.properties.name })}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </div>
   );
 }
 
 export default InitiativeMenueItem;
-
