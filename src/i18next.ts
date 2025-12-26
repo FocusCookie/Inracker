@@ -1,5 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentInitiativeMenueItemEN from "@/translations/en/components/InitiativeMenueItem.json";
+import ComponentInitiativeMenueItemDE from "@/translations/de/components/InitiativeMenueItem.json"; 
 import ComponentSettingsOpponentCardEN from "@/translations/en/components/SettingsOpponentCard.json";
 import ComponentSettingsOpponentCardDE from "@/translations/de/components/SettingsOpponentCard.json";
 import ComponentEditOpponentDrawerEN from "@/translations/en/components/EditOpponentDrawer.json";
@@ -109,6 +111,7 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentInitiativeMenueItem: ComponentInitiativeMenueItemEN,
     ComponentEditPlayerDrawer: ComponentEditPlayerDrawerEN,
     ComponentSettingsOpponentCard: ComponentSettingsOpponentCardEN,
     ComponentEditOpponentDrawer: ComponentEditOpponentDrawerEN,
@@ -170,6 +173,7 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentInitiativeMenueItem: ComponentInitiativeMenueItemDE,
     ComponentEditPlayerDrawer: ComponentEditPlayerDrawerDE,
     ComponentSettingsOpponentCard: ComponentSettingsOpponentCardDE,
     ComponentEditOpponentDrawer: ComponentEditOpponentDrawerDE,

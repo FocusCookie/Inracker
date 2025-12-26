@@ -5,14 +5,6 @@ import { Button } from "../ui/button";
 import { TrashIcon } from "lucide-react";
 import "./InitiativeMenueItem.css";
 import { InitiativeMenuEntity } from "@/types/initiative";
-import { useTranslation } from "react-i18next";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
-
 
 type Props = {
   entity: InitiativeMenuEntity;
@@ -21,7 +13,6 @@ type Props = {
 };
 
 function InitiativeMenueItem({ entity, onRemove, onInitiativeChange }: Props) {
-  const { t } = useTranslation("ComponentInitiativeMenuItem");
   const [inputValue, setInputValue] = useState("");
   const [committedValue, setCommittedValue] = useState(0);
 
@@ -64,42 +55,22 @@ function InitiativeMenueItem({ entity, onRemove, onInitiativeChange }: Props) {
       </div>
 
       <div className="flex items-center gap-1">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button size="icon" variant="ghost" onClick={handleRemove}>
-                <TrashIcon />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{t("remove", { name: entity.properties.name })}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div>
-                <Input
-                  className="w-[5ch] text-center"
-                  type="number"
-                  placeholder="0"
-                  value={inputValue}
-                  onChange={handleInputChange}
-                  onBlur={handleBlur}
-                  onKeyDown={handleKeyDown}
-                />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{t("initiative", { name: entity.properties.name })}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Button size="icon" variant="ghost" onClick={handleRemove}>
+          <TrashIcon />
+        </Button>
+        <Input
+          className="w-[5ch] text-center"
+          type="number"
+          placeholder="0"
+          value={inputValue}
+          onChange={handleInputChange}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+        />
       </div>
     </div>
   );
 }
 
 export default InitiativeMenueItem;
+
