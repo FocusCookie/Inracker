@@ -1,4 +1,11 @@
-import { connect, createDatabaseError } from "./core";
+import {
+  execute,
+  select,
+  beginTransaction,
+  commit,
+  rollback,
+  createDatabaseError,
+} from "./core";
 import {
   DBCombat,
   DBCombatEffect,
@@ -11,24 +18,23 @@ export const createCombat = async (
   participantsData: {
     name: string;
     initiative: number;
-    entityId: number;
-    type: "player" | "opponent";
+    entityId?: number;
+    type?: "player" | "opponent";
   }[],
 ): Promise<string> => {
-  const db = await connect();
   const combatId = crypto.randomUUID();
 
-  await db.execute("BEGIN TRANSACTION");
+  await beginTransaction();
 
   try {
-    await db.execute(
+    await execute(
       "INSERT INTO combats (id, chapter_id, round, status) VALUES ($1, $2, 1, 'running')",
       [combatId, chapterId],
     );
 
     if (participantsData.length !== 0) {
       for (const participant of participantsData) {
-        await db.execute(
+        await execute(
           `INSERT INTO combat_participants 
                 (id, combat_id, name, initiative, entity_id, entity_type) 
                 VALUES ($1, $2, $3, $4, $5, $6)`,
@@ -37,53 +43,52 @@ export const createCombat = async (
             combatId,
             participant.name,
             participant.initiative,
-            participant.entityId,
-            participant.type,
+            participant.entityId || null,
+            participant.type || null,
           ],
         );
       }
 
-      const sorted = await db.select<any[]>(
+      const sorted = await select<any[]>(
         "SELECT id FROM combat_participants WHERE combat_id = $1 ORDER BY initiative DESC LIMIT 1",
         [combatId],
       );
 
       if (sorted.length > 0) {
-        await db.execute(
+        await execute(
           "UPDATE combats SET active_participant_id = $1 WHERE id = $2",
           [sorted[0].id, combatId],
         );
       }
     }
 
-    await db.execute("COMMIT");
+    await commit();
 
     return combatId;
   } catch (e) {
-    await db.execute("ROLLBACK");
+    await rollback();
     throw createDatabaseError("Failed to create combat", e);
   }
 };
 
 export const nextTurn = async (combatId: string) => {
-  const db = await connect();
-  await db.execute("BEGIN TRANSACTION");
+  await beginTransaction();
 
   try {
-    const combatRes = await db.select<DBCombat[]>(
+    const combatRes = await select<DBCombat[]>(
       "SELECT * FROM combats WHERE id = $1",
       [combatId],
     );
     if (!combatRes.length) throw new Error("Combat not found");
     const combat = combatRes[0];
 
-    const participants = await db.select<DBCombatParticipant[]>(
+    const participants = await select<DBCombatParticipant[]>(
       "SELECT id FROM combat_participants WHERE combat_id = $1 ORDER BY initiative DESC",
       [combatId],
     );
 
     if (participants.length === 0) {
-      await db.execute("COMMIT");
+      await commit();
 
       return;
     }
@@ -103,25 +108,25 @@ export const nextTurn = async (combatId: string) => {
     }
 
     if (isNewRound) {
-      await db.execute(
+      await execute(
         "UPDATE combat_effects SET duration = duration - 1 WHERE combat_id = $1",
         [combatId],
       );
-      await db.execute(
+      await execute(
         "DELETE FROM combat_effects WHERE combat_id = $1 AND duration <= 0",
         [combatId],
       );
     }
 
     const nextParticipantId = participants[nextIndex].id;
-    await db.execute(
+    await execute(
       "UPDATE combats SET round = $1, active_participant_id = $2 WHERE id = $3",
       [nextRound, nextParticipantId, combatId],
     );
 
-    await db.execute("COMMIT");
+    await commit();
   } catch (e) {
-    await db.execute("ROLLBACK");
+    await rollback();
     throw createDatabaseError("Failed to advance turn", e);
   }
 };
@@ -133,8 +138,7 @@ export const addEffect = async (effect: {
   description?: string;
   duration: number;
 }) => {
-  const db = await connect();
-  await db.execute(
+  await execute(
     `INSERT INTO combat_effects (id, combat_id, participant_id, name, description, duration, total_duration)
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
     [
@@ -150,16 +154,14 @@ export const addEffect = async (effect: {
 };
 
 export const removeEffect = async (effectId: string) => {
-  const db = await connect();
-  await db.execute("DELETE FROM combat_effects WHERE id = $1", [effectId]);
+  await execute("DELETE FROM combat_effects WHERE id = $1", [effectId]);
 };
 
 export const updateInitiative = async (
   participantId: string,
   newInitiative: number,
 ) => {
-  const db = await connect();
-  await db.execute(
+  await execute(
     "UPDATE combat_participants SET initiative = $1 WHERE id = $2",
     [newInitiative, participantId],
   );
@@ -168,21 +170,19 @@ export const updateInitiative = async (
 export const getCombatState = async (
   chapterId: number,
 ): Promise<FullCombatState | null> => {
-  const db = await connect();
-
-  const combats = await db.select<DBCombat[]>(
+  const combats = await select<DBCombat[]>(
     "SELECT * FROM combats WHERE chapter_id = $1 AND status != 'finished'",
     [chapterId],
   );
   if (!combats.length) return null;
   const currentCombat = combats[0];
 
-  const participants = await db.select<DBCombatParticipant[]>(
+  const participants = await select<DBCombatParticipant[]>(
     "SELECT * FROM combat_participants WHERE combat_id = $1 ORDER BY initiative DESC",
     [currentCombat.id],
   );
 
-  const effects = await db.select<DBCombatEffect[]>(
+  const effects = await select<DBCombatEffect[]>(
     "SELECT * FROM combat_effects WHERE combat_id = $1",
     [currentCombat.id],
   );
@@ -209,6 +209,22 @@ export const getCombatState = async (
   };
 };
 
+export const removeParticipant = async (participantId: string) => {
+  await beginTransaction();
+  try {
+    await execute("DELETE FROM combat_effects WHERE participant_id = $1", [
+      participantId,
+    ]);
+    await execute("DELETE FROM combat_participants WHERE id = $1", [
+      participantId,
+    ]);
+    await commit();
+  } catch (e) {
+    await rollback();
+    throw createDatabaseError("Failed to remove participant", e);
+  }
+};
+
 export const combat = {
   create: createCombat,
   nextTurn,
@@ -216,5 +232,5 @@ export const combat = {
   removeEffect,
   updateInitiative,
   getState: getCombatState,
+  removeParticipant: removeParticipant,
 };
-

@@ -1,7 +1,6 @@
 import { DBChapter, Chapter, ChapterStatus } from "@/types/chapters";
 import { Party } from "@/types/party";
-import { connect, createDatabaseError } from "./core";
-import TauriDatabase from "@tauri-apps/plugin-sql";
+import { execute, select, createDatabaseError } from "./core"; // Updated import
 import { deleteImage } from "../utils";
 import { getDetailedEncountersByIds, deleteEncounterById } from "./encounters";
 import { deleteEncounterOpponentById } from "./opponents";
@@ -13,10 +12,9 @@ import {
 import { getPartyById } from "./parties";
 
 export const getChapterById = async (
-  db: TauriDatabase,
   id: number,
 ): Promise<DBChapter> => {
-  const result = await db.select<DBChapter[]>(
+  const result = await select<DBChapter[]>( // Changed db.select to select
     "SELECT * FROM chapters WHERE id = $1",
     [id],
   );
@@ -29,10 +27,9 @@ export const getChapterById = async (
 };
 
 export const getDetailedChapterById = async (
-  db: TauriDatabase,
   id: number,
 ): Promise<Chapter> => {
-  const dbChapters = await db.select<DBChapter[]>(
+  const dbChapters = await select<DBChapter[]>( // Changed db.select to select
     "SELECT * FROM chapters WHERE id = $1",
     [id],
   );
@@ -45,7 +42,7 @@ export const getDetailedChapterById = async (
   const state = dbChapter.state as ChapterStatus;
   const encounterIds = JSON.parse(dbChapter.encounters) as number[];
 
-  const encounters = await getDetailedEncountersByIds(db, encounterIds);
+  const encounters = await getDetailedEncountersByIds(encounterIds); // Removed db parameter
 
   const totalExperience = encounters.reduce(
     (acc, enc) => acc + (enc.experience || 0),
@@ -66,28 +63,26 @@ export const getDetailedChapterById = async (
 };
 
 export const createChapter = async (
-  db: TauriDatabase,
   chapter: Omit<Chapter, "id">,
 ): Promise<DBChapter> => {
   const { name, icon, description, battlemap, state, party, encounters } =
     chapter;
 
-  const result = await db.execute(
+  const result = await execute( // Changed db.execute to execute
     "INSERT INTO chapters(name, icon, description, battlemap, state, party, encounters) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
     [name, icon, description, battlemap, state, party, encounters],
   );
 
-  const createdChapter = await getChapterById(
-    db,
+  const createdChapter = await getChapterById( // Removed db parameter
     result!.lastInsertId as number,
   );
 
   // Create Tokens for all players in the party
-  const partyData = await getPartyById(db, party);
+  const partyData = await getPartyById(party); // Removed db parameter
   const playerIds = JSON.parse(partyData.players) as number[];
 
   for (const playerId of playerIds) {
-    await createToken(db, {
+    await createToken({ // Removed db parameter
       chapter: createdChapter.id,
       entity: playerId,
       coordinates: { x: 0, y: 0 },
@@ -99,17 +94,16 @@ export const createChapter = async (
 };
 
 export const getAllChaptersForParty = async (
-  db: TauriDatabase,
   partyId: Party["id"],
 ): Promise<Chapter[]> => {
-  const dbChapters = await db.select<DBChapter[]>(
+  const dbChapters = await select<DBChapter[]>( // Changed db.select to select
     "SELECT * FROM chapters WHERE party = $1",
     [partyId],
   );
   const prettyfiedChapters: Chapter[] = [];
 
   for (const dbChapter of dbChapters) {
-    const prettyChapter = await getDetailedChapterById(db, dbChapter.id);
+    const prettyChapter = await getDetailedChapterById(dbChapter.id); // Removed db parameter
     prettyfiedChapters.push(prettyChapter);
   }
 
@@ -117,85 +111,80 @@ export const getAllChaptersForParty = async (
 };
 
 export const updateChapter = async (
-  db: TauriDatabase,
   chapter: Chapter,
 ): Promise<Chapter> => {
   const { id, battlemap, description, icon, name, party, state } = chapter;
 
-  await db.execute(
+  await execute( // Changed db.execute to execute
     "UPDATE chapters SET battlemap = $2, description = $3, icon = $4, name = $5, party = $6, state = $7 WHERE id = $1",
     [id, battlemap, description, icon, name, party, state],
   );
 
-  return getDetailedChapterById(db, id);
+  return getDetailedChapterById(id); // Removed db parameter
 };
 
 export const updateChapterProperty = async <
   T extends keyof Chapter,
   V extends Chapter[T],
 >(
-  db: TauriDatabase,
   chapterId: Chapter["id"],
   property: T,
   value: V,
 ): Promise<Chapter> => {
   const sql = `UPDATE chapters SET ${property} = $2 WHERE id = $1`;
 
-  await db.execute(sql, [chapterId, value]);
+  await execute(sql, [chapterId, value]); // Changed db.execute to execute
 
-  await getDetailedChapterById(db, chapterId);
+  await getDetailedChapterById(chapterId); // Removed db parameter
 
-  return getDetailedChapterById(db, chapterId);
+  return getDetailedChapterById(chapterId); // Removed db parameter
 };
 
 export const addEncounterToChapter = async (
-  db: TauriDatabase,
   chapterId: number,
   encounterId: number,
 ): Promise<Chapter> => {
-  const chapter = await getChapterById(db, chapterId);
+  const chapter = await getChapterById(chapterId); // Removed db parameter
   const encounters = JSON.parse(chapter.encounters) as number[];
   encounters.push(encounterId);
 
-  await db.execute("UPDATE chapters SET encounters = $2 WHERE id = $1", [
+  await execute("UPDATE chapters SET encounters = $2 WHERE id = $1", [ // Changed db.execute to execute
     chapterId,
     JSON.stringify(encounters),
   ]);
 
-  return getDetailedChapterById(db, chapterId);
+  return getDetailedChapterById(chapterId); // Removed db parameter
 };
 
 export const removeEncounterFromChapter = async (
-  db: TauriDatabase,
   chapterId: number,
   encounterId: number,
 ): Promise<Chapter> => {
-  const chapter = await getChapterById(db, chapterId);
+  const chapter = await getChapterById(chapterId); // Removed db parameter
   const encounters = JSON.parse(chapter.encounters) as number[];
   const updatedEncounters = encounters.filter((id) => id !== encounterId);
 
-  await db.execute("UPDATE chapters SET encounters = $2 WHERE id = $1", [
+  await execute("UPDATE chapters SET encounters = $2 WHERE id = $1", [ // Changed db.execute to execute
     chapterId,
     JSON.stringify(updatedEncounters),
   ]);
 
-  return getDetailedChapterById(db, chapterId);
+  return getDetailedChapterById(chapterId); // Removed db parameter
 };
 
 export const deleteChapterById = async (
-  db: TauriDatabase,
   id: Chapter["id"],
 ): Promise<DBChapter> => {
-  const deletedChapter = await getChapterById(db, id);
+  const deletedChapter = await getChapterById(id); // Removed db parameter
 
-  const chapter = await getDetailedChapterById(db, id);
-  const encounters = await getDetailedEncountersByIds(db, chapter.encounters);
+  const chapter = await getDetailedChapterById(id); // Removed db parameter
+  const encounters = await getDetailedEncountersByIds(chapter.encounters); // Removed db parameter
 
   for (const encounter of encounters) {
     if (encounter.opponents) {
       for (const opponentId of encounter.opponents) {
         try {
-          await deleteEncounterOpponentById(db, Number(opponentId));
+          await deleteEncounterOpponentById(Number(opponentId)); // Removed db parameter
         } catch (error) {
           console.error(
             `Failed to delete opponent ${opponentId} from encounter ${encounter.id}:`,
@@ -208,7 +197,7 @@ export const deleteChapterById = async (
 
   for (const encounter of encounters) {
     try {
-      await deleteEncounterById(db, encounter.id);
+      await deleteEncounterById(encounter.id); // Removed db parameter
     } catch (error) {
       console.error(`Failed to delete encounter ${encounter.id}:`, error);
     }
@@ -230,25 +219,23 @@ export const deleteChapterById = async (
   }
 
   // Delete all tokens for this chapter
-  const tokens = await getTokensForChapter(db, id);
-  await deleteTokens(
-    db,
+  const tokens = await getTokensForChapter(id); // Removed db parameter
+  await deleteTokens( // Removed db parameter
     tokens.map((t) => t.id),
   );
 
-  await db.execute("DELETE FROM chapters WHERE id = $1", [id]);
+  await execute("DELETE FROM chapters WHERE id = $1", [id]); // Changed db.execute to execute
 
   return deletedChapter;
 };
 
 export const getAllChapters = async (
-  db: TauriDatabase,
 ): Promise<Chapter[]> => {
-  const dbChapters = await db.select<DBChapter[]>("SELECT * FROM chapters");
+  const dbChapters = await select<DBChapter[]>("SELECT * FROM chapters"); // Changed db.select to select
   const prettyfiedChapters: Chapter[] = [];
 
   for (const dbChapter of dbChapters) {
-    const prettyChapter = await getDetailedChapterById(db, dbChapter.id);
+    const prettyChapter = await getDetailedChapterById(dbChapter.id); // Removed db parameter
     prettyfiedChapters.push(prettyChapter);
   }
 
@@ -257,43 +244,34 @@ export const getAllChapters = async (
 
 export const chapters = {
   create: async (chapter: Omit<Chapter, "id">) => {
-    const db = await connect();
-    return createChapter(db, chapter);
+    return createChapter(chapter); // Removed db parameter
   },
   getAllForParty: async (partyId: number) => {
-    const db = await connect();
-    return getAllChaptersForParty(db, partyId);
+    return getAllChaptersForParty(partyId); // Removed db parameter
   },
   getAll: async () => {
-    const db = await connect();
-    return getAllChapters(db);
+    return getAllChapters(); // Removed db parameter
   },
   get: async (id: number) => {
-    const db = await connect();
-    return getDetailedChapterById(db, id);
+    return getDetailedChapterById(id); // Removed db parameter
   },
   update: async (chapter: Chapter) => {
-    const db = await connect();
-    return updateChapter(db, chapter);
+    return updateChapter(chapter); // Removed db parameter
   },
   updateProperty: async <T extends keyof Chapter, V extends Chapter[T]>(
     id: number,
     property: T,
     value: V,
   ) => {
-    const db = await connect();
-    return updateChapterProperty(db, id, property, value);
+    return updateChapterProperty(id, property, value); // Removed db parameter
   },
   addEncounter: async (chapterId: number, encounterId: number) => {
-    const db = await connect();
-    return addEncounterToChapter(db, chapterId, encounterId);
+    return addEncounterToChapter(chapterId, encounterId); // Removed db parameter
   },
   removeEncounter: async (chapterId: number, encounterId: number) => {
-    const db = await connect();
-    return removeEncounterFromChapter(db, chapterId, encounterId);
+    return removeEncounterFromChapter(chapterId, encounterId); // Removed db parameter
   },
   delete: async (id: number) => {
-    const db = await connect();
-    return deleteChapterById(db, id);
+    return deleteChapterById(id); // Removed db parameter
   },
 };

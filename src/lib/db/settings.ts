@@ -1,11 +1,9 @@
-import { connect, createDatabaseError } from "./core";
-import TauriDatabase from "@tauri-apps/plugin-sql";
+import { execute, select, createDatabaseError } from "./core"; // Updated import
 
 export const getSetting = async (
-  db: TauriDatabase,
   key: string,
 ): Promise<string | null> => {
-  const result = await db.select<{ key: string; value: string }[]>(
+  const result = await select<{ key: string; value: string }[]>( // Changed db.select to select
     "SELECT * FROM settings WHERE key = $1",
     [key],
   );
@@ -18,20 +16,19 @@ export const getSetting = async (
 };
 
 export const updateSetting = async (
-  db: TauriDatabase,
   key: string,
   value: string,
 ): Promise<void> => {
   // Check if setting exists
-  const existing = await getSetting(db, key);
+  const existing = await getSetting(key); // Removed db parameter
 
   if (existing !== null) {
-    await db.execute("UPDATE settings SET value = $1 WHERE key = $2", [
+    await execute("UPDATE settings SET value = $1 WHERE key = $2", [ // Changed db.execute to execute
       value,
       key,
     ]);
   } else {
-    await db.execute("INSERT INTO settings (key, value) VALUES ($1, $2)", [
+    await execute("INSERT INTO settings (key, value) VALUES ($1, $2)", [ // Changed db.execute to execute
       key,
       value,
     ]);
@@ -40,11 +37,9 @@ export const updateSetting = async (
 
 export const settings = {
   get: async (key: string) => {
-    const db = await connect();
-    return getSetting(db, key);
+    return getSetting(key); // Removed db parameter
   },
   update: async (key: string, value: string) => {
-    const db = await connect();
-    return updateSetting(db, key, value);
+    return updateSetting(key, value); // Removed db parameter
   },
 };
