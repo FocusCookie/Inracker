@@ -9,6 +9,7 @@ import { encounters } from "./db/encounters";
 import { opponents, encounterOpponents } from "./db/opponents";
 import { tokens } from "./db/tokens";
 import { settings } from "./db/settings";
+import { combat } from "./db/combat";
 
 const Database = {
   connect,
@@ -24,6 +25,7 @@ const Database = {
   encounterOpponents,
   tokens,
   settings,
+  combat,
 };
 
 export default Database;
