@@ -1,4 +1,6 @@
 import "i18next";
+import ComponentCombatControls from "@/translations/en/component/CombatControls.json";
+import ComponentCombatControls from "@/translations/en/component/CombatControls.json";
 import ComponentInitiativeMenueItem from "@/translations/en/component/InitiativeMenueItem.json";
 import ComponentEditPlayerDrawer from "@/translations/en/component/EditPlayerDrawer.json";
 import ComponentSettingsOpponentCard from "@/translations/en/component/SettingsOpponentCard.json";
@@ -60,6 +62,8 @@ declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
       // hygen-components - DO NOT DELETE THIS LINE
+      ComponentCombatControls: typeof ComponentCombatControls;
+      ComponentCombatControls: typeof ComponentCombatControls;
       ComponentInitiativeMenueItem: typeof ComponentInitiativeMenueItem;
       ComponentEditPlayerDrawer: typeof ComponentEditPlayerDrawer;
       ComponentSettingsOpponentCard: typeof ComponentSettingsOpponentCard;

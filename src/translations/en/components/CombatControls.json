@@ -1,0 +1,10 @@
+{
+  "open": "open Combat Menue",
+  "close": "close combat menue",
+  "initiative": "initative list",
+  "finishCombat": "finish combat",
+  "nextRound": "next round",
+  "round": "combat round",
+  "time": "combat time"
+}
+
