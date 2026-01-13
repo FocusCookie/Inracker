@@ -56,7 +56,10 @@ type RuntimeProps = {
   onExitComplete: () => void;
 };
 
-type Props = OverlayProps & RuntimeProps;
+type Props = OverlayProps & RuntimeProps & {
+  onStartFight?: () => void;
+  isCombatActive?: boolean;
+};
 
 function Difficulty({ diff }: { diff: EncounterDifficulty }) {
   return (
@@ -317,6 +320,7 @@ function EncounterSelection({
                                   <Button
                                     variant="ghost"
                                     size="icon"
+                                    disabled={isCombatActive}
                                     onClick={() => {
                                       onStartFight?.();
                                       handleClose();
@@ -326,7 +330,7 @@ function EncounterSelection({
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>{t("startFight")}</p>
+                                  {isCombatActive ? t("fightOngoing") : t("startFight")}
                                 </TooltipContent>
                               </Tooltip>
                             </>

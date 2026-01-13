@@ -414,6 +414,7 @@ function Play({
         console.log("Encounter selection:", reason);
       },
       onStartFight: () => handleStartFight(encounter),
+      isCombatActive: !!combatState,
       onOpponentSelect: (opponentId) => {
         const token = tokens.find(
           (t) => t.type === "opponent" && t.entity === opponentId,

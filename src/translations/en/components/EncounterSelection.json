@@ -6,5 +6,7 @@
   "closeEncounter": "Close Encounter",
   "fight": "Fight",
   "note": "Note",
-  "roll": "Roll"
+  "roll": "Roll",
+  "startFight": "Start Fight",
+  "fightOngoing": "A fight is already active. Finish it first."
 }

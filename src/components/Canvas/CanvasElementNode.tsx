@@ -63,16 +63,16 @@ export function CanvasElementNode({
         >
           {element.isCombatActive && (
             <motion.rect
-              x={-10}
-              y={-10}
-              width={element.width + 20}
-              height={element.height + 20}
-              rx={12}
-              ry={12}
+              x={-16}
+              y={-16}
+              width={element.width + 32}
+              height={element.height + 32}
+              rx={16}
+              ry={16}
               fill="none"
               stroke={element.color}
-              initial={{ strokeWidth: 2, opacity: 0.3 }}
-              animate={{ strokeWidth: 10, opacity: 0.6 }}
+              initial={{ strokeWidth: 4, opacity: 0.3 }}
+              animate={{ strokeWidth: 32, opacity: 0.8 }}
               transition={{
                 duration: 1.5,
                 repeat: Infinity,

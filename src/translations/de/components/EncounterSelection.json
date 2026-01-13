@@ -6,5 +6,7 @@
   "closeEncounter": "Schließe Begegnung",
   "fight": "Kampf",
   "note": "Notiz",
-  "roll": "Würfeln"
+  "roll": "Würfeln",
+  "startFight": "Kampf starten",
+  "fightOngoing": "Ein Kampf läuft bereits. Beende ihn zuerst."
 }
