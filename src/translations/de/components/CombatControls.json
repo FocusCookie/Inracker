@@ -3,7 +3,7 @@
   "close": "Schließe Kampfmenü",
   "initiative": "Initiative",
   "finishCombat": "Beende Kampf",
-  "nextRound": "Nächste Runde",
+  "nextTurn": "Nächster Zug",
   "round": "Kampfrunde",
   "time": "Kampfzeit"
 }

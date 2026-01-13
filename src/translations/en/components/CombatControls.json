@@ -3,7 +3,7 @@
   "close": "close combat menue",
   "initiative": "initative list",
   "finishCombat": "finish combat",
-  "nextRound": "next round",
+  "nextTurn": "next turn",
   "round": "combat round",
   "time": "combat time"
 }

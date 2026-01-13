@@ -83,8 +83,6 @@ export const createCombat = async (
 };
 
 export const nextTurn = async (combatId: string) => {
-  await beginTransaction();
-
   try {
     const combatRes = await select<DBCombat[]>(
       "SELECT * FROM combats WHERE id = $1",
@@ -99,8 +97,6 @@ export const nextTurn = async (combatId: string) => {
     );
 
     if (participants.length === 0) {
-      await commit();
-
       return;
     }
 
@@ -134,10 +130,7 @@ export const nextTurn = async (combatId: string) => {
       "UPDATE combats SET round = $1, active_participant_id = $2 WHERE id = $3",
       [nextRound, nextParticipantId, combatId],
     );
-
-    await commit();
   } catch (e) {
-    await rollback();
     throw createDatabaseError("Failed to advance turn", e);
   }
 };

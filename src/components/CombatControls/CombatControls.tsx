@@ -167,7 +167,7 @@ function CombatControls({
                       <ArrowBigRightDashIcon className="h-4 w-4" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent>{t("nextRound")}</TooltipContent>
+                  <TooltipContent>{t("nextTurn")}</TooltipContent>
                 </Tooltip>
               </motion.div>
 
