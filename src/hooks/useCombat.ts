@@ -71,6 +71,23 @@ export function useCombatActions(chapterId: number) {
     onSuccess: invalidate,
   });
 
+  const addParticipant = useMutationWithErrorToast({
+    mutationFn: (data: {
+      combatId: string;
+      name: string;
+      initiative: number;
+      entityId?: number;
+      entityType?: "player" | "opponent";
+    }) => Database.combat.addParticipant(data),
+    onSuccess: invalidate,
+  });
+
+  const removeParticipant = useMutationWithErrorToast({
+    mutationFn: (participantId: string) =>
+      Database.combat.removeParticipant(participantId),
+    onSuccess: invalidate,
+  });
+
   return {
     nextTurn,
     addEffect,
@@ -78,5 +95,7 @@ export function useCombatActions(chapterId: number) {
     createCombat,
     updateInitiative,
     finishCombat,
+    addParticipant,
+    removeParticipant,
   };
 }

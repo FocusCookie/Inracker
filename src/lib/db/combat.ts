@@ -221,6 +221,28 @@ export const getCombatState = async (
   };
 };
 
+export const addParticipant = async (data: {
+  combatId: string;
+  name: string;
+  initiative: number;
+  entityId?: number;
+  entityType?: "player" | "opponent";
+}) => {
+  await execute(
+    `INSERT INTO combat_participants 
+      (id, combat_id, name, initiative, entity_id, entity_type) 
+      VALUES ($1, $2, $3, $4, $5, $6)`,
+    [
+      crypto.randomUUID(),
+      data.combatId,
+      data.name,
+      data.initiative,
+      data.entityId || null,
+      data.entityType || null,
+    ],
+  );
+};
+
 export const removeParticipant = async (participantId: string) => {
   await beginTransaction();
   try {
@@ -252,4 +274,5 @@ export const combat = {
   updateInitiative,
   getState: getCombatState,
   removeParticipant: removeParticipant,
+  addParticipant: addParticipant,
 };

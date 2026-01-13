@@ -39,7 +39,7 @@ function InitiativeMenue({
   }
 
   return (
-    <aside className="max-w-72">
+    <aside className="absolute top-1/2 left-0 z-50 max-w-72 -translate-y-1/2 transform">
       <AnimatePresence mode="wait">
         {isOpen && (
           <motion.div

@@ -47,8 +47,16 @@ function Initiative({
     }
   }, [activePosition]);
 
+  if (entities.length === 0) {
+    return (
+      <div className="absolute top-4 left-1/2 z-40 -translate-x-1/2 transform rounded-xl border border-white/80 bg-white/20 px-4 py-2 font-medium text-white shadow-md backdrop-blur-sm">
+        Add players and opponents to the fight
+      </div>
+    );
+  }
+
   return (
-    <div className="flex w-fit items-center gap-2 rounded-xl border border-white/80 bg-white/20 px-3 shadow-md backdrop-blur-sm">
+    <div className="absolute top-4 left-1/2 z-40 flex w-fit -translate-x-1/2 transform items-center gap-2 rounded-xl border border-white/80 bg-white/20 px-3 shadow-md backdrop-blur-sm">
       {showButtons && (
         <button
           onClick={() => scroll("left")}
