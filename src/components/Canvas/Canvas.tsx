@@ -64,6 +64,7 @@ export type CanvasElement = {
   name?: string;
   completed?: boolean;
   opponents?: number[];
+  isCombatActive?: boolean;
 };
 
 export type ClickableCanvasElement = CanvasElement & {

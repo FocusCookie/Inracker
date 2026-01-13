@@ -21,6 +21,7 @@ export const createCombat = async (
     entityId?: number;
     type?: "player" | "opponent";
   }[],
+  encounterId?: number,
 ): Promise<string> => {
   const combatId = crypto.randomUUID();
 
@@ -32,8 +33,8 @@ export const createCombat = async (
 
   try {
     await execute(
-      "INSERT INTO combats (id, chapter_id, round, status) VALUES ($1, $2, 1, 'running')",
-      [combatId, chapterId],
+      "INSERT INTO combats (id, chapter_id, encounter_id, round, status) VALUES ($1, $2, $3, 1, 'running')",
+      [combatId, chapterId, encounterId || null],
     );
 
     if (participants.length > 0) {
@@ -201,6 +202,7 @@ export const getCombatState = async (
     combat: {
       ...currentCombat,
       chapterId: currentCombat.chapter_id,
+      encounterId: currentCombat.encounter_id,
       activeParticipantId: currentCombat.active_participant_id,
       createdAt: new Date(currentCombat.created_at),
     },

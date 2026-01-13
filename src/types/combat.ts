@@ -5,6 +5,7 @@ export type CombatStatus = "running" | "paused" | "finished";
 export type DBCombat = {
   readonly id: string;
   readonly chapter_id: number;
+  readonly encounter_id: number | null;
   round: number;
   active_participant_id: string | null;
   status: CombatStatus;
@@ -34,6 +35,7 @@ export type DBCombatEffect = {
 export type Combat = Prettify<{
   id: string;
   chapterId: number;
+  encounterId: number | null;
   round: number;
   activeParticipantId: string | null;
   status: CombatStatus;

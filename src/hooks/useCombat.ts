@@ -44,13 +44,19 @@ export function useCombatActions(chapterId: number) {
   const createCombat = useMutationWithErrorToast({
     mutationFn: (data: {
       chapterId: number;
+      encounterId?: number;
       participants: {
         name: string;
         initiative: number;
         entityId: number;
         type: "player" | "opponent";
       }[];
-    }) => Database.combat.create(data.chapterId, data.participants),
+    }) =>
+      Database.combat.create(
+        data.chapterId,
+        data.participants,
+        data.encounterId,
+      ),
     onSuccess: invalidate,
   });
 

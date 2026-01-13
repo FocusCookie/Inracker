@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { ClickableCanvasElement } from "./Canvas";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 type Props = {
   element: ClickableCanvasElement & { id: any };
@@ -60,6 +61,27 @@ export function CanvasElementNode({
             }
           }}
         >
+          {element.isCombatActive && (
+            <motion.rect
+              x={-10}
+              y={-10}
+              width={element.width + 20}
+              height={element.height + 20}
+              rx={12}
+              ry={12}
+              fill="none"
+              stroke={element.color}
+              initial={{ strokeWidth: 2, opacity: 0.3 }}
+              animate={{ strokeWidth: 10, opacity: 0.6 }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut",
+              }}
+            />
+          )}
+
           <g className="hover:cursor-pointer">
             <g style={{ opacity: element.completed ? 0.4 : 1 }}>
               <rect

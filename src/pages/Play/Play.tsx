@@ -401,6 +401,7 @@ function Play({
 
     createCombat.mutate({
       chapterId: chapter.id,
+      encounterId: encounter.id,
       participants,
     });
   }
@@ -696,6 +697,9 @@ function Play({
               name: enc.name,
               completed: enc.completed, // Pass the completed status
               opponents: enc.opponents || [],
+              isCombatActive:
+                combatState?.combat.status === "running" &&
+                combatState.combat.encounterId === enc.id,
               onEdit: () => handleElementEdit(enc),
               onClick: () => handleElementClick(enc),
             })) || []

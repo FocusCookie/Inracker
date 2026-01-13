@@ -243,6 +243,12 @@ pub fn run() {
             )",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 19,
+            description: "add encounter_id to combats table",
+            sql: "ALTER TABLE combats ADD COLUMN encounter_id INTEGER REFERENCES encounters(id) ON DELETE SET NULL;",
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()
