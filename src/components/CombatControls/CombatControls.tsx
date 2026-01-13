@@ -50,7 +50,10 @@ function CombatControls({
         <Tooltip>
           <TooltipTrigger asChild>
             <button
-              onClick={handleToggleOpen}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleToggleOpen();
+              }}
               className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
             >
               <AnimatePresence mode="wait" initial={false}>
@@ -123,7 +126,10 @@ function CombatControls({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={onInitiative}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onInitiative();
+                      }}
                       className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
                     >
                       <ListIcon className="h-4 w-4" />
@@ -142,7 +148,10 @@ function CombatControls({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={onFinish}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onFinish();
+                      }}
                       className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
                     >
                       <CircleCheckBigIcon className="h-4 w-4" />
@@ -161,7 +170,10 @@ function CombatControls({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={onNext}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNext();
+                      }}
                       className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
                     >
                       <ArrowBigRightDashIcon className="h-4 w-4" />

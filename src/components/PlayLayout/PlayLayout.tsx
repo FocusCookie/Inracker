@@ -69,7 +69,7 @@ const PlayLayout: PlayLayoutCompound = ({
         <motion.aside
           key="aside"
           className={cn(
-            "absolute top-0 bottom-0 left-0 w-24 rounded-md bg-white p-4 pr-0",
+            "absolute top-0 bottom-0 left-0 w-24 bg-white p-4 pr-0",
             isAsideFloating && "shadow-2xl",
           )}
           animate={{

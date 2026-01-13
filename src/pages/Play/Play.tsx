@@ -316,11 +316,7 @@ function Play({
       keysPressed.current[event.key] = true;
 
       if (keysPressed.current["Meta"] && event.key.toLowerCase() === "s") {
-        if (isAsideOpen) {
-          setIsAsideOpen(false);
-        } else {
-          setIsAsideOpen(true);
-        }
+        setIsAsideOpen((prev) => !prev);
       }
     };
 
@@ -335,11 +331,7 @@ function Play({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [isAsideOpen]);
-
-  useEffect(() => {
-    console.log("isCreateEncounterDrawerOpen changed:", isCreateEncounterDrawerOpen);
-  }, [isCreateEncounterDrawerOpen]);
+  }, []);
 
   function handleResistancesCatalog(player: Player) {
     openOverlay("resistance.catalog", {
@@ -582,7 +574,6 @@ function Play({
   }
 
   function handeOpenCreateElementDrawer(element: CanvasElement) {
-    console.log("handeOpenCreateElementDrawer called");
     setIsCreateEncounterDrawerOpen(true);
     setTempElement(element);
     handleCreateEncounter(element);
