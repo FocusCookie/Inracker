@@ -88,6 +88,11 @@ export function useCombatActions(chapterId: number) {
     onSuccess: invalidate,
   });
 
+  const resetInitiative = useMutationWithErrorToast({
+    mutationFn: (combatId: string) => Database.combat.resetInitiative(combatId),
+    onSuccess: invalidate,
+  });
+
   return {
     nextTurn,
     addEffect,
@@ -97,5 +102,6 @@ export function useCombatActions(chapterId: number) {
     finishCombat,
     addParticipant,
     removeParticipant,
+    resetInitiative,
   };
 }

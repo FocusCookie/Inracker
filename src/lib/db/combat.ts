@@ -265,6 +265,13 @@ export const finishCombat = async (combatId: string) => {
   ]);
 };
 
+export const resetInitiative = async (combatId: string) => {
+  await execute(
+    "UPDATE combat_participants SET initiative = 0 WHERE combat_id = $1",
+    [combatId],
+  );
+};
+
 export const combat = {
   create: createCombat,
   nextTurn,
@@ -272,6 +279,7 @@ export const combat = {
   addEffect,
   removeEffect,
   updateInitiative,
+  resetInitiative,
   getState: getCombatState,
   removeParticipant: removeParticipant,
   addParticipant: addParticipant,

@@ -124,6 +124,7 @@ function Play({
     addParticipant,
     removeParticipant,
     updateInitiative,
+    resetInitiative,
   } = useCombatActions(chapter.id);
   const encounterOpponents = useEncounterOpponentsDetailed(database);
 
@@ -257,6 +258,11 @@ function Play({
         newInitiative: value,
       });
     }
+  }
+
+  function handleInitiativeReset() {
+    if (!combatState) return;
+    resetInitiative.mutate(combatState.combat.id);
   }
 
   const updateEncounterMutation = useUpdateEncounter(database);
@@ -883,7 +889,7 @@ function Play({
         encounterOpponents={availableOpponents}
         onAdd={handleInitiativeAdd}
         onRemove={handleInitiativeRemove}
-        onReset={() => {}}
+        onReset={handleInitiativeReset}
         onInitiativeChange={handleInitiativeChange}
       />
     </PlayLayout>
