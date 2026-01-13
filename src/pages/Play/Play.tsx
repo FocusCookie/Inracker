@@ -337,6 +337,10 @@ function Play({
     };
   }, [isAsideOpen]);
 
+  useEffect(() => {
+    console.log("isCreateEncounterDrawerOpen changed:", isCreateEncounterDrawerOpen);
+  }, [isCreateEncounterDrawerOpen]);
+
   function handleResistancesCatalog(player: Player) {
     openOverlay("resistance.catalog", {
       database,
@@ -578,6 +582,7 @@ function Play({
   }
 
   function handeOpenCreateElementDrawer(element: CanvasElement) {
+    console.log("handeOpenCreateElementDrawer called");
     setIsCreateEncounterDrawerOpen(true);
     setTempElement(element);
     handleCreateEncounter(element);
