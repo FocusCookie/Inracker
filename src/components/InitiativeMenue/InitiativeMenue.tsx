@@ -78,30 +78,47 @@ function InitiativeMenue({
 
               <div className="flex flex-col gap-4">
                 <ul className="flex flex-col gap-2">
-                  {players.map((player) => {
-                    return (
-                      <AddEntityCard
-                        key={`player-${player.id}`}
-                        entity={{ type: "player", properties: player }}
-                        onAdd={onAdd}
-                      />
-                    );
-                  })}
+                  {players
+                    .filter(
+                      (p) =>
+                        !selected.some(
+                          (s) => s.type === "player" && s.properties.id === p.id,
+                        ),
+                    )
+                    .map((player) => {
+                      return (
+                        <AddEntityCard
+                          key={`player-${player.id}`}
+                          entity={{ type: "player", properties: player, initiative: 0 }}
+                          onAdd={onAdd}
+                        />
+                      );
+                    })}
                 </ul>
 
                 <ul className="flex flex-col gap-2">
-                  {encounterOpponents.map((opponent) => {
-                    return (
-                      <AddEntityCard
-                        key={`opponent-${opponent.id}`}
-                        entity={{
-                          type: "encounterOpponent",
-                          properties: opponent,
-                        }}
-                        onAdd={onAdd}
-                      />
-                    );
-                  })}
+                  {encounterOpponents
+                    .filter(
+                      (o) =>
+                        !selected.some(
+                          (s) =>
+                            s.type === "encounterOpponent" &&
+                            s.properties.id === o.id,
+                        ),
+                    )
+                    .map((opponent) => {
+                      return (
+                        <AddEntityCard
+                          key={`opponent-${opponent.id}`}
+                          entity={{
+                            type: "encounterOpponent",
+                            properties: opponent,
+                            initiative: 0,
+                          }}
+                          onAdd={onAdd}
+                        />
+                      );
+                    })}
                 </ul>
               </div>
 

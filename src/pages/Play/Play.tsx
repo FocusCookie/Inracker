@@ -206,6 +206,18 @@ function Play({
     return participant ? participant.initiative : -1;
   }, [combatState]);
 
+  const activeEncounter = useMemo(() => {
+    if (!combatState?.combat.encounterId) return null;
+    return encounters.find((e) => e.id === combatState.combat.encounterId);
+  }, [combatState, encounters]);
+
+  const availableOpponents = useMemo(() => {
+    if (!activeEncounter || !encounterOpponents.data) return [];
+    return encounterOpponents.data.filter((opp) =>
+      activeEncounter.opponents?.includes(opp.id),
+    );
+  }, [activeEncounter, encounterOpponents.data]);
+
   function handleInitiativeAdd(entity: InitiativeMenuEntity) {
     if (!combatState) return;
     addParticipant.mutate({
@@ -868,7 +880,7 @@ function Play({
         setIsOpen={setIsInitiativeMenuOpen}
         selected={selectedInitiativeEntities}
         players={players}
-        encounterOpponents={encounterOpponents.data || []}
+        encounterOpponents={availableOpponents}
         onAdd={handleInitiativeAdd}
         onRemove={handleInitiativeRemove}
         onReset={() => {}}
