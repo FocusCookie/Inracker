@@ -83,6 +83,7 @@ function EncounterSelection({
   onCancel,
   onOpponentSelect,
   onStartFight,
+  isCombatActive,
 }: Props) {
   const { t } = useTranslation("ComponentEncounterSelection");
   const openOverlay = useOverlayStore((s) => s.open);
