@@ -24,7 +24,11 @@ export const createCombat = async (
 ): Promise<string> => {
   const combatId = crypto.randomUUID();
 
-  await beginTransaction();
+  // Generate IDs and prepare participants
+  const participants = participantsData.map((p) => ({
+    ...p,
+    id: crypto.randomUUID(),
+  }));
 
   try {
     await execute(
@@ -32,26 +36,35 @@ export const createCombat = async (
       [combatId, chapterId],
     );
 
-    if (participantsData.length !== 0) {
-      for (const participant of participantsData) {
-        await execute(
-          `INSERT INTO combat_participants 
-                (id, combat_id, name, initiative, entity_id, entity_type) 
-                VALUES ($1, $2, $3, $4, $5, $6)`,
-          [
-            crypto.randomUUID(),
-            combatId,
-            participant.name,
-            participant.initiative,
-            participant.entityId || null,
-            participant.type || null,
-          ],
+    if (participants.length > 0) {
+      // Batch insert participants
+      const valueGroups: string[] = [];
+      const args: any[] = [];
+      let idx = 1;
+
+      for (const p of participants) {
+        valueGroups.push(
+          `($${idx++}, $${idx++}, $${idx++}, $${idx++}, $${idx++}, $${idx++})`,
+        );
+        args.push(
+          p.id,
+          combatId,
+          p.name,
+          p.initiative,
+          p.entityId || null,
+          p.type || null,
         );
       }
 
-      const sorted = await select<any[]>(
-        "SELECT id FROM combat_participants WHERE combat_id = $1 ORDER BY initiative DESC LIMIT 1",
-        [combatId],
+      const insertParticipantsQuery = `INSERT INTO combat_participants 
+                (id, combat_id, name, initiative, entity_id, entity_type) 
+                VALUES ${valueGroups.join(", ")}`;
+
+      await execute(insertParticipantsQuery, args);
+
+      // Determine active participant (highest initiative)
+      const sorted = [...participants].sort(
+        (a, b) => b.initiative - a.initiative,
       );
 
       if (sorted.length > 0) {
@@ -62,11 +75,8 @@ export const createCombat = async (
       }
     }
 
-    await commit();
-
     return combatId;
   } catch (e) {
-    await rollback();
     throw createDatabaseError("Failed to create combat", e);
   }
 };
@@ -225,9 +235,16 @@ export const removeParticipant = async (participantId: string) => {
   }
 };
 
+export const finishCombat = async (combatId: string) => {
+  await execute("UPDATE combats SET status = 'finished' WHERE id = $1", [
+    combatId,
+  ]);
+};
+
 export const combat = {
   create: createCombat,
   nextTurn,
+  finish: finishCombat,
   addEffect,
   removeEffect,
   updateInitiative,

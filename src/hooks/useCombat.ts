@@ -60,5 +60,17 @@ export function useCombatActions(chapterId: number) {
     onSuccess: invalidate,
   });
 
-  return { nextTurn, addEffect, removeEffect, createCombat, updateInitiative };
+  const finishCombat = useMutationWithErrorToast({
+    mutationFn: (combatId: string) => Database.combat.finish(combatId),
+    onSuccess: invalidate,
+  });
+
+  return {
+    nextTurn,
+    addEffect,
+    removeEffect,
+    createCombat,
+    updateInitiative,
+    finishCombat,
+  };
 }

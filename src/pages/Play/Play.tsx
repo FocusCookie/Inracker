@@ -52,10 +52,7 @@ import {
   useRemoveResistanceFromPlayer,
   useUpdatePlayer,
 } from "@/hooks/usePlayers";
-import {
-  useCreateImmunity,
-  useUpdateImmunity,
-} from "@/hooks/useImmunities";
+import { useCreateImmunity, useUpdateImmunity } from "@/hooks/useImmunities";
 import {
   useCreateResistance,
   useUpdateResistance,
@@ -66,14 +63,14 @@ import {
   useDeleteEncounter,
   useUpdateEncounter,
 } from "@/hooks/useEncounters";
-import {
-  useCreateTokensForEncounter,
-  useUpdateToken,
-} from "@/hooks/useTokens";
+import { useCreateTokensForEncounter, useUpdateToken } from "@/hooks/useTokens";
 import {
   useAddEncounterToChapter,
   useUpdateChapterProperty,
 } from "@/hooks/useChapters";
+import CombatControls from "@/components/CombatControls/CombatControls";
+import { useCombatActions, useCombatState } from "@/hooks/useCombat";
+import { useEncounterOpponentsDetailed } from "@/hooks/useEncounterOpponents";
 
 type Props = {
   partyId: Party["id"];
@@ -110,6 +107,10 @@ function Play({
   const [isCreateEncounterDrawerOpen, setIsCreateEncounterDrawerOpen] =
     useState<boolean>(false);
 
+  const { data: combatState } = useCombatState(chapter.id);
+  const { nextTurn, finishCombat, createCombat } = useCombatActions(chapter.id);
+  const encounterOpponents = useEncounterOpponentsDetailed(database);
+
   const addPlayerToPartyMutation = useAddPlayer(database);
   const editImmunity = useUpdateImmunity(database);
   const editResistance = useUpdateResistance(database);
@@ -120,7 +121,7 @@ function Play({
   const updateEncounterMutation = useUpdateEncounter(database);
   const updateTokenMutation = useUpdateToken(database);
   const addResistanceToPlayerMutation = useAddResistanceToPlayer(database);
-  
+
   const createEncounterMutation = useCreateEncounterMutation(database);
   const addEncounterToChapterMutation = useAddEncounterToChapter(database);
   const createTokensForEncounterMutation =
@@ -376,6 +377,34 @@ function Play({
     });
   }
 
+  function handleStartFight(encounter: Encounter) {
+    if (!encounterOpponents.data) return;
+
+    const opponents = encounterOpponents.data.filter((opp) =>
+      encounter.opponents?.includes(opp.id),
+    );
+
+    const participants = [
+      ...players.map((p) => ({
+        name: p.name,
+        initiative: 0,
+        entityId: p.id,
+        type: "player" as const,
+      })),
+      ...opponents.map((o) => ({
+        name: o.name,
+        initiative: 0,
+        entityId: o.id,
+        type: "opponent" as const,
+      })),
+    ];
+
+    createCombat.mutate({
+      chapterId: chapter.id,
+      participants,
+    });
+  }
+
   function handleElementClick(encounter: Encounter) {
     openOverlay("encounter.selection", {
       encounterId: encounter.id,
@@ -383,6 +412,7 @@ function Play({
       onCancel: (reason) => {
         console.log("Encounter selection:", reason);
       },
+      onStartFight: () => handleStartFight(encounter),
       onOpponentSelect: (opponentId) => {
         const token = tokens.find(
           (t) => t.type === "opponent" && t.entity === opponentId,
@@ -506,8 +536,8 @@ function Play({
           playerId: player.id,
         });
         toast({
-            variant: "default",
-            title: `Created ${player.icon} ${player.name}`,
+          variant: "default",
+          title: `Created ${player.icon} ${player.name}`,
         });
       },
       onCancel: (reason) => {
@@ -654,6 +684,7 @@ function Play({
           </TooltipProvider>
         </motion.div>
       </PlayLayout.Settings>
+
       <AnimatePresence mode="wait">
         <Canvas
           database={database}
@@ -678,6 +709,18 @@ function Play({
           onTokenMove={updateTokenMutation.mutate}
           onElementMove={handleElementMove}
         />
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {combatState && (
+          <CombatControls
+            round={combatState.combat.round}
+            time={(combatState.combat.round - 1) * 6}
+            onFinish={() => finishCombat.mutate(combatState.combat.id)}
+            onNext={() => nextTurn.mutate(combatState.combat.id)}
+            onInitiative={() => console.log("Initiative clicked")}
+          />
+        )}
       </AnimatePresence>
     </PlayLayout>
   );

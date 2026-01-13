@@ -13,6 +13,7 @@ import {
   Maximize2,
   Minimize2,
   PlayIcon,
+  SwordsIcon,
 } from "lucide-react";
 import { CheckIcon, Pencil1Icon } from "@radix-ui/react-icons";
 import { Badge } from "../ui/badge";
@@ -78,6 +79,7 @@ function EncounterSelection({
   onOpenChange,
   onCancel,
   onOpponentSelect,
+  onStartFight,
 }: Props) {
   const { t } = useTranslation("ComponentEncounterSelection");
   const openOverlay = useOverlayStore((s) => s.open);
@@ -294,22 +296,40 @@ function EncounterSelection({
                           </Tooltip>
 
                           {encounter.type === "fight" && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={
-                                    handleGroupOpponentTokensIntoEncounter
-                                  }
-                                >
-                                  <ShrinkIcon />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>{t("groupAllOpponentsIntoElement")}</p>
-                              </TooltipContent>
-                            </Tooltip>
+                            <>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={handleGroupOpponentTokensIntoEncounter}
+                                  >
+                                    <ShrinkIcon />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{t("groupAllOpponentsIntoElement")}</p>
+                                </TooltipContent>
+                              </Tooltip>
+
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                      onStartFight?.();
+                                      handleClose();
+                                    }}
+                                  >
+                                    <SwordsIcon />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{t("startFight")}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </>
                           )}
                         </TooltipProvider>
                       </div>

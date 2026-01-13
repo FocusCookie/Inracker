@@ -1,9 +1,9 @@
 {
   "open": "Öffne Kampfmenü",
   "close": "Schließe Kampfmenü",
-  "initiative": "initiative",
-  "finishRound": "Beende Kampf",
-  "nextRound": "nächste Runde",
+  "initiative": "Initiative",
+  "finishCombat": "Beende Kampf",
+  "nextRound": "Nächste Runde",
   "round": "Kampfrunde",
   "time": "Kampfzeit"
 }

@@ -39,7 +39,13 @@ function CombatControls({
   }
 
   return (
-    <motion.div className="absolute top-4 left-4 flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
+    <motion.div
+      initial={{ x: -100, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: -100, opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="absolute top-4 left-4 flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm"
+    >
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -161,9 +167,7 @@ function CombatControls({
                       <ArrowBigRightDashIcon className="h-4 w-4" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent>
-                    <p>next round</p>
-                  </TooltipContent>
+                  <TooltipContent>{t("nextRound")}</TooltipContent>
                 </Tooltip>
               </motion.div>
 
