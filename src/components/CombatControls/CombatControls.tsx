@@ -44,7 +44,7 @@ function CombatControls({
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: -100, opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="absolute top-4 left-4 flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm"
+      className="flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm"
     >
       <TooltipProvider>
         <Tooltip>
@@ -170,6 +170,7 @@ function CombatControls({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         onNext();
@@ -191,7 +192,7 @@ function CombatControls({
               >
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <motion.span className="flex h-8 w-fit items-center justify-center rounded-full bg-white/40 px-4 font-medium whitespace-nowrap text-white">
+                    <motion.span className="flex h-8 w-fit items-center justify-center rounded-full border border-black/50 bg-white/40 px-4 font-medium whitespace-nowrap">
                       # {round}
                     </motion.span>
                   </TooltipTrigger>
@@ -207,9 +208,9 @@ function CombatControls({
               >
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="flex h-8 w-fit items-center justify-center gap-2 rounded-full bg-white/40 px-4 whitespace-nowrap">
-                      <ClockIcon className="h-4 w-4 text-white" />
-                      <span className="font-medium text-white">{time}s</span>
+                    <div className="flex h-8 w-fit items-center justify-center gap-2 rounded-full border border-black/50 bg-white/40 px-4 whitespace-nowrap text-black">
+                      <ClockIcon className="h-4 w-4" />
+                      <span className="font-medium">{time}s</span>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>{t("time")}</TooltipContent>

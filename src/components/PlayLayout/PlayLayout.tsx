@@ -14,6 +14,9 @@ type PlayLayoutCompound = React.FC<PlayLayoutCompoundProps> & {
   Players: React.FC<{ children: React.ReactNode }>;
   Settings: React.FC<{ children: React.ReactNode }>;
   Encounter: React.FC<{ children: React.ReactNode }>;
+  Initiative: React.FC<{ children: React.ReactNode }>;
+  InitiativeMenue: React.FC<{ children: React.ReactNode }>;
+  CombatControls: React.FC<{ children: React.ReactNode }>;
 };
 
 const PlayLayout: PlayLayoutCompound = ({
@@ -30,6 +33,22 @@ const PlayLayout: PlayLayoutCompound = ({
   const playersChild = childrenArray.find(
     (child) => React.isValidElement(child) && child.type === PlayLayout.Players,
   );
+
+  const initiativeMenueChild = childrenArray.find(
+    (child) =>
+      React.isValidElement(child) && child.type === PlayLayout.InitiativeMenue,
+  );
+
+  const initiativeChild = childrenArray.find(
+    (child) =>
+      React.isValidElement(child) && child.type === PlayLayout.Initiative,
+  );
+
+  const combatControlsChild = childrenArray.find(
+    (child) =>
+      React.isValidElement(child) && child.type === PlayLayout.CombatControls,
+  );
+
   const settingsChild = childrenArray.find(
     (child) =>
       React.isValidElement(child) && child.type === PlayLayout.Settings,
@@ -39,7 +58,10 @@ const PlayLayout: PlayLayoutCompound = ({
     (child) =>
       React.isValidElement(child) &&
       child.type !== PlayLayout.Players &&
-      child.type !== PlayLayout.Settings,
+      child.type !== PlayLayout.Settings &&
+      child.type !== PlayLayout.Initiative &&
+      child.type !== PlayLayout.InitiativeMenue &&
+      child.type !== PlayLayout.CombatControls,
   );
 
   return (
@@ -64,12 +86,22 @@ const PlayLayout: PlayLayoutCompound = ({
           }}
         >
           {mainContent}
+
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 transform">
+            {initiativeChild}
+          </div>
+
+          <div className="absolute top-1/2 left-0 -translate-y-1/2 transform">
+            {initiativeMenueChild}
+          </div>
+
+          <div className="absolute top-4 left-4">{combatControlsChild}</div>
         </motion.main>
 
         <motion.aside
           key="aside"
           className={cn(
-            "absolute top-0 bottom-0 left-0 w-24 bg-white p-4 pr-0",
+            "absolute top-0 bottom-0 left-0 w-24 rounded-md bg-white p-4 pr-0",
             isAsideFloating && "shadow-2xl",
           )}
           animate={{
@@ -81,7 +113,7 @@ const PlayLayout: PlayLayoutCompound = ({
           <div className="flex h-full flex-col">
             <div className="grow gap-4 overflow-hidden">
               <ScrollArea className="h-full">
-                <div className="flex h-full w-full flex-col gap-4 pt-0.5 pl-0.5 pr-4">
+                <div className="flex h-full w-full flex-col gap-4 pt-0.5 pr-4 pl-0.5">
                   {playersChild}
                 </div>
               </ScrollArea>
@@ -97,16 +129,6 @@ const PlayLayout: PlayLayoutCompound = ({
             </div>
           </div>
         </motion.aside>
-
-        <motion.div
-          key="encounter-blankspace"
-          initial={{ right: -656 }}
-          className={cn("absolute top-0 bottom-0")}
-          animate={{
-            right: isEncounterOpen ? 0 : -640,
-            width: 640,
-          }}
-        ></motion.div>
       </AnimatePresence>
     </div>
   );
@@ -126,5 +148,20 @@ PlayLayout.Encounter = ({ children }) => {
   return <>{children}</>;
 };
 PlayLayout.Encounter.displayName = "MainLayout.Encounter";
+
+PlayLayout.Initiative = ({ children }) => {
+  return <>{children}</>;
+};
+PlayLayout.Initiative.displayName = "MainLayout.Initiative";
+
+PlayLayout.InitiativeMenue = ({ children }) => {
+  return <>{children}</>;
+};
+PlayLayout.InitiativeMenue.displayName = "MainLayout.InitiativeMenue";
+
+PlayLayout.CombatControls = ({ children }) => {
+  return <>{children}</>;
+};
+PlayLayout.CombatControls.displayName = "MainLayout.CombatControls";
 
 export default PlayLayout;

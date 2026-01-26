@@ -13,8 +13,8 @@ type Props = {
   selected: InitiativeMenuEntity[];
   players: Player[];
   encounterOpponents: EncounterOpponent[];
-  isOpen: Boolean;
-  setIsOpen: (state: Boolean) => void;
+  isOpen: boolean;
+  setIsOpen: (state: boolean) => void;
   onAdd: (entity: InitiativeMenuEntity) => void;
   onRemove: (entity: InitiativeMenuEntity) => void;
   onReset: () => void;
@@ -39,7 +39,7 @@ function InitiativeMenue({
   }
 
   return (
-    <aside className="absolute top-1/2 left-0 z-50 max-w-72 -translate-y-1/2 transform">
+    <aside className="max-w-72">
       <AnimatePresence mode="wait">
         {isOpen && (
           <motion.div
@@ -82,14 +82,19 @@ function InitiativeMenue({
                     .filter(
                       (p) =>
                         !selected.some(
-                          (s) => s.type === "player" && s.properties.id === p.id,
+                          (s) =>
+                            s.type === "player" && s.properties.id === p.id,
                         ),
                     )
                     .map((player) => {
                       return (
                         <AddEntityCard
                           key={`player-${player.id}`}
-                          entity={{ type: "player", properties: player, initiative: 0 }}
+                          entity={{
+                            type: "player",
+                            properties: player,
+                            initiative: 0,
+                          }}
                           onAdd={onAdd}
                         />
                       );
