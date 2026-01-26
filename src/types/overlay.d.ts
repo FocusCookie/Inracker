@@ -76,6 +76,8 @@ export type OverlayMap = {
     chapterId: Chapter["id"];
     onCancel?: (reason: CancelReason) => void;
     onOpponentSelect?: (opponentId: number) => void;
+    onStartFight?: () => void;
+    isCombatActive?: boolean;
   };
   "encounter.edit": {
     encounter: Encounter;
@@ -132,6 +134,7 @@ export type OverlayMap = {
     onCancel?: (reason: CancelReason) => void;
   };
   "player.catalog": {
+    database?: typeof db;
     onSelect: (partyId: Party["id"], playerId: Player["id"]) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
     partyId: Party["id"];

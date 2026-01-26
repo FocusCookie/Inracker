@@ -80,7 +80,7 @@ function Initiative({
       >
         {entities.map((entity) => (
           <div
-            key={entity.id}
+            key={`entity-${entity.type}-${entity.id}`}
             className="flex-shrink-0"
             ref={(el) => {
               if (el) {
@@ -113,4 +113,3 @@ function Initiative({
 }
 
 export default Initiative;
-

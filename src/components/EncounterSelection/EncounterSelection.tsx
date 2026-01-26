@@ -44,6 +44,7 @@ import {
   useCreateTokensForEncounter,
   useGroupTokensIntoElement,
 } from "@/hooks/useTokens";
+import { useCombatState } from "@/hooks/useCombat";
 import { useEncounterQuery } from "@/hooks/useEncounters";
 import { useMusicStore } from "@/stores/useMusicStore";
 
@@ -83,12 +84,14 @@ function EncounterSelection({
   onCancel,
   onOpponentSelect,
   onStartFight,
-  isCombatActive,
+  isCombatActive: propIsCombatActive,
 }: Props) {
   const { t } = useTranslation("ComponentEncounterSelection");
   const openOverlay = useOverlayStore((s) => s.open);
   const setTrack = useMusicStore((s) => s.setTrack);
   const { data: encounter } = useEncounterQuery(encounterId, database);
+  const { data: combatState } = useCombatState(chapterId);
+  const isCombatActive = propIsCombatActive ?? !!combatState;
   const [isExpanded, setIsExpanded] = useState(false);
 
   const encounterOpponents = useEncounterOpponentsDetailed(database);
@@ -318,20 +321,24 @@ function EncounterSelection({
 
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    disabled={isCombatActive}
-                                    onClick={() => {
-                                      onStartFight?.();
-                                      handleClose();
-                                    }}
-                                  >
-                                    <SwordsIcon />
-                                  </Button>
+                                  <div>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      disabled={isCombatActive}
+                                      onClick={() => {
+                                        onStartFight?.();
+                                        handleClose();
+                                      }}
+                                    >
+                                      <SwordsIcon />
+                                    </Button>
+                                  </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  {isCombatActive ? t("fightOngoing") : t("startFight")}
+                                  {isCombatActive
+                                    ? t("fightOngoing")
+                                    : t("startFight")}
                                 </TooltipContent>
                               </Tooltip>
                             </>
