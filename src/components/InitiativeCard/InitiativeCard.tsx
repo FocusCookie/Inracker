@@ -32,8 +32,8 @@ function InitiativeCard({ entity, isActive, onClick }: Props) {
         <button
           onClick={() => onClick?.(entity)}
           className={cn(
-            "relative flex h-28 w-22 cursor-pointer flex-col overflow-hidden rounded-lg bg-white outline-1 outline-white transition-all",
-            "outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+            "relative flex h-28 w-24 cursor-pointer flex-col overflow-hidden rounded-lg bg-white outline-1 outline-white transition-all",
+            "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive outline-none focus-visible:ring-[3px]",
             isActive && "shadow-2xl",
           )}
         >
@@ -73,4 +73,3 @@ function InitiativeCard({ entity, isActive, onClick }: Props) {
 }
 
 export default InitiativeCard;
-
