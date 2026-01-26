@@ -56,7 +56,7 @@ function Initiative({
   }
 
   return (
-    <div className="absolute top-4 left-1/2 flex w-fit -translate-x-1/2 transform items-center gap-2 rounded-xl border border-white/80 bg-white/20 px-3 shadow-md backdrop-blur-sm">
+    <div className="items-center gap-2 rounded-xl border border-white/80 bg-white/20 px-3 shadow-md backdrop-blur-sm">
       {showButtons && (
         <button
           onClick={() => scroll("left")}

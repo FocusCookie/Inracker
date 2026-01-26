@@ -43,7 +43,7 @@ function InitiativeMenue({
       <AnimatePresence mode="wait">
         {isOpen && (
           <motion.div
-            className="overflow-hidden rounded-r-lg bg-white"
+            className="overflow-hidden rounded-r-lg bg-white shadow-md"
             initial={{ width: 0 }}
             animate={{
               width: "100%",

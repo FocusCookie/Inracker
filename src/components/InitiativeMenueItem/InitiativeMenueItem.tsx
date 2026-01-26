@@ -1,4 +1,4 @@
-import { useState, KeyboardEvent, ChangeEvent } from "react";
+import { useState, KeyboardEvent, ChangeEvent, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -13,8 +13,13 @@ type Props = {
 };
 
 function InitiativeMenueItem({ entity, onRemove, onInitiativeChange }: Props) {
-  const [inputValue, setInputValue] = useState("");
-  const [committedValue, setCommittedValue] = useState(0);
+  const [inputValue, setInputValue] = useState(entity.initiative.toString());
+  const [committedValue, setCommittedValue] = useState(entity.initiative);
+
+  useEffect(() => {
+    setInputValue(entity.initiative.toString());
+    setCommittedValue(entity.initiative);
+  }, [entity.initiative]);
 
   function handleRemove() {
     onRemove(entity);
