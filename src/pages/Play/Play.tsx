@@ -187,12 +187,17 @@ function Play({
     );
     if (!activeParticipant) return 0;
 
-    const index = selectedInitiativeEntities.findIndex(
-      (p) =>
-        p.properties.id === activeParticipant.entityId &&
-        activeParticipant.entityType &&
-        p.type === activeParticipant.entityType,
-    );
+    const index = selectedInitiativeEntities.findIndex((p) => {
+      if (p.properties.id !== activeParticipant.entityId) return false;
+
+      if (activeParticipant.entityType === "player") {
+        return p.type === "player";
+      }
+      if (activeParticipant.entityType === "opponent") {
+        return p.type === "encounterOpponent";
+      }
+      return false;
+    });
     return index + 1;
   }, [combatState, selectedInitiativeEntities]);
 

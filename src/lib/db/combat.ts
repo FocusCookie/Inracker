@@ -1,9 +1,6 @@
 import {
   execute,
   select,
-  beginTransaction,
-  commit,
-  rollback,
   createDatabaseError,
 } from "./core";
 import {
@@ -165,10 +162,63 @@ export const updateInitiative = async (
   participantId: string,
   newInitiative: number,
 ) => {
-  await execute(
-    "UPDATE combat_participants SET initiative = $1 WHERE id = $2",
-    [newInitiative, participantId],
-  );
+  try {
+    // 1. Get combat_id and current info
+    const participantRes = await select<{ combat_id: string }[]>(
+      "SELECT combat_id FROM combat_participants WHERE id = $1",
+      [participantId],
+    );
+    if (!participantRes.length) {
+      throw new Error("Participant not found");
+    }
+    const combatId = participantRes[0].combat_id;
+
+    const combatRes = await select<DBCombat[]>(
+      "SELECT * FROM combats WHERE id = $1",
+      [combatId],
+    );
+    if (!combatRes.length) {
+      throw new Error("Combat not found");
+    }
+    const combat = combatRes[0];
+
+    // 2. Check if we are in the "first turn" (Round 1, active participant is top of list)
+    let shouldUpdateActive = false;
+    if (combat.round === 1) {
+      const currentParticipants = await select<DBCombatParticipant[]>(
+        "SELECT id FROM combat_participants WHERE combat_id = $1 ORDER BY initiative DESC",
+        [combatId],
+      );
+      if (
+        currentParticipants.length > 0 &&
+        currentParticipants[0].id === combat.active_participant_id
+      ) {
+        shouldUpdateActive = true;
+      }
+    }
+
+    // 3. Update initiative
+    await execute(
+      "UPDATE combat_participants SET initiative = $1 WHERE id = $2",
+      [newInitiative, participantId],
+    );
+
+    // 4. If we were in the first turn, ensure active participant is the new top
+    if (shouldUpdateActive) {
+      const newParticipants = await select<DBCombatParticipant[]>(
+        "SELECT id FROM combat_participants WHERE combat_id = $1 ORDER BY initiative DESC",
+        [combatId],
+      );
+      if (newParticipants.length > 0) {
+        await execute(
+          "UPDATE combats SET active_participant_id = $1 WHERE id = $2",
+          [newParticipants[0].id, combatId],
+        );
+      }
+    }
+  } catch (e) {
+    throw createDatabaseError("Failed to update initiative", e);
+  }
 };
 
 export const getCombatState = async (
@@ -237,7 +287,6 @@ export const addParticipant = async (data: {
 };
 
 export const removeParticipant = async (participantId: string) => {
-  await beginTransaction();
   try {
     await execute("DELETE FROM combat_effects WHERE participant_id = $1", [
       participantId,
@@ -245,9 +294,7 @@ export const removeParticipant = async (participantId: string) => {
     await execute("DELETE FROM combat_participants WHERE id = $1", [
       participantId,
     ]);
-    await commit();
   } catch (e) {
-    await rollback();
     throw createDatabaseError("Failed to remove participant", e);
   }
 };
