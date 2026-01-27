@@ -78,7 +78,7 @@ const PlayLayout: PlayLayoutCompound = ({
           key="main"
           ref={mainRef}
           className={cn(
-            "absolute flex items-start justify-center gap-4 rounded-md bg-white",
+            "absolute flex items-start justify-center gap-4 overflow-hidden rounded-md bg-white",
           )}
           initial={{ right: 0, left: 112, top: 0, bottom: 0 }}
           animate={{

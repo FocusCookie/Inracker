@@ -52,6 +52,8 @@ function CreateEffectDrawer({
   >(null);
   const [durationType, setDurationType] =
     useState<Effect["durationType"]>("rounds");
+  const [minutes, setMinutes] = useState(0);
+  const [seconds, setSeconds] = useState(0);
 
   const formSchema = z.object({
     name: z.string().min(2, {
@@ -91,7 +93,7 @@ function CreateEffectDrawer({
         name,
         icon,
         description,
-        duration,
+        duration, // This is now always rounds or total seconds
         durationType,
         type,
         value: type === "positive" ? value : Math.abs(value) * -1,
@@ -133,9 +135,33 @@ function CreateEffectDrawer({
     form.setValue("type", value as "positive" | "negative");
   }
 
-  function handleDurationTypeChange(value: "rounds" | "time") {
+  function handleDurationTypeChange(
+    value: "rounds" | "time" | "short" | "long",
+  ) {
     form.setValue("durationType", value);
     setDurationType(value);
+
+    // Default values when switching
+    if (value === "time") {
+      setMinutes(1);
+      setSeconds(60);
+      form.setValue("duration", 60);
+    } else {
+      form.setValue("duration", 1);
+    }
+  }
+
+  function handleMinutesChange(val: number) {
+    setMinutes(val);
+    const totalSec = val * 60;
+    setSeconds(totalSec);
+    form.setValue("duration", totalSec);
+  }
+
+  function handleSecondsChange(val: number) {
+    setSeconds(val);
+    setMinutes(Math.floor(val / 60));
+    form.setValue("duration", val);
   }
 
   return (
@@ -312,19 +338,13 @@ function CreateEffectDrawer({
               </Tabs>
             </div>
 
-            {(durationType === "rounds" || durationType === "time") && (
+            {durationType === "rounds" && (
               <FormField
                 control={form.control}
                 name="duration"
                 render={({ field }: { field: any }) => (
                   <FormItem className="flex flex-col gap-0.5 px-0.5">
-                    <div className="flex h-[1.3125rem] gap-2 pt-1.5">
-                      <FormLabel>
-                        {t("duration")}{" "}
-                        {durationType === "time" && t("timeUnit")}
-                      </FormLabel>
-                    </div>
-
+                    <FormLabel>{t("durationRounds")}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -337,6 +357,37 @@ function CreateEffectDrawer({
                   </FormItem>
                 )}
               />
+            )}
+
+            {durationType === "time" && (
+              <div className="grid grid-cols-2 gap-4 px-0.5">
+                <FormItem className="flex flex-col gap-0.5">
+                  <FormLabel>{t("durationMinutes")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      value={minutes}
+                      onChange={(e) =>
+                        handleMinutesChange(Number(e.target.value))
+                      }
+                      disabled={isCreating}
+                    />
+                  </FormControl>
+                </FormItem>
+                <FormItem className="flex flex-col gap-0.5">
+                  <FormLabel>{t("durationSeconds")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      value={seconds}
+                      onChange={(e) =>
+                        handleSecondsChange(Number(e.target.value))
+                      }
+                      disabled={isCreating}
+                    />
+                  </FormControl>
+                </FormItem>
+              </div>
             )}
           </form>
         </Form>

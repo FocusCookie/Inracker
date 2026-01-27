@@ -138,39 +138,48 @@ function Play({
 
   const selectedInitiativeEntities = useMemo(() => {
     if (!combatState) return [];
-    return combatState.participants
-      .map((p) => {
-        if (p.entityType === "player") {
-          const player = players.find((pl) => pl.id === p.entityId);
-          if (player) {
-            return {
-              type: "player" as const,
-              properties: player,
-              initiative: p.initiative,
-            };
-          }
-        } else if (p.entityType === "opponent") {
-          const opponent = encounterOpponents.data?.find(
-            (op) => op.id === p.entityId,
-          );
-          if (opponent) {
-            return {
-              type: "encounterOpponent" as const,
-              properties: opponent,
-              initiative: p.initiative,
-            };
-          }
+    const entities = combatState.participants.map((p) => {
+      const participantEffects = combatState.effects.filter(
+        (e) => e.participantId === p.id,
+      );
+
+      if (p.entityType === "player") {
+        const player = players.find((pl) => pl.id === p.entityId);
+        if (player) {
+          const entity: InitiativeMenuEntity = {
+            type: "player",
+            properties: player,
+            initiative: p.initiative,
+            effects: participantEffects,
+          };
+          return entity;
         }
-        return null;
-      })
+      } else if (p.entityType === "opponent") {
+        const opponent = encounterOpponents.data?.find(
+          (op) => op.id === p.entityId,
+        );
+        if (opponent) {
+          const entity: InitiativeMenuEntity = {
+            type: "encounterOpponent",
+            properties: opponent,
+            initiative: p.initiative,
+            effects: participantEffects,
+          };
+          return entity;
+        }
+      }
+      return null;
+    });
+
+    return entities
       .filter((e): e is InitiativeMenuEntity => e !== null)
       .sort((a, b) => b.initiative - a.initiative);
   }, [combatState, players, encounterOpponents.data]);
 
-  const { data: secondsPerTurn } = useQuery({
-    queryKey: ["settings", "secondsPerTurn"],
+  const { data: secondsPerRound } = useQuery({
+    queryKey: ["settings", "secondsPerRound"],
     queryFn: async () => {
-      const value = await database.settings.get("seconds_per_turn");
+      const value = await database.settings.get("seconds_per_round");
       return value ? parseInt(value, 10) : 6;
     },
   });
@@ -205,15 +214,9 @@ function Play({
   }, [combatState, selectedInitiativeEntities]);
 
   const time = useMemo(() => {
-    if (!combatState || !secondsPerTurn || activePosition === 0) return 0;
-
-    return (
-      (combatState.combat.round - 1) *
-        selectedInitiativeEntities.length *
-        secondsPerTurn +
-      (activePosition - 1) * secondsPerTurn
-    );
-  }, [combatState, selectedInitiativeEntities, secondsPerTurn, activePosition]);
+    if (!combatState || !secondsPerRound) return 0;
+    return (combatState.combat.round - 1) * secondsPerRound;
+  }, [combatState, secondsPerRound]);
 
   const availableOpponents = useMemo(() => {
     if (!combatState || !encounterOpponents.data) return [];

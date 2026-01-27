@@ -16,7 +16,7 @@ import ComponentSettingsCategoryResistances from "@/translations/en/component/Se
 import ComponentSettingsCategoryImmunities from "@/translations/en/component/SettingsCategoryImmunities.json";
 import ComponentSettingsCategoryEffects from "@/translations/en/component/SettingsCategoryEffects.json";
 import ComponentSettingsCategoryPlayers from "@/translations/en/component/SettingsCategoryPlayers.json";
-import ComponentSettingsCategoryGeneral from "@/translations/en/component/SettingsCategoryGeneral.json";
+import ComponentSettingsCategoryGeneral from "@/translations/en/components/SettingsCategoryGeneral.json";
 import ComponentSettingsCategoryImages from "@/translations/en/components/SettingsCategoryImages.json";
 import ComponentSettingsSidebar from "@/translations/en/component/SettingsSidebar.json";
 import ComponentCatalog from "@/translations/en/component/Catalog.json";

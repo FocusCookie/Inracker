@@ -263,6 +263,12 @@ pub fn run() {
             )",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 21,
+            description: "add duration_type to active_effects table",
+            sql: "ALTER TABLE active_effects ADD COLUMN duration_type TEXT NOT NULL DEFAULT 'rounds';",
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()

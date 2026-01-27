@@ -12,10 +12,10 @@ import { useMutationWithErrorToast } from "./useMutationWithErrorToast";
 export const useSettingsGeneral = () => {
   const queryClient = useQueryClient();
 
-  const { data: secondsPerTurn, isLoading } = useQuery({
-    queryKey: ["settings", "secondsPerTurn"],
+  const { data: secondsPerRound, isLoading } = useQuery({
+    queryKey: ["settings", "secondsPerRound"],
     queryFn: async () => {
-      const value = await Database.settings.get("seconds_per_turn");
+      const value = await Database.settings.get("seconds_per_round");
       return value ? parseInt(value, 10) : 6;
     },
   });
@@ -23,21 +23,21 @@ export const useSettingsGeneral = () => {
   const form = useForm<SettingsGeneral>({
     resolver: zodResolver(settingsGeneralSchema),
     defaultValues: {
-      secondsPerTurn: 6,
+      secondsPerRound: 6,
     },
   });
 
   useEffect(() => {
-    if (secondsPerTurn !== undefined) {
-      form.reset({ secondsPerTurn });
+    if (secondsPerRound !== undefined) {
+      form.reset({ secondsPerRound });
     }
-  }, [secondsPerTurn, form]);
+  }, [secondsPerRound, form]);
 
   const mutation = useMutationWithErrorToast({
     mutationFn: async (values: SettingsGeneral) => {
       await Database.settings.update(
-        "seconds_per_turn",
-        values.secondsPerTurn.toString(),
+        "seconds_per_round",
+        values.secondsPerRound.toString(),
       );
     },
     onSuccess: () => {

@@ -44,13 +44,14 @@ function InitiativeMenue({
         {isOpen && (
           <motion.div
             className="overflow-hidden rounded-r-lg bg-white shadow-md"
-            initial={{ width: 0 }}
+            initial={{ x: -288 }}
             animate={{
-              width: "100%",
+              x: 0,
             }}
             exit={{
-              width: 0,
+              x: -288,
             }}
+            transition={{ type: "tween", ease: "easeOut", duration: 0.2 }}
           >
             <div className="flex w-72 flex-col gap-4 p-4">
               <header className="flex items-center justify-between gap-2">

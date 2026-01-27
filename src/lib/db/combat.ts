@@ -112,6 +112,13 @@ export const nextTurn = async (combatId: string) => {
     }
 
     if (isNewRound) {
+      // 0. Fetch seconds_per_round
+      const sprRes = await select<{ value: string }[]>(
+        "SELECT value FROM settings WHERE key = 'seconds_per_round'",
+      );
+      const secondsPerRound =
+        sprRes.length > 0 ? parseInt(sprRes[0].value, 10) : 6;
+
       // 1. Bulk Decrement manual combat-only effects
       await execute(
         "UPDATE combat_effects SET duration = duration - 1 WHERE combat_id = $1",
@@ -122,19 +129,22 @@ export const nextTurn = async (combatId: string) => {
         [combatId],
       );
 
-      // 2. Bulk Decrement linked active_effects for all entities in this combat
-      const participantsWithEntities = participants.filter(
-        (p) => p.entity_id && p.entity_type,
-      );
+      // 2. Decrement linked active_effects for participants in THIS combat
+      for (const p of participants) {
+        if (!p.entity_id || !p.entity_type) continue;
 
-      for (const p of participantsWithEntities) {
-        // Decrement
+        // a. Decrement Rounds
         await execute(
-          "UPDATE active_effects SET remaining_duration = remaining_duration - 1 WHERE entity_id = $1 AND entity_type = $2",
+          "UPDATE active_effects SET remaining_duration = remaining_duration - 1 WHERE entity_id = $1 AND entity_type = $2 AND duration_type = 'rounds'",
           [p.entity_id, p.entity_type],
         );
+        // b. Decrement Time
+        await execute(
+          "UPDATE active_effects SET remaining_duration = remaining_duration - $1 WHERE entity_id = $2 AND entity_type = $3 AND duration_type = 'time'",
+          [secondsPerRound, p.entity_id, p.entity_type],
+        );
 
-        // Cleanup expired
+        // 3. Cleanup expired
         const expiredEffects = await select<
           { effect_id: number; entity_id: number; entity_type: string }[]
         >(

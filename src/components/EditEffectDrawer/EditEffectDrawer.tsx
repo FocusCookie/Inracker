@@ -54,6 +54,8 @@ function EditEffectDrawer({
   const [durationType, setDurationType] = useState<Effect["durationType"]>(
     effect.durationType,
   );
+  const [minutes, setMinutes] = useState(0);
+  const [seconds, setSeconds] = useState(0);
 
   const formSchema = z.object({
     name: z.string().min(2, {
@@ -83,6 +85,7 @@ function EditEffectDrawer({
   });
 
   useEffect(() => {
+    const isTime = effect.durationType === "time";
     form.reset({
       name: effect.name,
       description: effect.description,
@@ -92,6 +95,11 @@ function EditEffectDrawer({
       durationType: effect.durationType,
       value: Math.abs(effect.value),
     });
+    setDurationType(effect.durationType);
+    if (isTime) {
+      setSeconds(effect.duration);
+      setMinutes(Math.floor(effect.duration / 60));
+    }
   }, [effect, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -105,7 +113,7 @@ function EditEffectDrawer({
         name,
         icon,
         description,
-        duration,
+        duration, // duration is now always in base units (rounds or total seconds)
         durationType,
         type,
         value,
@@ -134,6 +142,25 @@ function EditEffectDrawer({
   function handleDurationTypeChange(value: "rounds" | "time") {
     form.setValue("durationType", value);
     setDurationType(value);
+    
+    if (value === "time") {
+      const current = form.getValues("duration");
+      setSeconds(current);
+      setMinutes(Math.floor(current / 60));
+    }
+  }
+
+  function handleMinutesChange(val: number) {
+    setMinutes(val);
+    const totalSec = val * 60;
+    setSeconds(totalSec);
+    form.setValue("duration", totalSec);
+  }
+
+  function handleSecondsChange(val: number) {
+    setSeconds(val);
+    setMinutes(Math.floor(val / 60));
+    form.setValue("duration", val);
   }
 
   function handleCancelClick() {
@@ -316,36 +343,59 @@ function EditEffectDrawer({
                   </Tabs>
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name="duration"
-                  render={({ field }: { field: any }) => (
-                    <FormItem className="flex flex-col gap-0.5 px-0.5">
-                      <div className="flex h-[1.3125rem] gap-2 pt-1.5">
-                        <FormLabel>
-                          {t("duration")}{" "}
-                          {durationType === "time" && t("timeUnit")}
-                        </FormLabel>
-                      </div>
+                {durationType === "rounds" && (
+                  <FormField
+                    control={form.control}
+                    name="duration"
+                    render={({ field }: { field: any }) => (
+                      <FormItem className="flex flex-col gap-0.5 px-0.5 w-full">
+                        <FormLabel>{t("durationRounds")}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="mt-0.5"
+                            disabled={isLoading}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
+                {durationType === "time" && (
+                  <div className="flex gap-4 px-0.5 w-full">
+                    <FormItem className="flex flex-col gap-0.5 w-1/2">
+                      <FormLabel>{t("durationMinutes")}</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          className="mt-0.5"
+                          value={minutes}
+                          onChange={(e) => handleMinutesChange(Number(e.target.value))}
                           disabled={isLoading}
-                          {...field}
                         />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
-                  )}
-                />
-              </div>
-            </form>
-          </Form>
-      }
-    />
-  );
-}
-
-export default EditEffectDrawer;
+                    <FormItem className="flex flex-col gap-0.5 w-1/2">
+                      <FormLabel>{t("durationSeconds")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          value={seconds}
+                          onChange={(e) => handleSecondsChange(Number(e.target.value))}
+                          disabled={isLoading}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  </div>
+                )}
+                          </div>
+                        </form>
+                      </Form>
+                    }
+                  />
+                );
+              }
+              
+              export default EditEffectDrawer;

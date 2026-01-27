@@ -381,8 +381,15 @@ export const addEffectToPlayer = async (
     // Populate active_effects
     const catalogEffect = await getEffectById(effectId);
     await execute(
-      "INSERT INTO active_effects (id, effect_id, entity_id, entity_type, remaining_duration) VALUES ($1, $2, $3, $4, $5)",
-      [crypto.randomUUID(), effectId, playerId, "player", catalogEffect.duration],
+      "INSERT INTO active_effects (id, effect_id, entity_id, entity_type, remaining_duration, duration_type) VALUES ($1, $2, $3, $4, $5, $6)",
+      [
+        crypto.randomUUID(),
+        effectId,
+        playerId,
+        "player",
+        catalogEffect.duration,
+        catalogEffect.durationType,
+      ],
     );
   }
 

@@ -34,10 +34,10 @@ function SettingsCategoryGeneral() {
         <div className="flex flex-col gap-4">
           <FormField
             control={form.control}
-            name="secondsPerTurn"
+            name="secondsPerRound"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("secondsPerTurn")}</FormLabel>
+                <FormLabel>{t("secondsPerRound")}</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} />
                 </FormControl>
