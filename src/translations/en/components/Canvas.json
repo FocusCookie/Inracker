@@ -12,5 +12,6 @@
   "deselect": "Stop Resizing",
   "resize": "Resize",
   "removeFromInitiative": "Remove from Initiative",
-  "addToInitiative": "Add to Initiative"
+  "addToInitiative": "Add to Initiative",
+  "addEffect": "Add Effect"
 }

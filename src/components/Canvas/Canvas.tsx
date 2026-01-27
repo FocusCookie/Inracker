@@ -61,6 +61,10 @@ type Props = {
     type: "player" | "opponent",
     name: string,
   ) => void;
+  onOpenEffectsCatalog?: (
+    entityId: number,
+    type: "player" | "opponent",
+  ) => void;
   initiativeEntityIds?: { id: number; type: "player" | "opponent" }[];
 };
 
@@ -96,6 +100,7 @@ function Canvas({
   onElementMove,
   onRemoveFromInitiative,
   onAddToInitiative,
+  onOpenEffectsCatalog,
   initiativeEntityIds,
 }: Props) {
   const { t } = useTranslation("ComponentCanvas");
@@ -1264,6 +1269,13 @@ function Canvas({
                   <ContextMenuItem onClick={() => onTokenSelect(token)}>
                     {t("select")}
                   </ContextMenuItem>
+                  {onOpenEffectsCatalog && (
+                    <ContextMenuItem
+                      onClick={() => onOpenEffectsCatalog(player.id, "player")}
+                    >
+                      {t("addEffect")}
+                    </ContextMenuItem>
+                  )}
                   <ContextMenuItem
                     onClick={() =>
                       useOverlayStore.getState().open("player.edit", {
@@ -1411,6 +1423,15 @@ function Canvas({
                   <ContextMenuItem onClick={() => onTokenSelect(token)}>
                     {t("select")}
                   </ContextMenuItem>
+                  {onOpenEffectsCatalog && (
+                    <ContextMenuItem
+                      onClick={() =>
+                        onOpenEffectsCatalog(opponent.id, "opponent")
+                      }
+                    >
+                      {t("addEffect")}
+                    </ContextMenuItem>
+                  )}
                   <ContextMenuItem
                     onClick={() =>
                       useOverlayStore.getState().open("encounter-opponent.edit", {

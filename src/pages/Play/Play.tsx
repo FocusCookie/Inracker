@@ -50,7 +50,10 @@ import { BedSingleIcon, CoffeeIcon } from "lucide-react";
 
 // Hooks
 import { useCombatState, useCombatActions } from "@/hooks/useCombat";
-import { useEncounterOpponentsDetailed } from "@/hooks/useEncounterOpponents";
+import {
+  useEncounterOpponentsDetailed,
+  useAddEffectToEncounterOpponent,
+} from "@/hooks/useEncounterOpponents";
 import { useRests } from "@/hooks/useRests";
 import {
   useUpdatePlayer,
@@ -132,6 +135,8 @@ function Play({
     nextTurn,
   } = useCombatActions(chapter.id);
   const { shortRest, longRest } = useRests();
+  const addEffectToEncounterOpponentMutation =
+    useAddEffectToEncounterOpponent(database);
   const encounterOpponents = useEncounterOpponentsDetailed(database);
   const encounterOpponentsRef = useRef(encounterOpponents);
   encounterOpponentsRef.current = encounterOpponents;
@@ -459,6 +464,39 @@ function Play({
       (t) => t.type === tokenType && t.entity === entity.properties.id,
     );
     handleTokenSelect(token || null);
+  }
+
+  function handleOpenEffectsCatalog(
+    entityId: number,
+    type: "player" | "opponent",
+  ) {
+    if (type === "player") {
+      const player = players.find((p) => p.id === entityId);
+      if (player) handleEffectsCatalog(player);
+    } else {
+      const opponent = encounterOpponents.data?.find((o) => o.id === entityId);
+      if (!opponent) return;
+
+      openOverlay("effect.catalog", {
+        database,
+        onSelect: async (effect) => {
+          await addEffectToEncounterOpponentMutation.mutateAsync({
+            opponentId: entityId,
+            effectId: effect.id,
+          });
+
+          queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
+          queryClient.invalidateQueries({ queryKey: ["party"] });
+
+          toast({
+            title: `Added ${effect.icon} ${effect.name} to ${opponent.name}`,
+          });
+        },
+        onCancel: (reason) => {
+          console.log("Effect Catalog cancelled:", reason);
+        },
+      });
+    }
   }
 
   function handleCreateEncounter(element: CanvasElement) {
@@ -997,6 +1035,7 @@ function Play({
           onElementMove={handleElementMove}
           onRemoveFromInitiative={handleRemoveFromInitiative}
           onAddToInitiative={handleAddToInitiative}
+          onOpenEffectsCatalog={handleOpenEffectsCatalog}
           initiativeEntityIds={initiativeEntityIds}
         />
       </AnimatePresence>
