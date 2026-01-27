@@ -58,8 +58,24 @@ export const getDetailedPlayerById = async (
     try {
       const buff = await getEffectById(effectId); // Removed db parameter
 
-      const { description, duration, durationType, icon, id, name, type, value } =
-        buff;
+      const {
+        description,
+        duration: catalogDuration,
+        durationType,
+        icon,
+        id,
+        name,
+        type,
+        value,
+      } = buff;
+
+      // Try to get remaining duration from active_effects
+      const activeEffect = await select<{ remaining_duration: number }[]>(
+        "SELECT remaining_duration FROM active_effects WHERE entity_id = $1 AND entity_type = 'player' AND effect_id = $2",
+        [playerId, effectId],
+      );
+
+      const duration = activeEffect.length > 0 ? activeEffect[0].remaining_duration : catalogDuration;
 
       effects.push({
         description,
@@ -72,25 +88,25 @@ export const getDetailedPlayerById = async (
         value,
       });
     } catch (e) {
-        console.warn(`Failed to load effect ${effectId}`, e);
+      console.warn(`Failed to load effect ${effectId}`, e);
     }
   }
 
   for (const immunityId of immunitiesIds) {
     try {
-        const immunity = await getImmunityById(immunityId); // Removed db parameter
-        immunities.push(immunity);
+      const immunity = await getImmunityById(immunityId); // Removed db parameter
+      immunities.push(immunity);
     } catch (e) {
-        console.warn(`Failed to load immunity ${immunityId}`, e);
+      console.warn(`Failed to load immunity ${immunityId}`, e);
     }
   }
 
   for (const resistanceId of resistancesIds) {
     try {
-        const resistance = await getResistanceById(resistanceId); // Removed db parameter
-        resistances.push(resistance);
+      const resistance = await getResistanceById(resistanceId); // Removed db parameter
+      resistances.push(resistance);
     } catch (e) {
-        console.warn(`Failed to load resistance ${resistanceId}`, e);
+      console.warn(`Failed to load resistance ${resistanceId}`, e);
     }
   }
 
@@ -361,6 +377,13 @@ export const addEffectToPlayer = async (
       playerId,
       JSON.stringify(update.map((id: number) => id)),
     ]);
+
+    // Populate active_effects
+    const catalogEffect = await getEffectById(effectId);
+    await execute(
+      "INSERT INTO active_effects (id, effect_id, entity_id, entity_type, remaining_duration) VALUES ($1, $2, $3, $4, $5)",
+      [crypto.randomUUID(), effectId, playerId, "player", catalogEffect.duration],
+    );
   }
 
   return getDetailedPlayerById(playerId); // Removed db parameter
@@ -382,6 +405,12 @@ export const removeEffectFromPlayer = async (
         .map((id: number) => id),
     ),
   ]);
+
+  // Remove from active_effects tracking
+  await execute(
+    "DELETE FROM active_effects WHERE entity_id = $1 AND entity_type = 'player' AND effect_id = $2",
+    [playerId, effectId],
+  );
 
   return removedEffect as Effect;
 };

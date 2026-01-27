@@ -43,6 +43,7 @@ import { Party } from "@/types/party";
 import PlayerCard from "@/components/PlayerCard/PlayerCard";
 import CombatControls from "@/components/CombatControls/CombatControls";
 import InitiativeMenue from "@/components/InitiativeMenue/InitiativeMenue";
+import ActiveEffectsMenue from "@/components/ActiveEffectsMenue/ActiveEffectsMenue";
 import Initiative from "@/components/Initiative/Initiative";
 import { InitiativeMenuEntity } from "@/types/initiative";
 
@@ -114,6 +115,8 @@ function Play({
 
   const [isAsideOpen, setIsAsideOpen] = useState<boolean>(false);
   const [isInitiativeMenuOpen, setIsInitiativeMenuOpen] =
+    useState<boolean>(false);
+  const [isActiveEffectsMenuOpen, setIsActiveEffectsMenuOpen] =
     useState<boolean>(false);
 
   const { data: combatState } = useCombatState(chapter.id);
@@ -704,6 +707,7 @@ function Play({
             onFinish={() => finishCombat.mutate(combatState.combat.id)}
             onNext={() => nextTurn.mutate(combatState.combat.id)}
             onInitiative={() => setIsInitiativeMenuOpen((prev) => !prev)}
+            onActiveEffects={() => setIsActiveEffectsMenuOpen((prev) => !prev)}
           />
         </PlayLayout.CombatControls>
       )}
@@ -739,6 +743,17 @@ function Play({
             onInitiativeChange={handleInitiativeChange}
           />
         </PlayLayout.InitiativeMenue>
+      )}
+
+      {combatState && (
+        <PlayLayout.ActiveEffects>
+          <ActiveEffectsMenue
+            players={players}
+            encounterOpponents={availableOpponents || []}
+            isOpen={isActiveEffectsMenuOpen}
+            setIsOpen={setIsActiveEffectsMenuOpen}
+          />
+        </PlayLayout.ActiveEffects>
       )}
 
       <PlayLayout.Players>

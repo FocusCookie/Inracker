@@ -1,9 +1,13 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentCreateCombatEffectDrawerEN from "@/translations/en/components/CreateCombatEffectDrawer.json";
+import ComponentCreateCombatEffectDrawerDE from "@/translations/de/components/CreateCombatEffectDrawer.json"; 
 import ComponentCombatControlsEN from "@/translations/en/components/CombatControls.json";
 import ComponentCombatControlsDE from "@/translations/de/components/CombatControls.json";
 import ComponentInitiativeMenueItemEN from "@/translations/en/components/InitiativeMenueItem.json";
 import ComponentInitiativeMenueItemDE from "@/translations/de/components/InitiativeMenueItem.json";
+import ComponentActiveEffectsMenueEN from "@/translations/en/components/ActiveEffectsMenue.json";
+import ComponentActiveEffectsMenueDE from "@/translations/de/components/ActiveEffectsMenue.json";
 import ComponentSettingsOpponentCardEN from "@/translations/en/components/SettingsOpponentCard.json";
 import ComponentSettingsOpponentCardDE from "@/translations/de/components/SettingsOpponentCard.json";
 import ComponentEditOpponentDrawerEN from "@/translations/en/components/EditOpponentDrawer.json";
@@ -113,8 +117,10 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentCreateCombatEffectDrawer: ComponentCreateCombatEffectDrawerEN,
     ComponentCombatControls: ComponentCombatControlsEN,
     ComponentInitiativeMenueItem: ComponentInitiativeMenueItemEN,
+    ComponentActiveEffectsMenue: ComponentActiveEffectsMenueEN,
     ComponentEditPlayerDrawer: ComponentEditPlayerDrawerEN,
     ComponentSettingsOpponentCard: ComponentSettingsOpponentCardEN,
     ComponentEditOpponentDrawer: ComponentEditOpponentDrawerEN,
@@ -176,8 +182,10 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentCreateCombatEffectDrawer: ComponentCreateCombatEffectDrawerDE,
     ComponentCombatControls: ComponentCombatControlsDE,
     ComponentInitiativeMenueItem: ComponentInitiativeMenueItemDE,
+    ComponentActiveEffectsMenue: ComponentActiveEffectsMenueDE,
     ComponentEditPlayerDrawer: ComponentEditPlayerDrawerDE,
     ComponentSettingsOpponentCard: ComponentSettingsOpponentCardDE,
     ComponentEditOpponentDrawer: ComponentEditOpponentDrawerDE,

@@ -1,8 +1,9 @@
 import "i18next";
-import ComponentCombatControls from "@/translations/en/component/CombatControls.json";
-import ComponentCombatControls from "@/translations/en/component/CombatControls.json";
-import ComponentInitiativeMenueItem from "@/translations/en/component/InitiativeMenueItem.json";
-import ComponentEditPlayerDrawer from "@/translations/en/component/EditPlayerDrawer.json";
+import ComponentCreateCombatEffectDrawer from "@/translations/en/components/CreateCombatEffectDrawer.json";
+import ComponentCombatControls from "@/translations/en/components/CombatControls.json";
+import ComponentInitiativeMenueItem from "@/translations/en/components/InitiativeMenueItem.json";
+import ComponentActiveEffectsMenue from "@/translations/en/components/ActiveEffectsMenue.json";
+import ComponentEditPlayerDrawer from "@/translations/en/components/EditPlayerDrawer.json";
 import ComponentSettingsOpponentCard from "@/translations/en/component/SettingsOpponentCard.json";
 import ComponentEditOpponentDrawer from "@/translations/en/component/EditOpponentDrawer.json";
 import ComponentEncounterOpponentEditDrawer from "@/translations/en/component/EncounterOpponentEditDrawer.json";
@@ -62,9 +63,11 @@ declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
       // hygen-components - DO NOT DELETE THIS LINE
+      ComponentCreateCombatEffectDrawer: typeof ComponentCreateCombatEffectDrawer;
       ComponentCombatControls: typeof ComponentCombatControls;
       ComponentCombatControls: typeof ComponentCombatControls;
       ComponentInitiativeMenueItem: typeof ComponentInitiativeMenueItem;
+      ComponentActiveEffectsMenue: typeof ComponentActiveEffectsMenue;
       ComponentEditPlayerDrawer: typeof ComponentEditPlayerDrawer;
       ComponentSettingsOpponentCard: typeof ComponentSettingsOpponentCard;
       ComponentEditOpponentDrawer: typeof ComponentEditOpponentDrawer;

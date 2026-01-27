@@ -12,6 +12,7 @@ import {
   ClockIcon,
   ListIcon,
   SwordsIcon,
+  SparklesIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -22,6 +23,7 @@ type Props = {
   onFinish: () => void;
   onNext: () => void;
   onInitiative: () => void;
+  onActiveEffects: () => void;
 };
 
 function CombatControls({
@@ -30,6 +32,7 @@ function CombatControls({
   onFinish,
   onInitiative,
   onNext,
+  onActiveEffects,
 }: Props) {
   const { t } = useTranslation("ComponentCombatControls");
   const [open, setOpen] = useState(false);
@@ -136,6 +139,32 @@ function CombatControls({
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>{t("initiative")}</TooltipContent>
+                </Tooltip>
+              </motion.div>
+
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, scale: 0.5 },
+                  visible: {
+                    opacity: 1,
+                    scale: 1,
+                    transition: { duration: 0.02 },
+                  },
+                }}
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onActiveEffects();
+                      }}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
+                    >
+                      <SparklesIcon className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>{t("activeEffects")}</TooltipContent>
                 </Tooltip>
               </motion.div>
 

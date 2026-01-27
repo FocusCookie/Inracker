@@ -269,8 +269,37 @@ export const getDetailedEncounterOpponentById = async (
 
   for (const effectId of effectsIds) {
     try {
-      const effect = await getEffectById(effectId);
-      effects.push(effect);
+      const buff = await getEffectById(effectId);
+
+      const {
+        description,
+        duration: catalogDuration,
+        durationType,
+        icon,
+        id,
+        name,
+        type,
+        value,
+      } = buff;
+
+      // Try to get remaining duration from active_effects
+      const activeEffect = await select<{ remaining_duration: number }[]>(
+        "SELECT remaining_duration FROM active_effects WHERE entity_id = $1 AND entity_type = 'opponent' AND effect_id = $2",
+        [encounterOpponentId, effectId],
+      );
+
+      const duration = activeEffect.length > 0 ? activeEffect[0].remaining_duration : catalogDuration;
+
+      effects.push({
+        description,
+        duration,
+        durationType,
+        icon,
+        id,
+        name,
+        type,
+        value,
+      });
     } catch (e) {
       console.warn(`Failed to load effect ${effectId}`, e);
     }

@@ -249,6 +249,20 @@ pub fn run() {
             sql: "ALTER TABLE combats ADD COLUMN encounter_id INTEGER REFERENCES encounters(id) ON DELETE SET NULL;",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 20,
+            description: "create active_effects table",
+            sql: "CREATE TABLE IF NOT EXISTS active_effects (
+                id TEXT PRIMARY KEY,
+                effect_id INTEGER NOT NULL,
+                entity_id INTEGER NOT NULL,
+                entity_type TEXT NOT NULL, -- 'player' or 'opponent'
+                remaining_duration INTEGER NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(effect_id) REFERENCES effects(id) ON DELETE CASCADE
+            )",
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()

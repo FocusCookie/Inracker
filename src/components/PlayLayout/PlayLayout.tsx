@@ -16,6 +16,7 @@ type PlayLayoutCompound = React.FC<PlayLayoutCompoundProps> & {
   Encounter: React.FC<{ children: React.ReactNode }>;
   Initiative: React.FC<{ children: React.ReactNode }>;
   InitiativeMenue: React.FC<{ children: React.ReactNode }>;
+  ActiveEffects: React.FC<{ children: React.ReactNode }>;
   CombatControls: React.FC<{ children: React.ReactNode }>;
 };
 
@@ -37,6 +38,11 @@ const PlayLayout: PlayLayoutCompound = ({
   const initiativeMenueChild = childrenArray.find(
     (child) =>
       React.isValidElement(child) && child.type === PlayLayout.InitiativeMenue,
+  );
+
+  const activeEffectsChild = childrenArray.find(
+    (child) =>
+      React.isValidElement(child) && child.type === PlayLayout.ActiveEffects,
   );
 
   const initiativeChild = childrenArray.find(
@@ -61,6 +67,7 @@ const PlayLayout: PlayLayoutCompound = ({
       child.type !== PlayLayout.Settings &&
       child.type !== PlayLayout.Initiative &&
       child.type !== PlayLayout.InitiativeMenue &&
+      child.type !== PlayLayout.ActiveEffects &&
       child.type !== PlayLayout.CombatControls,
   );
 
@@ -93,6 +100,10 @@ const PlayLayout: PlayLayoutCompound = ({
 
           <div className="absolute top-1/2 left-0 -translate-y-1/2 transform">
             {initiativeMenueChild}
+          </div>
+
+          <div className="absolute top-1/2 right-0 -translate-y-1/2 transform">
+            {activeEffectsChild}
           </div>
 
           <div className="absolute top-4 left-4">{combatControlsChild}</div>
@@ -158,6 +169,11 @@ PlayLayout.InitiativeMenue = ({ children }) => {
   return <>{children}</>;
 };
 PlayLayout.InitiativeMenue.displayName = "MainLayout.InitiativeMenue";
+
+PlayLayout.ActiveEffects = ({ children }) => {
+  return <>{children}</>;
+};
+PlayLayout.ActiveEffects.displayName = "MainLayout.ActiveEffects";
 
 PlayLayout.CombatControls = ({ children }) => {
   return <>{children}</>;

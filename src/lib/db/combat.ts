@@ -89,7 +89,7 @@ export const nextTurn = async (combatId: string) => {
     const combat = combatRes[0];
 
     const participants = await select<DBCombatParticipant[]>(
-      "SELECT id FROM combat_participants WHERE combat_id = $1 ORDER BY initiative DESC",
+      "SELECT * FROM combat_participants WHERE combat_id = $1 ORDER BY initiative DESC",
       [combatId],
     );
 
@@ -112,6 +112,7 @@ export const nextTurn = async (combatId: string) => {
     }
 
     if (isNewRound) {
+      // 1. Bulk Decrement manual combat-only effects
       await execute(
         "UPDATE combat_effects SET duration = duration - 1 WHERE combat_id = $1",
         [combatId],
@@ -120,6 +121,55 @@ export const nextTurn = async (combatId: string) => {
         "DELETE FROM combat_effects WHERE combat_id = $1 AND duration <= 0",
         [combatId],
       );
+
+      // 2. Bulk Decrement linked active_effects for all entities in this combat
+      const participantsWithEntities = participants.filter(
+        (p) => p.entity_id && p.entity_type,
+      );
+
+      for (const p of participantsWithEntities) {
+        // Decrement
+        await execute(
+          "UPDATE active_effects SET remaining_duration = remaining_duration - 1 WHERE entity_id = $1 AND entity_type = $2",
+          [p.entity_id, p.entity_type],
+        );
+
+        // Cleanup expired
+        const expiredEffects = await select<
+          { effect_id: number; entity_id: number; entity_type: string }[]
+        >(
+          "SELECT effect_id, entity_id, entity_type FROM active_effects WHERE entity_id = $1 AND entity_type = $2 AND remaining_duration <= 0",
+          [p.entity_id, p.entity_type],
+        );
+
+        for (const expired of expiredEffects) {
+          const table =
+            expired.entity_type === "player" ? "players" : "encounter_opponents";
+
+          const entityRes = await select<{ effects: string }[]>(
+            `SELECT effects FROM ${table} WHERE id = $1`,
+            [expired.entity_id],
+          );
+
+          if (entityRes.length > 0) {
+            const currentEffects = JSON.parse(entityRes[0].effects) as number[];
+            const updatedEffects = currentEffects.filter(
+              (id) => id !== expired.effect_id,
+            );
+
+            await execute(`UPDATE ${table} SET effects = $1 WHERE id = $2`, [
+              JSON.stringify(updatedEffects),
+              expired.entity_id,
+            ]);
+          }
+        }
+
+        // Delete from tracking table
+        await execute(
+          "DELETE FROM active_effects WHERE entity_id = $1 AND entity_type = $2 AND remaining_duration <= 0",
+          [p.entity_id, p.entity_type],
+        );
+      }
     }
 
     const nextParticipantId = participants[nextIndex].id;

@@ -4,6 +4,7 @@
   "initiative": "Initiative",
   "finishCombat": "Beende Kampf",
   "nextTurn": "Nächster Zug",
-  "round": "Kampfrunde",
+  "activeEffects": "Aktive Effekte",
+  "round": "Runde",
   "time": "Kampfzeit"
 }

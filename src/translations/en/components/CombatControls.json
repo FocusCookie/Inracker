@@ -4,6 +4,7 @@
   "initiative": "initative list",
   "finishCombat": "finish combat",
   "nextTurn": "next turn",
+  "activeEffects": "Active Effects",
   "round": "combat round",
   "time": "combat time"
 }

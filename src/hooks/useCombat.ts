@@ -18,6 +18,10 @@ export function useCombatActions(chapterId: number) {
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["combat", chapterId] });
+    queryClient.invalidateQueries({ queryKey: ["players"] });
+    queryClient.invalidateQueries({ queryKey: ["party"] });
+    queryClient.invalidateQueries({ queryKey: ["parties"] });
+    queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
   };
 
   const nextTurn = useMutationWithErrorToast({
