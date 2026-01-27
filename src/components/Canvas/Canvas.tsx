@@ -21,7 +21,7 @@ import {
   ContextMenuLabel,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { CircleX, Swords, UsersRound } from "lucide-react";
+import { CircleX, Sword, UsersRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -1230,7 +1230,7 @@ function Canvas({
 
                     <g>
                       <text
-                        className="text-4xl select-none pointer-events-none"
+                        className="pointer-events-none text-4xl select-none"
                         x={token.coordinates.x}
                         y={token.coordinates.y + 32}
                       >
@@ -1255,7 +1255,7 @@ function Canvas({
                     />
                     <g>
                       <text
-                        className="text-4xl select-none pointer-events-none"
+                        className="pointer-events-none text-4xl select-none"
                         x={token.coordinates.x}
                         y={token.coordinates.y + 32}
                       >
@@ -1281,9 +1281,8 @@ function Canvas({
                       useOverlayStore.getState().open("player.edit", {
                         player: player,
                         onEdit: async (updatedPlayer) => {
-                          const result = await database.players.update(
-                            updatedPlayer,
-                          );
+                          const result =
+                            await database.players.update(updatedPlayer);
                           return result;
                         },
                         onComplete: () => {
@@ -1370,7 +1369,7 @@ function Canvas({
                     {!opponent.image && (
                       <g>
                         <text
-                          className="text-4xl select-none pointer-events-none"
+                          className="pointer-events-none text-4xl select-none"
                           x={token.coordinates.x + 32}
                           y={token.coordinates.y + 64}
                         >
@@ -1398,7 +1397,7 @@ function Canvas({
                     {opponent.image && (
                       <g>
                         <text
-                          className="text-4xl select-none pointer-events-none"
+                          className="pointer-events-none text-4xl select-none"
                           x={token.coordinates.x}
                           y={token.coordinates.y + 32}
                         >
@@ -1409,7 +1408,7 @@ function Canvas({
                     {opponent.image && (
                       <g>
                         <text
-                          className="text-4xl select-none pointer-events-none"
+                          className="pointer-events-none text-4xl select-none"
                           x={token.coordinates.x}
                           y={token.coordinates.y + 32}
                         >
@@ -1434,22 +1433,24 @@ function Canvas({
                   )}
                   <ContextMenuItem
                     onClick={() =>
-                      useOverlayStore.getState().open("encounter-opponent.edit", {
-                        opponent: opponent,
-                        onEdit: async (opp) => {
-                          const result =
-                            await database.encounterOpponents.update(opp);
-                          return result;
-                        },
-                        onDelete: async (id) => {
-                          await database.encounterOpponents.delete(id);
-                        },
-                        onComplete: () => {
-                          queryClient.invalidateQueries({
-                            queryKey: ["encounter-opponents"],
-                          });
-                        },
-                      })
+                      useOverlayStore
+                        .getState()
+                        .open("encounter-opponent.edit", {
+                          opponent: opponent,
+                          onEdit: async (opp) => {
+                            const result =
+                              await database.encounterOpponents.update(opp);
+                            return result;
+                          },
+                          onDelete: async (id) => {
+                            await database.encounterOpponents.delete(id);
+                          },
+                          onComplete: () => {
+                            queryClient.invalidateQueries({
+                              queryKey: ["encounter-opponents"],
+                            });
+                          },
+                        })
                     }
                   >
                     {t("edit")}
@@ -1464,7 +1465,8 @@ function Canvas({
                       <ContextMenuItem
                         onClick={() => {
                           const isInInitiative = initiativeEntityIds.some(
-                            (e) => e.id === opponent.id && e.type === "opponent",
+                            (e) =>
+                              e.id === opponent.id && e.type === "opponent",
                           );
                           if (isInInitiative) {
                             onRemoveFromInitiative(opponent.id, "opponent");
@@ -1569,7 +1571,7 @@ function Canvas({
                       {isOpponentsPanelOpen ? (
                         <CircleX className="h-4 w-4" />
                       ) : (
-                        <Swords className="h-4 w-4" />
+                        <Sword className="h-4 w-4" />
                       )}
                     </button>
                   </TooltipTrigger>

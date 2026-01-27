@@ -17,5 +17,9 @@
   "detailsDescription": "Dieser Bereich ist für alle wichtigen Fähigkeiten und zusätzliche relevante Informationen über den Charakter gedacht. Öffne ihn, wenn du spezifische Details während deiner Abenteuer benötigst!",
   "select": "Auswahl",
   "editPlayerDescription": "Du kannst alle Details am Spieler ändern.",
-  "editPlayer": "Edit Player"
+  "editPlayer": "Spieler bearbeiten",
+  "immunities": "Immunitäten",
+  "resistances": "Resistenzen",
+  "effects": "Effekte",
+  "catalog": "Katalog"
 }

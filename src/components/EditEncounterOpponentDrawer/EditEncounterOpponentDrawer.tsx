@@ -17,6 +17,7 @@ import CreateOpponentForm from "../CreateOpponentForm/CreateOpponentForm";
 import { TypographyH2 } from "../ui/typographyH2";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
 import ResistanceCard from "../ResistanceCard/ResistanceCard";
+import EffectCard from "../EffectCard/EffectCard";
 import { useState } from "react";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
@@ -198,6 +199,18 @@ function EditEncounterOpponentDrawer({
     });
   }
 
+  function handleOpenEffectCatalog() {
+    openOverlay("effect.catalog", {
+      onSelect: async (effect) => {
+        const currentEffects = form.getValues("effects") || [];
+        form.setValue("effects", [...currentEffects, effect.id]);
+      },
+      onCancel: (reason) => {
+        console.log("Effect catalog cancelled:", reason);
+      },
+    });
+  }
+
   function handleRemoveImmunity(id: number) {
     const currentImmunities = form.getValues("immunities") || [];
     form.setValue(
@@ -211,6 +224,14 @@ function EditEncounterOpponentDrawer({
     form.setValue(
       "resistances",
       currentResistances.filter((resistanceId) => resistanceId !== id),
+    );
+  }
+
+  function handleRemoveEffect(id: number) {
+    const currentEffects = form.getValues("effects") || [];
+    form.setValue(
+      "effects",
+      currentEffects.filter((effectId) => effectId !== id),
     );
   }
 
@@ -238,7 +259,7 @@ function EditEncounterOpponentDrawer({
               console.log("Validation errors:", errors),
             )}
           >
-            {t("create")}
+            {t("save")}
           </Button>
 
           <AlertDialog>
@@ -335,6 +356,31 @@ function EditEncounterOpponentDrawer({
             </div>
           </div>
         </CreateOpponentForm.Resistances>
+
+        <CreateOpponentForm.Effects>
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between gap-4">
+              <TypographyH2> {t("effects")}</TypographyH2>
+              <div className="flex grow justify-end gap-2">
+                <Button type="button" onClick={handleOpenEffectCatalog}>
+                  {t("catalog")}
+                </Button>
+              </div>
+            </div>
+            <div className="flex flex-col gap-4">
+              {(form.watch("effects") || [])
+                .map((id: number) => effects.data?.find((e) => e.id === id))
+                .filter((e): e is any => !!e)
+                .map((effect: any) => (
+                  <EffectCard
+                    key={`effect-${effect.id}`}
+                    effect={effect}
+                    onRemove={() => handleRemoveEffect(effect.id)}
+                  />
+                ))}
+            </div>
+          </div>
+        </CreateOpponentForm.Effects>
       </CreateOpponentForm>
     </Drawer>
   );

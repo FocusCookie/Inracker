@@ -1,6 +1,6 @@
 import { Player } from "@/types/player";
 import { TrashIcon } from "@radix-ui/react-icons";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import IconPicker from "../IconPicker/IconPicker";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -23,15 +23,44 @@ type Props = {
   disabled: boolean;
   player: Player;
   form: any; //TODO: Better type
+  children?: React.ReactNode;
 };
 
-function EditPlayerForm({ disabled, player, form }: Props) {
+type EditPlayerFormCompound = React.FC<Props> & {
+  Immunities: React.FC<{ children: React.ReactNode }>;
+  Resistances: React.FC<{ children: React.ReactNode }>;
+  Effects: React.FC<{ children: React.ReactNode }>;
+};
+
+const EditPlayerForm: EditPlayerFormCompound = ({
+  disabled,
+  player,
+  form,
+  children,
+}) => {
   const { t } = useTranslation("ComponentEditPlayerDrawer");
   const [picturePreview, setPicturePreview] = useState<string>(
     player?.image || "",
   );
   const [isImageSelectorOpen, setIsImageSelectorOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState<number>(0); // to reset the input type file path after a reset
+
+  const childrenArray = React.Children.toArray(children);
+
+  const immunitiesChild = childrenArray.find(
+    (child) =>
+      React.isValidElement(child) && child.type === EditPlayerForm.Immunities,
+  );
+
+  const resistancesChild = childrenArray.find(
+    (child) =>
+      React.isValidElement(child) && child.type === EditPlayerForm.Resistances,
+  );
+
+  const effectsChild = childrenArray.find(
+    (child) =>
+      React.isValidElement(child) && child.type === EditPlayerForm.Effects,
+  );
 
   useEffect(() => {
     if (!!player) {
@@ -227,6 +256,12 @@ function EditPlayerForm({ disabled, player, form }: Props) {
             )}
           />
         </div>
+
+        {immunitiesChild}
+
+        {resistancesChild}
+
+        {effectsChild}
       </form>
       <ImageSelectionDialog
         open={isImageSelectorOpen}
@@ -235,7 +270,22 @@ function EditPlayerForm({ disabled, player, form }: Props) {
       />
     </Form>
   );
-}
+};
+
+EditPlayerForm.Immunities = ({ children }) => {
+  return <>{children}</>;
+};
+EditPlayerForm.Immunities.displayName = "EditPlayerForm.Immunities";
+
+EditPlayerForm.Resistances = ({ children }) => {
+  return <>{children}</>;
+};
+EditPlayerForm.Resistances.displayName = "EditPlayerForm.Resistances";
+
+EditPlayerForm.Effects = ({ children }) => {
+  return <>{children}</>;
+};
+EditPlayerForm.Effects.displayName = "EditPlayerForm.Effects";
 
 export default EditPlayerForm;
 

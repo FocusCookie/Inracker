@@ -19,5 +19,9 @@
   "details": "Details",
   "select": "Select",
   "editPlayerDescription": "Edit the player as you wish.",
-  "editPlayer": "Edit Player"
+  "editPlayer": "Edit Player",
+  "immunities": "Immunities",
+  "resistances": "Resistances",
+  "effects": "Effects",
+  "catalog": "Catalog"
 }

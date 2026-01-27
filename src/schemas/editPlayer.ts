@@ -5,29 +5,12 @@ export const editPlayerSchema = z.object({
   ep: z.coerce.number(),
   id: z.coerce.number(),
   details: z.string(),
-  effects: z.array(
-    z.object({
-      id: z.number(),
-      name: z.string(),
-      icon: z.string(),
-      type: z.enum(["positive", "negative"]),
-      description: z.string(),
-      duration: z.number(),
-      durationType: z.enum(["rounds", "time"]),
-    }),
-  ),
+  effects: z.array(z.number()),
   overview: z.string(),
   health: z.coerce.number(),
   max_health: z.coerce.number(),
   icon: z.string().emoji(),
-  immunities: z.array(
-    z.object({
-      id: z.number(),
-      name: z.string(),
-      icon: z.string(),
-      description: z.string(),
-    }),
-  ),
+  immunities: z.array(z.number()),
   level: z.coerce.number(),
   name: z.string().min(2, {
     message: i18next.t("ComponentCreatePlayerDrawer:minName"),
@@ -36,12 +19,5 @@ export const editPlayerSchema = z.object({
     message: i18next.t("ComponentCreatePlayerDrawer:minRole"),
   }),
   picture: z.instanceof(File).or(z.string()),
-  resistances: z.array(
-    z.object({
-      id: z.number(),
-      name: z.string(),
-      icon: z.string(),
-      description: z.string(),
-    }),
-  ),
+  resistances: z.array(z.number()),
 });
