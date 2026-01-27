@@ -8,6 +8,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import InitiativeMenueItem from "../InitiativeMenueItem/InitiativeMenueItem";
 import { InitiativeMenuEntity } from "@/types/initiative";
 import { useTranslation } from "react-i18next";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
 type Props = {
   selected: InitiativeMenuEntity[];
@@ -154,9 +160,9 @@ type AddEntityProps = {
 
 function AddEntityCard({ entity, onAdd }: AddEntityProps) {
   return (
-    <li className="flex items-center justify-between gap-2">
-      <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8">
+    <li className="flex items-center justify-between gap-2 overflow-hidden">
+      <div className="flex min-w-0 items-center gap-2 overflow-hidden">
+        <Avatar className="h-8 w-8 shrink-0">
           <AvatarImage
             src={entity.properties.image || undefined}
             alt={entity.properties.name}
@@ -164,10 +170,26 @@ function AddEntityCard({ entity, onAdd }: AddEntityProps) {
           <AvatarFallback>{entity.properties.icon}</AvatarFallback>
         </Avatar>
 
-        <strong>{entity.properties.name}</strong>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <strong className="truncate text-sm">
+                {entity.properties.name}
+              </strong>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{entity.properties.name}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
-      <Button variant="ghost" onClick={() => onAdd(entity)}>
+      <Button
+        size="icon"
+        variant="ghost"
+        className="shrink-0"
+        onClick={() => onAdd(entity)}
+      >
         <PlusIcon />
       </Button>
     </li>
