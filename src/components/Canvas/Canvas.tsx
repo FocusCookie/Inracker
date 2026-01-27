@@ -1203,8 +1203,11 @@ function Canvas({
                     <circle
                       cx={token.coordinates.x + 50}
                       cy={token.coordinates.y + 50}
-                      r={52}
-                      fill="none"
+                      r={40}
+                      fill="white"
+                      stroke="black"
+                      strokeWidth={2}
+                      className="pointer-events-none"
                     />
 
                     <g>
@@ -1306,17 +1309,18 @@ function Canvas({
                       }
                     }}
                   >
+                    <circle
+                      cx={token.coordinates.x + 50}
+                      cy={token.coordinates.y + 50}
+                      r={40}
+                      fill="white"
+                      stroke="black"
+                      strokeWidth={2}
+                      className="pointer-events-none"
+                    />
+
                     {!opponent.image && (
                       <g>
-                        <circle
-                          cx={token.coordinates.x + 50}
-                          cy={token.coordinates.y + 50}
-                          r={52}
-                          fill="none"
-                          strokeWidth={4}
-                          className="pointer-events-none"
-                        ></circle>
-
                         <text
                           className="text-4xl select-none pointer-events-none"
                           x={token.coordinates.x + 32}
@@ -1343,6 +1347,17 @@ function Canvas({
                       onMouseDown={(e) => handleTokenDragStart(e, token)}
                       onClick={() => handleTokenClick(token)}
                     />
+                    {opponent.image && (
+                      <g>
+                        <text
+                          className="text-4xl select-none pointer-events-none"
+                          x={token.coordinates.x}
+                          y={token.coordinates.y + 32}
+                        >
+                          {opponent.icon}
+                        </text>
+                      </g>
+                    )}
                     {opponent.image && (
                       <g>
                         <text
