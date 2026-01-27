@@ -133,6 +133,46 @@ export const nextTurn = async (combatId: string) => {
       for (const p of participants) {
         if (!p.entity_id || !p.entity_type) continue;
 
+        // Apply health changes from active effects (value != 0)
+        const activeEffects = await select<{ value: number }[]>(
+          `SELECT e.value 
+             FROM active_effects ae
+             JOIN effects e ON ae.effect_id = e.id
+             WHERE ae.entity_id = $1 AND ae.entity_type = $2`,
+          [p.entity_id, p.entity_type],
+        );
+
+        const totalChange = activeEffects.reduce(
+          (sum, eff) => sum + eff.value,
+          0,
+        );
+
+        if (totalChange !== 0) {
+          const table =
+            p.entity_type === "player" ? "players" : "encounter_opponents";
+
+          const entityRes = await select<
+            { health: number; max_health: number }[]
+          >(`SELECT health, max_health FROM ${table} WHERE id = $1`, [
+            p.entity_id,
+          ]);
+
+          if (entityRes.length > 0) {
+            const { health, max_health } = entityRes[0];
+            let newHealth = health + totalChange;
+
+            // If healing (positive change), cap at max_health
+            if (totalChange > 0) {
+              newHealth = Math.min(newHealth, max_health);
+            }
+
+            await execute(`UPDATE ${table} SET health = $1 WHERE id = $2`, [
+              newHealth,
+              p.entity_id,
+            ]);
+          }
+        }
+
         // a. Decrement Rounds
         await execute(
           "UPDATE active_effects SET remaining_duration = remaining_duration - 1 WHERE entity_id = $1 AND entity_type = $2 AND duration_type = 'rounds'",
