@@ -20,6 +20,8 @@ import {
   ContextMenuItem,
   ContextMenuLabel,
   ContextMenuTrigger,
+  ContextMenuSeparator,
+  ContextMenuGroup,
 } from "@/components/ui/context-menu";
 import { CircleX, Sword, UsersRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -66,6 +68,10 @@ type Props = {
     type: "player" | "opponent",
   ) => void;
   initiativeEntityIds?: { id: number; type: "player" | "opponent" }[];
+  onHealPlayer?: (playerId: number) => void;
+  onDamagePlayer?: (playerId: number) => void;
+  onHealOpponent?: (opponentId: number) => void;
+  onDamageOpponent?: (opponentId: number) => void;
 };
 
 export type CanvasElement = {
@@ -102,6 +108,10 @@ function Canvas({
   onAddToInitiative,
   onOpenEffectsCatalog,
   initiativeEntityIds,
+  onHealPlayer,
+  onDamagePlayer,
+  onHealOpponent,
+  onDamageOpponent,
 }: Props) {
   const { t } = useTranslation("ComponentCanvas");
   const queryClient = useQueryClient();
@@ -1264,70 +1274,111 @@ function Canvas({
                     </g>
                   </g>
                 </ContextMenuTrigger>
-                <ContextMenuContent className="w-40">
+                <ContextMenuContent className="w-56">
                   <ContextMenuLabel>{player.name}</ContextMenuLabel>
+                  <ContextMenuSeparator />
                   <ContextMenuItem onClick={() => onTokenSelect(token)}>
                     {t("select")}
                   </ContextMenuItem>
-                  {onOpenEffectsCatalog && (
-                    <ContextMenuItem
-                      onClick={() => onOpenEffectsCatalog(player.id, "player")}
-                    >
-                      {t("addEffect")}
-                    </ContextMenuItem>
+                  <ContextMenuSeparator />
+                  <ContextMenuGroup>
+                    {onOpenEffectsCatalog && (
+                      <ContextMenuItem
+                        onClick={() =>
+                          onOpenEffectsCatalog(player.id, "player")
+                        }
+                      >
+                        {t("addEffect")}
+                      </ContextMenuItem>
+                    )}
+                  </ContextMenuGroup>
+
+                  {(onHealPlayer || onDamagePlayer) && (
+                    <>
+                      <ContextMenuSeparator />
+                      <ContextMenuGroup>
+                        {onHealPlayer && (
+                          <ContextMenuItem
+                            onClick={() => onHealPlayer(player.id)}
+                          >
+                            {t("addHealth")}
+                          </ContextMenuItem>
+                        )}
+                        {onDamagePlayer && (
+                          <ContextMenuItem
+                            onClick={() => onDamagePlayer(player.id)}
+                          >
+                            {t("removeHealth")}
+                          </ContextMenuItem>
+                        )}
+                      </ContextMenuGroup>
+                    </>
                   )}
-                  <ContextMenuItem
-                    onClick={() =>
-                      useOverlayStore.getState().open("player.edit", {
-                        player: player,
-                        onEdit: async (updatedPlayer) => {
-                          const result =
-                            await database.players.update(updatedPlayer);
-                          return result;
-                        },
-                        onComplete: () => {
-                          queryClient.invalidateQueries({
-                            queryKey: ["players"],
-                          });
-                          queryClient.invalidateQueries({
-                            queryKey: ["party"],
-                          });
-                          queryClient.invalidateQueries({
-                            queryKey: ["parties"],
-                          });
-                        },
-                      })
-                    }
-                  >
-                    {t("edit")}
-                  </ContextMenuItem>
-                  <ContextMenuItem onClick={() => toggleToken(token)}>
-                    {(tokenVisibility[token.id] ?? true)
-                      ? t("hide")
-                      : t("show")}
-                  </ContextMenuItem>
+
+                  <ContextMenuSeparator />
+
+                  <ContextMenuGroup>
+                    <ContextMenuItem
+                      onClick={() =>
+                        useOverlayStore.getState().open("player.edit", {
+                          player: player,
+                          onEdit: async (updatedPlayer) => {
+                            const result =
+                              await database.players.update(updatedPlayer);
+                            return result;
+                          },
+                          onComplete: () => {
+                            queryClient.invalidateQueries({
+                              queryKey: ["players"],
+                            });
+                            queryClient.invalidateQueries({
+                              queryKey: ["party"],
+                            });
+                            queryClient.invalidateQueries({
+                              queryKey: ["parties"],
+                            });
+                          },
+                        })
+                      }
+                    >
+                      {t("edit")}
+                    </ContextMenuItem>
+                    <ContextMenuItem onClick={() => toggleToken(token)}>
+                      {(tokenVisibility[token.id] ?? true)
+                        ? t("hide")
+                        : t("show")}
+                    </ContextMenuItem>
+                  </ContextMenuGroup>
+
                   {onRemoveFromInitiative &&
                     onAddToInitiative &&
                     initiativeEntityIds &&
                     initiativeEntityIds.length > 0 && (
-                      <ContextMenuItem
-                        onClick={() => {
-                          const isInInitiative = initiativeEntityIds.some(
+                      <>
+                        <ContextMenuSeparator />
+                        <ContextMenuItem
+                          onClick={() => {
+                            const isInInitiative = initiativeEntityIds.some(
+                              (e) => e.id === player.id && e.type === "player",
+                            );
+                            if (isInInitiative) {
+                              onRemoveFromInitiative(player.id, "player");
+                            } else {
+                              onAddToInitiative(
+                                player.id,
+                                "player",
+                                player.name,
+                              );
+                            }
+                          }}
+                        >
+                          {initiativeEntityIds.some(
                             (e) => e.id === player.id && e.type === "player",
-                          );
-                          if (isInInitiative) {
-                            onRemoveFromInitiative(player.id, "player");
-                          } else {
-                            onAddToInitiative(player.id, "player", player.name);
-                          }
-                        }}
-                      >
-                        {initiativeEntityIds.some(
-                          (e) => e.id === player.id && e.type === "player",
-                        )
-                          ? t("removeFromInitiative")
-                          : t("addToInitiative")}
-                      </ContextMenuItem>
+                          )
+                            ? t("removeFromInitiative")
+                            : t("addToInitiative")}
+                        </ContextMenuItem>
+                      </>
                     )}
                 </ContextMenuContent>
               </ContextMenu>
@@ -1418,73 +1469,110 @@ function Canvas({
                     )}
                   </g>
                 </ContextMenuTrigger>
-                <ContextMenuContent className="w-40">
+                <ContextMenuContent className="w-56">
+                  <ContextMenuLabel>{opponent.name}</ContextMenuLabel>
+                  <ContextMenuSeparator />
                   <ContextMenuItem onClick={() => onTokenSelect(token)}>
                     {t("select")}
                   </ContextMenuItem>
-                  {onOpenEffectsCatalog && (
+                  <ContextMenuSeparator />
+                  <ContextMenuGroup>
+                    {onOpenEffectsCatalog && (
+                      <ContextMenuItem
+                        onClick={() =>
+                          onOpenEffectsCatalog(opponent.id, "opponent")
+                        }
+                      >
+                        {t("addEffect")}
+                      </ContextMenuItem>
+                    )}
+                  </ContextMenuGroup>
+
+                  {(onHealOpponent || onDamageOpponent) && (
+                    <>
+                      <ContextMenuSeparator />
+                      <ContextMenuGroup>
+                        {onHealOpponent && (
+                          <ContextMenuItem
+                            onClick={() => onHealOpponent(opponent.id)}
+                          >
+                            {t("addHealth")}
+                          </ContextMenuItem>
+                        )}
+                        {onDamageOpponent && (
+                          <ContextMenuItem
+                            onClick={() => onDamageOpponent(opponent.id)}
+                          >
+                            {t("removeHealth")}
+                          </ContextMenuItem>
+                        )}
+                      </ContextMenuGroup>
+                    </>
+                  )}
+
+                  <ContextMenuSeparator />
+
+                  <ContextMenuGroup>
                     <ContextMenuItem
                       onClick={() =>
-                        onOpenEffectsCatalog(opponent.id, "opponent")
+                        useOverlayStore
+                          .getState()
+                          .open("encounter-opponent.edit", {
+                            opponent: opponent,
+                            onEdit: async (opp) => {
+                              const result =
+                                await database.encounterOpponents.update(opp);
+                              return result;
+                            },
+                            onDelete: async (id) => {
+                              await database.encounterOpponents.delete(id);
+                            },
+                            onComplete: () => {
+                              queryClient.invalidateQueries({
+                                queryKey: ["encounter-opponents"],
+                              });
+                            },
+                          })
                       }
                     >
-                      {t("addEffect")}
+                      {t("edit")}
                     </ContextMenuItem>
-                  )}
-                  <ContextMenuItem
-                    onClick={() =>
-                      useOverlayStore
-                        .getState()
-                        .open("encounter-opponent.edit", {
-                          opponent: opponent,
-                          onEdit: async (opp) => {
-                            const result =
-                              await database.encounterOpponents.update(opp);
-                            return result;
-                          },
-                          onDelete: async (id) => {
-                            await database.encounterOpponents.delete(id);
-                          },
-                          onComplete: () => {
-                            queryClient.invalidateQueries({
-                              queryKey: ["encounter-opponents"],
-                            });
-                          },
-                        })
-                    }
-                  >
-                    {t("edit")}
-                  </ContextMenuItem>
-                  <ContextMenuItem onClick={() => toggleToken(token)}>
-                    {(tokenVisibility[token.id] ?? true) ? "Hide" : "Show"}
-                  </ContextMenuItem>
+                    <ContextMenuItem onClick={() => toggleToken(token)}>
+                      {(tokenVisibility[token.id] ?? true) ? "Hide" : "Show"}
+                    </ContextMenuItem>
+                  </ContextMenuGroup>
+
                   {onRemoveFromInitiative &&
                     onAddToInitiative &&
                     initiativeEntityIds &&
                     initiativeEntityIds.length > 0 && (
-                      <ContextMenuItem
-                        onClick={() => {
-                          const isInInitiative = initiativeEntityIds.some(
+                      <>
+                        <ContextMenuSeparator />
+                        <ContextMenuItem
+                          onClick={() => {
+                            const isInInitiative = initiativeEntityIds.some(
+                              (e) =>
+                                e.id === opponent.id && e.type === "opponent",
+                            );
+                            if (isInInitiative) {
+                              onRemoveFromInitiative(opponent.id, "opponent");
+                            } else {
+                              onAddToInitiative(
+                                opponent.id,
+                                "opponent",
+                                opponent.name,
+                              );
+                            }
+                          }}
+                        >
+                          {initiativeEntityIds.some(
                             (e) =>
                               e.id === opponent.id && e.type === "opponent",
-                          );
-                          if (isInInitiative) {
-                            onRemoveFromInitiative(opponent.id, "opponent");
-                          } else {
-                            onAddToInitiative(
-                              opponent.id,
-                              "opponent",
-                              opponent.name,
-                            );
-                          }
-                        }}
-                      >
-                        {initiativeEntityIds.some(
-                          (e) => e.id === opponent.id && e.type === "opponent",
-                        )
-                          ? t("removeFromInitiative")
-                          : t("addToInitiative")}
-                      </ContextMenuItem>
+                          )
+                            ? t("removeFromInitiative")
+                            : t("addToInitiative")}
+                        </ContextMenuItem>
+                      </>
                     )}
                 </ContextMenuContent>
               </ContextMenu>

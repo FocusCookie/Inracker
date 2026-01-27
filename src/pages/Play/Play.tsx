@@ -53,6 +53,7 @@ import { useCombatState, useCombatActions } from "@/hooks/useCombat";
 import {
   useEncounterOpponentsDetailed,
   useAddEffectToEncounterOpponent,
+  useUpdateEncounterOpponent,
 } from "@/hooks/useEncounterOpponents";
 import { useRests } from "@/hooks/useRests";
 import {
@@ -137,6 +138,7 @@ function Play({
   const { shortRest, longRest } = useRests();
   const addEffectToEncounterOpponentMutation =
     useAddEffectToEncounterOpponent(database);
+  const updateEncounterOpponentMutation = useUpdateEncounterOpponent(database);
   const encounterOpponents = useEncounterOpponentsDetailed(database);
   const encounterOpponentsRef = useRef(encounterOpponents);
   encounterOpponentsRef.current = encounterOpponents;
@@ -803,6 +805,49 @@ function Play({
     });
   }
 
+  function handleHealOpponent(opponentId: number) {
+    const opponent = encounterOpponents.data?.find((o) => o.id === opponentId);
+    if (!opponent) return;
+
+    openOverlay("health.dialog", {
+      currentHealth: opponent.health,
+      maxHealth: opponent.max_health,
+      entityName: opponent.name,
+      type: "heal",
+      onConfirm: async (amount) => {
+        const newHealth = Math.min(
+          opponent.health + amount,
+          opponent.max_health,
+        );
+        await updateEncounterOpponentMutation.mutateAsync({
+          ...opponent,
+          health: newHealth,
+        });
+        toast({ title: `Healed ${opponent.name} for ${amount} HP` });
+      },
+    });
+  }
+
+  function handleDamageOpponent(opponentId: number) {
+    const opponent = encounterOpponents.data?.find((o) => o.id === opponentId);
+    if (!opponent) return;
+
+    openOverlay("health.dialog", {
+      currentHealth: opponent.health,
+      maxHealth: opponent.max_health,
+      entityName: opponent.name,
+      type: "damage",
+      onConfirm: async (amount) => {
+        const newHealth = opponent.health - amount;
+        await updateEncounterOpponentMutation.mutateAsync({
+          ...opponent,
+          health: newHealth,
+        });
+        toast({ title: `Damaged ${opponent.name} for ${amount} HP` });
+      },
+    });
+  }
+
   function handleOpenCreatePlayer() {
     openOverlay("player.create", {
       database,
@@ -1073,6 +1118,10 @@ function Play({
           onAddToInitiative={handleAddToInitiative}
           onOpenEffectsCatalog={handleOpenEffectsCatalog}
           initiativeEntityIds={initiativeEntityIds}
+          onHealPlayer={handleHealPlayer}
+          onDamagePlayer={handleDamagePlayer}
+          onHealOpponent={handleHealOpponent}
+          onDamageOpponent={handleDamageOpponent}
         />
       </AnimatePresence>
     </PlayLayout>

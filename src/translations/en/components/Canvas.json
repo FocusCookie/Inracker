@@ -13,5 +13,7 @@
   "resize": "Resize",
   "removeFromInitiative": "Remove from Initiative",
   "addToInitiative": "Add to Initiative",
-  "addEffect": "Add Effect"
+  "addEffect": "Add Effect",
+  "addHealth": "Add Health",
+  "removeHealth": "Remove Health"
 }
