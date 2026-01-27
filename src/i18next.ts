@@ -1,5 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentHealthDialogEN from "@/translations/en/components/HealthDialog.json";
+import ComponentHealthDialogDE from "@/translations/de/components/HealthDialog.json"; 
 import ComponentCreateCombatEffectDrawerEN from "@/translations/en/components/CreateCombatEffectDrawer.json";
 import ComponentCreateCombatEffectDrawerDE from "@/translations/de/components/CreateCombatEffectDrawer.json"; 
 import ComponentCombatControlsEN from "@/translations/en/components/CombatControls.json";
@@ -117,6 +119,7 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentHealthDialog: ComponentHealthDialogEN,
     ComponentCreateCombatEffectDrawer: ComponentCreateCombatEffectDrawerEN,
     ComponentCombatControls: ComponentCombatControlsEN,
     ComponentInitiativeMenueItem: ComponentInitiativeMenueItemEN,
@@ -182,6 +185,7 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentHealthDialog: ComponentHealthDialogDE,
     ComponentCreateCombatEffectDrawer: ComponentCreateCombatEffectDrawerDE,
     ComponentCombatControls: ComponentCombatControlsDE,
     ComponentInitiativeMenueItem: ComponentInitiativeMenueItemDE,

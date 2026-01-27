@@ -44,6 +44,8 @@ type Props = {
   onOpenImmunitiesCatalog: () => void;
   onOpenResistancesCatalog: () => void;
   onOpenEffectsCatalog: () => void;
+  onHeal?: (playerId: Player["id"]) => void;
+  onDamage?: (playerId: Player["id"]) => void;
 };
 
 function PlayerCard({
@@ -61,6 +63,8 @@ function PlayerCard({
   onOpenResistancesCatalog,
   onOpenImmunitiesCatalog,
   onOpenEffectsCatalog,
+  onHeal,
+  onDamage,
 }: Props) {
   const { t } = useTranslation("ComponentPlayerCard");
 
@@ -117,6 +121,24 @@ function PlayerCard({
           {t("addResistance")}
         </DropdownMenuItem>
       </DropdownMenuGroup>
+
+      {(onHeal || onDamage) && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            {onHeal && (
+              <DropdownMenuItem onClick={() => onHeal(player.id)}>
+                {t("addHealth")}
+              </DropdownMenuItem>
+            )}
+            {onDamage && (
+              <DropdownMenuItem onClick={() => onDamage(player.id)}>
+                {t("removeHealth")}
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuGroup>
+        </>
+      )}
 
       <DropdownMenuSeparator />
       <DropdownMenuItem onClick={handleRemovePlayer}>

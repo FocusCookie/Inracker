@@ -33,6 +33,7 @@ export type OverlaySuccessMap = {
   "immunity.create": DBImmunity;
   "immunity.catalog": DBImmunity;
   "immunity.edit": DBImmunity;
+  "health.dialog": number;
   settings: void;
 };
 
@@ -154,6 +155,14 @@ export type OverlayMap = {
     immunity: DBImmunity;
     onEdit: (immunity: DBImmunity) => Promise<DBImmunity>;
     onComplete?: (result: OverlaySuccessMap["immunity.edit"]) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "health.dialog": {
+    currentHealth: number;
+    maxHealth: number;
+    entityName: string;
+    type: "heal" | "damage";
+    onConfirm: (amount: number) => void;
     onCancel?: (reason: CancelReason) => void;
   };
   "resistance.create": {

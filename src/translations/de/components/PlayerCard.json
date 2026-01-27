@@ -9,8 +9,11 @@
   "addEffect": "Effekt hinzufügen",
   "level": "Stufe",
   "immunitites": "Immunitäten",
+  "immunities": "Immunitäten",
   "resistances": "Wiederstände",
   "positiveEffects": "Positive Effekte",
   "negativeEffects": "Negative Effekte",
-  "selectToken": "Token auswählen"
+  "selectToken": "Token auswählen",
+  "addHealth": "Leben hinzufügen",
+  "removeHealth": "Leben entfernen"
 }

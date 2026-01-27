@@ -1,0 +1,10 @@
+{
+  "healTitle": "Heal Entity",
+  "damageTitle": "Damage Entity",
+  "healDescription": "Heal {{name}}. Current health: {{health}}/{{max}}",
+  "damageDescription": "Damage {{name}}. Current health: {{health}}/{{max}}",
+  "amount": "Amount",
+  "heal": "Heal",
+  "damage": "Damage",
+  "cancel": "Cancel"
+}

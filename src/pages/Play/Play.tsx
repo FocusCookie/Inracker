@@ -769,6 +769,40 @@ function Play({
     });
   }
 
+  function handleHealPlayer(playerId: number) {
+    const player = players.find((p) => p.id === playerId);
+    if (!player) return;
+
+    openOverlay("health.dialog", {
+      currentHealth: player.health,
+      maxHealth: player.max_health,
+      entityName: player.name,
+      type: "heal",
+      onConfirm: async (amount) => {
+        const newHealth = Math.min(player.health + amount, player.max_health);
+        await editPlayer.mutateAsync({ ...player, health: newHealth });
+        toast({ title: `Healed ${player.name} for ${amount} HP` });
+      },
+    });
+  }
+
+  function handleDamagePlayer(playerId: number) {
+    const player = players.find((p) => p.id === playerId);
+    if (!player) return;
+
+    openOverlay("health.dialog", {
+      currentHealth: player.health,
+      maxHealth: player.max_health,
+      entityName: player.name,
+      type: "damage",
+      onConfirm: async (amount) => {
+        const newHealth = player.health - amount;
+        await editPlayer.mutateAsync({ ...player, health: newHealth });
+        toast({ title: `Damaged ${player.name} for ${amount} HP` });
+      },
+    });
+  }
+
   function handleOpenCreatePlayer() {
     openOverlay("player.create", {
       database,
@@ -920,6 +954,8 @@ function Play({
             onOpenEffectsCatalog={() => handleEffectsCatalog(player)}
             onOpenResistancesCatalog={() => handleResistancesCatalog(player)}
             onOpenImmunitiesCatalog={() => handleImmunitiesCatalog(player)}
+            onHeal={handleHealPlayer}
+            onDamage={handleDamagePlayer}
           />
         ))}
       </PlayLayout.Players>
