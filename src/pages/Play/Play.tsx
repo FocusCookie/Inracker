@@ -453,6 +453,14 @@ function Play({
     resetInitiative.mutate(combatState.combat.id);
   }
 
+  function handleSelectTokenFromInitiative(entity: InitiativeMenuEntity) {
+    const tokenType = entity.type === "player" ? "player" : "opponent";
+    const token = tokens.find(
+      (t) => t.type === tokenType && t.entity === entity.properties.id,
+    );
+    handleTokenSelect(token || null);
+  }
+
   function handleCreateEncounter(element: CanvasElement) {
     openOverlay("encounter.create", {
       onCreate: async (encounter) => {
@@ -747,6 +755,7 @@ function Play({
             onRemove={handleInitiativeRemove}
             onReset={handleInitiativeReset}
             onInitiativeChange={handleInitiativeChange}
+            onSelectToken={handleSelectTokenFromInitiative}
           />
         </PlayLayout.InitiativeMenue>
       )}

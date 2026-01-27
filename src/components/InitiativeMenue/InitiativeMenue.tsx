@@ -19,6 +19,7 @@ type Props = {
   onRemove: (entity: InitiativeMenuEntity) => void;
   onReset: () => void;
   onInitiativeChange: (entity: InitiativeMenuEntity, value: number) => void;
+  onSelectToken?: (entity: InitiativeMenuEntity) => void;
 };
 
 function InitiativeMenue({
@@ -31,6 +32,7 @@ function InitiativeMenue({
   onAdd,
   onReset,
   onInitiativeChange,
+  onSelectToken,
 }: Props) {
   const { t } = useTranslation("ComponentInitiativeMenueItem");
 
@@ -39,7 +41,7 @@ function InitiativeMenue({
   }
 
   return (
-    <aside className="max-w-72">
+    <aside className="max-w-80">
       <AnimatePresence mode="wait">
         {isOpen && (
           <motion.div
@@ -53,7 +55,7 @@ function InitiativeMenue({
             }}
             transition={{ type: "tween", ease: "easeOut", duration: 0.2 }}
           >
-            <div className="flex w-72 flex-col gap-4 p-4">
+            <div className="flex w-80 flex-col gap-4 p-4">
               <header className="flex items-center justify-between gap-2">
                 <TypographyH4>⚔ {t("title")} </TypographyH4>
 
@@ -70,6 +72,7 @@ function InitiativeMenue({
                       entity={selectedItem}
                       onRemove={onRemove}
                       onInitiativeChange={onInitiativeChange}
+                      onSelectToken={onSelectToken}
                     />
                   );
                 })}
