@@ -46,14 +46,22 @@ function InitiativeCard({ entity, isActive, onClick }: Props) {
             {entity.position}
           </span>
 
-          {!!entity.icon && (
-            <span className="absolute top-2 right-2">{entity.icon}</span>
+          {entity.image && entity.image !== "" ? (
+            <>
+              {!!entity.icon && (
+                <span className="absolute top-2 right-2">{entity.icon}</span>
+              )}
+              <img
+                className="h-20 w-full object-cover"
+                src={entity.image}
+                alt={entity.name}
+              />
+            </>
+          ) : (
+            <div className="flex h-20 w-full items-center justify-center">
+              <span className="text-6xl select-none">{entity.icon}</span>
+            </div>
           )}
-          <img
-            className="h-20 w-full object-cover"
-            src={entity.image}
-            alt={entity.name}
-          />
 
           <div
             className={cn(
