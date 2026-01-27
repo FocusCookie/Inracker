@@ -172,7 +172,7 @@ export const db = {
       return Promise.resolve(deletedEffect);
     },
   },
-  immunitites: {
+  immunities: {
     getAll: async (): Promise<DBImmunity[]> => {
       console.log("STORYBOOK MOCK: getAll immunities");
       return Promise.resolve(immunities);

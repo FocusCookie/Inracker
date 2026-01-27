@@ -46,10 +46,12 @@ import InitiativeMenue from "@/components/InitiativeMenue/InitiativeMenue";
 import ActiveEffectsMenue from "@/components/ActiveEffectsMenue/ActiveEffectsMenue";
 import Initiative from "@/components/Initiative/Initiative";
 import { InitiativeMenuEntity } from "@/types/initiative";
+import { BedSingleIcon, CoffeeIcon } from "lucide-react";
 
 // Hooks
 import { useCombatState, useCombatActions } from "@/hooks/useCombat";
 import { useEncounterOpponentsDetailed } from "@/hooks/useEncounterOpponents";
+import { useRests } from "@/hooks/useRests";
 import {
   useUpdatePlayer,
   useAddEffectToPlayer,
@@ -129,6 +131,7 @@ function Play({
     finishCombat,
     nextTurn,
   } = useCombatActions(chapter.id);
+  const { shortRest, longRest } = useRests();
   const encounterOpponents = useEncounterOpponentsDetailed(database);
   const encounterOpponentsRef = useRef(encounterOpponents);
   encounterOpponentsRef.current = encounterOpponents;
@@ -156,7 +159,7 @@ function Play({
         }
       } else if (p.entityType === "opponent") {
         const opponent = encounterOpponents.data?.find(
-          (op) => op.id === p.entityId,
+          (op: any) => op.id === p.entityId,
         );
         if (opponent) {
           const entity: InitiativeMenuEntity = {
@@ -635,7 +638,7 @@ function Play({
       onComplete: (immunity) => {
         queryClient.invalidateQueries({ queryKey: ["players"] });
         queryClient.invalidateQueries({ queryKey: ["party"] });
-        queryClient.invalidateQueries({ queryKey: ["immunitites"] });
+        queryClient.invalidateQueries({ queryKey: ["immunities"] });
 
         toast({
           title: `Created ${immunity.icon} ${immunity.name}`,
@@ -758,6 +761,40 @@ function Play({
           />
         </PlayLayout.ActiveEffects>
       )}
+
+      <PlayLayout.Rest>
+        <div className="flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => shortRest.mutate()}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
+                >
+                  <CoffeeIcon className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t("shortRest")}</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => longRest.mutate()}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
+                >
+                  <BedSingleIcon className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t("longRest")}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </PlayLayout.Rest>
 
       <PlayLayout.Players>
         {players.map((player) => (

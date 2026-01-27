@@ -13,9 +13,8 @@ export function useEffects(database = defaultDb) {
 
 export function useCreateEffect(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
-    mutationFn: (effect: Omit<Effect, "id">) =>
-      database.effects.create(effect),
+  return useMutationWithErrorToast<Effect, Error, Omit<Effect, "id">>({
+    mutationFn: (effect: Omit<Effect, "id">) => database.effects.create(effect),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["effects"] });
     },
@@ -24,26 +23,20 @@ export function useCreateEffect(database = defaultDb) {
 
 export function useUpdateEffect(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<Effect, Error, Effect>({
     mutationFn: (effect: Effect) => database.effects.update(effect),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["effects"] });
-      queryClient.invalidateQueries({ queryKey: ["players"] });
-      queryClient.invalidateQueries({ queryKey: ["party"] });
-      queryClient.invalidateQueries({ queryKey: ["parties"] });
     },
   });
 }
 
 export function useDeleteEffect(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
-    mutationFn: (id: Effect["id"]) => database.effects.delete(id),
+  return useMutationWithErrorToast<Effect, Error, number>({
+    mutationFn: (id: number) => database.effects.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["effects"] });
-      queryClient.invalidateQueries({ queryKey: ["players"] });
-      queryClient.invalidateQueries({ queryKey: ["party"] });
-      queryClient.invalidateQueries({ queryKey: ["parties"] });
     },
   });
 }

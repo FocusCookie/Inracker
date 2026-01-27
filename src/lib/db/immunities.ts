@@ -94,7 +94,7 @@ export const updateImmunity = async (
   return getImmunityById(id); // Removed db parameter
 };
 
-export const immunitites = {
+export const immunities = {
   getAll: async () => {
     return getAllImmunities(); // Removed db parameter
   },

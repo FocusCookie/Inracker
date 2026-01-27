@@ -13,8 +13,8 @@ export function useResistances(database = defaultDb) {
 
 export function useCreateResistance(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
-    mutationFn: (resistance: Resistance) =>
+  return useMutationWithErrorToast<DBResistance, Error, Omit<Resistance, "id">>({
+    mutationFn: (resistance: Omit<Resistance, "id">) =>
       database.resistances.create(resistance),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["resistances"] });
@@ -24,27 +24,21 @@ export function useCreateResistance(database = defaultDb) {
 
 export function useUpdateResistance(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<DBResistance, Error, DBResistance>({
     mutationFn: (resistance: DBResistance) =>
       database.resistances.update(resistance),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["resistances"] });
-      queryClient.invalidateQueries({ queryKey: ["players"] });
-      queryClient.invalidateQueries({ queryKey: ["party"] });
-      queryClient.invalidateQueries({ queryKey: ["parties"] });
     },
   });
 }
 
 export function useDeleteResistance(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<DBResistance, Error, DBResistance["id"]>({
     mutationFn: (id: DBResistance["id"]) => database.resistances.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["resistances"] });
-      queryClient.invalidateQueries({ queryKey: ["players"] });
-      queryClient.invalidateQueries({ queryKey: ["party"] });
-      queryClient.invalidateQueries({ queryKey: ["parties"] });
     },
   });
 }

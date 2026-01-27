@@ -531,6 +531,62 @@ export const deleteEncounterOpponents = async (
   return deletedOpponents;
 };
 
+export const addEffectToEncounterOpponent = async (
+  opponentId: number,
+  effectId: number,
+): Promise<EncounterOpponent> => {
+  const { effects } = await getDetailedEncounterOpponentById(opponentId);
+  const isAlreadySet = effects.some((effect: Effect) => effect.id === effectId);
+  const update = effects.map((effect: Effect) => effect.id);
+
+  if (!isAlreadySet) {
+    update.push(effectId);
+
+    await execute("UPDATE encounter_opponents SET effects = $2 WHERE id = $1", [
+      opponentId,
+      JSON.stringify(update.map((id: number) => id)),
+    ]);
+
+    // Populate active_effects
+    const catalogEffect = await getEffectById(effectId);
+    await execute(
+      "INSERT INTO active_effects (id, effect_id, entity_id, entity_type, remaining_duration, duration_type) VALUES ($1, $2, $3, $4, $5, $6)",
+      [
+        crypto.randomUUID(),
+        effectId,
+        opponentId,
+        "opponent",
+        catalogEffect.duration,
+        catalogEffect.durationType,
+      ],
+    );
+  }
+
+  return getDetailedEncounterOpponentById(opponentId);
+};
+
+export const removeEffectFromEncounterOpponent = async (
+  opponentId: number,
+  effectId: number,
+) => {
+  const { effects } = await getDetailedEncounterOpponentById(opponentId);
+  const removedEffect = effects.find((effect: Effect) => effect.id === effectId);
+  const update = effects.filter((effect: Effect) => effect.id !== effectId);
+
+  await execute("UPDATE encounter_opponents SET effects = $2 WHERE id = $1", [
+    opponentId,
+    JSON.stringify(update.map((id: number) => id)),
+  ]);
+
+  // Remove from active_effects tracking
+  await execute(
+    "DELETE FROM active_effects WHERE entity_id = $1 AND entity_type = 'opponent' AND effect_id = $2",
+    [opponentId, effectId],
+  );
+
+  return removedEffect as Effect;
+};
+
 export const opponents = {
   getAllDetailed: async () => {
     return getAllDetailedOpponents();
@@ -567,5 +623,11 @@ export const encounterOpponents = {
   },
   delete: async (id: number) => {
     return deleteEncounterOpponentById(id);
+  },
+  addEffect: async (opponentId: number, effectId: number) => {
+    return addEffectToEncounterOpponent(opponentId, effectId);
+  },
+  removeEffect: async (opponentId: number, effectId: number) => {
+    return removeEffectFromEncounterOpponent(opponentId, effectId);
   },
 };

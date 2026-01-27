@@ -19,55 +19,33 @@ export function usePartyQuery(partyId: number | null, database = defaultDb) {
   });
 }
 
-export function useRemovePlayer(database = defaultDb) {
-  const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
-    mutationFn: ({
-      partyId,
-      playerId,
-    }: {
-      partyId: number;
-      playerId: number;
-    }) => database.parties.removePlayer(partyId, playerId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["parties"] });
-      queryClient.invalidateQueries({ queryKey: ["party"] });
-      queryClient.invalidateQueries({ queryKey: ["tokens"] });
-    },
-  });
-}
-
 export function useAddPlayer(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
-    mutationFn: ({
-      partyId,
-      playerId,
-    }: {
-      partyId: number;
-      playerId: number;
-    }) => database.parties.addPlayer(partyId, playerId),
+  return useMutationWithErrorToast<any, Error, { partyId: number; playerId: number }> ({
+    mutationFn: (data: { partyId: number; playerId: number }) =>
+      database.parties.addPlayer(data.partyId, data.playerId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["parties"] });
       queryClient.invalidateQueries({ queryKey: ["party"] });
-      queryClient.invalidateQueries({ queryKey: ["tokens"] });
     },
   });
 }
 
-export function useDeleteParty(database = defaultDb) {
+export function useRemovePlayer(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
-    mutationFn: (id: number) => database.parties.delete(id),
+  return useMutationWithErrorToast<any, Error, { partyId: number; playerId: number }> ({
+    mutationFn: (data: { partyId: number; playerId: number }) =>
+      database.parties.removePlayer(data.partyId, data.playerId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["parties"] });
+      queryClient.invalidateQueries({ queryKey: ["party"] });
     },
   });
 }
 
 export function useCreateParty(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<{ id: number }, Error, Omit<Party, "id"> > ({
     mutationFn: (party: Omit<Party, "id">) => database.parties.create(party),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["parties"] });
@@ -77,11 +55,21 @@ export function useCreateParty(database = defaultDb) {
 
 export function useUpdateParty(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<Party, Error, Party> ({
     mutationFn: (party: Party) => database.parties.update(party),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["parties"] });
       queryClient.invalidateQueries({ queryKey: ["party"] });
+    },
+  });
+}
+
+export function useDeleteParty(database = defaultDb) {
+  const queryClient = useQueryClient();
+  return useMutationWithErrorToast<number, Error, number> ({
+    mutationFn: (id: number) => database.parties.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["parties"] });
     },
   });
 }

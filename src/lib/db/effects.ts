@@ -73,7 +73,7 @@ export const updateEffect = async (
 
 export const deleteEffect = async (
   id: Effect["id"],
-): Promise<DBEffect> => {
+): Promise<Effect> => {
   const deletedEffect = await select<DBEffect[]>( // Changed db.select to select
     "SELECT * FROM effects WHERE id = $1",
     [id],
@@ -120,7 +120,11 @@ export const deleteEffect = async (
 
   await execute("DELETE FROM effects WHERE id = $1", [id]); // Changed db.execute to execute
 
-  return deletedEffect[0];
+  const { duration_type, ...rest } = deletedEffect[0];
+  return {
+    ...rest,
+    durationType: duration_type,
+  } as Effect;
 };
 
 export const effects = {

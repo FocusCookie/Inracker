@@ -51,7 +51,7 @@ export default function CreatePlayerDrawer({
 
   const immunities = useQueryWithToast({
     queryKey: ["immunities"],
-    queryFn: () => database.immunitites.getAll(),
+    queryFn: () => database.immunities.getAll(),
   });
 
   const resistances = useQueryWithToast({

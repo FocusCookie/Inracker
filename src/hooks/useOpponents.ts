@@ -14,7 +14,7 @@ export function useOpponents(database = defaultDb) {
 export function useCreateOpponent(database = defaultDb) {
   const queryClient = useQueryClient();
 
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<Opponent, Error, Omit<Opponent, "id">>({
     mutationFn: (opponent: Omit<Opponent, "id">) =>
       database.opponents.create(opponent),
     onSuccess: () => {
@@ -26,7 +26,7 @@ export function useCreateOpponent(database = defaultDb) {
 export function useUpdateOpponent(database = defaultDb) {
   const queryClient = useQueryClient();
 
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<Opponent, Error, Opponent>({
     mutationFn: (opponent: Opponent) => database.opponents.update(opponent),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["opponents"] });
@@ -37,7 +37,7 @@ export function useUpdateOpponent(database = defaultDb) {
 export function useDeleteOpponent(database = defaultDb) {
   const queryClient = useQueryClient();
 
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<DBOpponent, Error, DBOpponent["id"]>({
     mutationFn: (id: DBOpponent["id"]) => database.opponents.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["opponents"] });

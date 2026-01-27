@@ -57,7 +57,7 @@ function EditEncounterOpponentDrawer({
 
   const immunities = useQueryWithToast({
     queryKey: ["immunities"],
-    queryFn: () => db.immunitites.getAll(),
+    queryFn: () => db.immunities.getAll(),
   });
 
   const resistances = useQueryWithToast({
@@ -143,7 +143,7 @@ function EditEncounterOpponentDrawer({
   function handleCreateImmunity() {
     openOverlay("immunity.create", {
       onCreate: async (immunity) => {
-        const createdImmunity = await db.immunitites.create(immunity);
+        const createdImmunity = await db.immunities.create(immunity);
         return createdImmunity;
       },
       onComplete: (immunity) => {

@@ -13,10 +13,10 @@ export function useEncounterOpponentsDetailed(database = defaultDb) {
 
 export function useDeleteEncounterOpponent(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<any, Error, EncounterOpponent["id"]>({
     mutationFn: (id: EncounterOpponent["id"]) =>
       database.encounterOpponents.delete(id),
-    onSuccess: (opponent: EncounterOpponent) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["party"] });
       queryClient.invalidateQueries({ queryKey: ["tokens"] });
       queryClient.invalidateQueries({ queryKey: ["chapter"] });
@@ -28,7 +28,10 @@ export function useDeleteEncounterOpponent(database = defaultDb) {
 
 export function useCreateEncounterOpponent(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<EncounterOpponent, Error, {
+    opponent: Omit<EncounterOpponent, "id">;
+    chapterId: number;
+  }>({
     mutationFn: (data: {
       opponent: Omit<EncounterOpponent, "id">;
       chapterId: number;
@@ -43,7 +46,7 @@ export function useCreateEncounterOpponent(database = defaultDb) {
 
 export function useCreateMultipleEncounterOpponents(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<EncounterOpponent[], Error, Array<Omit<EncounterOpponent, "id">>>({
     mutationFn: (opponents: Array<Omit<EncounterOpponent, "id">>) =>
       database.encounterOpponents.createMultiple(opponents),
     onSuccess: () => {
@@ -54,7 +57,7 @@ export function useCreateMultipleEncounterOpponents(database = defaultDb) {
 
 export function useUpdateEncounterOpponent(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<EncounterOpponent, Error, EncounterOpponent>({
     mutationFn: (opponent: EncounterOpponent) =>
       database.encounterOpponents.update(opponent),
     onSuccess: () => {

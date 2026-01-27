@@ -185,7 +185,7 @@ function PlayerCard({
               <Collapsible
                 title={
                   <div className="items-cent flex justify-between gap-2">
-                    <span>{t("immunitites")}</span>
+                    <span>{t("immunities")}</span>
                     <span className="rounded-md bg-black px-2 py-1 text-sm text-white">
                       {player.immunities.length}
                     </span>

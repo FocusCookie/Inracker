@@ -83,17 +83,17 @@ export const select = async <T>(query: string, bindValues?: any[]): Promise<T> =
 };
 
 // Export beginTransaction, commit, rollback for manual transaction management
-export const beginTransaction = async (): Promise<void> => {
+export const beginTransaction = async (): Promise<any> => {
   const db = await connect();
   return db.execute("BEGIN TRANSACTION");
 };
 
-export const commit = async (): Promise<void> => {
+export const commit = async (): Promise<any> => {
   const db = await connect();
   return db.execute("COMMIT");
 };
 
-export const rollback = async (): Promise<void> => {
+export const rollback = async (): Promise<any> => {
   const db = await connect();
   return db.execute("ROLLBACK");
 };

@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import defaultDb from "@/lib/database";
 import { useMutationWithErrorToast } from "./useMutationWithErrorToast";
-import { Chapter } from "@/types/chapters";
+import { DBChapter, Chapter } from "@/types/chapters";
 import { useQueryWithToast } from "./useQueryWithErrorToast";
 
 export function useChaptersQuery(partyId: number, database = defaultDb) {
@@ -20,7 +20,7 @@ export function useChapters(database = defaultDb) {
 
 export function useCreateChapter(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<DBChapter, Error, Omit<Chapter, "id">>({
     mutationFn: (chapter: Omit<Chapter, "id">) =>
       database.chapters.create(chapter),
     onSuccess: () => {
@@ -32,7 +32,7 @@ export function useCreateChapter(database = defaultDb) {
 
 export function useUpdateChapter(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<Chapter, Error, Chapter>({
     mutationFn: (chapter: Chapter) => database.chapters.update(chapter),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["chapters"] });
@@ -43,7 +43,7 @@ export function useUpdateChapter(database = defaultDb) {
 
 export function useDeleteChapter(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<DBChapter, Error, Chapter["id"]>({
     mutationFn: (id: Chapter["id"]) => database.chapters.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["chapters"] });
@@ -54,7 +54,10 @@ export function useDeleteChapter(database = defaultDb) {
 
 export function useAddEncounterToChapter(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<Chapter, Error, {
+    chapterId: Chapter["id"];
+    encounterId: number;
+  }>({
     mutationFn: (data: {
       chapterId: Chapter["id"];
       encounterId: number;
@@ -67,7 +70,11 @@ export function useAddEncounterToChapter(database = defaultDb) {
 
 export function useUpdateChapterProperty(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<Chapter, Error, {
+    chapterId: Chapter["id"];
+    property: keyof Chapter;
+    value: any;
+  }>({
     mutationFn: (data: {
       chapterId: Chapter["id"];
       property: keyof Chapter;
@@ -86,7 +93,7 @@ export function useUpdateChapterProperty(database = defaultDb) {
 
 export function useRemoveEncounterFromChapter(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<any, Error, { chapterId: Chapter["id"], encounterId: number }>({
     mutationFn: async (data: { chapterId: Chapter["id"], encounterId: number }) => {
         await database.chapters.removeEncounter(data.chapterId, data.encounterId);
         return database.encounters.delete(data.encounterId);

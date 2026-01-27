@@ -20,7 +20,7 @@ export function MusicPlayer({ className }: { className?: string }) {
       layout
       initial={false}
       animate={{
-        width: isMinimized ? 122 : 384,
+        width: isMinimized ? 126 : 384,
         height: isMinimized ? 42 : 220,
         borderRadius: isMinimized ? 26 : 16, // rounded-full vs rounded-2xl
       }}
@@ -40,6 +40,7 @@ export function MusicPlayer({ className }: { className?: string }) {
         <motion.span layout className="ml-2 font-bold text-slate-800">
           🎶
         </motion.span>
+
         <motion.div layout className="flex gap-2">
           <Button
             size="icon"

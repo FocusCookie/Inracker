@@ -13,7 +13,7 @@ export function useEncounterQuery(id: number, database = defaultDb) {
 
 export function useCreateEncounterMutation(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<Encounter, Error, Omit<Encounter, "id">>({
     mutationFn: (encounter: Omit<Encounter, "id">) =>
       database.encounters.create(encounter),
     onSuccess: () => {
@@ -24,7 +24,7 @@ export function useCreateEncounterMutation(database = defaultDb) {
 
 export function useUpdateEncounter(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<Encounter, Error, Encounter>({
     mutationFn: (encounter: Encounter) => database.encounters.update(encounter),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["encounters"] });
@@ -37,7 +37,7 @@ export function useUpdateEncounter(database = defaultDb) {
 
 export function useSetEncounterCompletion(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<Encounter, Error, { id: number; completed: boolean }>({
     mutationFn: (data: { id: number; completed: boolean }) =>
       database.encounters.updateProperty(data.id, "completed", data.completed),
     onSuccess: (updatedEncounter) => {
@@ -55,7 +55,7 @@ export function useSetEncounterCompletion(database = defaultDb) {
 
 export function useDeleteEncounter(database = defaultDb) {
   const queryClient = useQueryClient();
-  return useMutationWithErrorToast({
+  return useMutationWithErrorToast<Encounter, Error, Encounter["id"]>({
     mutationFn: (id: Encounter["id"]) => database.encounters.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["encounters"] });
