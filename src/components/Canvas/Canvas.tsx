@@ -52,6 +52,16 @@ type Props = {
   onDrawed: (element: Omit<CanvasElement, "id">) => void;
   onTokenMove: (token: Token) => void;
   onElementMove: (element: ClickableCanvasElement & { id: any }) => void;
+  onRemoveFromInitiative?: (
+    entityId: number,
+    type: "player" | "opponent",
+  ) => void;
+  onAddToInitiative?: (
+    entityId: number,
+    type: "player" | "opponent",
+    name: string,
+  ) => void;
+  initiativeEntityIds?: { id: number; type: "player" | "opponent" }[];
 };
 
 export type CanvasElement = {
@@ -84,6 +94,9 @@ function Canvas({
   onTokenSelect,
   onDrawed,
   onElementMove,
+  onRemoveFromInitiative,
+  onAddToInitiative,
+  initiativeEntityIds,
 }: Props) {
   const { t } = useTranslation("ComponentCanvas");
   const queryClient = useQueryClient();
@@ -1282,6 +1295,29 @@ function Canvas({
                       ? t("hide")
                       : t("show")}
                   </ContextMenuItem>
+                  {onRemoveFromInitiative &&
+                    onAddToInitiative &&
+                    initiativeEntityIds &&
+                    initiativeEntityIds.length > 0 && (
+                      <ContextMenuItem
+                        onClick={() => {
+                          const isInInitiative = initiativeEntityIds.some(
+                            (e) => e.id === player.id && e.type === "player",
+                          );
+                          if (isInInitiative) {
+                            onRemoveFromInitiative(player.id, "player");
+                          } else {
+                            onAddToInitiative(player.id, "player", player.name);
+                          }
+                        }}
+                      >
+                        {initiativeEntityIds.some(
+                          (e) => e.id === player.id && e.type === "player",
+                        )
+                          ? t("removeFromInitiative")
+                          : t("addToInitiative")}
+                      </ContextMenuItem>
+                    )}
                 </ContextMenuContent>
               </ContextMenu>
             );
@@ -1400,6 +1436,33 @@ function Canvas({
                   <ContextMenuItem onClick={() => toggleToken(token)}>
                     {(tokenVisibility[token.id] ?? true) ? "Hide" : "Show"}
                   </ContextMenuItem>
+                  {onRemoveFromInitiative &&
+                    onAddToInitiative &&
+                    initiativeEntityIds &&
+                    initiativeEntityIds.length > 0 && (
+                      <ContextMenuItem
+                        onClick={() => {
+                          const isInInitiative = initiativeEntityIds.some(
+                            (e) => e.id === opponent.id && e.type === "opponent",
+                          );
+                          if (isInInitiative) {
+                            onRemoveFromInitiative(opponent.id, "opponent");
+                          } else {
+                            onAddToInitiative(
+                              opponent.id,
+                              "opponent",
+                              opponent.name,
+                            );
+                          }
+                        }}
+                      >
+                        {initiativeEntityIds.some(
+                          (e) => e.id === opponent.id && e.type === "opponent",
+                        )
+                          ? t("removeFromInitiative")
+                          : t("addToInitiative")}
+                      </ContextMenuItem>
+                    )}
                 </ContextMenuContent>
               </ContextMenu>
             );

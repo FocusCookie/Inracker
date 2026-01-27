@@ -598,6 +598,46 @@ function Play({
     handleCreateEncounter(element);
   }
 
+  function handleRemoveFromInitiative(
+    entityId: number,
+    type: "player" | "opponent",
+  ) {
+    if (!combatState) return;
+    const participant = combatState.participants.find(
+      (p) => p.entityId === entityId && p.entityType === type,
+    );
+    if (participant) {
+      removeParticipant.mutate(participant.id);
+    }
+  }
+
+  function handleAddToInitiative(
+    entityId: number,
+    type: "player" | "opponent",
+    name: string,
+  ) {
+    if (!combatState) return;
+    addParticipant.mutate({
+      combatId: combatState.combat.id,
+      name,
+      initiative: 0,
+      entityId,
+      entityType: type,
+    });
+  }
+
+  const initiativeEntityIds = useMemo(() => {
+    if (!combatState) return [];
+    return combatState.participants
+      .filter((p) => p.entityId !== null && p.entityType !== null)
+      .map((p) => ({
+        id: p.entityId as number,
+        type: (p.entityType === "player" ? "player" : "opponent") as
+          | "player"
+          | "opponent",
+      }));
+  }, [combatState]);
+
   async function handleElementMove(
     element: ClickableCanvasElement & { id: any },
   ) {
@@ -955,6 +995,9 @@ function Play({
           onDrawed={handeOpenCreateElementDrawer}
           onTokenMove={updateTokenMutation.mutate}
           onElementMove={handleElementMove}
+          onRemoveFromInitiative={handleRemoveFromInitiative}
+          onAddToInitiative={handleAddToInitiative}
+          initiativeEntityIds={initiativeEntityIds}
         />
       </AnimatePresence>
     </PlayLayout>
