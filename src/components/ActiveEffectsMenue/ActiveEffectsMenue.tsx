@@ -1,6 +1,12 @@
 import { TypographyH4 } from "../ui/typographyH4";
 import { Button } from "../ui/button";
-import { ClockIcon, XIcon, SparklesIcon } from "lucide-react";
+import {
+  ClockIcon,
+  XIcon,
+  SparklesIcon,
+  BedSingleIcon,
+  CoffeeIcon,
+} from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useTranslation } from "react-i18next";
@@ -113,10 +119,19 @@ function ActiveEffectsMenue({
                                       }
                                       className="h-5 gap-1 px-1.5 text-[10px]"
                                     >
-                                      <ClockIcon className="h-2.5 w-2.5" />
+                                      {effect.durationType === "short" ? (
+                                        <CoffeeIcon className="h-2.5 w-2.5" />
+                                      ) : effect.durationType === "long" ? (
+                                        <BedSingleIcon className="h-2.5 w-2.5" />
+                                      ) : (
+                                        <ClockIcon className="h-2.5 w-2.5" />
+                                      )}
                                       {effect.durationType === "time"
                                         ? formatDuration(effect.duration)
-                                        : effect.duration}
+                                        : effect.durationType === "short" ||
+                                            effect.durationType === "long"
+                                          ? ""
+                                          : effect.duration}
                                     </Badge>
                                   </div>
                                 </TooltipTrigger>
