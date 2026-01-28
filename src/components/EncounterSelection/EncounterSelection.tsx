@@ -93,6 +93,7 @@ function EncounterSelection({
   const { data: combatState } = useCombatState(chapterId);
   const isCombatActive = propIsCombatActive ?? !!combatState;
   const [isExpanded, setIsExpanded] = useState(false);
+  const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
 
   const encounterOpponents = useEncounterOpponentsDetailed(database);
   const deleteEncounterOpponent = useDeleteEncounterOpponent(database);
@@ -380,6 +381,23 @@ function EncounterSelection({
                         <MarkdownReader markdown={encounter.description} />
                       )}
 
+                      <div className="flex flex-wrap gap-2">
+                        {encounter.images &&
+                          encounter.images.map((img, index) => (
+                            <div
+                              key={index}
+                              className="group relative h-16 w-16 overflow-hidden rounded-md border"
+                            >
+                              <img
+                                src={img}
+                                className="h-full w-full cursor-pointer object-cover"
+                                alt={`Encounter image ${index}`}
+                                onClick={() => setFullScreenImage(img)}
+                              />
+                            </div>
+                          ))}
+                      </div>
+
                       {encounter.soundcloud && (
                         <div className="flex items-center justify-between rounded-lg border bg-neutral-50 p-2">
                           <div className="flex items-center gap-2 overflow-hidden">
@@ -449,6 +467,33 @@ function EncounterSelection({
           </Dialog.Portal>
         )}
       </AnimatePresence>
+
+      <Dialog.Root
+        open={!!fullScreenImage}
+        onOpenChange={(val) => !val && setFullScreenImage(null)}
+      >
+        <Dialog.Portal container={document.getElementById("drawer-portal")}>
+          <Dialog.Overlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80" />
+          <Dialog.Content className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 translate-x-[-50%] translate-y-[-50%] duration-200 outline-none">
+            <Dialog.Title className="sr-only">Full screen image</Dialog.Title>
+            <div className="relative">
+              <img
+                src={fullScreenImage || ""}
+                alt="Full screen"
+                className="max-h-[90vh] max-w-[90vw] rounded-md object-contain shadow-lg"
+              />
+              <Button
+                size="icon"
+                variant="ghost"
+                className="absolute top-2 right-2 text-white hover:bg-black/20"
+                onClick={() => setFullScreenImage(null)}
+              >
+                <XIcon />
+              </Button>
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </Dialog.Root>
   );
 }

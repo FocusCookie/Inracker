@@ -47,12 +47,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import { Token } from "@/types/tokens";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, PlusIcon } from "lucide-react";
 import {
   useCreateMultipleEncounterOpponents,
   useDeleteEncounterOpponent,
 } from "@/hooks/useEncounterOpponents";
 import { storeAudio } from "@/lib/utils";
+import { ImageSelectionDialog } from "../ImageSelectionDialog/ImageSelectionDialog";
 
 type OverlayProps = OverlayMap["encounter.edit"];
 
@@ -85,6 +86,19 @@ function EditEncounterDrawer({
   >(null);
   const [encounterOpponentsToAttache, setEncounterOpponentsToAttache] =
     useState<Array<Omit<Encounter, "id">>>([]);
+  const [isImageSelectionOpen, setIsImageSelectionOpen] = useState(false);
+
+  function handleAddImage(imagePath: string) {
+    const currentImages = form.getValues("images") || [];
+    form.setValue("images", [...currentImages, imagePath]);
+  }
+
+  function handleRemoveImage(indexToRemove: number) {
+    const currentImages = form.getValues("images") || [];
+    form.setValue("images",
+      currentImages.filter((_, index) => index !== indexToRemove),
+    );
+  }
 
   const createMultipleEncounterOpponents =
     useCreateMultipleEncounterOpponents(db);
@@ -116,6 +130,7 @@ function EditEncounterDrawer({
     completed: z.boolean().optional(),
     soundcloud: z.string().optional(),
     musicFile: z.string().optional(),
+    images: z.array(z.string()).optional(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -123,6 +138,7 @@ function EditEncounterDrawer({
     defaultValues: {
       name: encounter.name,
       description: encounter.description || "",
+      images: encounter.images || [],
       icon: encounter.element.icon,
       color: encounter.element.color,
       type: encounter.type,
@@ -357,8 +373,14 @@ function EditEncounterDrawer({
   }
 
   return (
-    <Drawer
-      modal={false}
+    <>
+      <ImageSelectionDialog
+        open={isImageSelectionOpen}
+        onOpenChange={setIsImageSelectionOpen}
+        onSelect={handleAddImage}
+      />
+      <Drawer
+        modal={false}
       onExitComplete={onExitComplete}
       description={t("titleDescription")}
       open={open}
@@ -649,22 +671,131 @@ function EditEncounterDrawer({
                 )}
               </div>
 
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem className="w-full px-0.5">
-                    <FormLabel>{t("description")}</FormLabel>
-                    <FormControl>
-                                          <MarkdownEditor
-                                            disabled={isLoading}
-                                            placeholder={t("descriptionPlaceholder")}
-                                            {...field}
-                                          />                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                            <FormField
+
+                              control={form.control}
+
+                              name="description"
+
+                              render={({ field }) => (
+
+                                <FormItem className="w-full px-0.5">
+
+                                  <FormLabel>{t("description")}</FormLabel>
+
+                                  <FormControl>
+
+                                    <MarkdownEditor
+
+                                      disabled={isLoading}
+
+                                      placeholder={t("descriptionPlaceholder")}
+
+                                      {...field}
+
+                                    />
+
+                                  </FormControl>
+
+                                  <FormMessage />
+
+                                </FormItem>
+
+                              )}
+
+                            />
+
+              
+
+                            <FormField
+
+                              control={form.control}
+
+                              name="images"
+
+                              render={({ field }) => (
+
+                                <FormItem className="w-full px-0.5">
+
+                                  <FormLabel>{t("images")}</FormLabel>
+
+                                  <div className="flex flex-wrap gap-2">
+
+                                    {field.value &&
+
+                                      field.value.map((img: string, index: number) => (
+
+                                        <div
+
+                                          key={index}
+
+                                          className="group relative h-16 w-16 overflow-hidden rounded-md border"
+
+                                        >
+
+                                          <img
+
+                                            src={img}
+
+                                            className="h-full w-full object-cover"
+
+                                            alt={`Encounter image ${index}`}
+
+                                          />
+
+                                          <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+
+                                            <Button
+
+                                              type="button"
+
+                                              variant="ghost"
+
+                                              size="icon"
+
+                                              className="h-6 w-6 text-white hover:text-red-500"
+
+                                              onClick={() => handleRemoveImage(index)}
+
+                                            >
+
+                                              <TrashIcon className="h-4 w-4" />
+
+                                            </Button>
+
+                                          </div>
+
+                                        </div>
+
+                                      ))}
+
+                                    <Button
+
+                                      type="button"
+
+                                      variant="outline"
+
+                                      className="h-16 w-16 border-dashed"
+
+                                      onClick={() => setIsImageSelectionOpen(true)}
+
+                                    >
+
+                                      <PlusIcon className="h-6 w-6 text-muted-foreground" />
+
+                                    </Button>
+
+                                  </div>
+
+                                  <FormMessage />
+
+                                </FormItem>
+
+                              )}
+
+                            />
+
+              
 
               <FormField
                 control={form.control}
@@ -923,6 +1054,7 @@ function EditEncounterDrawer({
         </div>
       </div>
     </Drawer>
+    </>
   );
 }
 

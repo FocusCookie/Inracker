@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import defaultDb from "@/lib/database";
 import { BaseDirectory, remove } from "@tauri-apps/plugin-fs";
-import { IMAGE_FOLDERS } from "@/lib/utils";
+import { createFolder } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { TypographyH1 } from "../ui/typographyH1";
 import {
@@ -11,7 +11,7 @@ import {
   AccordionTrigger,
 } from "../ui/accordion";
 import { Button } from "../ui/button";
-import { Trash2, Image as ImageIcon } from "lucide-react";
+import { Trash2, Image as ImageIcon, PlusIcon } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -24,6 +24,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
+import { Input } from "../ui/input";
 
 import { useAllPlayers } from "@/hooks/usePlayers";
 import { useOpponents } from "@/hooks/useOpponents";
@@ -40,7 +41,8 @@ type UsageMap = Record<string, { type: string; name: string }[]>;
 
 function SettingsCategoryImages({ database = defaultDb }: Props) {
   const { t } = useTranslation("ComponentSettingsCategoryImages");
-  const { images, loading, refresh: fetchImages } = useImages();
+  const { images, folders, loading, refresh: fetchImages } = useImages();
+  const [newFolderName, setNewFolderName] = useState("");
 
   const players = useAllPlayers(database);
   const opponents = useOpponents(database);
@@ -61,19 +63,6 @@ function SettingsCategoryImages({ database = defaultDb }: Props) {
       name: string,
     ) => {
       if (!imagePath) return;
-      // The DB stores the full asset URL. We need to match it against our file's assetUrl or name.
-      // Usually the DB stores what `storeImage` returns, which is `convertFileSrc(appFilePath)`.
-      // So exact match on assetUrl should work.
-      // However, let's normalize by checking if the DB string contains the filename.
-
-      // A safer approach: The DB string is the key. But we want to look up by OUR image file.
-      // So we reverse it.
-
-      // Let's iterate our images and see if they appear in the entities.
-      // BUT that is O(N*M).
-
-      // Better: Map DB Image String -> Usage List.
-      // Then for each File, check if its Asset URL matches the DB Image String.
 
       if (!map[imagePath]) {
         map[imagePath] = [];
@@ -82,15 +71,15 @@ function SettingsCategoryImages({ database = defaultDb }: Props) {
     };
 
     players.data?.forEach((p) =>
-      addToMap(p.image, t("folders.players"), p.name),
+      addToMap(p.image, t("folders.players" as any), p.name),
     );
 
     opponents.data?.forEach((o) =>
-      addToMap(o.image, t("folders.opponents"), o.name),
+      addToMap(o.image, t("folders.opponents" as any), o.name),
     );
 
     chapters.data?.forEach((c) => {
-      addToMap(c.battlemap, t("folders.chapters"), c.name);
+      addToMap(c.battlemap, t("folders.chapters" as any), c.name);
     });
 
     encounters.data?.forEach((e) => {
@@ -115,15 +104,12 @@ function SettingsCategoryImages({ database = defaultDb }: Props) {
 
   const handleDelete = async (file: ImageFile) => {
     try {
-      // Path relative to AppData for remove() with BaseDirectory.AppData
-      // file.folder is "players", file.name is "xyz.png"
-      // path should be "images/players/xyz.png"
       const relativePath = `images/${file.folder}/${file.name}`;
 
       await remove(relativePath, { baseDir: BaseDirectory.AppData });
 
       toast({ title: t("deleteSuccess") });
-      fetchImages(); // Refresh list
+      fetchImages();
     } catch (error) {
       console.error("Delete failed", error);
       toast({ variant: "destructive", title: t("deleteError") });
@@ -158,6 +144,19 @@ function SettingsCategoryImages({ database = defaultDb }: Props) {
     }
   };
 
+  async function handleCreateFolder() {
+    if (!newFolderName) return;
+    try {
+      await createFolder(newFolderName);
+      toast({ title: t("folderCreated") });
+      setNewFolderName("");
+      fetchImages();
+    } catch (error) {
+      console.error("Create folder failed", error);
+      toast({ variant: "destructive", title: t("folderCreateError") });
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4 pb-10">
       <div className="flex items-center justify-between">
@@ -191,19 +190,26 @@ function SettingsCategoryImages({ database = defaultDb }: Props) {
         )}
       </div>
 
-      <Accordion
-        type="multiple"
-        defaultValue={IMAGE_FOLDERS as unknown as string[]}
-        className="w-full"
-      >
-        {IMAGE_FOLDERS.map((folder) => {
-          const folderImages = images[folder];
-          if (folderImages.length === 0) return null;
+      <div className="flex w-full max-w-sm items-center space-x-2">
+        <Input
+          type="text"
+          placeholder={t("newFolderPlaceholder")}
+          value={newFolderName}
+          onChange={(e) => setNewFolderName(e.target.value)}
+        />
+        <Button onClick={handleCreateFolder}>
+          <PlusIcon className="mr-2 h-4 w-4" /> {t("createFolder")}
+        </Button>
+      </div>
+
+      <Accordion type="multiple" className="w-full">
+        {folders.map((folder) => {
+          const folderImages = images[folder] || [];
 
           return (
             <AccordionItem value={folder} key={folder}>
               <AccordionTrigger className=" ">
-                {t(`folders.${folder}`)} ({folderImages.length})
+                {t(`folders.${folder}` as any) || folder} ({folderImages.length})
               </AccordionTrigger>
               <AccordionContent>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

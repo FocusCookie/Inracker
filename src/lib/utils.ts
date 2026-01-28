@@ -8,23 +8,29 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const IMAGE_FOLDERS = [
+export const DEFAULT_IMAGE_FOLDERS = [
   "players",
   "battlemaps",
   "chapters",
   "others",
   "opponents",
 ] as const;
-export type ImageFolder = (typeof IMAGE_FOLDERS)[number];
 
 export async function createTauriAppDataSubfolders() {
-  for (const folder of IMAGE_FOLDERS) {
+  for (const folder of DEFAULT_IMAGE_FOLDERS) {
     await mkdir(`images/${folder}`, {
       baseDir: BaseDirectory.AppData,
       recursive: true,
     });
   }
   await mkdir("audio", {
+    baseDir: BaseDirectory.AppData,
+    recursive: true,
+  });
+}
+
+export async function createFolder(folderName: string) {
+  await mkdir(`images/${folderName}`, {
     baseDir: BaseDirectory.AppData,
     recursive: true,
   });
@@ -54,7 +60,7 @@ export async function storeAudio(audio: File) {
   return null;
 }
 
-export async function storeImage(picture: File | string, folder: ImageFolder) {
+export async function storeImage(picture: File | string, folder: string) {
   if (picture instanceof File) {
     try {
       const fileName = `${Date.now()}-${picture.name}`;
@@ -78,7 +84,7 @@ export async function storeImage(picture: File | string, folder: ImageFolder) {
   return null;
 }
 
-export async function deleteImage(fileName: string, folder: ImageFolder) {
+export async function deleteImage(fileName: string, folder: string) {
   try {
     const appDataDirPath = await appDataDir();
     const imagePath = await join(appDataDirPath, "images", folder, fileName); // Construct the correct path
