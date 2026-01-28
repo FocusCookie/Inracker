@@ -83,7 +83,7 @@ export function CanvasElementNode({
           )}
 
           <g className="hover:cursor-pointer">
-            <g style={{ opacity: element.completed ? 0.4 : 1 }}>
+            <g style={{ opacity: element.completed ? 0.5 : 1 }}>
               <rect
                 x={0}
                 y={0}
@@ -182,15 +182,15 @@ export function CanvasElementNode({
             {/* Completed Icon (Large, centered) */}
             {element.completed && (
               <g
-                transform={`translate(${element.width / 2 - 64}, ${element.height / 2 - 64})`}
+                transform={`translate(${element.width / 2 - 32}, ${element.height / 2 - 32})`}
               >
                 <foreignObject
-                  width="128"
-                  height="128"
+                  width="64"
+                  height="64"
                   className="pointer-events-none"
                 >
-                  <div className="flex h-full w-full items-center justify-center rounded-full bg-white/80">
-                    <CheckIcon className="h-32 w-32 text-emerald-500" />
+                  <div className="flex h-full w-full items-center justify-center rounded-full bg-emerald-950">
+                    <CheckIcon className="h-8 w-8 text-white" />
                   </div>
                 </foreignObject>
               </g>

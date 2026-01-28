@@ -1157,6 +1157,7 @@ function Play({
               id: enc.id,
               ...enc.element,
               name: enc.name,
+              completed: enc.completed,
               onEdit: () => handleElementEdit(enc),
               onClick: () => handleElementClick(enc),
             })) || []
