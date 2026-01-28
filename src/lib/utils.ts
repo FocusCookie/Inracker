@@ -36,6 +36,13 @@ export async function createFolder(folderName: string) {
   });
 }
 
+export async function deleteFolder(folderName: string) {
+  await remove(`images/${folderName}`, {
+    baseDir: BaseDirectory.AppData,
+    recursive: true,
+  });
+}
+
 export async function storeAudio(audio: File) {
   if (audio instanceof File) {
     try {

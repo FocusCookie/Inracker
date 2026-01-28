@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import defaultDb from "@/lib/database";
 import { BaseDirectory, remove } from "@tauri-apps/plugin-fs";
-import { createFolder } from "@/lib/utils";
+import { createFolder, deleteFolder, DEFAULT_IMAGE_FOLDERS } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { TypographyH1 } from "../ui/typographyH1";
 import {
@@ -157,6 +157,17 @@ function SettingsCategoryImages({ database = defaultDb }: Props) {
     }
   }
 
+  async function handleDeleteFolder(folderName: string) {
+    try {
+      await deleteFolder(folderName);
+      toast({ title: t("deleteFolderSuccess") });
+      fetchImages();
+    } catch (error) {
+      console.error("Delete folder failed", error);
+      toast({ variant: "destructive", title: t("deleteFolderError") });
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4 pb-10">
       <div className="flex items-center justify-between">
@@ -190,8 +201,9 @@ function SettingsCategoryImages({ database = defaultDb }: Props) {
         )}
       </div>
 
-      <div className="flex w-full max-w-sm items-center space-x-2">
+      <div className="flex w-full items-center gap-4">
         <Input
+          className="w-full grow"
           type="text"
           placeholder={t("newFolderPlaceholder")}
           value={newFolderName}
@@ -205,11 +217,52 @@ function SettingsCategoryImages({ database = defaultDb }: Props) {
       <Accordion type="multiple" className="w-full">
         {folders.map((folder) => {
           const folderImages = images[folder] || [];
+          const isDefault = DEFAULT_IMAGE_FOLDERS.includes(folder as any);
+          const displayName = isDefault
+            ? t(`folders.${folder}` as any)
+            : folder;
 
           return (
             <AccordionItem value={folder} key={folder}>
-              <AccordionTrigger className=" ">
-                {t(`folders.${folder}` as any) || folder} ({folderImages.length})
+              <AccordionTrigger className="group">
+                <div className="flex w-full items-center justify-between pr-4">
+                  <span>
+                    {displayName} ({folderImages.length})
+                  </span>
+
+                  {!isDefault && (
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:bg-destructive/10 h-8 w-8"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>{t("delete")}</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {t("confirmDeleteFolder")}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className="flex gap-4">
+                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteFolder(folder)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              {t("delete")}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  )}
+                </div>
               </AccordionTrigger>
               <AccordionContent>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

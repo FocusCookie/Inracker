@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useImages } from "@/hooks/useImages";
-import { storeImage } from "@/lib/utils";
+import { storeImage, DEFAULT_IMAGE_FOLDERS } from "@/lib/utils";
 import { Loader2, Image as ImageIcon, PlusIcon } from "lucide-react";
 import Drawer from "../Drawer/Drawer";
 import { Button } from "../ui/button";
@@ -80,15 +80,25 @@ export function ImageSelectionDialog({
               </SelectTrigger>
 
               <SelectContent>
-                {folders.map((folder) => (
-                  <SelectItem
-                    key={folder}
-                    value={folder}
-                    className="capitalize"
-                  >
-                    {t(`folders.${folder}` as any) || folder}
-                  </SelectItem>
-                ))}
+                {folders.map((folder) => {
+                  const isDefault = DEFAULT_IMAGE_FOLDERS.includes(
+                    folder as any,
+                  );
+
+                  const displayName = isDefault
+                    ? t(`folders.${folder}` as any)
+                    : folder;
+
+                  return (
+                    <SelectItem
+                      key={folder}
+                      value={folder}
+                      className="capitalize"
+                    >
+                      {displayName}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
@@ -110,21 +120,27 @@ export function ImageSelectionDialog({
       }
     >
       <div className="flex h-[600px] gap-4 pr-1">
-        <div className="flex h-fit w-1/3 flex-col gap-1 rounded-md bg-neutral-50 p-4">
-          {folders.map((folder) => (
-            <Button
-              key={folder}
-              variant={currentTab === folder ? "default" : "ghost"}
-              className={cn(
-                "w-full justify-start capitalize",
-                currentTab === folder ? "" : "text-neutral-600",
-              )}
-              onClick={() => setCurrentTab(folder)}
-            >
-              {t(`folders.${folder}` as any) || folder} (
-              {images[folder]?.length || 0})
-            </Button>
-          ))}
+        {/* Left Sidebar */}
+        <div className="flex w-1/4 flex-col gap-1 overflow-y-auto rounded-md bg-neutral-50 p-2">
+          {folders.map((folder) => {
+            const isDefault = DEFAULT_IMAGE_FOLDERS.includes(folder as any);
+            const displayName = isDefault
+              ? t(`folders.${folder}` as any)
+              : folder;
+            return (
+              <Button
+                key={folder}
+                variant={currentTab === folder ? "default" : "ghost"}
+                className={cn(
+                  "w-full justify-start capitalize",
+                  currentTab === folder ? "" : "text-neutral-600",
+                )}
+                onClick={() => setCurrentTab(folder)}
+              >
+                {displayName} ({images[folder]?.length || 0})
+              </Button>
+            );
+          })}
         </div>
 
         <div className="flex-1 overflow-y-auto">
@@ -137,7 +153,10 @@ export function ImageSelectionDialog({
               <ImageIcon className="mb-2 h-12 w-12 opacity-20" />
               <p>
                 No images found in{" "}
-                {t(`folders.${currentTab}` as any) || currentTab}.
+                {DEFAULT_IMAGE_FOLDERS.includes(currentTab as any)
+                  ? t(`folders.${currentTab}` as any)
+                  : currentTab}
+                .
               </p>
             </div>
           ) : (
@@ -167,4 +186,3 @@ export function ImageSelectionDialog({
     </Drawer>
   );
 }
-

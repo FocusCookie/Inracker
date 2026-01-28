@@ -26,5 +26,8 @@
   "newFolderPlaceholder": "New folder name",
   "createFolder": "Create Folder",
   "uploadImage": "Upload Image",
-  "selectFolder": "Select Folder"
+  "selectFolder": "Select Folder",
+  "deleteFolderSuccess": "Folder deleted successfully",
+  "deleteFolderError": "Failed to delete folder",
+  "confirmDeleteFolder": "Are you sure you want to delete this folder? All images inside will be deleted."
 }
