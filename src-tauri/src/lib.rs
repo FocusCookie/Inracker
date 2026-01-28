@@ -269,6 +269,21 @@ pub fn run() {
             sql: "ALTER TABLE active_effects ADD COLUMN duration_type TEXT NOT NULL DEFAULT 'rounds';",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 22,
+            description: "create logs table",
+            sql: "CREATE TABLE IF NOT EXISTS logs (
+                id TEXT PRIMARY KEY,
+                chapter_id INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT,
+                icon TEXT NOT NULL,
+                type TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(chapter_id) REFERENCES chapters(id) ON DELETE CASCADE
+            )",
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()

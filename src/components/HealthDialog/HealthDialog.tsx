@@ -34,6 +34,7 @@ type Props = OverlayProps & RuntimeProps;
 
 const formSchema = z.object({
   amount: z.coerce.number().min(1),
+  note: z.string().optional(),
 });
 
 function HealthDialog({
@@ -52,11 +53,12 @@ function HealthDialog({
     resolver: zodResolver(formSchema),
     defaultValues: {
       amount: 0,
+      note: "",
     },
   });
 
   function handleSubmit(values: z.infer<typeof formSchema>) {
-    onConfirm(values.amount);
+    onConfirm(values.amount, values.note);
     onOpenChange(false);
     form.reset();
   }
@@ -99,6 +101,20 @@ function HealthDialog({
                   <FormLabel>{t("amount")}</FormLabel>
                   <FormControl>
                     <Input type="number" {...field} autoFocus />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="note"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("note")}</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

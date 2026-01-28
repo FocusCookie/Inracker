@@ -46,7 +46,7 @@ import InitiativeMenue from "@/components/InitiativeMenue/InitiativeMenue";
 import ActiveEffectsMenue from "@/components/ActiveEffectsMenue/ActiveEffectsMenue";
 import Initiative from "@/components/Initiative/Initiative";
 import { InitiativeMenuEntity } from "@/types/initiative";
-import { BedSingleIcon, CoffeeIcon } from "lucide-react";
+import { BedSingleIcon, CoffeeIcon, NotebookText } from "lucide-react";
 
 // Hooks
 import { useCombatState, useCombatActions } from "@/hooks/useCombat";
@@ -56,6 +56,7 @@ import {
   useUpdateEncounterOpponent,
 } from "@/hooks/useEncounterOpponents";
 import { useRests } from "@/hooks/useRests";
+import { useCreateLog } from "@/hooks/useLogs";
 import {
   useUpdatePlayer,
   useAddEffectToPlayer,
@@ -136,6 +137,7 @@ function Play({
     nextTurn,
   } = useCombatActions(chapter.id);
   const { shortRest, longRest } = useRests();
+  const createLogMutation = useCreateLog(database);
   const addEffectToEncounterOpponentMutation =
     useAddEffectToEncounterOpponent(database);
   const updateEncounterOpponentMutation = useUpdateEncounterOpponent(database);
@@ -700,6 +702,11 @@ function Play({
     });
   }
 
+  function handleOpenSessionLog() {
+    if (!chapter.id) return;
+    openOverlay("session.log", { chapterId: chapter.id });
+  }
+
   function handleCreateEffect() {
     openOverlay("effect.create", {
       onCreate: (effect: Omit<Effect, "id">) =>
@@ -780,10 +787,17 @@ function Play({
       maxHealth: player.max_health,
       entityName: player.name,
       type: "heal",
-      onConfirm: async (amount) => {
+      onConfirm: async (amount, note) => {
         const newHealth = Math.min(player.health + amount, player.max_health);
         await editPlayer.mutateAsync({ ...player, health: newHealth });
-        toast({ title: `Healed ${player.name} for ${amount} HP` });
+
+        await createLogMutation.mutateAsync({
+          chapterId: chapter.id,
+          title: t("healedEntity", { name: player.name, amount }),
+          description: note,
+          icon: "💚",
+          type: "heal",
+        });
       },
     });
   }
@@ -797,10 +811,17 @@ function Play({
       maxHealth: player.max_health,
       entityName: player.name,
       type: "damage",
-      onConfirm: async (amount) => {
+      onConfirm: async (amount, note) => {
         const newHealth = player.health - amount;
         await editPlayer.mutateAsync({ ...player, health: newHealth });
-        toast({ title: `Damaged ${player.name} for ${amount} HP` });
+
+        await createLogMutation.mutateAsync({
+          chapterId: chapter.id,
+          title: t("damagedEntity", { name: player.name, amount }),
+          description: note,
+          icon: "💔",
+          type: "damage",
+        });
       },
     });
   }
@@ -814,7 +835,7 @@ function Play({
       maxHealth: opponent.max_health,
       entityName: opponent.name,
       type: "heal",
-      onConfirm: async (amount) => {
+      onConfirm: async (amount, note) => {
         const newHealth = Math.min(
           opponent.health + amount,
           opponent.max_health,
@@ -823,7 +844,14 @@ function Play({
           ...opponent,
           health: newHealth,
         });
-        toast({ title: `Healed ${opponent.name} for ${amount} HP` });
+
+        await createLogMutation.mutateAsync({
+          chapterId: chapter.id,
+          title: t("healedEntity", { name: opponent.name, amount }),
+          description: note,
+          icon: "💚",
+          type: "heal",
+        });
       },
     });
   }
@@ -837,13 +865,20 @@ function Play({
       maxHealth: opponent.max_health,
       entityName: opponent.name,
       type: "damage",
-      onConfirm: async (amount) => {
+      onConfirm: async (amount, note) => {
         const newHealth = opponent.health - amount;
         await updateEncounterOpponentMutation.mutateAsync({
           ...opponent,
           health: newHealth,
         });
-        toast({ title: `Damaged ${opponent.name} for ${amount} HP` });
+
+        await createLogMutation.mutateAsync({
+          chapterId: chapter.id,
+          title: t("damagedEntity", { name: opponent.name, amount }),
+          description: note,
+          icon: "💔",
+          type: "damage",
+        });
       },
     });
   }
@@ -1092,6 +1127,26 @@ function Play({
           </TooltipProvider>
         </motion.div>
       </PlayLayout.Settings>
+
+      <PlayLayout.SessionLog>
+        <div className="flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleOpenSessionLog}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
+                >
+                  <NotebookText className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t("sessionLog")}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </PlayLayout.SessionLog>
 
       <AnimatePresence mode="wait">
         <Canvas

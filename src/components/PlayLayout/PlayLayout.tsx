@@ -19,6 +19,7 @@ type PlayLayoutCompound = React.FC<PlayLayoutCompoundProps> & {
   ActiveEffects: React.FC<{ children: React.ReactNode }>;
   CombatControls: React.FC<{ children: React.ReactNode }>;
   Rest: React.FC<{ children: React.ReactNode }>;
+  SessionLog: React.FC<{ children: React.ReactNode }>;
 };
 
 const PlayLayout: PlayLayoutCompound = ({
@@ -50,6 +51,11 @@ const PlayLayout: PlayLayoutCompound = ({
     (child) => React.isValidElement(child) && child.type === PlayLayout.Rest,
   );
 
+  const sessionLogChild = childrenArray.find(
+    (child) =>
+      React.isValidElement(child) && child.type === PlayLayout.SessionLog,
+  );
+
   const initiativeChild = childrenArray.find(
     (child) =>
       React.isValidElement(child) && child.type === PlayLayout.Initiative,
@@ -74,7 +80,8 @@ const PlayLayout: PlayLayoutCompound = ({
       child.type !== PlayLayout.InitiativeMenue &&
       child.type !== PlayLayout.ActiveEffects &&
       child.type !== PlayLayout.CombatControls &&
-      child.type !== PlayLayout.Rest,
+      child.type !== PlayLayout.Rest &&
+      child.type !== PlayLayout.SessionLog,
   );
 
   return (
@@ -101,6 +108,8 @@ const PlayLayout: PlayLayoutCompound = ({
           {mainContent}
 
           <div className="absolute top-4 right-18">{restChild}</div>
+
+          <div className="absolute bottom-4 left-48">{sessionLogChild}</div>
 
           <div className="absolute top-4 left-1/2 -translate-x-1/2 transform">
             {initiativeChild}
@@ -192,5 +201,10 @@ PlayLayout.Rest = ({ children }) => {
   return <>{children}</>;
 };
 PlayLayout.Rest.displayName = "MainLayout.Rest";
+
+PlayLayout.SessionLog = ({ children }) => {
+  return <>{children}</>;
+};
+PlayLayout.SessionLog.displayName = "PlayLayout.SessionLog";
 
 export default PlayLayout;

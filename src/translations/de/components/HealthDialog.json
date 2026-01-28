@@ -6,5 +6,6 @@
   "amount": "Wert",
   "heal": "Heilen",
   "damage": "Schaden",
-  "cancel": "Abbrechen"
+  "cancel": "Abbrechen",
+  "note": "Notiz"
 }

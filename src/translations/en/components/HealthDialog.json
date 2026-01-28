@@ -6,5 +6,6 @@
   "amount": "Amount",
   "heal": "Heal",
   "damage": "Damage",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "note": "Note"
 }

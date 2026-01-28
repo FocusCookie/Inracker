@@ -3,6 +3,8 @@ import {
   select,
   createDatabaseError,
 } from "./core";
+import { createLog } from "./logs";
+import i18n from "@/i18next";
 import {
   DBCombat,
   DBCombatEffect,
@@ -134,8 +136,8 @@ export const nextTurn = async (combatId: string) => {
         if (!p.entity_id || !p.entity_type) continue;
 
         // Apply health changes from active effects (value != 0)
-        const activeEffects = await select<{ value: number }[]>(
-          `SELECT e.value 
+        const activeEffects = await select<{ value: number; name: string }[]>(
+          `SELECT e.value, e.name 
              FROM active_effects ae
              JOIN effects e ON ae.effect_id = e.id
              WHERE ae.entity_id = $1 AND ae.entity_type = $2`,
@@ -152,13 +154,13 @@ export const nextTurn = async (combatId: string) => {
             p.entity_type === "player" ? "players" : "encounter_opponents";
 
           const entityRes = await select<
-            { health: number; max_health: number }[]
-          >(`SELECT health, max_health FROM ${table} WHERE id = $1`, [
+            { health: number; max_health: number; name: string }[]
+          >(`SELECT health, max_health, name FROM ${table} WHERE id = $1`, [
             p.entity_id,
           ]);
 
           if (entityRes.length > 0) {
-            const { health, max_health } = entityRes[0];
+            const { health, max_health, name } = entityRes[0];
             let newHealth = health + totalChange;
 
             // If healing (positive change), cap at max_health
@@ -170,6 +172,29 @@ export const nextTurn = async (combatId: string) => {
               newHealth,
               p.entity_id,
             ]);
+
+            // Log each individual effect that had an impact
+            for (const eff of activeEffects) {
+              if (eff.value !== 0) {
+                await createLog({
+                  chapterId: combat.chapter_id,
+                  title:
+                    eff.value > 0
+                      ? i18n.t("PagePlay:healedByEffect", {
+                          name,
+                          amount: eff.value,
+                          effect: eff.name,
+                        })
+                      : i18n.t("PagePlay:damagedByEffect", {
+                          name,
+                          amount: Math.abs(eff.value),
+                          effect: eff.name,
+                        }),
+                  icon: eff.value > 0 ? "💚" : "💔",
+                  type: eff.value > 0 ? "heal" : "damage",
+                });
+              }
+            }
           }
         }
 

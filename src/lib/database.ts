@@ -11,6 +11,7 @@ import { tokens } from "./db/tokens";
 import { settings } from "./db/settings";
 import { combat } from "./db/combat";
 import { shortRest, longRest } from "./db/rests";
+import { logs } from "./db/logs";
 
 const database = {
   connect,
@@ -27,6 +28,7 @@ const database = {
   encounterOpponents,
   combat,
   settings,
+  logs,
   rests: {
     short: shortRest,
     long: longRest,

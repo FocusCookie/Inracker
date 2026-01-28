@@ -57,10 +57,11 @@ type RuntimeProps = {
   onExitComplete: () => void;
 };
 
-type Props = OverlayProps & RuntimeProps & {
-  onStartFight?: () => void;
-  isCombatActive?: boolean;
-};
+type Props = OverlayProps &
+  RuntimeProps & {
+    onStartFight?: () => void;
+    isCombatActive?: boolean;
+  };
 
 function Difficulty({ diff }: { diff: EncounterDifficulty }) {
   return (
@@ -225,7 +226,7 @@ function EncounterSelection({
                   transition={{ type: "tween", duration: 0.2 }}
                   className={cn(
                     "shadow-4xl border-opacity-50 fixed bottom-4 left-[calc(50%+64px)] flex -translate-x-1/2 flex-col rounded-t-lg border-t-4 border-r-4 border-l-4 bg-white",
-                    isExpanded ? "h-[80vh] w-[80vw]" : "w-md",
+                    isExpanded ? "h-[80vh] w-[80vw]" : "w-lg",
                   )}
                   onClick={(e) => e.stopPropagation()}
                   style={{ borderColor: encounter.element.color }}
@@ -310,7 +311,9 @@ function EncounterSelection({
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={handleGroupOpponentTokensIntoEncounter}
+                                    onClick={
+                                      handleGroupOpponentTokensIntoEncounter
+                                    }
                                   >
                                     <ShrinkIcon />
                                   </Button>

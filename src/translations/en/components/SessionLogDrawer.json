@@ -1,0 +1,19 @@
+{
+  "title": "Session Logs",
+  "description": "Journal of events and notes.",
+  "addNote": "Add Note",
+  "manual": "Manual Note",
+  "damage": "Damage Log",
+  "heal": "Heal Log",
+  "noLogs": "No logs yet.",
+  "logTitle": "Title",
+  "logDescription": "Description",
+  "logIcon": "Icon",
+  "add": "Add",
+  "cancel": "Cancel",
+  "edit": "Edit",
+  "delete": "Delete",
+  "update": "Update",
+  "cancelEdit": "Cancel Edit",
+  "confirmDeleteLog": "Are you sure you want to delete this log entry?"
+}

@@ -1,4 +1,5 @@
 import "i18next";
+import ComponentSessionLogDrawer from "@/translations/en/component/SessionLogDrawer.json";
 import ComponentHealthDialog from "@/translations/en/component/HealthDialog.json";
 import ComponentCreateCombatEffectDrawer from "@/translations/en/components/CreateCombatEffectDrawer.json";
 import ComponentCombatControls from "@/translations/en/components/CombatControls.json";
@@ -64,6 +65,7 @@ declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
       // hygen-components - DO NOT DELETE THIS LINE
+      ComponentSessionLogDrawer: typeof ComponentSessionLogDrawer;
       ComponentHealthDialog: typeof ComponentHealthDialog;
       ComponentCreateCombatEffectDrawer: typeof ComponentCreateCombatEffectDrawer;
       ComponentCombatControls: typeof ComponentCombatControls;

@@ -1,13 +1,19 @@
 {
-  "createEffect": "Erstelle Effect",
-  "createImmunity": "Erstelle Immunität",
-  "createResistance": "Erstelle Wiederstand",
-  "addFromCatalog": "Vom Katalog hinzufügen",
-  "createNewPlayer": "Erstelle Spieler",
-  "backToChapters": "Zurück zu den Kapiteln",
-  "closeDetails": "Schließe Details",
-  "openDetails": "Öffne Details",
+  "createEffect": "Effekt erstellen",
+  "createImmunity": "Immunität erstellen",
+  "createResistance": "Resistenz erstellen",
+  "addFromCatalog": "Aus Katalog hinzufügen",
+  "createNewPlayer": "Neuen Spieler erstellen",
+  "backToChapters": "Zurück zu Kapiteln",
+  "closeDetails": "Details schließen",
+  "openDetails": "Details öffnen",
   "shortRest": "Kurze Rast",
-  "longRest": "Lange Rast"
+  "longRest": "Lange Rast",
+  "sessionLog": "Sitzungsprotokoll",
+  "healedEntity": "Heilte {{name}} um {{amount}} HP",
+  "damagedEntity": "{{name}} um {{amount}}HP geschädigt",
+  "healedViaEffects": "Heilte {{name}} um {{amount}} HP durch Effekte",
+  "damagedViaEffects": "{{name}} um {{amount}}HP durch Effekte geschädigt",
+  "healedByEffect": "{{name}} um {{amount}} HP durch {{effect}} geheilt",
+  "damagedByEffect": "{{name}} um {{amount}}HP durch {{effect}} geschädigt"
 }
-
