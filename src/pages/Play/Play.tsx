@@ -270,6 +270,40 @@ function Play({
     await deleteEncounterSimpleMutation.mutateAsync(encounterId);
   }
 
+  function handleShortRest() {
+    shortRest.mutate(undefined, {
+      onSuccess: async () => {
+        toast({ title: t("shortRestTriggered") });
+        if (chapter.id) {
+          await createLogMutation.mutateAsync({
+            chapterId: chapter.id,
+            title: t("shortRest"),
+            description: t("shortRestLogDescription"),
+            icon: "☕",
+            type: "rest",
+          });
+        }
+      },
+    });
+  }
+
+  function handleLongRest() {
+    longRest.mutate(undefined, {
+      onSuccess: async () => {
+        toast({ title: t("longRestTriggered") });
+        if (chapter.id) {
+          await createLogMutation.mutateAsync({
+            chapterId: chapter.id,
+            title: t("longRest"),
+            description: t("longRestLogDescription"),
+            icon: "🛏️",
+            type: "rest",
+          });
+        }
+      },
+    });
+  }
+
   function handleEffectsCatalog(player: Player) {
     openOverlay("effect.catalog", {
       database,
@@ -969,7 +1003,7 @@ function Play({
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  onClick={() => shortRest.mutate()}
+                  onClick={handleShortRest}
                   className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
                 >
                   <CoffeeIcon className="h-4 w-4" />
@@ -983,7 +1017,7 @@ function Play({
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  onClick={() => longRest.mutate()}
+                  onClick={handleLongRest}
                   className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
                 >
                   <BedSingleIcon className="h-4 w-4" />

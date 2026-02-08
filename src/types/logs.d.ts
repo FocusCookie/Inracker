@@ -1,4 +1,4 @@
-export type LogType = "manual" | "damage" | "heal";
+export type LogType = "manual" | "damage" | "heal" | "rest";
 
 export type DBLog = {
   id: string;
