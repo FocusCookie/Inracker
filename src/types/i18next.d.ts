@@ -1,4 +1,5 @@
 import "i18next";
+import HookUseAppUpdates from "@/translations/en/hook/useAppUpdates.json";
 import ComponentSettingsCategoryBackup from "@/translations/en/component/SettingsCategoryBackup.json";
 import ComponentSettingsCategoryAudio from "@/translations/en/components/SettingsCategoryAudio.json";
 import ComponentInitiativeCard from "@/translations/en/component/InitiativeCard.json";
@@ -64,6 +65,7 @@ import ComponentCreateImmunityDrawer from "@/translations/en/components/CreateIm
 import ComponentCreatePlayerDrawer from "@/translations/en/components/CreatePlayerDrawer.json";
 import ComponentCatalog from "@/translations/en/components/Catalog.json";
 import HookUseMutationWithErrorTaost from "@/translations/en/hooks/useMutationWithErrorTaost.json";
+import HookUseAppUpdates from "@/translations/en/hooks/useAppUpdates.json";
 
 declare module "i18next" {
   interface CustomTypeOptions {
@@ -131,7 +133,9 @@ declare module "i18next" {
       ComponentCatalog: typeof ComponentCatalog;
 
       // hygen-hooks - DO NOT DELETE THIS LINE
+      HookUseAppUpdates: typeof HookUseAppUpdates;
       HookUseMutationWithErrorTaost: typeof HookUseMutationWithErrorTaost;
+      HookUseAppUpdates: typeof HookUseAppUpdates;
 
       // hygen-pages - DO NOT DELETE THIS LINE
       PagePlay: typeof PagePlay;

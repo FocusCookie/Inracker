@@ -1,0 +1,6 @@
+{
+  "availableTitle": "Update Available",
+  "availableDescription": "A new version ({{version}}) is available.",
+  "viewChangelog": "View changelog in repository",
+  "updateNow": "Update Now"
+}

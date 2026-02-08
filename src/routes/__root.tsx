@@ -6,9 +6,12 @@ import { useEffect } from "react";
 import Database from "@/lib/database";
 import i18n from "@/i18next";
 import { useQuery } from "@tanstack/react-query";
+import { useAppUpdates } from "@/hooks/useAppUpdates";
 
 export const Route = createRootRoute({
   component: () => {
+    const { checkForUpdates } = useAppUpdates();
+
     const { data: language } = useQuery({
       queryKey: ["settings", "language"],
       queryFn: async () => {
@@ -21,6 +24,10 @@ export const Route = createRootRoute({
         i18n.changeLanguage(language);
       }
     }, [language]);
+
+    useEffect(() => {
+      checkForUpdates();
+    }, [checkForUpdates]);
 
     return (
       <TooltipProvider>

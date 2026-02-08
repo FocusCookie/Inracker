@@ -1,5 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import HookUseAppUpdatesEN from "@/translations/en/hooks/useAppUpdates.json";
+import HookUseAppUpdatesDE from "@/translations/de/hooks/useAppUpdates.json"; 
 import ComponentSettingsCategoryBackupEN from "@/translations/en/components/SettingsCategoryBackup.json";
 import ComponentSettingsCategoryBackupDE from "@/translations/de/components/SettingsCategoryBackup.json";
 import ComponentCollapsibleEN from "@/translations/en/components/Collapsible.json";
@@ -123,6 +125,8 @@ import ComponentCreatePlayerDrawerEN from "@/translations/en/components/CreatePl
 import ComponentCreatePlayerDrawerDE from "@/translations/de/components/CreatePlayerDrawer.json";
 import HookUseMutationWithErrorTaostEN from "@/translations/en/hooks/useMutationWithErrorTaost.json";
 import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutationWithErrorTaost.json";
+import HookUseAppUpdatesEN from "@/translations/en/hooks/useAppUpdates.json";
+import HookUseAppUpdatesDE from "@/translations/de/hooks/useAppUpdates.json";
 
 const resources = {
   en: {
@@ -187,7 +191,9 @@ const resources = {
     ComponentCreatePlayerDrawer: ComponentCreatePlayerDrawerEN,
 
     // hygen-en-hooks - DO NOT DELETE THIS LINE
+    HookUseAppUpdates: HookUseAppUpdatesEN,
     HookUseMutationWithErrorTaost: HookUseMutationWithErrorTaostEN,
+    HookUseAppUpdates: HookUseAppUpdatesEN,
 
     // hygen-en-pages - DO NOT DELETE THIS LINE
     PagePlay: PagePlayEN,
@@ -257,7 +263,9 @@ const resources = {
     ComponentCreatePlayerDrawer: ComponentCreatePlayerDrawerDE,
 
     // hygen-de-hooks - DO NOT DELETE THIS LINE
+    HookUseAppUpdates: HookUseAppUpdatesDE,
     HookUseMutationWithErrorTaost: HookUseMutationWithErrorTaostDE,
+    HookUseAppUpdates: HookUseAppUpdatesDE,
 
     // hygen-de-pages - DO NOT DELETE THIS LINE
     PagePlay: PagePlayDE,
