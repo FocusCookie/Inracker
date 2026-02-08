@@ -1231,6 +1231,7 @@ function Play({
           onDamagePlayer={handleDamagePlayer}
           onHealOpponent={handleHealOpponent}
           onDamageOpponent={handleDamageOpponent}
+          onToggleAside={handleAsideToggle}
         />
       </AnimatePresence>
     </PlayLayout>

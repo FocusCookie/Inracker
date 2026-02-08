@@ -317,7 +317,7 @@ function PlayerCard({
                   <AvatarFallback>{player.icon}</AvatarFallback>
                 </Avatar>
 
-                <span className="absolute top-0 right-0 rounded-full bg-white p-0.5 shadow">
+                <span className="absolute top-0 right-0 rounded-full bg-white p-0.5 text-sm shadow">
                   {player.icon}
                 </span>
               </div>

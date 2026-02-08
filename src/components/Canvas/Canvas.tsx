@@ -87,6 +87,7 @@ type Props = {
   onDamagePlayer?: (playerId: number) => void;
   onHealOpponent?: (opponentId: number) => void;
   onDamageOpponent?: (opponentId: number) => void;
+  onToggleAside?: () => void;
 };
 
 export type CanvasElement = {
@@ -127,6 +128,7 @@ function Canvas({
   onDamagePlayer,
   onHealOpponent,
   onDamageOpponent,
+  onToggleAside,
 }: Props) {
   const { t } = useTranslation("ComponentCanvas");
   const queryClient = useQueryClient();
@@ -138,6 +140,10 @@ function Canvas({
   const [resizingElementId, setResizingElementId] = useState<number | null>(
     null,
   );
+
+  const [tokenVisibility, setTokenVisibility] = useState<
+    Record<string, boolean>
+  >({});
 
   const {
     currentColor,
@@ -223,9 +229,6 @@ function Canvas({
     x: 0,
     y: 0,
   });
-  const [tokenVisibility, setTokenVisibility] = useState<
-    Record<string, boolean>
-  >({});
 
   const draggedElement = useRef<(ClickableCanvasElement & { id: any }) | null>(
     null,
@@ -483,6 +486,28 @@ function Canvas({
       }
     };
   }, [handleZoom]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey) {
+        if (event.key === "+" || event.key === "=") {
+          event.preventDefault();
+          handleZoom("in");
+        } else if (event.key === "-" || event.key === "_") {
+          event.preventDefault();
+          handleZoom("out");
+        } else if (event.key === "s") {
+          event.preventDefault();
+          onToggleAside?.();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleZoom, onToggleAside]);
 
   const resetZoom = useCallback(() => {
     const defaultViewBox = initialViewBoxRef.current;
