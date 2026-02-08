@@ -304,6 +304,7 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
       search: {
         partyId: party.id,
         chapterId,
+        selectedToken: null,
       },
     });
   }

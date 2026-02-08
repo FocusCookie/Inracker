@@ -10,7 +10,6 @@ import { execute, select, createDatabaseError } from "./core"; // Updated import
 import { getDetailedChapterById } from "./chapters";
 import { getDetailedEncounterTokens, deleteTokens } from "./tokens";
 import { deleteEncounterOpponents } from "./opponents";
-import { storeImage } from "../utils";
 
 export const getAllEncounters = async (): Promise<Encounter[]> => {
   const dbEncounters = await select<DBEncounter[]>("SELECT * FROM encounters");

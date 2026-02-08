@@ -3,7 +3,7 @@ import Drawer from "../Drawer/Drawer";
 import { Button } from "../ui/button";
 import { storeImage } from "@/lib/utils";
 import CreateOpponentForm from "../CreateOpponentForm/CreateOpponentForm";
-import { TypographyH2 } from "../ui/typographyH2";
+import { TypographyH2 } from "../ui/typographyh2";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
 import ResistanceCard from "../ResistanceCard/ResistanceCard";
 import { useState } from "react";

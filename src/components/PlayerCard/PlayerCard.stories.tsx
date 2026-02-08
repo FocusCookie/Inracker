@@ -8,14 +8,17 @@ const meta = {
   component: PlayerCard,
   parameters: {},
   args: {
-    onAddEffect: fn(),
     onRemoveEffect: fn(),
-    onAddImmunity: fn(),
-    onAddResistance: fn(),
     onEdit: fn(),
     onRemove: fn(),
     onRemoveImmunity: fn(),
     onRemoveResistance: fn(),
+    onEditImmunity: fn(),
+    onEditResistance: fn(),
+    onEditEffect: fn(),
+    onOpenImmunitiesCatalog: fn(),
+    onOpenResistancesCatalog: fn(),
+    onOpenEffectsCatalog: fn(),
     expanded: false,
     player: {
       id: 1,
@@ -47,6 +50,4 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Primary: Story = {
-  // args: {},
-};
+export const Primary: Story = {};

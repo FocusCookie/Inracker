@@ -11,7 +11,7 @@ const meta = {
     effect: {
       description: "descriptive text",
       duration: 4,
-      duration_type: "rounds",
+      durationType: "rounds",
       icon: "🎅",
       id: 1,
       name: "Santa Effect",
@@ -39,7 +39,7 @@ export const NegativeEffect: Story = {
     effect: {
       description: "descriptive text",
       duration: 4,
-      duration_type: "rounds",
+      durationType: "rounds",
       icon: "👹",
       id: 1,
       name: "Satan Effect",

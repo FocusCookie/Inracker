@@ -12,6 +12,7 @@ const meta = {
     onFinish: fn(),
     onInitiative: fn(),
     onNext: fn(),
+    onActiveEffects: fn(),
   },
 } satisfies Meta<typeof CombatControls>;
 

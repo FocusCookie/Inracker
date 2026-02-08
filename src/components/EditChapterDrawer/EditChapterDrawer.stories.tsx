@@ -16,11 +16,13 @@ const meta = {
       name: "name",
       party: 1,
       state: "draft",
-      tokens: [],
     },
-    loading: false,
     onOpenChange: fn(),
-    onSave: fn(),
+    onEdit: fn(),
+    onComplete: fn(),
+    onCancel: fn(),
+    onDelete: fn(),
+    onExitComplete: fn(),
     open: true,
   },
 } satisfies Meta<typeof EditChapterDrawer>;
@@ -28,6 +30,4 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Primary: Story = {
-  // args: {},
-};
+export const Primary: Story = {};

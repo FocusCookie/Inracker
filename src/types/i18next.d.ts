@@ -1,5 +1,6 @@
 import "i18next";
 import ComponentSettingsCategoryBackup from "@/translations/en/component/SettingsCategoryBackup.json";
+import ComponentSettingsCategoryAudio from "@/translations/en/components/SettingsCategoryAudio.json";
 import ComponentInitiativeCard from "@/translations/en/component/InitiativeCard.json";
 import ComponentCollapsible from "@/translations/en/component/Collapsible.json";
 import ComponentSessionLogDrawer from "@/translations/en/component/SessionLogDrawer.json";
@@ -69,6 +70,7 @@ declare module "i18next" {
     resources: {
       // hygen-components - DO NOT DELETE THIS LINE
       ComponentSettingsCategoryBackup: typeof ComponentSettingsCategoryBackup;
+      ComponentSettingsCategoryAudio: typeof ComponentSettingsCategoryAudio;
       ComponentInitiativeCard: typeof ComponentInitiativeCard;
       ComponentCollapsible: typeof ComponentCollapsible;
       ComponentSessionLogDrawer: typeof ComponentSessionLogDrawer;

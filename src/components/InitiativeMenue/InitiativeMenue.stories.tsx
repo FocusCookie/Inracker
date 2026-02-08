@@ -91,6 +91,7 @@ export const Primary: Story = {
     selected: [
       {
         type: "player",
+        initiative: 0,
         properties: {
           id: 1,
           name: "Player 1",
@@ -109,7 +110,8 @@ export const Primary: Story = {
         },
       },
       {
-        type: "EncounterOpponent",
+        type: "encounterOpponent",
+        initiative: 0,
         properties: {
           id: 101,
           name: "Goblin Grunt",

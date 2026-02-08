@@ -139,11 +139,47 @@ export const db = {
       }
       return Promise.resolve(deletedPlayer);
     },
+    getById: async (id: number): Promise<Player> => {
+      console.log("STORYBOOK MOCK: getById player", id);
+      const player = players.find((p) => p.id === id);
+      if (!player) throw new Error(`Player ${id} not found`);
+      return Promise.resolve(player);
+    },
+    addEffect: async (playerId: number, effectId: number) => {
+      console.log("STORYBOOK MOCK: addEffect", playerId, effectId);
+      return Promise.resolve({} as any);
+    },
+    removeEffect: async (playerId: number, effectId: number) => {
+      console.log("STORYBOOK MOCK: removeEffect", playerId, effectId);
+      return Promise.resolve({} as any);
+    },
+    addImmunity: async (playerId: number, immunityId: number) => {
+      console.log("STORYBOOK MOCK: addImmunity", playerId, immunityId);
+      return Promise.resolve({} as any);
+    },
+    removeImmunity: async (playerId: number, immunityId: number) => {
+      console.log("STORYBOOK MOCK: removeImmunity", playerId, immunityId);
+      return Promise.resolve({} as any);
+    },
+    addResistance: async (playerId: number, resistanceId: number) => {
+      console.log("STORYBOOK MOCK: addResistance", playerId, resistanceId);
+      return Promise.resolve({} as any);
+    },
+    removeResistance: async (playerId: number, resistanceId: number) => {
+      console.log("STORYBOOK MOCK: removeResistance", playerId, resistanceId);
+      return Promise.resolve({} as any);
+    },
   },
   effects: {
     getAll: async (): Promise<Effect[]> => {
       console.log("STORYBOOK MOCK: getAll effects");
       return Promise.resolve(effects);
+    },
+    getById: async (id: number): Promise<Effect> => {
+      console.log("STORYBOOK MOCK: getById effect", id);
+      const effect = effects.find((e) => e.id === id);
+      if (!effect) throw new Error(`Effect ${id} not found`);
+      return Promise.resolve(effect);
     },
     create: async (effect: Omit<Effect, "id">): Promise<Effect> => {
       console.log("STORYBOOK MOCK: create effect", effect);
@@ -177,6 +213,12 @@ export const db = {
       console.log("STORYBOOK MOCK: getAll immunities");
       return Promise.resolve(immunities);
     },
+    getById: async (id: number): Promise<DBImmunity> => {
+      console.log("STORYBOOK MOCK: getById immunity", id);
+      const immunity = immunities.find((i) => i.id === id);
+      if (!immunity) throw new Error(`Immunity ${id} not found`);
+      return Promise.resolve(immunity);
+    },
     create: async (immunity: Omit<DBImmunity, "id">): Promise<DBImmunity> => {
       console.log("STORYBOOK MOCK: create immunity", immunity);
       const newImmunity: DBImmunity = {
@@ -208,6 +250,12 @@ export const db = {
     getAll: async (): Promise<DBResistance[]> => {
       console.log("STORYBOOK MOCK: getAll resistances");
       return Promise.resolve(resistances);
+    },
+    getById: async (id: number): Promise<DBResistance> => {
+      console.log("STORYBOOK MOCK: getById resistance", id);
+      const resistance = resistances.find((r) => r.id === id);
+      if (!resistance) throw new Error(`Resistance ${id} not found`);
+      return Promise.resolve(resistance);
     },
     create: async (
       resistance: Omit<DBResistance, "id">,
@@ -247,6 +295,26 @@ export const db = {
       console.log("STORYBOOK MOCK: update token", token);
       return Promise.resolve(token);
     },
+    getById: async (id: number) => {
+      console.log("STORYBOOK MOCK: getById token", id);
+      return Promise.resolve({ id, coordinates: { x: 0, y: 0 } } as any);
+    },
+    getByChapter: async (chapterId: number) => {
+      console.log("STORYBOOK MOCK: getByChapter tokens", chapterId);
+      return Promise.resolve([]);
+    },
+    create: async (token: any) => {
+      console.log("STORYBOOK MOCK: create token", token);
+      return Promise.resolve({ ...token, id: Math.random() });
+    },
+    delete: async (id: number) => {
+      console.log("STORYBOOK MOCK: delete token", id);
+      return Promise.resolve({ id } as any);
+    },
+    groupIntoElement: async (tokens: number[], element: any) => {
+      console.log("STORYBOOK MOCK: groupIntoElement", tokens, element);
+      return Promise.resolve([]);
+    },
   },
   encounters: {
     create: async (encounter: any) => {
@@ -260,6 +328,36 @@ export const db = {
     delete: async (id: number) => {
       console.log("STORYBOOK MOCK: delete encounter", id);
       return Promise.resolve({ id } as any);
+    },
+    getById: async (id: number) => {
+      console.log("STORYBOOK MOCK: getById encounter", id);
+      return Promise.resolve({
+        id,
+        name: "Mock Encounter",
+        description: "Mock Description",
+        type: "fight",
+        element: { x: 0, y: 0, width: 100, height: 100, color: "#ff0000", icon: "⚔️" },
+        opponents: [],
+        images: [],
+        difficulties: [],
+        experience: 100,
+        completed: false,
+        passed: false,
+        soundcloud: null,
+        musicFile: null,
+      } as any);
+    },
+    updateProperty: async (id: number, property: string, value: any) => {
+      console.log("STORYBOOK MOCK: updateProperty encounter", id, property, value);
+      return Promise.resolve({ id } as any);
+    },
+    getByChapterId: async (chapterId: number) => {
+      console.log("STORYBOOK MOCK: getByChapterId", chapterId);
+      return Promise.resolve([]);
+    },
+    getAll: async () => {
+      console.log("STORYBOOK MOCK: getAll encounters");
+      return Promise.resolve([]);
     },
   },
   chapters: {
@@ -275,6 +373,30 @@ export const db = {
       console.log("STORYBOOK MOCK: delete chapter", id);
       return Promise.resolve({ id } as any);
     },
+    create: async (chapter: any) => {
+      console.log("STORYBOOK MOCK: create chapter", chapter);
+      return Promise.resolve({ ...chapter, id: Math.random(), encounters: "[]" });
+    },
+    getAllForParty: async (partyId: number) => {
+      console.log("STORYBOOK MOCK: getAllForParty", partyId);
+      return Promise.resolve([]);
+    },
+    getAll: async () => {
+      console.log("STORYBOOK MOCK: getAll chapters");
+      return Promise.resolve([]);
+    },
+    get: async (id: number) => {
+      console.log("STORYBOOK MOCK: get chapter", id);
+      return Promise.resolve({ id, name: "Mock Chapter", encounters: "[]" } as any);
+    },
+    removeEncounter: async (chapterId: number, encounterId: number) => {
+      console.log("STORYBOOK MOCK: removeEncounter", chapterId, encounterId);
+      return Promise.resolve({} as any);
+    },
+    update: async (chapter: any) => {
+      console.log("STORYBOOK MOCK: update chapter", chapter);
+      return Promise.resolve(chapter);
+    },
   },
   encounterOpponents: {
     getAllDetailed: async () => {
@@ -289,6 +411,26 @@ export const db = {
       console.log("STORYBOOK MOCK: delete encounterOpponent", id);
       return Promise.resolve({ id } as any);
     },
+    create: async (opponent: any) => {
+      console.log("STORYBOOK MOCK: create encounterOpponent", opponent);
+      return Promise.resolve({ ...opponent, id: Math.random() });
+    },
+    createWithToken: async (opponent: any, chapterId: number) => {
+      console.log("STORYBOOK MOCK: createWithToken encounterOpponent", opponent, chapterId);
+      return Promise.resolve({ ...opponent, id: Math.random() });
+    },
+    createMultiple: async (opponents: any[]) => {
+      console.log("STORYBOOK MOCK: createMultiple encounterOpponents", opponents);
+      return Promise.resolve(opponents.map(o => ({ ...o, id: Math.random() })));
+    },
+    addEffect: async (opponentId: number, effectId: number) => {
+      console.log("STORYBOOK MOCK: addEffect to encounterOpponent", opponentId, effectId);
+      return Promise.resolve({} as any);
+    },
+    removeEffect: async (opponentId: number, effectId: number) => {
+      console.log("STORYBOOK MOCK: removeEffect from encounterOpponent", opponentId, effectId);
+      return Promise.resolve({} as any);
+    },
   },
   parties: {
     getAll: async () => {
@@ -298,6 +440,26 @@ export const db = {
     getAllDetailed: async () => {
       console.log("STORYBOOK MOCK: getAllDetailed parties");
       return Promise.resolve([]);
+    },
+    getById: async (id: number) => {
+      console.log("STORYBOOK MOCK: getById party", id);
+      return Promise.resolve({ id, name: "Mock Party", description: "", icon: "⚔️", players: [] } as any);
+    },
+    create: async (party: any) => {
+      console.log("STORYBOOK MOCK: create party", party);
+      return Promise.resolve({ ...party, id: Math.random() });
+    },
+    update: async (party: any) => {
+      console.log("STORYBOOK MOCK: update party", party);
+      return Promise.resolve(party);
+    },
+    delete: async (id: number) => {
+      console.log("STORYBOOK MOCK: delete party", id);
+      return Promise.resolve(id);
+    },
+    addPlayer: async (partyId: number, playerId: number) => {
+      console.log("STORYBOOK MOCK: addPlayer", partyId, playerId);
+      return Promise.resolve({} as any);
     },
     removePlayer: async (partyId: number, playerId: number) => {
       console.log("STORYBOOK MOCK: removePlayer", partyId, playerId);
@@ -317,16 +479,80 @@ export const db = {
       console.log("STORYBOOK MOCK: getAll opponents");
       return Promise.resolve([]);
     },
+    getAllDetailed: async () => {
+      console.log("STORYBOOK MOCK: getAllDetailed opponents");
+      return Promise.resolve([]);
+    },
+    create: async (opponent: any) => {
+      console.log("STORYBOOK MOCK: create opponent", opponent);
+      return Promise.resolve({ ...opponent, id: Math.random() });
+    },
+    update: async (opponent: any) => {
+      console.log("STORYBOOK MOCK: update opponent", opponent);
+      return Promise.resolve(opponent);
+    },
+    delete: async (id: number) => {
+      console.log("STORYBOOK MOCK: delete opponent", id);
+      return Promise.resolve({ id } as any);
+    },
   },
   settings: {
     get: async (key: string) => {
       console.log("STORYBOOK MOCK: get setting", key);
       return Promise.resolve(null);
     },
+    update: async (key: string, value: string) => {
+      console.log("STORYBOOK MOCK: update setting", key, value);
+      return Promise.resolve();
+    },
   },
   combat: {
     get: async () => {
       console.log("STORYBOOK MOCK: get combat");
+      return Promise.resolve(null);
+    },
+    create: async () => {
+      console.log("STORYBOOK MOCK: create combat");
+      return Promise.resolve({} as any);
+    },
+    nextTurn: async () => {
+      console.log("STORYBOOK MOCK: nextTurn");
+      return Promise.resolve({} as any);
+    },
+    finish: async () => {
+      console.log("STORYBOOK MOCK: finish combat");
+      return Promise.resolve();
+    },
+    addEffect: async () => {
+      console.log("STORYBOOK MOCK: addEffect to combat");
+      return Promise.resolve({} as any);
+    },
+    removeEffect: async () => {
+      console.log("STORYBOOK MOCK: removeEffect from combat");
+      return Promise.resolve({} as any);
+    },
+    updateInitiative: async () => {
+      console.log("STORYBOOK MOCK: updateInitiative");
+      return Promise.resolve({} as any);
+    },
+    resetInitiative: async () => {
+      console.log("STORYBOOK MOCK: resetInitiative");
+      return Promise.resolve({} as any);
+    },
+    removeParticipant: async () => {
+      console.log("STORYBOOK MOCK: removeParticipant");
+      return Promise.resolve({} as any);
+    },
+    addParticipant: async () => {
+      console.log("STORYBOOK MOCK: addParticipant");
+      return Promise.resolve({} as any);
+    },
+    getActiveParticipantId: async () => {
+      console.log("STORYBOOK MOCK: getActiveParticipantId");
+      return Promise.resolve(null);
+    },
+    getState: async () => {
+      console.log("STORYBOOK MOCK: getState");
       return Promise.resolve(null);
     },
   },
@@ -335,11 +561,27 @@ export const db = {
       console.log("STORYBOOK MOCK: getAll logs");
       return Promise.resolve([]);
     },
+    getByChapterId: async (chapterId: number) => {
+      console.log("STORYBOOK MOCK: getByChapterId logs", chapterId);
+      return Promise.resolve([]);
+    },
+    create: async (log: any) => {
+      console.log("STORYBOOK MOCK: create log", log);
+      return Promise.resolve({ ...log, id: Math.random() });
+    },
+    delete: async (id: string) => {
+      console.log("STORYBOOK MOCK: delete log", id);
+      return Promise.resolve({ id } as any);
+    },
+    update: async (log: any) => {
+      console.log("STORYBOOK MOCK: update log", log);
+      return Promise.resolve(log);
+    },
   },
   backup: {
     exportAll: async () => {
       console.log("STORYBOOK MOCK: exportAll");
-      return Promise.resolve("");
+      return Promise.resolve({} as any);
     },
     importAll: async () => {
       console.log("STORYBOOK MOCK: importAll");
@@ -347,7 +589,7 @@ export const db = {
     },
     mergeAll: async () => {
       console.log("STORYBOOK MOCK: mergeAll");
-      return Promise.resolve();
+      return Promise.resolve({});
     },
   },
   rests: {

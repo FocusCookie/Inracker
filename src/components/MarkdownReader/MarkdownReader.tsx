@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { TypographyH2 } from "../ui/typographyH2";
+import { TypographyH2 } from "../ui/typographyh2";
 
 type Props = {
   className?: string;
@@ -51,10 +51,10 @@ export const markdownComponents: any = {
       </div>
     );
   },
-  ul({ children, ...props }: MarkdownComponent) {
+  ul({ children }: MarkdownComponent) {
     return <ul className="flex flex-col gap-1 py-2">{children}</ul>;
   },
-  ol({ children, ...props }: MarkdownComponent) {
+  ol({ children }: MarkdownComponent) {
     return <ol className="flex flex-col gap-1 py-2">{children}</ol>;
   },
 

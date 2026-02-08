@@ -17,6 +17,7 @@ export const Primary: Story = {
   args: {
     entity: {
       type: "player",
+      initiative: 0,
       properties: {
         id: 1,
         name: "Player 1",

@@ -4,10 +4,11 @@ import { useMutationWithErrorToast } from "./useMutationWithErrorToast";
 import { DBChapter, Chapter } from "@/types/chapters";
 import { useQueryWithToast } from "./useQueryWithErrorToast";
 
-export function useChaptersQuery(partyId: number, database = defaultDb) {
+export function useChaptersQuery(partyId: number | null, database = defaultDb) {
   return useQueryWithToast({
     queryKey: ["chapters", partyId],
-    queryFn: () => database.chapters.getAllForParty(partyId),
+    queryFn: () => database.chapters.getAllForParty(partyId!),
+    enabled: !!partyId,
   });
 }
 

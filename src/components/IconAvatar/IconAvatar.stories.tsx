@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn } from "@storybook/test";
 
 import IconAvatar from "./IconAvatar";
 
@@ -10,9 +9,22 @@ const meta = {
     layout: "centered",
   },
   args: {
-    name: "Lizard",
-    icon: "🧙",
-    onClick: fn(),
+    player: {
+      id: 1,
+      name: "H. Potter",
+      icon: "🧙",
+      role: "mage",
+      level: 4,
+      health: 23,
+      max_health: 10,
+      ep: 234,
+      details: "Hex hex!",
+      overview: "overview",
+      image: null,
+      effects: [],
+      immunities: [],
+      resistances: [],
+    },
   },
 } satisfies Meta<typeof IconAvatar>;
 
@@ -20,6 +32,4 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
-export const Primary: Story = {
-  // args: {},
-};
+export const Primary: Story = {};

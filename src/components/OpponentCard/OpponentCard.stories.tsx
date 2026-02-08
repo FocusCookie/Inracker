@@ -44,8 +44,9 @@ const meta = {
           icon: "💪",
           description: "Increased strength for 2 rounds.",
           duration: 2,
-          duration_type: "rounds",
+          durationType: "rounds",
           type: "positive",
+          value: 0,
         },
         {
           id: 2,
@@ -53,8 +54,9 @@ const meta = {
           icon: "🧪",
           description: "Takes poison damage for 3 rounds.",
           duration: 3,
-          duration_type: "rounds",
+          durationType: "rounds",
           type: "negative",
+          value: 0,
         },
         {
           id: 3,
@@ -62,8 +64,9 @@ const meta = {
           icon: "⬇️",
           description: "Decreased damage for 1 round.",
           duration: 1,
-          duration_type: "rounds",
+          durationType: "rounds",
           type: "negative",
+          value: 0,
         },
       ],
       immunities: [
@@ -81,11 +84,9 @@ const meta = {
         },
       ],
     },
-    onDelete: fn(),
+    onRemove: fn(),
     onEdit: fn(),
-    onRemoveImmunity: fn(),
-    onRemoveResistance: fn(),
-    onRemoveEffect: fn(),
+    onSelectToken: fn(),
   },
   decorators: [
     (Story) => (

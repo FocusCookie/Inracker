@@ -7,7 +7,7 @@ import { useEditPlayer } from "@/hooks/useEditPlayer";
 import { CancelReason, OverlayMap } from "@/types/overlay";
 import { useTranslation } from "react-i18next";
 import { useOverlayStore } from "@/stores/useOverlayStore";
-import { TypographyH2 } from "../ui/typographyH2";
+import { TypographyH2 } from "../ui/typographyh2";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
 import ResistanceCard from "../ResistanceCard/ResistanceCard";
 import EffectCard from "../EffectCard/EffectCard";

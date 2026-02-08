@@ -14,7 +14,7 @@ import { useCreatePlayer as useCreatePlayerForm } from "@/hooks/useCreatePlayer"
 import database from "@/lib/database";
 import type { CancelReason, OverlayMap } from "@/types/overlay";
 import { Button } from "../ui/button";
-import { TypographyH2 } from "../ui/typographyH2";
+import { TypographyH2 } from "../ui/typographyh2";
 import { useCreateImmunity } from "@/hooks/useImmunities";
 import { useCreateResistance } from "@/hooks/useResistances";
 import { toast } from "@/hooks/use-toast";
