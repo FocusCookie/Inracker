@@ -1,5 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentCollapsibleEN from "@/translations/en/components/Collapsible.json";
+import ComponentCollapsibleDE from "@/translations/de/components/Collapsible.json"; 
 import ComponentSessionLogDrawerEN from "@/translations/en/components/SessionLogDrawer.json";
 import ComponentSessionLogDrawerDE from "@/translations/de/components/SessionLogDrawer.json"; 
 import ComponentHealthDialogEN from "@/translations/en/components/HealthDialog.json";
@@ -121,6 +123,7 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentCollapsible: ComponentCollapsibleEN,
     ComponentSessionLogDrawer: ComponentSessionLogDrawerEN,
     ComponentHealthDialog: ComponentHealthDialogEN,
     ComponentCreateCombatEffectDrawer: ComponentCreateCombatEffectDrawerEN,
@@ -188,6 +191,7 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentCollapsible: ComponentCollapsibleDE,
     ComponentSessionLogDrawer: ComponentSessionLogDrawerDE,
     ComponentHealthDialog: ComponentHealthDialogDE,
     ComponentCreateCombatEffectDrawer: ComponentCreateCombatEffectDrawerDE,

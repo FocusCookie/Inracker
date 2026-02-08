@@ -15,7 +15,13 @@ type Props = {
   onDelete?: () => void;
 };
 
-function ImmunityCard({ immunity, actions, onRemove, onEdit, onDelete }: Props) {
+function ImmunityCard({
+  immunity,
+  actions,
+  onRemove,
+  onEdit,
+  onDelete,
+}: Props) {
   function handleRemoveImmunity() {
     if (onRemove) {
       onRemove(immunity.id);
@@ -33,6 +39,7 @@ function ImmunityCard({ immunity, actions, onRemove, onEdit, onDelete }: Props) 
 
   return (
     <Collapsible
+      disabled={!immunity.description}
       title={
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-4">

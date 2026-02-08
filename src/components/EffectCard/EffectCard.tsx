@@ -31,6 +31,7 @@ function EffectCard({ actions, effect, onRemove, onEdit }: Props) {
 
   return (
     <Collapsible
+      disabled={!effect.description}
       title={
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-4">
