@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 import testBackground from "./test_assets/HB_Festplatz.jpg";
 import player1 from "./test_assets/player_1.webp";
+import { db } from "@/mocks/db";
 
 import Canvas from "./Canvas";
 
@@ -20,6 +21,7 @@ const meta = {
     ),
   ],
   args: {
+    database: db as any,
     background:
       "http://localhost:6006/src/components/Canvas/test_assets/HB_Festplatz.jpg",
     elements: [],
@@ -49,7 +51,6 @@ const meta = {
         overview: "overview",
       },
     ],
-    opponents: [],
     selectedToken: null,
     tokens: [
       {

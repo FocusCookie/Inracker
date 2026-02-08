@@ -276,6 +276,90 @@ export const db = {
       return Promise.resolve({ id } as any);
     },
   },
+  encounterOpponents: {
+    getAllDetailed: async () => {
+      console.log("STORYBOOK MOCK: getAllDetailed encounterOpponents");
+      return Promise.resolve([]);
+    },
+    update: async (opponent: any) => {
+      console.log("STORYBOOK MOCK: update encounterOpponent", opponent);
+      return Promise.resolve(opponent);
+    },
+    delete: async (id: number) => {
+      console.log("STORYBOOK MOCK: delete encounterOpponent", id);
+      return Promise.resolve({ id } as any);
+    },
+  },
+  parties: {
+    getAll: async () => {
+      console.log("STORYBOOK MOCK: getAll parties");
+      return Promise.resolve([]);
+    },
+    getAllDetailed: async () => {
+      console.log("STORYBOOK MOCK: getAllDetailed parties");
+      return Promise.resolve([]);
+    },
+    removePlayer: async (partyId: number, playerId: number) => {
+      console.log("STORYBOOK MOCK: removePlayer", partyId, playerId);
+      return Promise.resolve({} as any);
+    },
+  },
+  connect: async () => {
+    console.log("STORYBOOK MOCK: connect");
+    return Promise.resolve({} as any);
+  },
+  disconnect: async () => {
+    console.log("STORYBOOK MOCK: disconnect");
+    return Promise.resolve();
+  },
+  opponents: {
+    getAll: async () => {
+      console.log("STORYBOOK MOCK: getAll opponents");
+      return Promise.resolve([]);
+    },
+  },
+  settings: {
+    get: async (key: string) => {
+      console.log("STORYBOOK MOCK: get setting", key);
+      return Promise.resolve(null);
+    },
+  },
+  combat: {
+    get: async () => {
+      console.log("STORYBOOK MOCK: get combat");
+      return Promise.resolve(null);
+    },
+  },
+  logs: {
+    getAll: async () => {
+      console.log("STORYBOOK MOCK: getAll logs");
+      return Promise.resolve([]);
+    },
+  },
+  backup: {
+    exportAll: async () => {
+      console.log("STORYBOOK MOCK: exportAll");
+      return Promise.resolve("");
+    },
+    importAll: async () => {
+      console.log("STORYBOOK MOCK: importAll");
+      return Promise.resolve();
+    },
+    mergeAll: async () => {
+      console.log("STORYBOOK MOCK: mergeAll");
+      return Promise.resolve();
+    },
+  },
+  rests: {
+    short: async () => {
+      console.log("STORYBOOK MOCK: shortRest");
+      return Promise.resolve();
+    },
+    long: async () => {
+      console.log("STORYBOOK MOCK: longRest");
+      return Promise.resolve();
+    },
+  },
 };
 
 export default db;
