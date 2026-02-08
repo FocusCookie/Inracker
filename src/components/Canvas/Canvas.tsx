@@ -23,7 +23,14 @@ import {
   ContextMenuSeparator,
   ContextMenuGroup,
 } from "@/components/ui/context-menu";
-import { CircleX, Sword, UsersRound } from "lucide-react";
+import {
+  CircleX,
+  Sword,
+  UsersRound,
+  Sparkle,
+  SparklesIcon,
+  Sparkles,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -582,7 +589,9 @@ function Canvas({
     dragElementsInitialCoords.current = [];
     const group = svg.querySelector(`g[data-token-group-id="${token.id}"]`);
     if (group) {
-      const children = group.querySelectorAll("circle, image, text");
+      const children = group.querySelectorAll(
+        "circle, image, text, foreignObject",
+      );
       children.forEach((child) => {
         const xAttr = child.tagName === "circle" ? "cx" : "x";
         const yAttr = child.tagName === "circle" ? "cy" : "y";
@@ -1272,6 +1281,28 @@ function Canvas({
                         {player.icon}
                       </text>
                     </g>
+                    {player.effects && player.effects.length > 0 && (
+                      <g>
+                        <circle
+                          cx={token.coordinates.x + 80}
+                          cy={token.coordinates.y + 24}
+                          r={16}
+                          fill="white"
+                          stroke="black"
+                          className="pointer-events-none"
+                        />
+
+                        <foreignObject
+                          x={token.coordinates.x + 72}
+                          y={token.coordinates.y + 16}
+                          width={24}
+                          height={24}
+                          className="pointer-events-none"
+                        >
+                          <Sparkles className="h-4 w-4" />
+                        </foreignObject>
+                      </g>
+                    )}
                   </g>
                 </ContextMenuTrigger>
                 <ContextMenuContent className="w-56">
@@ -1456,15 +1487,26 @@ function Canvas({
                         </text>
                       </g>
                     )}
-                    {opponent.image && (
+                    {opponent.effects && opponent.effects.length > 0 && (
                       <g>
-                        <text
-                          className="pointer-events-none text-4xl select-none"
-                          x={token.coordinates.x}
-                          y={token.coordinates.y + 32}
+                        <circle
+                          cx={token.coordinates.x + 80}
+                          cy={token.coordinates.y + 24}
+                          r={16}
+                          fill="white"
+                          stroke="black"
+                          className="pointer-events-none"
+                        />
+
+                        <foreignObject
+                          x={token.coordinates.x + 72}
+                          y={token.coordinates.y + 16}
+                          width={24}
+                          height={24}
+                          className="pointer-events-none"
                         >
-                          {opponent.icon}
-                        </text>
+                          <Sparkles className="h-4 w-4" />
+                        </foreignObject>
                       </g>
                     )}
                   </g>
