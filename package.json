@@ -4,10 +4,13 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "start": "npm run tauri:dev",
     "dev": "VITE_ENV=dev vite",
-    "build": "VITE_ENV=prod tsc && vite build",
+    "build": "VITE_ENV=inracker tsc && vite build",
     "preview": "VITE_ENV=dev vite preview",
-    "tauri": "VITE_ENV=dev tauri",
+    "tauri": "tauri",
+    "tauri:dev": "VITE_ENV=dev tauri dev",
+    "tauri:build": "VITE_ENV=inracker tauri build",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
