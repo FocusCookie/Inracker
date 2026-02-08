@@ -12,6 +12,7 @@ import { settings } from "./db/settings";
 import { combat } from "./db/combat";
 import { shortRest, longRest } from "./db/rests";
 import { logs } from "./db/logs";
+import { exportAllData, importAllData, mergeAllData } from "./db/backup";
 
 const database = {
   connect,
@@ -29,6 +30,11 @@ const database = {
   combat,
   settings,
   logs,
+  backup: {
+    exportAll: exportAllData,
+    importAll: importAllData,
+    mergeAll: mergeAllData,
+  },
   rests: {
     short: shortRest,
     long: longRest,

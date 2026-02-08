@@ -1,4 +1,4 @@
-import { execute, select, createDatabaseError } from "./core"; // Updated import
+import { execute, select } from "./core"; // Updated import
 
 export const getSetting = async (
   key: string,

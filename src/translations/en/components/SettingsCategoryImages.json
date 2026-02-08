@@ -29,5 +29,7 @@
   "selectFolder": "Select Folder",
   "deleteFolderSuccess": "Folder deleted successfully",
   "deleteFolderError": "Failed to delete folder",
-  "confirmDeleteFolder": "Are you sure you want to delete this folder? All images inside will be deleted."
+  "confirmDeleteFolder": "Are you sure you want to delete this folder? All images inside will be deleted.",
+  "deleteFolder": "Delete Folder",
+  "actions": "Actions"
 }

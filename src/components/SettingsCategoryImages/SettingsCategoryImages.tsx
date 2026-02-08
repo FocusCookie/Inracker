@@ -225,46 +225,47 @@ function SettingsCategoryImages({ database = defaultDb }: Props) {
           return (
             <AccordionItem value={folder} key={folder}>
               <AccordionTrigger className="group">
-                <div className="flex w-full items-center justify-between pr-4">
-                  <span>
-                    {displayName} ({folderImages.length})
-                  </span>
-
-                  {!isDefault && (
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive hover:bg-destructive/10 h-8 w-8"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>{t("delete")}</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              {t("confirmDeleteFolder")}
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter className="flex gap-4">
-                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDeleteFolder(folder)}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            >
-                              {t("delete")}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  )}
-                </div>
+                <span>
+                  {displayName} ({folderImages.length})
+                </span>
               </AccordionTrigger>
               <AccordionContent>
+                {!isDefault && (
+                  <div className="mb-4 flex items-center justify-between border-b pb-2">
+                    <span className="text-muted-foreground text-xs font-medium uppercase">
+                      {t("actions")}
+                    </span>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10 h-8 gap-2"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          {t("deleteFolder")}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>{t("delete")}</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {t("confirmDeleteFolder")}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="flex gap-4">
+                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteFolder(folder)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            {t("delete")}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                )}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   {folderImages.map((file) => {
                     const exactUsage = usageMap[file.assetUrl];

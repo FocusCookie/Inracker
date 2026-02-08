@@ -2,12 +2,13 @@
   "settings": "Einstellungen",
   "general": "Allgemein",
   "images": "Bilder",
+  "audio": "Audio",
+  "opponents": "Gegner",
   "players": "Spieler",
-  "statuses": "Statuseffekte",
+  "statuses": "Status",
   "effects": "Effekte",
   "immunities": "Immunitäten",
   "resistances": "Resistenzen",
-  "opponents": "Gegner",
-  "close": "Schließen",
-  "audio": "Audio"
+  "backup": "Import / Export",
+  "close": "Schließen"
 }

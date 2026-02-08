@@ -1,15 +1,15 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import ComponentInitiativeCardEN from "@/translations/en/components/InitiativeCard.json";
-import ComponentInitiativeCardDE from "@/translations/de/components/InitiativeCard.json"; 
+import ComponentSettingsCategoryBackupEN from "@/translations/en/components/SettingsCategoryBackup.json";
+import ComponentSettingsCategoryBackupDE from "@/translations/de/components/SettingsCategoryBackup.json";
 import ComponentCollapsibleEN from "@/translations/en/components/Collapsible.json";
-import ComponentCollapsibleDE from "@/translations/de/components/Collapsible.json"; 
+import ComponentCollapsibleDE from "@/translations/de/components/Collapsible.json";
 import ComponentSessionLogDrawerEN from "@/translations/en/components/SessionLogDrawer.json";
-import ComponentSessionLogDrawerDE from "@/translations/de/components/SessionLogDrawer.json"; 
+import ComponentSessionLogDrawerDE from "@/translations/de/components/SessionLogDrawer.json";
 import ComponentHealthDialogEN from "@/translations/en/components/HealthDialog.json";
-import ComponentHealthDialogDE from "@/translations/de/components/HealthDialog.json"; 
+import ComponentHealthDialogDE from "@/translations/de/components/HealthDialog.json";
 import ComponentCreateCombatEffectDrawerEN from "@/translations/en/components/CreateCombatEffectDrawer.json";
-import ComponentCreateCombatEffectDrawerDE from "@/translations/de/components/CreateCombatEffectDrawer.json"; 
+import ComponentCreateCombatEffectDrawerDE from "@/translations/de/components/CreateCombatEffectDrawer.json";
 import ComponentCombatControlsEN from "@/translations/en/components/CombatControls.json";
 import ComponentCombatControlsDE from "@/translations/de/components/CombatControls.json";
 import ComponentInitiativeMenueItemEN from "@/translations/en/components/InitiativeMenueItem.json";
@@ -127,6 +127,7 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentSettingsCategoryBackup: ComponentSettingsCategoryBackupEN,
     ComponentInitiativeCard: ComponentInitiativeCardEN,
     ComponentCollapsible: ComponentCollapsibleEN,
     ComponentSessionLogDrawer: ComponentSessionLogDrawerEN,
@@ -134,7 +135,6 @@ const resources = {
     ComponentCreateCombatEffectDrawer: ComponentCreateCombatEffectDrawerEN,
     ComponentCombatControls: ComponentCombatControlsEN,
     ComponentInitiativeMenueItem: ComponentInitiativeMenueItemEN,
-    ComponentInitiativeCard: ComponentInitiativeCardEN,
     ComponentActiveEffectsMenue: ComponentActiveEffectsMenueEN,
     ComponentEditPlayerDrawer: ComponentEditPlayerDrawerEN,
     ComponentSettingsOpponentCard: ComponentSettingsOpponentCardEN,
@@ -197,6 +197,7 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentSettingsCategoryBackup: ComponentSettingsCategoryBackupDE,
     ComponentInitiativeCard: ComponentInitiativeCardDE,
     ComponentCollapsible: ComponentCollapsibleDE,
     ComponentSessionLogDrawer: ComponentSessionLogDrawerDE,
@@ -204,7 +205,6 @@ const resources = {
     ComponentCreateCombatEffectDrawer: ComponentCreateCombatEffectDrawerDE,
     ComponentCombatControls: ComponentCombatControlsDE,
     ComponentInitiativeMenueItem: ComponentInitiativeMenueItemDE,
-    ComponentInitiativeCard: ComponentInitiativeCardDE,
     ComponentActiveEffectsMenue: ComponentActiveEffectsMenueDE,
     ComponentEditPlayerDrawer: ComponentEditPlayerDrawerDE,
     ComponentSettingsOpponentCard: ComponentSettingsOpponentCardDE,

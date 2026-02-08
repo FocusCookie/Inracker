@@ -1,4 +1,5 @@
 import "i18next";
+import ComponentSettingsCategoryBackup from "@/translations/en/component/SettingsCategoryBackup.json";
 import ComponentInitiativeCard from "@/translations/en/component/InitiativeCard.json";
 import ComponentCollapsible from "@/translations/en/component/Collapsible.json";
 import ComponentSessionLogDrawer from "@/translations/en/component/SessionLogDrawer.json";
@@ -67,6 +68,7 @@ declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
       // hygen-components - DO NOT DELETE THIS LINE
+      ComponentSettingsCategoryBackup: typeof ComponentSettingsCategoryBackup;
       ComponentInitiativeCard: typeof ComponentInitiativeCard;
       ComponentCollapsible: typeof ComponentCollapsible;
       ComponentSessionLogDrawer: typeof ComponentSessionLogDrawer;

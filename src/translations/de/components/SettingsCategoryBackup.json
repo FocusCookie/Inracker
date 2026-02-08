@@ -1,0 +1,21 @@
+{
+  "backup": "Sicherung",
+  "export": "Daten Exportieren",
+  "import": "Daten Importieren",
+  "exportDescription": "Exportiere alle deine Daten inklusive Bilder und Audio in einen ausgewählten Ordner.",
+  "importDescription": "Importiere Daten aus einem ausgewählten Ordner. Du kannst wählen, ob alles überschrieben (Wiederherstellen) oder mit vorhandenen Daten zusammengeführt werden soll.",
+  "selectFolder": "Ordner Auswählen",
+  "exportSuccess": "Daten erfolgreich exportiert!",
+  "importSuccess": "Daten erfolgreich importiert!",
+  "importSuccessWithConflicts": "Daten importiert, aber einige Konflikte traten auf.",
+  "error": "Ein Fehler ist aufgetreten",
+  "processing": "Verarbeitung läuft...",
+  "restore": "Vollständige Wiederherstellung",
+  "restoreDescription": "Löscht alle vorhandenen Daten und ersetzt sie durch das Backup.",
+  "merge": "Daten Zusammenführen",
+  "mergeDescription": "Fügt neue Daten hinzu. Konflikte werden übersprungen und gemeldet.",
+  "conflictsDetected": "Konflikte Erkannt",
+  "conflictsDescription": "Die folgenden Datensätze existieren bereits und wurden NICHT importiert. Du kannst diese Liste als JSON herunterladen.",
+  "downloadConflicts": "Konflikte als JSON herunterladen",
+  "close": "Schließen"
+}

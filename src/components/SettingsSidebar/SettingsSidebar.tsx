@@ -26,6 +26,7 @@ import {
   Skull,
   Sparkles,
   SquareX,
+  Save,
 } from "lucide-react";
 import {
   Collapsible,
@@ -43,7 +44,8 @@ export type SettingsCategory =
   | "immunities"
   | "opponents"
   | "resistances"
-  | "effects";
+  | "effects"
+  | "backup";
 
 type Props = {
   onClose: () => void;
@@ -124,6 +126,17 @@ function SettingsSidebar({ activeItem, onClose, onSelect }: Props) {
                 >
                   <PersonStanding />
                   <span>{t("players")}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip={t("backup")}
+                  isActive={activeItem === "backup"}
+                  onClick={() => onSelect("backup")}
+                >
+                  <Save />
+                  <span>{t("backup")}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
