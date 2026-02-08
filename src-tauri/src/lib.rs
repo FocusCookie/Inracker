@@ -8,7 +8,8 @@ fn greet(name: &str) -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let vite_env = env::var("VITE_ENV").unwrap_or_else(|_| String::from("inracker_dev"));
+    let default_env = if cfg!(debug_assertions) { "dev" } else { "inracker" };
+    let vite_env = env::var("VITE_ENV").unwrap_or_else(|_| String::from(default_env));
     let db_name = format!("sqlite:{}.db", vite_env);
 
     let migrations = vec![
