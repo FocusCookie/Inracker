@@ -33,6 +33,8 @@ export type OverlaySuccessMap = {
   "immunity.create": DBImmunity;
   "immunity.catalog": DBImmunity;
   "immunity.edit": DBImmunity;
+  "health.dialog": number;
+  "session.log": void;
   settings: void;
 };
 
@@ -76,6 +78,8 @@ export type OverlayMap = {
     chapterId: Chapter["id"];
     onCancel?: (reason: CancelReason) => void;
     onOpponentSelect?: (opponentId: number) => void;
+    onStartFight?: () => void;
+    isCombatActive?: boolean;
   };
   "encounter.edit": {
     encounter: Encounter;
@@ -132,6 +136,7 @@ export type OverlayMap = {
     onCancel?: (reason: CancelReason) => void;
   };
   "player.catalog": {
+    database?: typeof db;
     onSelect: (partyId: Party["id"], playerId: Player["id"]) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
     partyId: Party["id"];
@@ -152,6 +157,17 @@ export type OverlayMap = {
     onEdit: (immunity: DBImmunity) => Promise<DBImmunity>;
     onComplete?: (result: OverlaySuccessMap["immunity.edit"]) => void;
     onCancel?: (reason: CancelReason) => void;
+  };
+  "health.dialog": {
+    currentHealth: number;
+    maxHealth: number;
+    entityName: string;
+    type: "heal" | "damage";
+    onConfirm: (amount: number, note?: string) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "session.log": {
+    chapterId: number;
   };
   "resistance.create": {
     onCreate: (resistance: Resistance) => Promise<DBResistance>;

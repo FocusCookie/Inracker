@@ -72,7 +72,7 @@ export default function CreateImmunityDrawer({
 
       const createdImmunity = await onCreate(input);
 
-      onComplete(createdImmunity);
+      onComplete?.(createdImmunity);
 
       setClosingReason("success");
       onOpenChange(false);

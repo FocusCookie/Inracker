@@ -1,0 +1,136 @@
+import type { Meta, StoryObj } from "@storybook/react";
+import { fn } from "@storybook/test";
+
+import InitiativeMenue from "./InitiativeMenue";
+
+const meta = {
+  title: "Components/InitiativeMenue",
+  component: InitiativeMenue,
+  args: {
+    isOpen: true,
+    setIsOpen: fn(),
+    onAdd: fn(),
+    onReset: fn(),
+    onRemove: fn(),
+  },
+} satisfies Meta<typeof InitiativeMenue>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Primary: Story = {
+  args: {
+    isOpen: true,
+    setIsOpen: fn(),
+    players: [
+      {
+        id: 1,
+        name: "Player 1",
+        level: 5,
+        health: 20,
+        max_health: 20,
+        ep: 0,
+        image: "",
+        icon: "🧝",
+        details: "Some player details",
+        overview: "Player overview",
+        role: "Fighter",
+        effects: [],
+        immunities: [],
+        resistances: [],
+      },
+      {
+        id: 2,
+        name: "Player 2",
+        level: 3,
+        health: 15,
+        max_health: 15,
+        ep: 0,
+        image: "",
+        icon: "🧙",
+        details: "Another player",
+        overview: "Second player overview",
+        role: "Wizard",
+        effects: [],
+        immunities: [],
+        resistances: [],
+      },
+    ],
+    encounterOpponents: [
+      {
+        id: 101,
+        name: "Goblin Grunt",
+        icon: "👹",
+        details: "A small, green-skinned humanoid.",
+        health: 10,
+        max_health: 10,
+        image: "",
+        level: 1,
+        labels: [],
+        resistances: [],
+        effects: [],
+        immunities: [],
+        blueprint: 0,
+      },
+      {
+        id: 102,
+        name: "Orc Warrior",
+        icon: "🧌",
+        details: "A brutish warrior.",
+        health: 30,
+        max_health: 30,
+        image: "",
+        level: 3,
+        labels: [],
+        resistances: [],
+        effects: [],
+        immunities: [],
+        blueprint: 0,
+      },
+    ],
+    selected: [
+      {
+        type: "player",
+        initiative: 0,
+        properties: {
+          id: 1,
+          name: "Player 1",
+          level: 5,
+          health: 20,
+          max_health: 20,
+          ep: 0,
+          image: "",
+          icon: "🧝",
+          details: "Some player details",
+          overview: "Player overview",
+          role: "Fighter",
+          effects: [],
+          immunities: [],
+          resistances: [],
+        },
+      },
+      {
+        type: "encounterOpponent",
+        initiative: 0,
+        properties: {
+          id: 101,
+          name: "Goblin Grunt",
+          icon: "👹",
+          details: "A small, green-skinned humanoid.",
+          health: 10,
+          max_health: 10,
+          image: "",
+          level: 1,
+          labels: [],
+          resistances: [],
+          effects: [],
+          immunities: [],
+          blueprint: 0,
+        },
+      },
+    ],
+    onAdd: fn(),
+    onRemove: fn(),
+    onInitiativeChange: fn(),
+  },
+};

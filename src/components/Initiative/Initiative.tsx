@@ -12,9 +12,17 @@ type Props = {
   entities: Entity[];
   activePosition: number;
   maxVisible?: number;
+  onCardClick?: (entity: Entity) => void;
+  onRemove?: (entity: Entity) => void;
 };
 
-function Initiative({ entities, activePosition, maxVisible = 6 }: Props) {
+function Initiative({
+  entities,
+  activePosition,
+  maxVisible = 6,
+  onCardClick,
+  onRemove,
+}: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<Map<number, HTMLDivElement>>(new Map());
   const showButtons = entities.length > maxVisible;
@@ -41,8 +49,16 @@ function Initiative({ entities, activePosition, maxVisible = 6 }: Props) {
     }
   }, [activePosition]);
 
+  if (entities.length === 0) {
+    return (
+      <div className="rounded-xl border border-white/80 bg-white/20 px-4 py-2 font-medium text-white shadow-md backdrop-blur-sm">
+        Add players and opponents to the fight
+      </div>
+    );
+  }
+
   return (
-    <div className="flex w-fit items-center gap-2 rounded-xl border border-white/80 bg-white/20 px-3 shadow-md backdrop-blur-sm">
+    <div className="items-center gap-2 rounded-xl border border-white/80 bg-white/20 px-3 shadow-md backdrop-blur-sm">
       {showButtons && (
         <button
           onClick={() => scroll("left")}
@@ -66,8 +82,8 @@ function Initiative({ entities, activePosition, maxVisible = 6 }: Props) {
       >
         {entities.map((entity) => (
           <div
-            key={entity.id}
-            className="flex-shrink-0 px-1"
+            key={`entity-${entity.type}-${entity.id}`}
+            className="flex-shrink-0"
             ref={(el) => {
               if (el) {
                 cardsRef.current.set(entity.position, el);
@@ -79,6 +95,8 @@ function Initiative({ entities, activePosition, maxVisible = 6 }: Props) {
             <InitiativeCard
               entity={entity}
               isActive={entity.position === activePosition}
+              onClick={onCardClick}
+              onRemove={onRemove}
             />
           </div>
         ))}

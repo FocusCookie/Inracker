@@ -4,11 +4,12 @@ import InitiativeCard, {
   EncounterOpponentEntity,
   PlayerEntity,
 } from "./InitiativeCard";
+import { fn } from "@storybook/test";
 
 const meta = {
   title: "Components/InitiativeCard",
   component: InitiativeCard,
-  args: {},
+  args: { onClick: fn() },
 } satisfies Meta<typeof InitiativeCard>;
 
 export default meta;

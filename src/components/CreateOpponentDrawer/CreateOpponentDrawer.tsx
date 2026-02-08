@@ -3,7 +3,7 @@ import Drawer from "../Drawer/Drawer";
 import { Button } from "../ui/button";
 import { storeImage } from "@/lib/utils";
 import CreateOpponentForm from "../CreateOpponentForm/CreateOpponentForm";
-import { TypographyH2 } from "../ui/typographyH2";
+import { TypographyH2 } from "../ui/typographyh2";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
 import ResistanceCard from "../ResistanceCard/ResistanceCard";
 import { useState } from "react";
@@ -43,7 +43,7 @@ function CreateOpponentDrawer({
 
   const immunities = useQueryWithToast({
     queryKey: ["immunities"],
-    queryFn: () => db.immunitites.getAll(),
+    queryFn: () => db.immunities.getAll(),
   });
 
   const resistances = useQueryWithToast({
@@ -109,7 +109,7 @@ function CreateOpponentDrawer({
   function handleCreateImmunity() {
     openOverlay("immunity.create", {
       onCreate: async (immunity) => {
-        const createdImmunity = await db.immunitites.create(immunity);
+        const createdImmunity = await db.immunities.create(immunity);
         return createdImmunity;
       },
       onComplete: (immunity) => {

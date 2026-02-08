@@ -3,7 +3,7 @@ import { fn } from "@storybook/test";
 import ImmunitiesCatalog from "./ImmunitiesCatalog";
 
 const mockDatabase = {
-  immunitites: {
+  immunities: {
     getAll: fn(() => [
       {
         id: 1,

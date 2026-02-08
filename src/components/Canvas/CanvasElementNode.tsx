@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { ClickableCanvasElement } from "./Canvas";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 type Props = {
   element: ClickableCanvasElement & { id: any };
@@ -60,8 +61,29 @@ export function CanvasElementNode({
             }
           }}
         >
+          {element.isCombatActive && (
+            <motion.rect
+              x={-16}
+              y={-16}
+              width={element.width + 32}
+              height={element.height + 32}
+              rx={16}
+              ry={16}
+              fill="none"
+              stroke={element.color}
+              initial={{ strokeWidth: 4, opacity: 0.3 }}
+              animate={{ strokeWidth: 32, opacity: 0.8 }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut",
+              }}
+            />
+          )}
+
           <g className="hover:cursor-pointer">
-            <g style={{ opacity: element.completed ? 0.4 : 1 }}>
+            <g style={{ opacity: element.completed ? 0.5 : 1 }}>
               <rect
                 x={0}
                 y={0}
@@ -160,15 +182,15 @@ export function CanvasElementNode({
             {/* Completed Icon (Large, centered) */}
             {element.completed && (
               <g
-                transform={`translate(${element.width / 2 - 64}, ${element.height / 2 - 64})`}
+                transform={`translate(${element.width / 2 - 32}, ${element.height / 2 - 32})`}
               >
                 <foreignObject
-                  width="128"
-                  height="128"
+                  width="64"
+                  height="64"
                   className="pointer-events-none"
                 >
-                  <div className="flex h-full w-full items-center justify-center rounded-full bg-white/80">
-                    <CheckIcon className="h-32 w-32 text-emerald-500" />
+                  <div className="flex h-full w-full items-center justify-center rounded-full bg-emerald-950">
+                    <CheckIcon className="h-8 w-8 text-white" />
                   </div>
                 </foreignObject>
               </g>

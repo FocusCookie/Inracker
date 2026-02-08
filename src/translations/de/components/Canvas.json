@@ -9,5 +9,11 @@
   "zoomIn": "Vergrößern",
   "drawEncounter": "Begegnung zeichnen",
   "deselect": "Größe ändern beenden",
-  "resize": "Größe ändern"
+  "resize": "Größe ändern",
+  "removeFromInitiative": "Von Initiative entfernen",
+  "addToInitiative": "Zu Initiative hinzufügen",
+  "addEffect": "Effekt hinzufügen",
+  "addHealth": "Leben hinzufügen",
+  "removeHealth": "Leben entfernen",
+  "activeEffects": "Aktive Effekte"
 }

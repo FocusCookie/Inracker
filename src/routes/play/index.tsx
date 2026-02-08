@@ -45,11 +45,6 @@ function RouteComponent() {
     enabled: !!chapterId,
   });
 
-  const encounterOpponents = useQueryWithToast({
-    queryKey: ["encounter-opponents"],
-    queryFn: () => db.encounterOpponents.getAllDetailed(),
-  });
-
   const tokensQuery = useQueryWithToast({
     queryKey: ["tokens"],
     queryFn: () => db.tokens.getByChapter(chapterId),

@@ -1,0 +1,19 @@
+{
+  "title": "Sitzungsprotokoll",
+  "description": "Journal der Ereignisse und Notizen.",
+  "addNote": "Notiz hinzufügen",
+  "manual": "Manuelle Notiz",
+  "damage": "Schaden",
+  "heal": "Heilung",
+  "noLogs": "Noch keine Einträge.",
+  "logTitle": "Titel",
+  "logDescription": "Beschreibung",
+  "logIcon": "Symbol",
+  "add": "Hinzufügen",
+  "cancel": "Abbrechen",
+  "edit": "Bearbeiten",
+  "delete": "Löschen",
+  "update": "Aktualisieren",
+  "cancelEdit": "Bearbeitung abbrechen",
+  "confirmDeleteLog": "Bist du sicher, dass du diesen Eintrag löschen möchtest?"
+}

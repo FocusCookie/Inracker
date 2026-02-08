@@ -304,6 +304,7 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
       search: {
         partyId: party.id,
         chapterId,
+        selectedToken: null,
       },
     });
   }
@@ -367,7 +368,41 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
       effect,
       onEdit: (effect: Effect) => editEffect.mutateAsync(effect),
       onComplete: (effect) => {
-        console.log(`Ùpdated ${effect.name}`);
+        console.log(`Updated ${effect.name}`);
+      },
+    });
+  }
+
+  function handleHealPlayer(playerId: number) {
+    const player = party.players.find((p) => p.id === playerId);
+    if (!player) return;
+
+    openOverlay("health.dialog", {
+      currentHealth: player.health,
+      maxHealth: player.max_health,
+      entityName: player.name,
+      type: "heal",
+      onConfirm: async (amount) => {
+        const newHealth = Math.min(player.health + amount, player.max_health);
+        await editPlayer.mutateAsync({ ...player, health: newHealth });
+        toast({ title: `Healed ${player.name} for ${amount} HP` });
+      },
+    });
+  }
+
+  function handleDamagePlayer(playerId: number) {
+    const player = party.players.find((p) => p.id === playerId);
+    if (!player) return;
+
+    openOverlay("health.dialog", {
+      currentHealth: player.health,
+      maxHealth: player.max_health,
+      entityName: player.name,
+      type: "damage",
+      onConfirm: async (amount) => {
+        const newHealth = player.health - amount;
+        await editPlayer.mutateAsync({ ...player, health: newHealth });
+        toast({ title: `Damaged ${player.name} for ${amount} HP` });
       },
     });
   }
@@ -421,6 +456,8 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
                   handleResistancesCatalog(player)
                 }
                 onOpenImmunitiesCatalog={() => handleImmunitiesCatalog(player)}
+                onHeal={handleHealPlayer}
+                onDamage={handleDamagePlayer}
               />
             ))}
           </MainLayout.Players>

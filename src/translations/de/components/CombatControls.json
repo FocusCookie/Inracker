@@ -1,0 +1,10 @@
+{
+  "open": "Öffne Kampfmenü",
+  "close": "Schließe Kampfmenü",
+  "initiative": "Initiative",
+  "finishCombat": "Beende Kampf",
+  "nextTurn": "Nächster Zug",
+  "activeEffects": "Aktive Effekte",
+  "round": "Runde",
+  "time": "Kampfzeit"
+}

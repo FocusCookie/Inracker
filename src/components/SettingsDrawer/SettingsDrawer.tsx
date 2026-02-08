@@ -15,6 +15,7 @@ import SettingsCategoryImmunities from "../SettingsCategoryImmunities/SettingsCa
 import SettingsCategoryResistances from "../SettingsCategoryResistances/SettingsCategoryResistances";
 import SettingsCategoryOpponents from "../SettingsCategoryOpponents/SettingsCategoryOpponents";
 import SettingsCategoryAudio from "../SettingsCategoryAudio/SettingsCategoryAudio";
+import SettingsCategoryBackup from "../SettingsCategoryBackup/SettingsCategoryBackup";
 
 type OverlayProps = OverlayMap["settings"];
 
@@ -76,6 +77,9 @@ function SettingsDrawer({
 
       case "opponents":
         return <SettingsCategoryOpponents database={database} />;
+        
+      case "backup":
+        return <SettingsCategoryBackup />;
 
       default:
         return <SettingsCategoryGeneral />;

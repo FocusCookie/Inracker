@@ -4,7 +4,7 @@ Inracker is designed to be the ultimate companion app for Dungeon Masters (DMs) 
 
 Inracker is NOT meant to replace virtual tabletops like Foundry or Owlbear 🖥️🎲—instead, it's meant to help you plan out elements on the actual battlemap (both online and offline). For example, quickly identify when a player is stepping on a trap by marking it directly on the battlemap along with any relevant notes.
 
-Planned Features 🌟
+Features 🌟
 
 - Player Tracking 🛡️: Manage full stats of each character, such as skills, attributes, shields, health, and more—perfect for quick DM reference.
 
@@ -19,6 +19,7 @@ Planned Features 🌟
 - Multi-Campaign and Chapters Support 📖: Track multiple campaigns and their respective chapters, making it easier to manage vast and complex worlds.
 
 - Cross-Campaign Character Support 🌍: Seamlessly move characters across different campaigns with ease, allowing for extended narratives and shared universes.
+
 - Campaign Logs 📚: Quickly log important actions like player attacks, damage dealt, or other key events for later recaps and detailed session summaries.
 
 # Docs
@@ -106,26 +107,6 @@ hygen translation new
 
 # Todos
 
-- [ ] MP3 files
-      -- [ ] component where music can be selected that can be played during the game
-- [x] Effects need to have a boolean value for until long rest
-- [ ] Play&ChapterSelection: shortcut refactor to hook
-- [ ] Canvas
-  - [x] Show opponents when there are tokens for the encounters
-  - [x] make the elements movable like the tokens
-- [ ] Play screen
-  - [ ] Go back button and exit party button
-  - [ ] show the game states here if there are implemented
-- [ ] ActiveEffects connecting with players and opponents in chapter
-- [ ] effectCard - show duration and value in the opened card or as badges
-- [ ] need to store a game round and time state for the effects. time needs to be enabled somehow with a timer than rounds could be updated with a next round function
-- [x] settings dialog
-  - [x] immunites edit
-  - [x] resistances edit
-  - [ ] user settings
-- [ ] ui for round interaction
-- [ ] innitiative
-  - [ ] ui
-  - [ ] gamestate
-    - [ ] stored as an entity for each party
-  - [ ]
+- [ ] Refactor image Upload
+- [ ] Smooth page transitions
+- [ ] Patch/Update function

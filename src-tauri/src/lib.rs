@@ -170,20 +170,6 @@ pub fn run() {
             kind: MigrationKind::Up,
         },
         Migration {
-            version: 11,
-            description: "create active_effects table",
-            sql: "CREATE TABLE IF NOT EXISTS active_effects (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                effect_id INTEGER NOT NULL,
-                entity_id INTEGER NOT NULL, -- player or opponent id
-                entity_type TEXT NOT NULL, -- 'player' or 'opponent'
-                remaining_duration INTEGER, -- null for 'until rest' effects
-                duration_type TEXT NOT NULL, -- 'rounds', 'minutes', 'hours', 'short_rest', 'long_rest'
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            )",
-            kind: MigrationKind::Up,
-        },
-        Migration {
             version: 12,
             description: "add completed to encounters table",
             sql: "ALTER TABLE encounters ADD COLUMN completed BOOLEAN DEFAULT 0;",
@@ -201,10 +187,108 @@ pub fn run() {
             sql: "ALTER TABLE encounters ADD COLUMN music_file TEXT;",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 15,
+            description: "create settings table key value store",
+            sql: "CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            );
+            INSERT OR IGNORE INTO settings (key, value) VALUES ('seconds_per_round', '6');
+            ",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 16,
+            description: "create combats table",
+            sql: "CREATE TABLE IF NOT EXISTS combats (
+                id TEXT PRIMARY KEY,
+                chapter_id INTEGER NOT NULL,
+                round INTEGER DEFAULT 1,
+                active_participant_id TEXT, 
+                status TEXT DEFAULT 'running', 
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(chapter_id) REFERENCES chapters(id) ON DELETE CASCADE,
+                FOREIGN KEY(active_participant_id) REFERENCES combat_participants(id) ON DELETE SET NULL
+            )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 17,
+            description: "create combat_participants table",
+            sql: "CREATE TABLE IF NOT EXISTS combat_participants (
+                id TEXT PRIMARY KEY,
+                combat_id TEXT NOT NULL,
+                entity_id INTEGER, 
+                entity_type TEXT, 
+                name TEXT NOT NULL,
+                initiative INTEGER NOT NULL,
+                FOREIGN KEY(combat_id) REFERENCES combats(id) ON DELETE CASCADE
+            )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 18,
+            description: "create combat_effects table",
+            sql: "CREATE TABLE IF NOT EXISTS combat_effects (
+                id TEXT PRIMARY KEY,
+                combat_id TEXT NOT NULL,
+                participant_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                description TEXT,
+                duration INTEGER NOT NULL,
+                total_duration INTEGER NOT NULL,
+                FOREIGN KEY(combat_id) REFERENCES combats(id) ON DELETE CASCADE,
+                FOREIGN KEY(participant_id) REFERENCES combat_participants(id) ON DELETE CASCADE
+            )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 19,
+            description: "add encounter_id to combats table",
+            sql: "ALTER TABLE combats ADD COLUMN encounter_id INTEGER REFERENCES encounters(id) ON DELETE SET NULL;",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 20,
+            description: "create active_effects table",
+            sql: "CREATE TABLE IF NOT EXISTS active_effects (
+                id TEXT PRIMARY KEY,
+                effect_id INTEGER NOT NULL,
+                entity_id INTEGER NOT NULL,
+                entity_type TEXT NOT NULL, -- 'player' or 'opponent'
+                remaining_duration INTEGER NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(effect_id) REFERENCES effects(id) ON DELETE CASCADE
+            )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 21,
+            description: "add duration_type to active_effects table",
+            sql: "ALTER TABLE active_effects ADD COLUMN duration_type TEXT NOT NULL DEFAULT 'rounds';",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 22,
+            description: "create logs table",
+            sql: "CREATE TABLE IF NOT EXISTS logs (
+                id TEXT PRIMARY KEY,
+                chapter_id INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT,
+                icon TEXT NOT NULL,
+                type TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(chapter_id) REFERENCES chapters(id) ON DELETE CASCADE
+            )",
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(
             tauri_plugin_sql::Builder::default()
                 .add_migrations(&db_name, migrations)

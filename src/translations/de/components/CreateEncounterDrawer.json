@@ -45,6 +45,6 @@
   "drawerDescription": "Erstelle eine neue Begegnung, die du dann in deinen Abenteuern verwenden kannst.",
   "createButton": "Erstellen",
   "encounterOpponents": "Begegnungsgegner",
-  "encounterOpponentsDescription": "Gegner, die du aus dem Katalog auswählst, werden als eigene Begegnungsgegner dupliziert. So kannst du die Katalogvorlagen verwenden und bei Bedarf die Details jedes Gegners anpassen."
+  "encounterOpponentsDescription": "Gegner, die du aus dem Katalog auswählst, werden als eigene Begegnungsgegner dupliziert. So kannst du die Katalogvorlagen verwenden und bei Bedarf die Details jedes Gegners anpassen.",
+  "images": "Bilder"
 }
-

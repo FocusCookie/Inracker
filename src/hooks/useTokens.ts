@@ -4,6 +4,7 @@ import { useMutationWithErrorToast } from "./useMutationWithErrorToast";
 import { Token } from "@/types/tokens";
 import { Chapter } from "@/types/chapters";
 import { Encounter } from "@/types/encounter";
+import { CanvasElement } from "@/components/Canvas/Canvas";
 
 export function useUpdateToken(database = defaultDb) {
   const queryClient = useQueryClient();
@@ -35,11 +36,7 @@ export function useGroupTokensIntoElement(database = defaultDb) {
     mutationFn: (data: {
       tokens: Array<Token["entity"]>;
       element: CanvasElement;
-    }) =>
-      database.tokens.groupIntoElement(
-        data.tokens,
-        data.element,
-      ),
+    }) => database.tokens.groupIntoElement(data.tokens, data.element),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["encounters"] });
       queryClient.invalidateQueries({ queryKey: ["chapter"] });
@@ -47,4 +44,3 @@ export function useGroupTokensIntoElement(database = defaultDb) {
     },
   });
 }
-

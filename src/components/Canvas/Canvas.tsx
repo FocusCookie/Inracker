@@ -20,8 +20,18 @@ import {
   ContextMenuItem,
   ContextMenuLabel,
   ContextMenuTrigger,
+  ContextMenuSeparator,
+  ContextMenuGroup,
 } from "@/components/ui/context-menu";
-import { CircleX, Swords, UsersRound } from "lucide-react";
+import {
+  CircleX,
+  Sword,
+  UsersRound,
+  Sparkles,
+  CoffeeIcon,
+  BedSingleIcon,
+  ClockIcon,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -31,6 +41,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
+import { formatDuration } from "@/lib/time";
 import { CanvasElementNode } from "./CanvasElementNode";
 import { MusicPlayer } from "@/components/MusicPlayer/MusicPlayer";
 
@@ -52,6 +69,25 @@ type Props = {
   onDrawed: (element: Omit<CanvasElement, "id">) => void;
   onTokenMove: (token: Token) => void;
   onElementMove: (element: ClickableCanvasElement & { id: any }) => void;
+  onRemoveFromInitiative?: (
+    entityId: number,
+    type: "player" | "opponent",
+  ) => void;
+  onAddToInitiative?: (
+    entityId: number,
+    type: "player" | "opponent",
+    name: string,
+  ) => void;
+  onOpenEffectsCatalog?: (
+    entityId: number,
+    type: "player" | "opponent",
+  ) => void;
+  initiativeEntityIds?: { id: number; type: "player" | "opponent" }[];
+  onHealPlayer?: (playerId: number) => void;
+  onDamagePlayer?: (playerId: number) => void;
+  onHealOpponent?: (opponentId: number) => void;
+  onDamageOpponent?: (opponentId: number) => void;
+  onToggleAside?: () => void;
 };
 
 export type CanvasElement = {
@@ -64,6 +100,7 @@ export type CanvasElement = {
   name?: string;
   completed?: boolean;
   opponents?: number[];
+  isCombatActive?: boolean;
 };
 
 export type ClickableCanvasElement = CanvasElement & {
@@ -83,6 +120,15 @@ function Canvas({
   onTokenSelect,
   onDrawed,
   onElementMove,
+  onRemoveFromInitiative,
+  onAddToInitiative,
+  onOpenEffectsCatalog,
+  initiativeEntityIds,
+  onHealPlayer,
+  onDamagePlayer,
+  onHealOpponent,
+  onDamageOpponent,
+  onToggleAside,
 }: Props) {
   const { t } = useTranslation("ComponentCanvas");
   const queryClient = useQueryClient();
@@ -94,6 +140,10 @@ function Canvas({
   const [resizingElementId, setResizingElementId] = useState<number | null>(
     null,
   );
+
+  const [tokenVisibility, setTokenVisibility] = useState<
+    Record<string, boolean>
+  >({});
 
   const {
     currentColor,
@@ -179,9 +229,6 @@ function Canvas({
     x: 0,
     y: 0,
   });
-  const [tokenVisibility, setTokenVisibility] = useState<
-    Record<string, boolean>
-  >({});
 
   const draggedElement = useRef<(ClickableCanvasElement & { id: any }) | null>(
     null,
@@ -440,6 +487,28 @@ function Canvas({
     };
   }, [handleZoom]);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey) {
+        if (event.key === "+" || event.key === "=") {
+          event.preventDefault();
+          handleZoom("in");
+        } else if (event.key === "-" || event.key === "_") {
+          event.preventDefault();
+          handleZoom("out");
+        } else if (event.key === "s") {
+          event.preventDefault();
+          onToggleAside?.();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleZoom, onToggleAside]);
+
   const resetZoom = useCallback(() => {
     const defaultViewBox = initialViewBoxRef.current;
     currentViewBoxRef.current = defaultViewBox;
@@ -553,7 +622,9 @@ function Canvas({
     dragElementsInitialCoords.current = [];
     const group = svg.querySelector(`g[data-token-group-id="${token.id}"]`);
     if (group) {
-      const children = group.querySelectorAll("circle, image, text");
+      const children = group.querySelectorAll(
+        "circle, image, text, foreignObject",
+      );
       children.forEach((child) => {
         const xAttr = child.tagName === "circle" ? "cx" : "x";
         const yAttr = child.tagName === "circle" ? "cy" : "y";
@@ -1028,6 +1099,41 @@ function Canvas({
     setIsOpponentsPanelOpen((c) => !c);
   }
 
+  const renderEffectsList = (effects: any[]) => (
+    <ul className="flex flex-col gap-1.5">
+      {effects.map((effect) => (
+        <li key={effect.id}>
+          <div className="flex items-center justify-between gap-2 rounded p-1 transition-colors hover:bg-slate-50">
+            <div className="flex items-center gap-2 overflow-hidden">
+              <span className="text-sm">{effect.icon}</span>
+              <span className="truncate text-xs font-medium">
+                {effect.name}
+              </span>
+            </div>
+            <Badge
+              variant={effect.type === "positive" ? "secondary" : "destructive"}
+              className="h-5 gap-1 px-1.5 text-[10px]"
+            >
+              {effect.durationType === "short" ? (
+                <CoffeeIcon className="h-2.5 w-2.5" />
+              ) : effect.durationType === "long" ? (
+                <BedSingleIcon className="h-2.5 w-2.5" />
+              ) : (
+                <ClockIcon className="h-2.5 w-2.5" />
+              )}
+              {effect.durationType === "time"
+                ? formatDuration(effect.duration)
+                : effect.durationType === "short" ||
+                    effect.durationType === "long"
+                  ? ""
+                  : effect.duration}
+            </Badge>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+
   return (
     <div className="relative h-full w-full" key={resetCount}>
       <svg
@@ -1202,13 +1308,16 @@ function Canvas({
                     <circle
                       cx={token.coordinates.x + 50}
                       cy={token.coordinates.y + 50}
-                      r={52}
-                      fill="none"
+                      r={40}
+                      fill="white"
+                      stroke="black"
+                      strokeWidth={2}
+                      className="pointer-events-none"
                     />
 
                     <g>
                       <text
-                        className="text-4xl select-none pointer-events-none"
+                        className="pointer-events-none text-4xl select-none"
                         x={token.coordinates.x}
                         y={token.coordinates.y + 32}
                       >
@@ -1233,51 +1342,146 @@ function Canvas({
                     />
                     <g>
                       <text
-                        className="text-4xl select-none pointer-events-none"
+                        className="pointer-events-none text-4xl select-none"
                         x={token.coordinates.x}
                         y={token.coordinates.y + 32}
                       >
                         {player.icon}
                       </text>
                     </g>
+                    {player.effects && player.effects.length > 0 && (
+                      <foreignObject
+                        x={token.coordinates.x + 60}
+                        y={token.coordinates.y + 10}
+                        width={24}
+                        height={24}
+                        className="pointer-events-auto"
+                      >
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button className="flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-sm hover:cursor-pointer hover:bg-black hover:text-white">
+                              <Sparkles className="h-4 w-4" />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-64 p-2">
+                            <div className="flex flex-col gap-2">
+                              <h4 className="text-sm leading-none font-semibold">
+                                {t("activeEffects")}
+                              </h4>
+                              {renderEffectsList(player.effects)}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </foreignObject>
+                    )}
                   </g>
                 </ContextMenuTrigger>
-                <ContextMenuContent className="w-40">
+                <ContextMenuContent className="w-56">
                   <ContextMenuLabel>{player.name}</ContextMenuLabel>
+                  <ContextMenuSeparator />
                   <ContextMenuItem onClick={() => onTokenSelect(token)}>
                     {t("select")}
                   </ContextMenuItem>
-                  <ContextMenuItem
-                    onClick={() =>
-                      useOverlayStore.getState().open("player.edit", {
-                        player: player,
-                        onEdit: async (updatedPlayer) => {
-                          const result = await database.players.update(
-                            updatedPlayer,
-                          );
-                          return result;
-                        },
-                        onComplete: () => {
-                          queryClient.invalidateQueries({
-                            queryKey: ["players"],
-                          });
-                          queryClient.invalidateQueries({
-                            queryKey: ["party"],
-                          });
-                          queryClient.invalidateQueries({
-                            queryKey: ["parties"],
-                          });
-                        },
-                      })
-                    }
-                  >
-                    {t("edit")}
-                  </ContextMenuItem>
-                  <ContextMenuItem onClick={() => toggleToken(token)}>
-                    {(tokenVisibility[token.id] ?? true)
-                      ? t("hide")
-                      : t("show")}
-                  </ContextMenuItem>
+                  <ContextMenuSeparator />
+                  <ContextMenuGroup>
+                    {onOpenEffectsCatalog && (
+                      <ContextMenuItem
+                        onClick={() =>
+                          onOpenEffectsCatalog(player.id, "player")
+                        }
+                      >
+                        {t("addEffect")}
+                      </ContextMenuItem>
+                    )}
+                  </ContextMenuGroup>
+
+                  {(onHealPlayer || onDamagePlayer) && (
+                    <>
+                      <ContextMenuSeparator />
+                      <ContextMenuGroup>
+                        {onHealPlayer && (
+                          <ContextMenuItem
+                            onClick={() => onHealPlayer(player.id)}
+                          >
+                            {t("addHealth")}
+                          </ContextMenuItem>
+                        )}
+                        {onDamagePlayer && (
+                          <ContextMenuItem
+                            onClick={() => onDamagePlayer(player.id)}
+                          >
+                            {t("removeHealth")}
+                          </ContextMenuItem>
+                        )}
+                      </ContextMenuGroup>
+                    </>
+                  )}
+
+                  <ContextMenuSeparator />
+
+                  <ContextMenuGroup>
+                    <ContextMenuItem
+                      onClick={() =>
+                        useOverlayStore.getState().open("player.edit", {
+                          player: player,
+                          onEdit: async (updatedPlayer) => {
+                            const result =
+                              await database.players.update(updatedPlayer);
+                            return result;
+                          },
+                          onComplete: () => {
+                            queryClient.invalidateQueries({
+                              queryKey: ["players"],
+                            });
+                            queryClient.invalidateQueries({
+                              queryKey: ["party"],
+                            });
+                            queryClient.invalidateQueries({
+                              queryKey: ["parties"],
+                            });
+                          },
+                        })
+                      }
+                    >
+                      {t("edit")}
+                    </ContextMenuItem>
+                    <ContextMenuItem onClick={() => toggleToken(token)}>
+                      {(tokenVisibility[token.id] ?? true)
+                        ? t("hide")
+                        : t("show")}
+                    </ContextMenuItem>
+                  </ContextMenuGroup>
+
+                  {onRemoveFromInitiative &&
+                    onAddToInitiative &&
+                    initiativeEntityIds &&
+                    initiativeEntityIds.length > 0 && (
+                      <>
+                        <ContextMenuSeparator />
+                        <ContextMenuItem
+                          onClick={() => {
+                            const isInInitiative = initiativeEntityIds.some(
+                              (e) => e.id === player.id && e.type === "player",
+                            );
+                            if (isInInitiative) {
+                              onRemoveFromInitiative(player.id, "player");
+                            } else {
+                              onAddToInitiative(
+                                player.id,
+                                "player",
+                                player.name,
+                              );
+                            }
+                          }}
+                        >
+                          {initiativeEntityIds.some(
+                            (e) => e.id === player.id && e.type === "player",
+                          )
+                            ? t("removeFromInitiative")
+                            : t("addToInitiative")}
+                        </ContextMenuItem>
+                      </>
+                    )}
                 </ContextMenuContent>
               </ContextMenu>
             );
@@ -1305,19 +1509,20 @@ function Canvas({
                       }
                     }}
                   >
+                    <circle
+                      cx={token.coordinates.x + 50}
+                      cy={token.coordinates.y + 50}
+                      r={40}
+                      fill="white"
+                      stroke="black"
+                      strokeWidth={2}
+                      className="pointer-events-none"
+                    />
+
                     {!opponent.image && (
                       <g>
-                        <circle
-                          cx={token.coordinates.x + 50}
-                          cy={token.coordinates.y + 50}
-                          r={52}
-                          fill="none"
-                          strokeWidth={4}
-                          className="pointer-events-none"
-                        ></circle>
-
                         <text
-                          className="text-4xl select-none pointer-events-none"
+                          className="pointer-events-none text-4xl select-none"
                           x={token.coordinates.x + 32}
                           y={token.coordinates.y + 64}
                         >
@@ -1345,7 +1550,7 @@ function Canvas({
                     {opponent.image && (
                       <g>
                         <text
-                          className="text-4xl select-none pointer-events-none"
+                          className="pointer-events-none text-4xl select-none"
                           x={token.coordinates.x}
                           y={token.coordinates.y + 32}
                         >
@@ -1353,37 +1558,140 @@ function Canvas({
                         </text>
                       </g>
                     )}
+                    {opponent.effects && opponent.effects.length > 0 && (
+                      <foreignObject
+                        x={token.coordinates.x + 60}
+                        y={token.coordinates.y + 10}
+                        width={24}
+                        height={24}
+                        className="pointer-events-auto"
+                      >
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button className="flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-sm hover:cursor-pointer hover:bg-black hover:text-white">
+                              <Sparkles className="h-4 w-4" />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-64 p-2">
+                            <div className="flex flex-col gap-2">
+                              <h4 className="text-sm leading-none font-semibold">
+                                {t("activeEffects")}
+                              </h4>
+                              {renderEffectsList(opponent.effects)}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </foreignObject>
+                    )}
                   </g>
                 </ContextMenuTrigger>
-                <ContextMenuContent className="w-40">
+                <ContextMenuContent className="w-56">
+                  <ContextMenuLabel>{opponent.name}</ContextMenuLabel>
+                  <ContextMenuSeparator />
                   <ContextMenuItem onClick={() => onTokenSelect(token)}>
                     {t("select")}
                   </ContextMenuItem>
-                  <ContextMenuItem
-                    onClick={() =>
-                      useOverlayStore.getState().open("encounter-opponent.edit", {
-                        opponent: opponent,
-                        onEdit: async (opp) => {
-                          const result =
-                            await database.encounterOpponents.update(opp);
-                          return result;
-                        },
-                        onDelete: async (id) => {
-                          await database.encounterOpponents.delete(id);
-                        },
-                        onComplete: () => {
-                          queryClient.invalidateQueries({
-                            queryKey: ["encounter-opponents"],
-                          });
-                        },
-                      })
-                    }
-                  >
-                    {t("edit")}
-                  </ContextMenuItem>
-                  <ContextMenuItem onClick={() => toggleToken(token)}>
-                    {(tokenVisibility[token.id] ?? true) ? "Hide" : "Show"}
-                  </ContextMenuItem>
+                  <ContextMenuSeparator />
+                  <ContextMenuGroup>
+                    {onOpenEffectsCatalog && (
+                      <ContextMenuItem
+                        onClick={() =>
+                          onOpenEffectsCatalog(opponent.id, "opponent")
+                        }
+                      >
+                        {t("addEffect")}
+                      </ContextMenuItem>
+                    )}
+                  </ContextMenuGroup>
+
+                  {(onHealOpponent || onDamageOpponent) && (
+                    <>
+                      <ContextMenuSeparator />
+                      <ContextMenuGroup>
+                        {onHealOpponent && (
+                          <ContextMenuItem
+                            onClick={() => onHealOpponent(opponent.id)}
+                          >
+                            {t("addHealth")}
+                          </ContextMenuItem>
+                        )}
+                        {onDamageOpponent && (
+                          <ContextMenuItem
+                            onClick={() => onDamageOpponent(opponent.id)}
+                          >
+                            {t("removeHealth")}
+                          </ContextMenuItem>
+                        )}
+                      </ContextMenuGroup>
+                    </>
+                  )}
+
+                  <ContextMenuSeparator />
+
+                  <ContextMenuGroup>
+                    <ContextMenuItem
+                      onClick={() =>
+                        useOverlayStore
+                          .getState()
+                          .open("encounter-opponent.edit", {
+                            opponent: opponent,
+                            onEdit: async (opp) => {
+                              const result =
+                                await database.encounterOpponents.update(opp);
+                              return result;
+                            },
+                            onDelete: async (id) => {
+                              await database.encounterOpponents.delete(id);
+                            },
+                            onComplete: () => {
+                              queryClient.invalidateQueries({
+                                queryKey: ["encounter-opponents"],
+                              });
+                            },
+                          })
+                      }
+                    >
+                      {t("edit")}
+                    </ContextMenuItem>
+                    <ContextMenuItem onClick={() => toggleToken(token)}>
+                      {(tokenVisibility[token.id] ?? true)
+                        ? t("hide")
+                        : t("show")}
+                    </ContextMenuItem>
+                  </ContextMenuGroup>
+
+                  {onRemoveFromInitiative &&
+                    onAddToInitiative &&
+                    initiativeEntityIds &&
+                    initiativeEntityIds.length > 0 && (
+                      <>
+                        <ContextMenuSeparator />
+                        <ContextMenuItem
+                          onClick={() => {
+                            const isInInitiative = initiativeEntityIds.some(
+                              (e) =>
+                                e.id === opponent.id && e.type === "opponent",
+                            );
+                            if (isInInitiative) {
+                              onRemoveFromInitiative(opponent.id, "opponent");
+                            } else {
+                              onAddToInitiative(
+                                opponent.id,
+                                "opponent",
+                                opponent.name,
+                              );
+                            }
+                          }}
+                        >
+                          {initiativeEntityIds.some(
+                            (e) =>
+                              e.id === opponent.id && e.type === "opponent",
+                          )
+                            ? t("removeFromInitiative")
+                            : t("addToInitiative")}
+                        </ContextMenuItem>
+                      </>
+                    )}
                 </ContextMenuContent>
               </ContextMenu>
             );
@@ -1469,7 +1777,7 @@ function Canvas({
                       {isOpponentsPanelOpen ? (
                         <CircleX className="h-4 w-4" />
                       ) : (
-                        <Swords className="h-4 w-4" />
+                        <Sword className="h-4 w-4" />
                       )}
                     </button>
                   </TooltipTrigger>

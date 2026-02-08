@@ -45,6 +45,6 @@
   "drawerDescription": "Create a new encounter.",
   "createButton": "Create",
   "encounterOpponents": "Encounter Opponents",
-  "encounterOpponentsDescription": "Opponents that you select from the catalog will be duplicated as unique encounter opponents, allowing you to use the catalog templates while customizing details for each opponent if you wish."
+  "encounterOpponentsDescription": "Opponents that you select from the catalog will be duplicated as unique encounter opponents, allowing you to use the catalog templates while customizing details for each opponent if you wish.",
+  "images": "Images"
 }
-

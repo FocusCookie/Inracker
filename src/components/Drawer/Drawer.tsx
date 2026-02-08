@@ -83,7 +83,7 @@ function Drawer({
                   {children}
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex w-full gap-4 pr-4">
                   {actions}
                   <Dialog.Close asChild>{cancelTrigger}</Dialog.Close>
                 </div>

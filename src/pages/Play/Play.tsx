@@ -13,14 +13,13 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import {
-  CardStackPlusIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  CardStackPlusIcon,
 } from "@radix-ui/react-icons";
-import PlayerCard from "@/components/PlayerCard/PlayerCard";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useOverlayStore } from "@/stores/useOverlayStore";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { Token } from "@/types/tokens";
 import { Player } from "@/types/player";
 import { DBImmunity, Immunity } from "@/types/immunitiy";
@@ -41,35 +40,50 @@ import { useTranslation } from "react-i18next";
 import { RiArrowLeftBoxLine, RiUserAddFill } from "react-icons/ri";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Party } from "@/types/party";
-import { useAddPlayer } from "@/hooks/useParties";
+import PlayerCard from "@/components/PlayerCard/PlayerCard";
+import CombatControls from "@/components/CombatControls/CombatControls";
+import InitiativeMenue from "@/components/InitiativeMenue/InitiativeMenue";
+import ActiveEffectsMenue from "@/components/ActiveEffectsMenue/ActiveEffectsMenue";
+import Initiative from "@/components/Initiative/Initiative";
 import {
+  PlayerEntity,
+  EncounterOpponentEntity,
+} from "@/components/InitiativeCard/InitiativeCard";
+import { InitiativeMenuEntity } from "@/types/initiative";
+import { BedSingleIcon, CoffeeIcon, NotebookText } from "lucide-react";
+
+// Hooks
+import { useCombatState, useCombatActions } from "@/hooks/useCombat";
+import {
+  useEncounterOpponentsDetailed,
+  useAddEffectToEncounterOpponent,
+  useUpdateEncounterOpponent,
+} from "@/hooks/useEncounterOpponents";
+import { useRests } from "@/hooks/useRests";
+import { useCreateLog } from "@/hooks/useLogs";
+import {
+  useUpdatePlayer,
   useAddEffectToPlayer,
-  useAddImmunityToPlayer,
   useAddResistanceToPlayer,
-  useCreatePlayer,
-  useRemoveEffectFromPlayer,
+  useAddImmunityToPlayer,
   useRemoveImmunityFromPlayer,
   useRemoveResistanceFromPlayer,
-  useUpdatePlayer,
+  useRemoveEffectFromPlayer,
+  useCreatePlayer,
 } from "@/hooks/usePlayers";
+import { useAddPlayer, useRemovePlayer } from "@/hooks/useParties";
+import { useUpdateImmunity, useCreateImmunity } from "@/hooks/useImmunities";
 import {
-  useCreateImmunity,
-  useUpdateImmunity,
-} from "@/hooks/useImmunities";
-import {
-  useCreateResistance,
   useUpdateResistance,
+  useCreateResistance,
 } from "@/hooks/useResistances";
-import { useCreateEffect, useUpdateEffect } from "@/hooks/useEffects";
+import { useUpdateEffect, useCreateEffect } from "@/hooks/useEffects";
 import {
+  useUpdateEncounter,
   useCreateEncounterMutation,
   useDeleteEncounter,
-  useUpdateEncounter,
 } from "@/hooks/useEncounters";
-import {
-  useCreateTokensForEncounter,
-  useUpdateToken,
-} from "@/hooks/useTokens";
+import { useUpdateToken, useCreateTokensForEncounter } from "@/hooks/useTokens";
 import {
   useAddEncounterToChapter,
   useUpdateChapterProperty,
@@ -92,35 +106,157 @@ function Play({
   tokens,
   players,
 }: Props) {
-  const { chapterId, selectedToken: selectedTokenId } = useSearch({
-    from: "/play/",
-  });
   const { t } = useTranslation("PagePlay");
-  const navigate = useNavigate({ from: "/play" });
+  // @ts-ignore
+  const navigate = useNavigate({ from: "/play/" });
+  const search = useSearch({ from: "/play/" });
+  // @ts-ignore
+  const selectedTokenId = search.selectedToken;
+
   const queryClient = useQueryClient();
   const openOverlay = useOverlayStore((s) => s.open);
   const keysPressed = useRef<Record<string, boolean>>({});
+
   const [tempElement, setTempElement] = useState<undefined | CanvasElement>(
     undefined,
   );
+
   const selectedToken =
     tokens.find((t) => t.id === Number(selectedTokenId)) || null;
 
   const [isAsideOpen, setIsAsideOpen] = useState<boolean>(false);
-  const [isCreateEncounterDrawerOpen, setIsCreateEncounterDrawerOpen] =
+  const [isInitiativeMenuOpen, setIsInitiativeMenuOpen] =
+    useState<boolean>(false);
+  const [isActiveEffectsMenuOpen, setIsActiveEffectsMenuOpen] =
     useState<boolean>(false);
 
-  const addPlayerToPartyMutation = useAddPlayer(database);
+  const { data: combatState } = useCombatState(chapter.id);
+  const {
+    createCombat,
+    addParticipant,
+    removeParticipant,
+    updateInitiative,
+    resetInitiative,
+    finishCombat,
+    nextTurn,
+  } = useCombatActions(chapter.id);
+  const { shortRest, longRest } = useRests();
+  const createLogMutation = useCreateLog(database);
+  const addEffectToEncounterOpponentMutation =
+    useAddEffectToEncounterOpponent(database);
+  const updateEncounterOpponentMutation = useUpdateEncounterOpponent(database);
+  const encounterOpponents = useEncounterOpponentsDetailed(database);
+  const encounterOpponentsRef = useRef(encounterOpponents);
+  encounterOpponentsRef.current = encounterOpponents;
+
+  const playersRef = useRef(players);
+  playersRef.current = players;
+
+  const selectedInitiativeEntities = useMemo(() => {
+    if (!combatState) return [];
+    const entities = combatState.participants.map((p) => {
+      const participantEffects = combatState.effects.filter(
+        (e) => e.participantId === p.id,
+      );
+
+      if (p.entityType === "player") {
+        const player = players.find((pl) => pl.id === p.entityId);
+        if (player) {
+          const entity: InitiativeMenuEntity = {
+            type: "player",
+            properties: player,
+            initiative: p.initiative,
+            effects: participantEffects,
+          };
+          return entity;
+        }
+      } else if (p.entityType === "opponent") {
+        const opponent = encounterOpponents.data?.find(
+          (op: any) => op.id === p.entityId,
+        );
+        if (opponent) {
+          const entity: InitiativeMenuEntity = {
+            type: "encounterOpponent",
+            properties: opponent,
+            initiative: p.initiative,
+            effects: participantEffects,
+          };
+          return entity;
+        }
+      }
+      return null;
+    });
+
+    return entities
+      .filter((e): e is InitiativeMenuEntity => e !== null)
+      .sort((a, b) => b.initiative - a.initiative);
+  }, [combatState, players, encounterOpponents.data]);
+
+  const { data: secondsPerRound } = useQuery({
+    queryKey: ["settings", "secondsPerRound"],
+    queryFn: async () => {
+      const value = await database.settings.get("seconds_per_round");
+      return value ? parseInt(value, 10) : 6;
+    },
+  });
+
+  const initiativeEntities = useMemo(() => {
+    return selectedInitiativeEntities.map((entity, index) => ({
+      ...entity.properties,
+      type: entity.type === "player" ? "player" : "encounterOpponent",
+      position: index + 1,
+    }));
+  }, [selectedInitiativeEntities]);
+
+  const activePosition = useMemo(() => {
+    if (!combatState) return 0;
+    const activeParticipant = combatState.participants.find(
+      (p) => p.id === combatState.combat.activeParticipantId,
+    );
+    if (!activeParticipant) return 0;
+
+    const index = selectedInitiativeEntities.findIndex((p) => {
+      if (p.properties.id !== activeParticipant.entityId) return false;
+
+      if (activeParticipant.entityType === "player") {
+        return p.type === "player";
+      }
+      if (activeParticipant.entityType === "opponent") {
+        return p.type === "encounterOpponent";
+      }
+      return false;
+    });
+    return index + 1;
+  }, [combatState, selectedInitiativeEntities]);
+
+  const time = useMemo(() => {
+    if (!combatState || !secondsPerRound) return 0;
+    return (combatState.combat.round - 1) * secondsPerRound;
+  }, [combatState, secondsPerRound]);
+
+  const availableOpponents = useMemo(() => {
+    if (!combatState || !encounterOpponents.data) return [];
+    return encounterOpponents.data;
+  }, [combatState, encounterOpponents.data]);
+
   const editImmunity = useUpdateImmunity(database);
   const editResistance = useUpdateResistance(database);
   const editEffect = useUpdateEffect(database);
   const editPlayer = useUpdatePlayer(database);
   const addEffectToPlayerMutation = useAddEffectToPlayer(database);
+  const addResistanceToPlayerMutation = useAddResistanceToPlayer(database);
+  const addImmunityToPlayerMutation = useAddImmunityToPlayer(database);
+  const addPlayerToPartyMutation = useAddPlayer(database);
+  const removePlayerFromPartyMutation = useRemovePlayer(database);
+  const removeImmunityFromPlayerMutation =
+    useRemoveImmunityFromPlayer(database);
+  const removeResistanceFromPlayerMutation =
+    useRemoveResistanceFromPlayer(database);
+  const removeEffectFromPlayerMutation = useRemoveEffectFromPlayer(database);
 
   const updateEncounterMutation = useUpdateEncounter(database);
   const updateTokenMutation = useUpdateToken(database);
-  const addResistanceToPlayerMutation = useAddResistanceToPlayer(database);
-  
+
   const createEncounterMutation = useCreateEncounterMutation(database);
   const addEncounterToChapterMutation = useAddEncounterToChapter(database);
   const createTokensForEncounterMutation =
@@ -136,6 +272,40 @@ function Play({
       value: chapter.encounters.filter((enc) => enc !== encounterId),
     });
     await deleteEncounterSimpleMutation.mutateAsync(encounterId);
+  }
+
+  function handleShortRest() {
+    shortRest.mutate(undefined, {
+      onSuccess: async () => {
+        toast({ title: t("shortRestTriggered") });
+        if (chapter.id) {
+          await createLogMutation.mutateAsync({
+            chapterId: chapter.id,
+            title: t("shortRest"),
+            description: t("shortRestLogDescription"),
+            icon: "☕",
+            type: "rest",
+          });
+        }
+      },
+    });
+  }
+
+  function handleLongRest() {
+    longRest.mutate(undefined, {
+      onSuccess: async () => {
+        toast({ title: t("longRestTriggered") });
+        if (chapter.id) {
+          await createLogMutation.mutateAsync({
+            chapterId: chapter.id,
+            title: t("longRest"),
+            description: t("longRestLogDescription"),
+            icon: "🛏️",
+            type: "rest",
+          });
+        }
+      },
+    });
   }
 
   function handleEffectsCatalog(player: Player) {
@@ -162,17 +332,12 @@ function Play({
   }
 
   useEffect(() => {
-    //TODO: Shortcut for other OS
-    // To open the side menuu when the user presses Meta +  "s" key
     const handleKeyDown = (event: KeyboardEvent) => {
       keysPressed.current[event.key] = true;
 
       if (keysPressed.current["Meta"] && event.key.toLowerCase() === "s") {
-        if (isAsideOpen) {
-          setIsAsideOpen(false);
-        } else {
-          setIsAsideOpen(true);
-        }
+        console.log("handleKeyDown Meta+S called");
+        setIsAsideOpen((prev) => !prev);
       }
     };
 
@@ -187,7 +352,7 @@ function Play({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [isAsideOpen]);
+  }, []);
 
   function handleResistancesCatalog(player: Player) {
     openOverlay("resistance.catalog", {
@@ -249,16 +414,10 @@ function Play({
     });
   }
 
-  const createPlayer = useCreatePlayer(database);
   const createEffectMutation = useCreateEffect(database);
   const createImmunityMutation = useCreateImmunity(database);
-  const addImmunityToPlayerMutation = useAddImmunityToPlayer(database);
   const createResistanceMutation = useCreateResistance(database);
-  const removeImmunityFromPlayerMutation =
-    useRemoveImmunityFromPlayer(database);
-  const removeResistanceFromPlayerMutation =
-    useRemoveResistanceFromPlayer(database);
-  const removeEffectFromPlayerMutation = useRemoveEffectFromPlayer(database);
+  const createPlayerMutation = useCreatePlayer(database);
 
   function handleOpenEditPlayer(player: Player) {
     openOverlay("player.edit", {
@@ -298,6 +457,104 @@ function Play({
     });
   }
 
+  function handleInitiativeRemoveCard(
+    entity: PlayerEntity | EncounterOpponentEntity,
+  ) {
+    if (!combatState) return;
+    const participant = combatState.participants.find(
+      (p) =>
+        p.entityId === entity.id &&
+        p.entityType === (entity.type === "player" ? "player" : "opponent"),
+    );
+    if (participant) {
+      removeParticipant.mutate(participant.id);
+    }
+  }
+
+  function handleInitiativeAdd(entity: InitiativeMenuEntity) {
+    if (!combatState) return;
+    addParticipant.mutate({
+      combatId: combatState.combat.id,
+      name: entity.properties.name,
+      initiative: 0,
+      entityId: entity.properties.id,
+      entityType: entity.type === "player" ? "player" : "opponent",
+    });
+  }
+
+  function handleInitiativeRemove(entity: InitiativeMenuEntity) {
+    if (!combatState) return;
+    const participant = combatState.participants.find(
+      (p) =>
+        p.entityId === entity.properties.id &&
+        p.entityType === (entity.type === "player" ? "player" : "opponent"),
+    );
+    if (participant) {
+      removeParticipant.mutate(participant.id);
+    }
+  }
+
+  function handleInitiativeChange(entity: InitiativeMenuEntity, value: number) {
+    if (!combatState) return;
+    const participant = combatState.participants.find(
+      (p) =>
+        p.entityId === entity.properties.id &&
+        p.entityType === (entity.type === "player" ? "player" : "opponent"),
+    );
+    if (participant) {
+      updateInitiative.mutate({
+        participantId: participant.id,
+        newInitiative: value,
+      });
+    }
+  }
+
+  function handleInitiativeReset() {
+    if (!combatState) return;
+    resetInitiative.mutate(combatState.combat.id);
+  }
+
+  function handleSelectTokenFromInitiative(entity: InitiativeMenuEntity) {
+    const tokenType = entity.type === "player" ? "player" : "opponent";
+    const token = tokens.find(
+      (t) => t.type === tokenType && t.entity === entity.properties.id,
+    );
+    handleTokenSelect(token || null);
+  }
+
+  function handleOpenEffectsCatalog(
+    entityId: number,
+    type: "player" | "opponent",
+  ) {
+    if (type === "player") {
+      const player = players.find((p) => p.id === entityId);
+      if (player) handleEffectsCatalog(player);
+    } else {
+      const opponent = encounterOpponents.data?.find((o) => o.id === entityId);
+      if (!opponent) return;
+
+      openOverlay("effect.catalog", {
+        database,
+        onSelect: async (effect) => {
+          await addEffectToEncounterOpponentMutation.mutateAsync({
+            opponentId: entityId,
+            effectId: effect.id,
+          });
+
+          queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
+          queryClient.invalidateQueries({ queryKey: ["party"] });
+
+          toast({
+            title: `Added ${effect.icon} ${effect.name} to ${opponent.name}`,
+          });
+        },
+        onCancel: (reason) => {
+          console.log("Effect Catalog cancelled:", reason);
+        },
+      });
+    }
+  }
+
   function handleCreateEncounter(element: CanvasElement) {
     openOverlay("encounter.create", {
       onCreate: async (encounter) => {
@@ -317,12 +574,11 @@ function Play({
         return created;
       },
       onComplete: async (encounter) => {
-        setIsCreateEncounterDrawerOpen(false);
         setTempElement(undefined);
 
-        if (chapterId) {
+        if (chapter.id) {
           await createTokensForEncounterMutation.mutateAsync({
-            chapterId: Number(chapterId), // Ensure number
+            chapterId: Number(chapter.id), // Ensure number
             encounter,
           });
         }
@@ -334,7 +590,6 @@ function Play({
         queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
       },
       onCancel: (reason: CancelReason) => {
-        setIsCreateEncounterDrawerOpen(false);
         setTempElement(undefined);
         console.log("Opponent creation cancelled:", reason);
       },
@@ -355,9 +610,9 @@ function Play({
         console.log("Element edit cancelled:", reason);
       },
       onComplete: async (updatedEncounter) => {
-        if (chapterId) {
+        if (chapter.id) {
           await createTokensForEncounterMutation.mutateAsync({
-            chapterId: Number(chapterId),
+            chapterId: Number(chapter.id),
             encounter: updatedEncounter,
           });
         }
@@ -367,12 +622,42 @@ function Play({
 
   function handleTokenSelect(token: Token | null) {
     navigate({
-      search: (prev) => ({
+      // @ts-ignore
+      search: (prev: any) => ({
         ...prev,
         selectedToken: token?.id || null,
         partyId: prev.partyId || partyId || null,
         chapterId: prev.chapterId || chapter.id || null,
       }),
+    });
+  }
+
+  function handleStartFight(encounter: Encounter) {
+    if (!encounterOpponentsRef.current.data) return;
+
+    const opponents = encounterOpponentsRef.current.data.filter((opp) =>
+      encounter.opponents?.includes(opp.id),
+    );
+
+    const participants = [
+      ...playersRef.current.map((p) => ({
+        name: p.name,
+        initiative: 0,
+        entityId: p.id,
+        type: "player" as const,
+      })),
+      ...opponents.map((o) => ({
+        name: o.name,
+        initiative: 0,
+        entityId: o.id,
+        type: "opponent" as const,
+      })),
+    ];
+
+    createCombat.mutate({
+      chapterId: chapter.id,
+      encounterId: encounter.id,
+      participants,
     });
   }
 
@@ -383,6 +668,8 @@ function Play({
       onCancel: (reason) => {
         console.log("Encounter selection:", reason);
       },
+      onStartFight: () => handleStartFight(encounter),
+      isCombatActive: !!combatState,
       onOpponentSelect: (opponentId) => {
         const token = tokens.find(
           (t) => t.type === "opponent" && t.entity === opponentId,
@@ -395,14 +682,55 @@ function Play({
   }
 
   function handleAsideToggle() {
+    console.log("handleAsideToggle called");
     setIsAsideOpen(!isAsideOpen);
   }
 
   function handeOpenCreateElementDrawer(element: CanvasElement) {
-    setIsCreateEncounterDrawerOpen(true);
+    console.trace("handeOpenCreateElementDrawer called", element);
     setTempElement(element);
     handleCreateEncounter(element);
   }
+
+  function handleRemoveFromInitiative(
+    entityId: number,
+    type: "player" | "opponent",
+  ) {
+    if (!combatState) return;
+    const participant = combatState.participants.find(
+      (p) => p.entityId === entityId && p.entityType === type,
+    );
+    if (participant) {
+      removeParticipant.mutate(participant.id);
+    }
+  }
+
+  function handleAddToInitiative(
+    entityId: number,
+    type: "player" | "opponent",
+    name: string,
+  ) {
+    if (!combatState) return;
+    addParticipant.mutate({
+      combatId: combatState.combat.id,
+      name,
+      initiative: 0,
+      entityId,
+      entityType: type,
+    });
+  }
+
+  const initiativeEntityIds = useMemo(() => {
+    if (!combatState) return [];
+    return combatState.participants
+      .filter((p) => p.entityId !== null && p.entityType !== null)
+      .map((p) => ({
+        id: p.entityId as number,
+        type: (p.entityType === "player" ? "player" : "opponent") as
+          | "player"
+          | "opponent",
+      }));
+  }, [combatState]);
 
   async function handleElementMove(
     element: ClickableCanvasElement & { id: any },
@@ -424,6 +752,11 @@ function Play({
       to: "/chapters",
       search: { partyId },
     });
+  }
+
+  function handleOpenSessionLog() {
+    if (!chapter.id) return;
+    openOverlay("session.log", { chapterId: chapter.id });
   }
 
   function handleCreateEffect() {
@@ -452,7 +785,7 @@ function Play({
       onComplete: (immunity) => {
         queryClient.invalidateQueries({ queryKey: ["players"] });
         queryClient.invalidateQueries({ queryKey: ["party"] });
-        queryClient.invalidateQueries({ queryKey: ["immunitites"] });
+        queryClient.invalidateQueries({ queryKey: ["immunities"] });
 
         toast({
           title: `Created ${immunity.icon} ${immunity.name}`,
@@ -485,13 +818,119 @@ function Play({
 
   function handlePlayersCatalog() {
     openOverlay("player.catalog", {
+      database,
       excludedPlayers: players,
-      partyId: partyId,
-      onSelect: async (partyId: Party["id"], playerId: Player["id"]) => {
-        await addPlayerToPartyMutation.mutateAsync({ partyId, playerId });
+      partyId,
+      onSelect: async (pId, playerId) => {
+        await addPlayerToPartyMutation.mutateAsync({
+          partyId: pId || partyId,
+          playerId,
+        });
       },
-      onCancel: (reason) => {
-        console.log("Player creation cancelled:", reason);
+    });
+  }
+
+  function handleHealPlayer(playerId: number) {
+    const player = players.find((p) => p.id === playerId);
+    if (!player) return;
+
+    openOverlay("health.dialog", {
+      currentHealth: player.health,
+      maxHealth: player.max_health,
+      entityName: player.name,
+      type: "heal",
+      onConfirm: async (amount, note) => {
+        const newHealth = Math.min(player.health + amount, player.max_health);
+        await editPlayer.mutateAsync({ ...player, health: newHealth });
+
+        await createLogMutation.mutateAsync({
+          chapterId: chapter.id,
+          title: t("healedEntity", { name: player.name, amount }),
+          description: note,
+          icon: "💚",
+          type: "heal",
+        });
+      },
+    });
+  }
+
+  function handleDamagePlayer(playerId: number) {
+    const player = players.find((p) => p.id === playerId);
+    if (!player) return;
+
+    openOverlay("health.dialog", {
+      currentHealth: player.health,
+      maxHealth: player.max_health,
+      entityName: player.name,
+      type: "damage",
+      onConfirm: async (amount, note) => {
+        const newHealth = player.health - amount;
+        await editPlayer.mutateAsync({ ...player, health: newHealth });
+
+        await createLogMutation.mutateAsync({
+          chapterId: chapter.id,
+          title: t("damagedEntity", { name: player.name, amount }),
+          description: note,
+          icon: "💔",
+          type: "damage",
+        });
+      },
+    });
+  }
+
+  function handleHealOpponent(opponentId: number) {
+    const opponent = encounterOpponents.data?.find((o) => o.id === opponentId);
+    if (!opponent) return;
+
+    openOverlay("health.dialog", {
+      currentHealth: opponent.health,
+      maxHealth: opponent.max_health,
+      entityName: opponent.name,
+      type: "heal",
+      onConfirm: async (amount, note) => {
+        const newHealth = Math.min(
+          opponent.health + amount,
+          opponent.max_health,
+        );
+        await updateEncounterOpponentMutation.mutateAsync({
+          ...opponent,
+          health: newHealth,
+        });
+
+        await createLogMutation.mutateAsync({
+          chapterId: chapter.id,
+          title: t("healedEntity", { name: opponent.name, amount }),
+          description: note,
+          icon: "💚",
+          type: "heal",
+        });
+      },
+    });
+  }
+
+  function handleDamageOpponent(opponentId: number) {
+    const opponent = encounterOpponents.data?.find((o) => o.id === opponentId);
+    if (!opponent) return;
+
+    openOverlay("health.dialog", {
+      currentHealth: opponent.health,
+      maxHealth: opponent.max_health,
+      entityName: opponent.name,
+      type: "damage",
+      onConfirm: async (amount, note) => {
+        const newHealth = opponent.health - amount;
+        await updateEncounterOpponentMutation.mutateAsync({
+          ...opponent,
+          health: newHealth,
+        });
+
+        await createLogMutation.mutateAsync({
+          chapterId: chapter.id,
+          title: t("damagedEntity", { name: opponent.name, amount }),
+          description: note,
+          icon: "💔",
+          type: "damage",
+        });
       },
     });
   }
@@ -499,15 +938,15 @@ function Play({
   function handleOpenCreatePlayer() {
     openOverlay("player.create", {
       database,
-      onCreate: (player) => createPlayer.mutateAsync(player),
+      onCreate: (player) => createPlayerMutation.mutateAsync(player),
       onComplete: async (player) => {
         await addPlayerToPartyMutation.mutateAsync({
           partyId,
           playerId: player.id,
         });
         toast({
-            variant: "default",
-            title: `Created ${player.icon} ${player.name}`,
+          variant: "default",
+          title: `Created ${player.icon} ${player.name}`,
         });
       },
       onCancel: (reason) => {
@@ -517,10 +956,100 @@ function Play({
   }
 
   return (
-    <PlayLayout
-      isAsideOpen={isAsideOpen}
-      isEncounterOpen={isCreateEncounterDrawerOpen}
-    >
+    <PlayLayout isAsideOpen={isAsideOpen} isEncounterOpen={false}>
+      {combatState && (
+        <PlayLayout.CombatControls>
+          <CombatControls
+            round={combatState.combat.round}
+            time={time}
+            onFinish={() => finishCombat.mutate(combatState.combat.id)}
+            onNext={() => nextTurn.mutate(combatState.combat.id)}
+            onInitiative={() => setIsInitiativeMenuOpen((prev) => !prev)}
+            onActiveEffects={() => setIsActiveEffectsMenuOpen((prev) => !prev)}
+          />
+        </PlayLayout.CombatControls>
+      )}
+
+      {combatState && (
+        <PlayLayout.Initiative>
+          <Initiative
+            entities={initiativeEntities}
+            activePosition={activePosition}
+            onCardClick={(entity) => {
+              const tokenType =
+                entity.type === "player" ? "player" : "opponent";
+              const token = tokens.find(
+                (t) => t.type === tokenType && t.entity === entity.id,
+              );
+              handleTokenSelect(token || null);
+            }}
+            onRemove={handleInitiativeRemoveCard}
+          />
+        </PlayLayout.Initiative>
+      )}
+
+      {combatState && (
+        <PlayLayout.InitiativeMenue>
+          <InitiativeMenue
+            selected={selectedInitiativeEntities}
+            players={players}
+            encounterOpponents={availableOpponents || []}
+            isOpen={isInitiativeMenuOpen}
+            setIsOpen={setIsInitiativeMenuOpen}
+            onAdd={handleInitiativeAdd}
+            onRemove={handleInitiativeRemove}
+            onReset={handleInitiativeReset}
+            onInitiativeChange={handleInitiativeChange}
+            onSelectToken={handleSelectTokenFromInitiative}
+          />
+        </PlayLayout.InitiativeMenue>
+      )}
+
+      {combatState && (
+        <PlayLayout.ActiveEffects>
+          <ActiveEffectsMenue
+            players={players}
+            encounterOpponents={availableOpponents || []}
+            isOpen={isActiveEffectsMenuOpen}
+            setIsOpen={setIsActiveEffectsMenuOpen}
+          />
+        </PlayLayout.ActiveEffects>
+      )}
+
+      <PlayLayout.Rest>
+        <div className="flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleShortRest}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
+                >
+                  <CoffeeIcon className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t("shortRest")}</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleLongRest}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
+                >
+                  <BedSingleIcon className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t("longRest")}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </PlayLayout.Rest>
+
       <PlayLayout.Players>
         {players.map((player) => (
           <PlayerCard
@@ -530,6 +1059,12 @@ function Play({
             onEditImmunity={handleOpenEditImmunity}
             onEditResistance={handleOpenEditResistance}
             onEditEffect={handleOpenEditEffect}
+            onRemove={(playerId) => {
+              removePlayerFromPartyMutation.mutate({
+                partyId,
+                playerId,
+              });
+            }}
             onEdit={handleOpenEditPlayer}
             onRemoveImmunity={(playerId, immunityId) => {
               removeImmunityFromPlayerMutation.mutate({
@@ -552,27 +1087,18 @@ function Play({
             onOpenEffectsCatalog={() => handleEffectsCatalog(player)}
             onOpenResistancesCatalog={() => handleResistancesCatalog(player)}
             onOpenImmunitiesCatalog={() => handleImmunitiesCatalog(player)}
-            onSelectToken={(playerId) => {
-              const token = tokens.find(
-                (t) => t.type === "player" && t.entity === playerId,
-              );
-              if (token) handleTokenSelect(token);
-            }}
+            onHeal={handleHealPlayer}
+            onDamage={handleDamagePlayer}
           />
         ))}
       </PlayLayout.Players>
+
       <PlayLayout.Settings>
         <motion.div
-          initial={{
-            opacity: 0,
-          }}
-          animate={{
-            opacity: 1,
-          }}
-          exit={{
-            opacity: 0,
-          }}
-          className="flex flex-col gap-2"
+          className="pointer-events-auto flex flex-col gap-2"
+          initial={{ x: -50, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
         >
           {!isAsideOpen && (
             <>
@@ -654,6 +1180,27 @@ function Play({
           </TooltipProvider>
         </motion.div>
       </PlayLayout.Settings>
+
+      <PlayLayout.SessionLog>
+        <div className="flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleOpenSessionLog}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
+                >
+                  <NotebookText className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t("sessionLog")}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </PlayLayout.SessionLog>
+
       <AnimatePresence mode="wait">
         <Canvas
           database={database}
@@ -663,8 +1210,7 @@ function Play({
               id: enc.id,
               ...enc.element,
               name: enc.name,
-              completed: enc.completed, // Pass the completed status
-              opponents: enc.opponents || [],
+              completed: enc.completed,
               onEdit: () => handleElementEdit(enc),
               onClick: () => handleElementClick(enc),
             })) || []
@@ -677,6 +1223,15 @@ function Play({
           onDrawed={handeOpenCreateElementDrawer}
           onTokenMove={updateTokenMutation.mutate}
           onElementMove={handleElementMove}
+          onRemoveFromInitiative={handleRemoveFromInitiative}
+          onAddToInitiative={handleAddToInitiative}
+          onOpenEffectsCatalog={handleOpenEffectsCatalog}
+          initiativeEntityIds={initiativeEntityIds}
+          onHealPlayer={handleHealPlayer}
+          onDamagePlayer={handleDamagePlayer}
+          onHealOpponent={handleHealOpponent}
+          onDamageOpponent={handleDamageOpponent}
+          onToggleAside={handleAsideToggle}
         />
       </AnimatePresence>
     </PlayLayout>

@@ -20,5 +20,17 @@
   "confirmDeleteAllUnused": "Bist du sicher, dass du alle ungenutzten Bilder löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
   "selectImage": "Bild auswählen",
   "selectImageDescription": "Wähle ein bestehendes Bild aus deiner Bibliothek aus.",
-  "cancel": "Abbrechen"
-}
+  "cancel": "Abbrechen",
+  "folderCreated": "Ordner erfolgreich erstellt",
+  "folderCreateError": "Fehler beim Erstellen des Ordners",
+  "newFolderPlaceholder": "Neuer Ordnername",
+  "createFolder": "Ordner erstellen",
+  "uploadImage": "Bild hochladen",
+  "selectFolder": "Ordner auswählen",
+  "deleteFolderSuccess": "Ordner erfolgreich gelöscht",
+  "deleteFolderError": "Fehler beim Löschen des Ordners",
+  "confirmDeleteFolder": "Bist du sicher, dass du diesen Ordner löschen möchtest? Alle Bilder darin werden gelöscht.",
+    "deleteFolder": "Ordner löschen",
+    "actions": "Aktionen"
+  }
+  

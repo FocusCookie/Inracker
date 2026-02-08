@@ -1,6 +1,6 @@
 import { connect, disconnect } from "./db/core";
 import { effects } from "./db/effects";
-import { immunitites } from "./db/immunities";
+import { immunities } from "./db/immunities";
 import { resistances } from "./db/resistances";
 import { players } from "./db/players";
 import { parties } from "./db/parties";
@@ -8,20 +8,37 @@ import { chapters } from "./db/chapters";
 import { encounters } from "./db/encounters";
 import { opponents, encounterOpponents } from "./db/opponents";
 import { tokens } from "./db/tokens";
+import { settings } from "./db/settings";
+import { combat } from "./db/combat";
+import { shortRest, longRest } from "./db/rests";
+import { logs } from "./db/logs";
+import { exportAllData, importAllData, mergeAllData } from "./db/backup";
 
-const Database = {
+const database = {
   connect,
   disconnect,
+  parties,
+  opponents,
   effects,
-  immunitites,
+  immunities,
   resistances,
   players,
-  parties,
   chapters,
   encounters,
-  opponents,
-  encounterOpponents,
   tokens,
+  encounterOpponents,
+  combat,
+  settings,
+  logs,
+  backup: {
+    exportAll: exportAllData,
+    importAll: importAllData,
+    mergeAll: mergeAllData,
+  },
+  rests: {
+    short: shortRest,
+    long: longRest,
+  },
 };
 
-export default Database;
+export default database;

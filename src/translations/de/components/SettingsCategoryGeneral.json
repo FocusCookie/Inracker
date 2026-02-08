@@ -1,3 +1,7 @@
 {
-    
+  "secondsPerRound": "Sekunden pro Runde",
+  "language": "Sprache",
+  "en": "Englisch (US)",
+  "de": "Deutsch",
+  "save": "Speichern"
 }

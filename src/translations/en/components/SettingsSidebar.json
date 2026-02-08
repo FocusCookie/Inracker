@@ -2,12 +2,13 @@
   "settings": "Settings",
   "general": "General",
   "images": "Images",
+  "audio": "Audio",
+  "opponents": "Opponents",
   "players": "Players",
   "statuses": "Statuses",
   "effects": "Effects",
   "immunities": "Immunities",
   "resistances": "Resistances",
-  "opponents": "Opponents",
-  "close": "Close",
-  "audio": "Audio"
+  "backup": "Import / Export",
+  "close": "Close"
 }

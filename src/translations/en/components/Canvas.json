@@ -10,5 +10,11 @@
   "drawEncounter": "Draw Encounter",
   "resetZoom": "Reset Zoom",
   "deselect": "Stop Resizing",
-  "resize": "Resize"
+  "resize": "Resize",
+  "removeFromInitiative": "Remove from Initiative",
+  "addToInitiative": "Add to Initiative",
+  "addEffect": "Add Effect",
+  "addHealth": "Add Health",
+  "removeHealth": "Remove Health",
+  "activeEffects": "Active Effects"
 }

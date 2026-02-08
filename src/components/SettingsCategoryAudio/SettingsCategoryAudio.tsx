@@ -145,7 +145,7 @@ function SettingsCategoryAudio({ database = defaultDb }: Props) {
                 <Music className="h-6 w-6 text-muted-foreground" />
               </div>
 
-              <div className="flex min-w-0 flex-grow flex-col gap-1">
+              <div className="flex min-w-0 grow flex-col gap-1">
                 <p className="truncate text-sm font-medium" title={file.name}>
                   {file.name}
                 </p>

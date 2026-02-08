@@ -24,6 +24,8 @@ import EncounterSelection from "../EncounterSelection/EncounterSelection";
 import OpponentsCatalog from "../OpponentsCatalog/OpponentsCatalog";
 import EditOpponentDrawer from "../EditOpponentDrawer/EditOpponentDrawer";
 import EditEncounterOpponentDrawer from "../EditEncounterOpponentDrawer/EditEncounterOpponentDrawer";
+import HealthDialog from "../HealthDialog/HealthDialog";
+import SessionLogDrawer from "../SessionLogDrawer/SessionLogDrawer";
 
 type RuntimeOverlayProps = {
   open: boolean;
@@ -48,6 +50,7 @@ const registry: Record<OverlayKind, OverlayComponent<any>> = {
   "immunity.edit": EditImmunityDrawer,
   "immunity.create": CreateImmunityDrawer,
   "immunity.catalog": ImmunitiesCatalog,
+  "health.dialog": HealthDialog,
   "opponent.create": CreateOpponentDrawer,
   "opponent.edit": EditOpponentDrawer,
   "opponent.catalog": OpponentsCatalog,
@@ -59,6 +62,7 @@ const registry: Record<OverlayKind, OverlayComponent<any>> = {
   "resistance.create": CreateResistanceDrawer,
   "resistance.catalog": ResistancesCatalog,
   "resistance.edit": EditResistanceDrawer,
+  "session.log": SessionLogDrawer,
   settings: SettingsDrawer,
 };
 

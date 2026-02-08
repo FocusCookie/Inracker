@@ -1,0 +1,16 @@
+{
+  "title": "Temporären Effekt hinzufügen",
+  "description": "Erstelle einen Effekt, der nach einer festgelegten Dauer automatisch abläuft.",
+  "cancel": "Abbrechen",
+  "create": "Hinzufügen",
+  "nameLabel": "Name",
+  "namePlaceholder": "z.B. Betäubt",
+  "descriptionLabel": "Beschreibung",
+  "descriptionPlaceholder": "Details zum Effekt...",
+  "durationValueLabel": "Dauer",
+  "durationUnitLabel": "Einheit",
+  "unitRounds": "Runden",
+  "unitSeconds": "Sekunden",
+  "unitMinutes": "Minuten",
+  "unitHours": "Stunden"
+}

@@ -2,9 +2,11 @@
   "title": "Edit Encounter Opponent",
   "descriptionText": "Edit the details of this specific encounter opponent.",
   "cancel": "Cancel",
-  "create": "Save",
+  "save": "Save",
+  "create": "Create",
   "immunities": "Immunities",
   "resistances": "Resistances",
+  "effects": "Effects",
   "catalog": "Catalog",
   "delete": "Delete",
   "confirmDelete": "Are you sure you want to delete this encounter opponent? This action cannot be undone."

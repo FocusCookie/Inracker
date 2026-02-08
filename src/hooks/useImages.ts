@@ -1,69 +1,74 @@
 import { useState, useEffect, useCallback } from "react";
-import { BaseDirectory, readDir } from "@tauri-apps/plugin-fs";
+import { BaseDirectory, readDir, DirEntry } from "@tauri-apps/plugin-fs";
 import { appDataDir, join } from "@tauri-apps/api/path";
 import { convertFileSrc } from "@tauri-apps/api/core";
-import { IMAGE_FOLDERS, ImageFolder } from "@/lib/utils";
 
 export type ImageFile = {
   name: string;
   path: string;
-  folder: ImageFolder;
+  folder: string;
   assetUrl: string;
 };
 
 export function useImages() {
-  const [images, setImages] = useState<Record<ImageFolder, ImageFile[]>>({
-    players: [],
-    battlemaps: [],
-    chapters: [],
-    others: [],
-    opponents: [],
-  });
+  const [images, setImages] = useState<Record<string, ImageFile[]>>({});
+  const [folders, setFolders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchImages = useCallback(async () => {
     setLoading(true);
-    const newImages: Record<ImageFolder, ImageFile[]> = {
-      players: [],
-      battlemaps: [],
-      chapters: [],
-      others: [],
-      opponents: [],
-    };
+    const newImages: Record<string, ImageFile[]> = {};
+    const discoveredFolders: string[] = [];
 
     try {
       const appDataPath = await appDataDir();
 
-      for (const folder of IMAGE_FOLDERS) {
-        try {
-          const entries = await readDir(`images/${folder}`, {
-            baseDir: BaseDirectory.AppData,
-          });
+      // 1. Discover folders
+      let rootEntries: DirEntry[];
+      try {
+        rootEntries = await readDir("images", {
+          baseDir: BaseDirectory.AppData,
+        });
+      } catch (e) {
+        // images folder might not exist yet
+        rootEntries = [];
+      }
 
-          for (const entry of entries) {
-            if (entry.isFile) {
-              const filePath = await join(
-                appDataPath,
-                "images",
-                folder,
-                entry.name,
-              );
-              const assetUrl = convertFileSrc(filePath);
+      for (const rootEntry of rootEntries) {
+        if (rootEntry.isDirectory) {
+          discoveredFolders.push(rootEntry.name);
+          newImages[rootEntry.name] = [];
 
-              newImages[folder].push({
-                name: entry.name,
-                path: filePath,
-                folder: folder,
-                assetUrl: assetUrl,
-              });
+          try {
+            const entries = await readDir(`images/${rootEntry.name}`, {
+              baseDir: BaseDirectory.AppData,
+            });
+
+            for (const entry of entries) {
+              if (entry.isFile) {
+                const filePath = await join(
+                  appDataPath,
+                  "images",
+                  rootEntry.name,
+                  entry.name,
+                );
+                const assetUrl = convertFileSrc(filePath);
+
+                newImages[rootEntry.name].push({
+                  name: entry.name,
+                  path: filePath,
+                  folder: rootEntry.name,
+                  assetUrl: assetUrl,
+                });
+              }
             }
+          } catch (e) {
+            console.warn(`Could not read directory images/${rootEntry.name}`, e);
           }
-        } catch (e) {
-          // Folder might not exist yet, ignore
-          console.warn(`Could not read directory images/${folder}`, e);
         }
       }
       setImages(newImages);
+      setFolders(discoveredFolders);
     } catch (e) {
       console.error("Failed to list images", e);
     } finally {
@@ -75,5 +80,5 @@ export function useImages() {
     fetchImages();
   }, [fetchImages]);
 
-  return { images, loading, refresh: fetchImages };
+  return { images, folders, loading, refresh: fetchImages };
 }

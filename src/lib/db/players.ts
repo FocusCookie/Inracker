@@ -2,18 +2,18 @@ import { DBPlayer, Player, TCreatePlayer } from "@/types/player";
 import { DBImmunity } from "@/types/immunitiy";
 import { DBResistance } from "@/types/resistances";
 import { Effect } from "@/types/effect";
-import { connect, createDatabaseError } from "./core";
-import TauriDatabase from "@tauri-apps/plugin-sql";
+import { execute, select, createDatabaseError } from "./core"; // Updated import
 import { getEffectById } from "./effects";
 import { getImmunityById } from "./immunities";
 import { getResistanceById } from "./resistances";
 import { getAllParties } from "./parties";
+import { DBToken } from "@/types/tokens";
+import { deleteTokenById } from "./tokens";
 
 export const getPlayerById = async (
-  db: TauriDatabase,
   id: number,
 ): Promise<DBPlayer> => {
-  const result = await db.select<DBPlayer[]>(
+  const result = await select<DBPlayer[]>( // Changed db.select to select
     "SELECT * FROM players WHERE id = $1",
     [id],
   );
@@ -26,10 +26,9 @@ export const getPlayerById = async (
 };
 
 export const getDetailedPlayerById = async (
-  db: TauriDatabase,
   playerId: Player["id"],
 ): Promise<Player> => {
-  const dbPlayer = await getPlayerById(db, playerId);
+  const dbPlayer = await getPlayerById(playerId); // Removed db parameter
   const {
     effects: dbEffects,
     image,
@@ -56,31 +55,59 @@ export const getDetailedPlayerById = async (
   let resistances: DBResistance[] = [];
 
   for (const effectId of effectsIds) {
-    const buff = await getEffectById(db, effectId);
+    try {
+      const buff = await getEffectById(effectId); // Removed db parameter
 
-    const { description, duration, durationType, icon, id, name, type, value } =
-      buff;
+      const {
+        description,
+        duration: catalogDuration,
+        durationType,
+        icon,
+        id,
+        name,
+        type,
+        value,
+      } = buff;
 
-    effects.push({
-      description,
-      duration,
-      durationType,
-      icon,
-      id,
-      name,
-      type,
-      value,
-    });
+      // Try to get remaining duration from active_effects
+      const activeEffect = await select<{ remaining_duration: number }[]>(
+        "SELECT remaining_duration FROM active_effects WHERE entity_id = $1 AND entity_type = 'player' AND effect_id = $2",
+        [playerId, effectId],
+      );
+
+      const duration = activeEffect.length > 0 ? activeEffect[0].remaining_duration : catalogDuration;
+
+      effects.push({
+        description,
+        duration,
+        durationType,
+        icon,
+        id,
+        name,
+        type,
+        value,
+      });
+    } catch (e) {
+      console.warn(`Failed to load effect ${effectId}`, e);
+    }
   }
 
   for (const immunityId of immunitiesIds) {
-    const immunity = await getImmunityById(db, immunityId);
-    immunities.push(immunity);
+    try {
+      const immunity = await getImmunityById(immunityId); // Removed db parameter
+      immunities.push(immunity);
+    } catch (e) {
+      console.warn(`Failed to load immunity ${immunityId}`, e);
+    }
   }
 
   for (const resistanceId of resistancesIds) {
-    const resistance = await getResistanceById(db, resistanceId);
-    resistances.push(resistance);
+    try {
+      const resistance = await getResistanceById(resistanceId); // Removed db parameter
+      resistances.push(resistance);
+    } catch (e) {
+      console.warn(`Failed to load resistance ${resistanceId}`, e);
+    }
   }
 
   const player: Player = {
@@ -103,15 +130,15 @@ export const getDetailedPlayerById = async (
   return player;
 };
 
-export const getAllPlayers = async (db: TauriDatabase): Promise<DBPlayer[]> =>
-  await db.select<DBPlayer[]>("SELECT * FROM players");
+export const getAllPlayers = async (): Promise<DBPlayer[]> =>
+  await select<DBPlayer[]>("SELECT * FROM players"); // Changed db.select to select
 
-export const getAllDetailedPlayers = async (db: TauriDatabase): Promise<Player[]> => {
-  const playersRaw = await getAllPlayers(db);
+export const getAllDetailedPlayers = async (): Promise<Player[]> => {
+  const playersRaw = await getAllPlayers(); // Removed db parameter
   const detailedPlayers: Player[] = [];
 
   for (const player of playersRaw) {
-    const detailedPlayer = await getDetailedPlayerById(db, player.id);
+    const detailedPlayer = await getDetailedPlayerById(player.id); // Removed db parameter
     detailedPlayers.push(detailedPlayer);
   }
 
@@ -119,7 +146,6 @@ export const getAllDetailedPlayers = async (db: TauriDatabase): Promise<Player[]
 };
 
 export const createPlayer = async (
-  db: TauriDatabase,
   player: TCreatePlayer,
 ): Promise<Player> => {
   const {
@@ -138,7 +164,7 @@ export const createPlayer = async (
     role,
   } = player;
 
-  const result = await db.execute(
+  const result = await execute( // Changed db.execute to execute
     "INSERT INTO players (details, effects, ep, health, max_health, image, icon, immunities, level, name, overview, resistances, role) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)  RETURNING *",
     [
       details,
@@ -161,11 +187,10 @@ export const createPlayer = async (
     ],
   );
 
-  return getDetailedPlayerById(db, result!.lastInsertId as number);
+  return getDetailedPlayerById(result!.lastInsertId as number); // Removed db parameter
 };
 
 export const updatePlayer = async (
-  db: TauriDatabase,
   player: Player,
 ): Promise<Player> => {
   const {
@@ -185,7 +210,7 @@ export const updatePlayer = async (
     role,
   } = player;
 
-  await db.execute(
+  await execute( // Changed db.execute to execute
     "UPDATE players SET details = $2, effects = $3, ep = $4, health = $5, max_health = $6, image = $7, icon = $8, immunities = $9, level = $10, name = $11, overview = $12, resistances = $13, role = $14 WHERE id = $1",
     [
       id, // 1
@@ -205,15 +230,14 @@ export const updatePlayer = async (
     ],
   );
 
-  return getDetailedPlayerById(db, id);
+  return getDetailedPlayerById(id); // Removed db parameter
 };
 
 export const addImmunityToPlayer = async (
-  db: TauriDatabase,
   playerId: Player["id"],
   immunityId: DBImmunity["id"],
 ): Promise<Player> => {
-  const { immunities } = await getDetailedPlayerById(db, playerId);
+  const { immunities } = await getDetailedPlayerById(playerId); // Removed db parameter
   const isAlreadySet = immunities.some(
     (immunity) => immunity.id === immunityId,
   );
@@ -222,27 +246,28 @@ export const addImmunityToPlayer = async (
   if (!isAlreadySet) {
     update.push(immunityId);
 
-    await db.execute("UPDATE players SET immunities = $2 WHERE id = $1", [
+    await execute("UPDATE players SET immunities = $2 WHERE id = $1", [ // Changed db.execute to execute
       playerId,
       JSON.stringify(update.map((id: number) => id)),
     ]);
   }
 
-  return getDetailedPlayerById(db, playerId);
+  return getDetailedPlayerById(playerId); // Removed db parameter
 };
 
 export const removeImmunityFromPlayer = async (
-  db: TauriDatabase,
   playerId: Player["id"],
   immunityId: DBImmunity["id"],
 ) => {
-  const { immunities } = await getDetailedPlayerById(db, playerId);
+  const { immunities } = await getDetailedPlayerById(playerId); // Removed db parameter
   const removedImmunity = immunities.find(
     (immunity) => immunity.id === immunityId,
   );
-  const update = immunities.filter((immunity) => immunity.id !== immunityId);
+  const update = immunities.filter(
+    (immunity) => immunity.id !== immunityId,
+  );
 
-  await db.execute("UPDATE players SET immunities = $2 WHERE id = $1", [
+  await execute("UPDATE players SET immunities = $2 WHERE id = $1", [ // Changed db.execute to execute
     playerId,
     JSON.stringify(
       update
@@ -255,11 +280,10 @@ export const removeImmunityFromPlayer = async (
 };
 
 export const addResistanceToPlayer = async (
-  db: TauriDatabase,
   playerId: Player["id"],
   resistanceId: DBResistance["id"],
 ): Promise<Player> => {
-  const { resistances } = await getDetailedPlayerById(db, playerId);
+  const { resistances } = await getDetailedPlayerById(playerId); // Removed db parameter
   const isAlreadySet = resistances.some(
     (resistance) => resistance.id === resistanceId,
   );
@@ -268,21 +292,20 @@ export const addResistanceToPlayer = async (
   if (!isAlreadySet) {
     update.push(resistanceId);
 
-    await db.execute("UPDATE players SET resistances = $2 WHERE id = $1", [
+    await execute("UPDATE players SET resistances = $2 WHERE id = $1", [ // Changed db.execute to execute
       playerId,
       JSON.stringify(update.map((id: number) => id)),
     ]);
   }
 
-  return getDetailedPlayerById(db, playerId);
+  return getDetailedPlayerById(playerId); // Removed db parameter
 };
 
 export const removeResistanceFromPlayer = async (
-  db: TauriDatabase,
   playerId: Player["id"],
   resistanceId: DBResistance["id"],
 ) => {
-  const { resistances } = await getDetailedPlayerById(db, playerId);
+  const { resistances } = await getDetailedPlayerById(playerId); // Removed db parameter
   const removedResistance = resistances.find(
     (resistance) => resistance.id === resistanceId,
   ) as DBResistance;
@@ -290,7 +313,7 @@ export const removeResistanceFromPlayer = async (
     (resistance) => resistance.id !== resistanceId,
   );
 
-  await db.execute("UPDATE players SET resistances = $2 WHERE id = $1", [
+  await execute("UPDATE players SET resistances = $2 WHERE id = $1", [ // Changed db.execute to execute
     playerId,
     JSON.stringify(
       update
@@ -302,30 +325,26 @@ export const removeResistanceFromPlayer = async (
   return removedResistance;
 };
 
-import { DBToken, Token } from "@/types/tokens";
-import { deleteTokenById } from "./tokens";
-
 export const deletePlayerById = async (
-  db: TauriDatabase,
   id: Player["id"],
 ): Promise<Player> => {
-  const deletedPlayer = await getDetailedPlayerById(db, id);
-  const allParties = await getAllParties(db);
+  const deletedPlayer = await getDetailedPlayerById(id); // Removed db parameter
+  const allParties = await getAllParties(); // Removed db parameter
   const partiesWithPlayer = allParties.filter((party) =>
     party.players.includes(id.toString()),
   );
 
   // Delete all tokens for this player
-  const playerTokens = await db.select<DBToken[]>(
+  const playerTokens = await select<DBToken[]>( // Changed db.select to select
     "SELECT * FROM tokens WHERE entity = $1 AND type = $2",
     [id, "player"],
   );
   
   for (const token of playerTokens) {
-    await deleteTokenById(db, token.id);
+    await deleteTokenById(token.id); // Removed db parameter
   }
 
-  await db.execute("DELETE FROM players WHERE id = $1", [id]);
+  await execute("DELETE FROM players WHERE id = $1", [id]); // Changed db.execute to execute
   //TODO: Implement deletion of the image
 
   for (const party of partiesWithPlayer) {
@@ -334,7 +353,7 @@ export const deletePlayerById = async (
       (playerId: number) => playerId !== id,
     );
 
-    await db.execute("UPDATE parties SET id = $1, players = $2 WHERE id = $1", [
+    await execute("UPDATE parties SET id = $1, players = $2 WHERE id = $1", [ // Changed db.execute to execute
       party.id,
       JSON.stringify(updatedPlayers),
     ]);
@@ -344,36 +363,48 @@ export const deletePlayerById = async (
 };
 
 export const addEffectToPlayer = async (
-  db: TauriDatabase,
   playerId: Player["id"],
   effectId: Effect["id"],
 ): Promise<Player> => {
-  const { effects } = await getDetailedPlayerById(db, playerId);
+  const { effects } = await getDetailedPlayerById(playerId); // Removed db parameter
   const isAlreadySet = effects.some((effect) => effect.id === effectId);
   const update = effects.map((effect) => effect.id);
 
   if (!isAlreadySet) {
     update.push(effectId);
 
-    await db.execute("UPDATE players SET effects = $2 WHERE id = $1", [
+    await execute("UPDATE players SET effects = $2 WHERE id = $1", [ // Changed db.execute to execute
       playerId,
       JSON.stringify(update.map((id: number) => id)),
     ]);
+
+    // Populate active_effects
+    const catalogEffect = await getEffectById(effectId);
+    await execute(
+      "INSERT INTO active_effects (id, effect_id, entity_id, entity_type, remaining_duration, duration_type) VALUES ($1, $2, $3, $4, $5, $6)",
+      [
+        crypto.randomUUID(),
+        effectId,
+        playerId,
+        "player",
+        catalogEffect.duration,
+        catalogEffect.durationType,
+      ],
+    );
   }
 
-  return getDetailedPlayerById(db, playerId);
+  return getDetailedPlayerById(playerId); // Removed db parameter
 };
 
 export const removeEffectFromPlayer = async (
-  db: TauriDatabase,
   playerId: Player["id"],
   effectId: Effect["id"],
 ) => {
-  const { effects } = await getDetailedPlayerById(db, playerId);
+  const { effects } = await getDetailedPlayerById(playerId); // Removed db parameter
   const removedEffect = effects.find((effect) => effect.id === effectId);
   const update = effects.filter((effect) => effect.id !== effectId);
 
-  await db.execute("UPDATE players SET effects = $2 WHERE id = $1", [
+  await execute("UPDATE players SET effects = $2 WHERE id = $1", [ // Changed db.execute to execute
     playerId,
     JSON.stringify(
       update
@@ -382,64 +413,59 @@ export const removeEffectFromPlayer = async (
     ),
   ]);
 
+  // Remove from active_effects tracking
+  await execute(
+    "DELETE FROM active_effects WHERE entity_id = $1 AND entity_type = 'player' AND effect_id = $2",
+    [playerId, effectId],
+  );
+
   return removedEffect as Effect;
 };
 
 export const players = {
   getAll: async () => {
-    const db = await connect();
-    return getAllDetailedPlayers(db);
+    return getAllDetailedPlayers(); // Removed db parameter
   },
   getById: async (id: number) => {
-    const db = await connect();
-    return getDetailedPlayerById(db, id);
+    return getDetailedPlayerById(id); // Removed db parameter
   },
   create: async (player: TCreatePlayer) => {
-    const db = await connect();
-    return createPlayer(db, player);
+    return createPlayer(player); // Removed db parameter
   },
   update: async (player: Player) => {
-    const db = await connect();
-    return updatePlayer(db, player);
+    return updatePlayer(player); // Removed db parameter
   },
   delete: async (id: Player["id"]) => {
-    const db = await connect();
-    return deletePlayerById(db, id);
+    return deletePlayerById(id); // Removed db parameter
   },
   addEffect: async (playerId: Player["id"], effectId: Effect["id"]) => {
-    const db = await connect();
-    return addEffectToPlayer(db, playerId, effectId);
+    return addEffectToPlayer(playerId, effectId); // Removed db parameter
   },
   removeEffect: async (playerId: Player["id"], effectId: Effect["id"]) => {
-    const db = await connect();
-    return removeEffectFromPlayer(db, playerId, effectId);
+    return removeEffectFromPlayer(playerId, effectId); // Removed db parameter
   },
   addImmunity: async (
     playerId: Player["id"],
     immunityId: DBImmunity["id"],
   ) => {
-    const db = await connect();
-    return addImmunityToPlayer(db, playerId, immunityId);
+    return addImmunityToPlayer(playerId, immunityId); // Removed db parameter
   },
   removeImmunity: async (
     playerId: Player["id"],
     immunityId: DBImmunity["id"],
   ) => {
-    const db = await connect();
-    return removeImmunityFromPlayer(db, playerId, immunityId);
+    return removeImmunityFromPlayer(playerId, immunityId); // Removed db parameter
   },
   addResistance: async (
     playerId: Player["id"],
     resistanceId: DBResistance["id"],
   ) => {
-    const db = await connect();
-    return addResistanceToPlayer(db, playerId, resistanceId);
+    return addResistanceToPlayer(playerId, resistanceId); // Removed db parameter
   },
   removeResistance: async (
     playerId: Player["id"],
     resistanceId: DBResistance["id"],
   ) => {
-    const db = await connect();
-    return removeResistanceFromPlayer(db, playerId, resistanceId);
+    return removeResistanceFromPlayer(playerId, resistanceId); // Removed db parameter
   },
 };

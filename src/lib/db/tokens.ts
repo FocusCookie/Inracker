@@ -4,14 +4,12 @@ import { Chapter } from "@/types/chapters";
 import { Encounter } from "@/types/encounter";
 import { EncounterOpponent } from "@/types/opponents";
 import { Player } from "@/types/player";
-import { connect, createDatabaseError } from "./core";
-import TauriDatabase from "@tauri-apps/plugin-sql";
+import { execute, select, createDatabaseError } from "./core"; // Updated import
 
 export const getTokenById = async (
-  db: TauriDatabase,
   id: Token["id"],
 ): Promise<DBToken> => {
-  const result = await db.select<DBToken[]>(
+  const result = await select<DBToken[]>( // Changed db.select to select
     "SELECT * FROM tokens WHERE id = $1",
     [id],
   );
@@ -24,11 +22,10 @@ export const getTokenById = async (
 };
 
 export const existsTokenForChapterAndPlayerId = async (
-  db: TauriDatabase,
   chapter: Token["chapter"],
   player: Player["id"],
 ): Promise<boolean> => {
-  const result = await db.select<DBToken[]>(
+  const result = await select<DBToken[]>( // Changed db.select to select
     "SELECT * FROM tokens WHERE chapter = $1 AND entity = $2 AND type = $3",
     [chapter, player, "player"],
   );
@@ -37,10 +34,9 @@ export const existsTokenForChapterAndPlayerId = async (
 };
 
 export const getEncounterOpponentToken = async (
-  db: TauriDatabase,
   encounterOpponentId: EncounterOpponent["id"],
 ): Promise<DBToken> => {
-  const result = await db.select<DBToken[]>(
+  const result = await select<DBToken[]>( // Changed db.select to select
     "SELECT * FROM tokens WHERE entity = $1 AND type = $2",
     [encounterOpponentId, "opponent"],
   );
@@ -49,10 +45,9 @@ export const getEncounterOpponentToken = async (
 };
 
 export const getDetailedTokenById = async (
-  db: TauriDatabase,
   id: Token["id"],
 ): Promise<Token> => {
-  const dbTokens = await db.select<DBToken[]>(
+  const dbTokens = await select<DBToken[]>( // Changed db.select to select
     "SELECT * FROM tokens WHERE id = $1",
     [id],
   );
@@ -70,10 +65,9 @@ export const getDetailedTokenById = async (
 };
 
 export const getDetailedTokenByEntityId = async (
-  db: TauriDatabase,
   entityId: Token["entity"],
 ): Promise<Token> => {
-  const dbTokens = await db.select<DBToken[]>(
+  const dbTokens = await select<DBToken[]>( // Changed db.select to select
     "SELECT * FROM tokens WHERE entity = $1",
     [entityId],
   );
@@ -86,13 +80,12 @@ export const getDetailedTokenByEntityId = async (
 };
 
 export const getDetailedEncounterTokens = async (
-  db: TauriDatabase,
   encounter: Encounter,
 ): Promise<Token[]> => {
   if (encounter.opponents && encounter.opponents.length > 0) {
     const getDbTokens = encounter.opponents.map((entityId) => {
       // Parse string ID to number if necessary, assuming entityId is stored as string in JSON
-      return getDetailedTokenByEntityId(db, Number(entityId));
+      return getDetailedTokenByEntityId(Number(entityId)); // Removed db parameter
     });
 
     const getTokensResults = await Promise.allSettled(getDbTokens);
@@ -110,10 +103,9 @@ export const getDetailedEncounterTokens = async (
 };
 
 export const getTokensForChapter = async (
-  db: TauriDatabase,
   chapter: Chapter["id"],
 ): Promise<Token[]> => {
-  const dbTokens = await db.select<DBToken[]>(
+  const dbTokens = await select<DBToken[]>( // Changed db.select to select
     "SELECT * FROM tokens WHERE chapter = $1",
     [chapter],
   );
@@ -121,7 +113,7 @@ export const getTokensForChapter = async (
   const detailedTokens = [];
 
   for (const dbToken of dbTokens) {
-    const detailedToken = await getDetailedTokenById(db, dbToken.id);
+    const detailedToken = await getDetailedTokenById(dbToken.id); // Removed db parameter
 
     detailedTokens.push(detailedToken);
   }
@@ -130,31 +122,28 @@ export const getTokensForChapter = async (
 };
 
 export const createToken = async (
-  db: TauriDatabase,
   token: Omit<Token, "id">,
 ): Promise<Token> => {
   const { coordinates, entity, chapter, type } = token;
 
-  const result = await db.execute(
+  const result = await execute( // Changed db.execute to execute
     "INSERT INTO tokens(entity, coordinates, chapter, type) VALUES ($1, $2, $3, $4) RETURNING *",
     [entity, JSON.stringify(coordinates), chapter, type],
   );
 
   const createdToken = await getDetailedTokenById(
-    db,
     result!.lastInsertId as number,
-  );
+  ); // Removed db parameter
 
   return createdToken;
 };
 
 export const existsToken = async (
-  db: TauriDatabase,
   chapter: Token["chapter"],
   entity: Token["entity"],
   type: Token["type"],
 ): Promise<boolean> => {
-  const result = await db.select<DBToken[]>(
+  const result = await select<DBToken[]>( // Changed db.select to select
     "SELECT * FROM tokens WHERE chapter = $1 AND entity = $2 AND type = $3",
     [chapter, entity, type],
   );
@@ -163,7 +152,6 @@ export const existsToken = async (
 };
 
 export const createTokensForEncounter = async (
-  db: TauriDatabase,
   chapterId: Chapter["id"],
   encounter: Encounter,
 ): Promise<Token[]> => {
@@ -171,7 +159,7 @@ export const createTokensForEncounter = async (
 
   const createPromises = encounter.opponents.map(async (opponent, index) => {
     // @ts-ignore
-    const exists = await existsToken(db, chapterId!, opponent, "opponent");
+    const exists = await existsToken(chapterId!, opponent, "opponent"); // Removed db parameter
     if (exists) return null;
 
     const token: Omit<Token, "id"> = {
@@ -187,7 +175,7 @@ export const createTokensForEncounter = async (
       chapter: chapterId!,
     };
 
-    return createToken(db, token);
+    return createToken(token); // Removed db parameter
   });
 
   const createdTokenResult = await Promise.allSettled(createPromises);
@@ -203,38 +191,35 @@ export const createTokensForEncounter = async (
 };
 
 export const updateToken = async (
-  db: TauriDatabase,
   token: Token,
 ): Promise<Token> => {
   const { id, coordinates } = token;
 
-  await db.execute("UPDATE tokens SET coordinates = $2 WHERE id = $1", [
+  await execute("UPDATE tokens SET coordinates = $2 WHERE id = $1", [ // Changed db.execute to execute
     id,
-    coordinates,
+    JSON.stringify(coordinates),
   ]);
 
-  const updatedToken = await getDetailedTokenById(db, id);
+  const updatedToken = await getDetailedTokenById(id); // Removed db parameter
 
   return updatedToken;
 };
 
 export const deleteTokenById = async (
-  db: TauriDatabase,
   id: Token["id"],
 ): Promise<DBToken> => {
-  const deletedToken = await getTokenById(db, id);
+  const deletedToken = await getTokenById(id); // Removed db parameter
 
-  await db.execute("DELETE FROM tokens WHERE id = $1", [id]);
+  await execute("DELETE FROM tokens WHERE id = $1", [id]); // Changed db.execute to execute
 
   return deletedToken;
 };
 
 export const deleteTokens = async (
-  db: TauriDatabase,
   tokenIds: Array<Token["id"]>,
 ): Promise<DBToken[]> => {
   const deletePromises = tokenIds.map((tokenId: number) => {
-    return deleteTokenById(db, tokenId);
+    return deleteTokenById(tokenId); // Removed db parameter
   });
 
   const deleteTokensResults = await Promise.allSettled(deletePromises);
@@ -249,12 +234,11 @@ export const deleteTokens = async (
 };
 
 export const groupTokensIntoElement = async (
-  db: TauriDatabase,
   entityIds: Array<Token["entity"]>,
   element: CanvasElement,
 ) => {
   const getTokenPromises = entityIds.map((token) => {
-    return getDetailedTokenByEntityId(db, token);
+    return getDetailedTokenByEntityId(token); // Removed db parameter
   });
 
   const detailedTokensResults = await Promise.allSettled(getTokenPromises);
@@ -273,7 +257,7 @@ export const groupTokensIntoElement = async (
     };
   }) as any as Token[];
 
-  const updateTokensPromises = tmpTokens.map((token) => updateToken(db, token));
+  const updateTokensPromises = tmpTokens.map((token) => updateToken(token)); // Removed db parameter
 
   const updatedTokensResult = await Promise.allSettled(updateTokensPromises);
 
@@ -286,37 +270,30 @@ export const groupTokensIntoElement = async (
 
 export const tokens = {
   getById: async (id: number) => {
-    const db = await connect();
-    return getDetailedTokenById(db, id);
+    return getDetailedTokenById(id); // Removed db parameter
   },
   getByChapter: async (chapterId: Chapter["id"]) => {
-    const db = await connect();
-    return getTokensForChapter(db, chapterId);
+    return getTokensForChapter(chapterId); // Removed db parameter
   },
   create: async (token: Omit<Token, "id">) => {
-    const db = await connect();
-    return createToken(db, token);
+    return createToken(token); // Removed db parameter
   },
   createOpponentsTokensByEncounter: async (
     chapterId: Chapter["id"],
     encounter: Encounter,
   ) => {
-    const db = await connect();
-    return createTokensForEncounter(db, chapterId, encounter);
+    return createTokensForEncounter(chapterId, encounter); // Removed db parameter
   },
   update: async (token: Token) => {
-    const db = await connect();
-    return updateToken(db, token);
+    return updateToken(token); // Removed db parameter
   },
   delete: async (id: number) => {
-    const db = await connect();
-    return deleteTokenById(db, id);
+    return deleteTokenById(id); // Removed db parameter
   },
   groupIntoElement: async (
     entityIds: Array<Token["entity"]>,
     element: CanvasElement,
   ) => {
-    const db = await connect();
-    return groupTokensIntoElement(db, entityIds, element);
+    return groupTokensIntoElement(entityIds, element); // Removed db parameter
   },
 };

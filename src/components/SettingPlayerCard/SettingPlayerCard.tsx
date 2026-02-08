@@ -1,5 +1,4 @@
 import { Player } from "@/types/player";
-import React from "react";
 import IconAvatar from "../IconAvatar/IconAvatar";
 import { Badge } from "../ui/badge";
 import {

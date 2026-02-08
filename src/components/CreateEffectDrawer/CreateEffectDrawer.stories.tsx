@@ -8,15 +8,15 @@ const meta = {
   component: CreateEffectDrawer,
   args: {
     open: true,
-    isCreating: false,
     onOpenChange: fn(),
     onCreate: fn(),
+    onComplete: fn(),
+    onExitComplete: fn(),
+    onCancel: fn(),
   },
 } satisfies Meta<typeof CreateEffectDrawer>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Primary: Story = {
-  // args: {},
-};
+export const Primary: Story = {};

@@ -44,6 +44,8 @@ type Props = {
   onOpenImmunitiesCatalog: () => void;
   onOpenResistancesCatalog: () => void;
   onOpenEffectsCatalog: () => void;
+  onHeal?: (playerId: Player["id"]) => void;
+  onDamage?: (playerId: Player["id"]) => void;
 };
 
 function PlayerCard({
@@ -61,6 +63,8 @@ function PlayerCard({
   onOpenResistancesCatalog,
   onOpenImmunitiesCatalog,
   onOpenEffectsCatalog,
+  onHeal,
+  onDamage,
 }: Props) {
   const { t } = useTranslation("ComponentPlayerCard");
 
@@ -117,6 +121,24 @@ function PlayerCard({
           {t("addResistance")}
         </DropdownMenuItem>
       </DropdownMenuGroup>
+
+      {(onHeal || onDamage) && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            {onHeal && (
+              <DropdownMenuItem onClick={() => onHeal(player.id)}>
+                {t("addHealth")}
+              </DropdownMenuItem>
+            )}
+            {onDamage && (
+              <DropdownMenuItem onClick={() => onDamage(player.id)}>
+                {t("removeHealth")}
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuGroup>
+        </>
+      )}
 
       <DropdownMenuSeparator />
       <DropdownMenuItem onClick={handleRemovePlayer}>
@@ -185,7 +207,7 @@ function PlayerCard({
               <Collapsible
                 title={
                   <div className="items-cent flex justify-between gap-2">
-                    <span>{t("immunitites")}</span>
+                    <span>{t("immunities")}</span>
                     <span className="rounded-md bg-black px-2 py-1 text-sm text-white">
                       {player.immunities.length}
                     </span>
@@ -295,7 +317,7 @@ function PlayerCard({
                   <AvatarFallback>{player.icon}</AvatarFallback>
                 </Avatar>
 
-                <span className="absolute top-0 right-0 rounded-full bg-white p-0.5 shadow">
+                <span className="absolute top-0 right-0 rounded-full bg-white p-0.5 text-sm shadow">
                   {player.icon}
                 </span>
               </div>

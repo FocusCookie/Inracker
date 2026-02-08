@@ -1,5 +1,15 @@
 import "i18next";
-import ComponentEditPlayerDrawer from "@/translations/en/component/EditPlayerDrawer.json";
+import ComponentSettingsCategoryBackup from "@/translations/en/component/SettingsCategoryBackup.json";
+import ComponentSettingsCategoryAudio from "@/translations/en/components/SettingsCategoryAudio.json";
+import ComponentInitiativeCard from "@/translations/en/component/InitiativeCard.json";
+import ComponentCollapsible from "@/translations/en/component/Collapsible.json";
+import ComponentSessionLogDrawer from "@/translations/en/component/SessionLogDrawer.json";
+import ComponentHealthDialog from "@/translations/en/component/HealthDialog.json";
+import ComponentCreateCombatEffectDrawer from "@/translations/en/components/CreateCombatEffectDrawer.json";
+import ComponentCombatControls from "@/translations/en/components/CombatControls.json";
+import ComponentInitiativeMenueItem from "@/translations/en/components/InitiativeMenueItem.json";
+import ComponentActiveEffectsMenue from "@/translations/en/components/ActiveEffectsMenue.json";
+import ComponentEditPlayerDrawer from "@/translations/en/components/EditPlayerDrawer.json";
 import ComponentSettingsOpponentCard from "@/translations/en/component/SettingsOpponentCard.json";
 import ComponentEditOpponentDrawer from "@/translations/en/component/EditOpponentDrawer.json";
 import ComponentEncounterOpponentEditDrawer from "@/translations/en/component/EncounterOpponentEditDrawer.json";
@@ -12,7 +22,7 @@ import ComponentSettingsCategoryResistances from "@/translations/en/component/Se
 import ComponentSettingsCategoryImmunities from "@/translations/en/component/SettingsCategoryImmunities.json";
 import ComponentSettingsCategoryEffects from "@/translations/en/component/SettingsCategoryEffects.json";
 import ComponentSettingsCategoryPlayers from "@/translations/en/component/SettingsCategoryPlayers.json";
-import ComponentSettingsCategoryGeneral from "@/translations/en/component/SettingsCategoryGeneral.json";
+import ComponentSettingsCategoryGeneral from "@/translations/en/components/SettingsCategoryGeneral.json";
 import ComponentSettingsCategoryImages from "@/translations/en/components/SettingsCategoryImages.json";
 import ComponentSettingsSidebar from "@/translations/en/component/SettingsSidebar.json";
 import ComponentCatalog from "@/translations/en/component/Catalog.json";
@@ -59,6 +69,17 @@ declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
       // hygen-components - DO NOT DELETE THIS LINE
+      ComponentSettingsCategoryBackup: typeof ComponentSettingsCategoryBackup;
+      ComponentSettingsCategoryAudio: typeof ComponentSettingsCategoryAudio;
+      ComponentInitiativeCard: typeof ComponentInitiativeCard;
+      ComponentCollapsible: typeof ComponentCollapsible;
+      ComponentSessionLogDrawer: typeof ComponentSessionLogDrawer;
+      ComponentHealthDialog: typeof ComponentHealthDialog;
+      ComponentCreateCombatEffectDrawer: typeof ComponentCreateCombatEffectDrawer;
+      ComponentCombatControls: typeof ComponentCombatControls;
+      ComponentCombatControls: typeof ComponentCombatControls;
+      ComponentInitiativeMenueItem: typeof ComponentInitiativeMenueItem;
+      ComponentActiveEffectsMenue: typeof ComponentActiveEffectsMenue;
       ComponentEditPlayerDrawer: typeof ComponentEditPlayerDrawer;
       ComponentSettingsOpponentCard: typeof ComponentSettingsOpponentCard;
       ComponentEditOpponentDrawer: typeof ComponentEditOpponentDrawer;

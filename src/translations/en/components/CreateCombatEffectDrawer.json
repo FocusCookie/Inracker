@@ -1,0 +1,16 @@
+{
+  "title": "Add Temporary Effect",
+  "description": "Create an effect that will automatically expire after a set duration.",
+  "cancel": "Cancel",
+  "create": "Add Effect",
+  "nameLabel": "Name",
+  "namePlaceholder": "e.g., Stunned",
+  "descriptionLabel": "Description",
+  "descriptionPlaceholder": "Effect details...",
+  "durationValueLabel": "Duration",
+  "durationUnitLabel": "Unit",
+  "unitRounds": "Rounds",
+  "unitSeconds": "Seconds",
+  "unitMinutes": "Minutes",
+  "unitHours": "Hours"
+}

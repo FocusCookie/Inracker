@@ -22,7 +22,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
   args: {
-    // @ts-expect-error
-    database: mockDb,
+    database: mockDb as any,
   },
 };

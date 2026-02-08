@@ -11,12 +11,13 @@
     "sql:allow-execute",
     "sql:allow-select",
     "sql:allow-close",
-    "fs:default",
-    "fs:allow-appdata-read-recursive",
-    "fs:allow-appdata-write-recursive",
+    "dialog:default",
+    "fs:read-all",
+    "fs:write-all",
+    "fs:allow-copy-file",
     {
-      "identifier": "fs:allow-mkdir",
-      "allow": [{ "path": "$APPDATA/*/*/*" }]
+      "identifier": "fs:scope",
+      "allow": [{ "path": "**" }]
     }
   ]
 }

@@ -42,7 +42,7 @@ export default function ImmunitiesCatalog({
 
   const immunities = useQueryWithToast({
     queryKey: ["immunities"],
-    queryFn: () => database.immunitites.getAll(),
+    queryFn: () => database.immunities.getAll(),
   });
 
   function handleCreateImmunity() {

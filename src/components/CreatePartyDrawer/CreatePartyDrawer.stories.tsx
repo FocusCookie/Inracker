@@ -9,13 +9,18 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  args: { isCreating: false, onCreate: fn(), onOpenChange: fn(), open: true },
+  args: {
+    onCreate: fn(),
+    onOpenChange: fn(),
+    open: true,
+    onComplete: fn(),
+    onExitComplete: fn(),
+    onCancel: fn(),
+  },
 } satisfies Meta<typeof CreatePartyDrawer>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
-export const Primary: Story = {
-  // args: {},
-};
+export const Primary: Story = {};

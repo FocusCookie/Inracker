@@ -6,18 +6,17 @@ import {
 } from "@/types/encounter";
 import { CanvasElement } from "@/components/Canvas/Canvas";
 import { Chapter } from "@/types/chapters";
-import { connect, createDatabaseError } from "./core";
-import TauriDatabase from "@tauri-apps/plugin-sql";
+import { execute, select, createDatabaseError } from "./core"; // Updated import
 import { getDetailedChapterById } from "./chapters";
 import { getDetailedEncounterTokens, deleteTokens } from "./tokens";
 import { deleteEncounterOpponents } from "./opponents";
 
-export const getAllEncounters = async (db: TauriDatabase): Promise<Encounter[]> => {
-  const dbEncounters = await db.select<DBEncounter[]>("SELECT * FROM encounters");
+export const getAllEncounters = async (): Promise<Encounter[]> => {
+  const dbEncounters = await select<DBEncounter[]>("SELECT * FROM encounters");
   const prettyfiedEncounters: Encounter[] = [];
 
   for (const dbEncounter of dbEncounters) {
-    const prettyEncounter = await getDetailedEncounterById(db, dbEncounter.id);
+    const prettyEncounter = await getDetailedEncounterById(dbEncounter.id);
     prettyfiedEncounters.push(prettyEncounter);
   }
 
@@ -25,10 +24,9 @@ export const getAllEncounters = async (db: TauriDatabase): Promise<Encounter[]> 
 };
 
 export const getEncounterById = async (
-  db: TauriDatabase,
   id: DBEncounter["id"],
 ): Promise<DBEncounter> => {
-  const result = await db.select<DBEncounter[]>(
+  const result = await select<DBEncounter[]>(
     "SELECT * FROM encounters WHERE id = $1",
     [id],
   );
@@ -41,10 +39,9 @@ export const getEncounterById = async (
 };
 
 export const getDetailedEncounterById = async (
-  db: TauriDatabase,
   id: number,
 ): Promise<Encounter> => {
-  const dbEncounters = await db.select<DBEncounter[]>(
+  const dbEncounters = await select<DBEncounter[]>(
     "SELECT * FROM encounters WHERE id = $1",
     [id],
   );
@@ -92,11 +89,10 @@ export const getDetailedEncounterById = async (
 };
 
 export const getDetailedEncountersByIds = async (
-  db: TauriDatabase,
   encounterIds: Array<DBEncounter["id"]>,
 ): Promise<Encounter[]> => {
   const encounterPromises = encounterIds.map((id) =>
-    getDetailedEncounterById(db, id),
+    getDetailedEncounterById(id),
   );
   const encounters = await Promise.allSettled(encounterPromises);
 
@@ -109,12 +105,11 @@ export const getDetailedEncountersByIds = async (
 };
 
 export const getDetailedEncountersByChapterId = async (
-  db: TauriDatabase,
   chapterId: Chapter["id"],
 ): Promise<Encounter[]> => {
-  const chapter = await getDetailedChapterById(db, chapterId);
+  const chapter = await getDetailedChapterById(chapterId);
   const encounterPromises = chapter.encounters.map((id) =>
-    getDetailedEncounterById(db, id),
+    getDetailedEncounterById(id),
   );
   const encounters = await Promise.allSettled(encounterPromises);
 
@@ -127,7 +122,6 @@ export const getDetailedEncountersByChapterId = async (
 };
 
 export const createEncounter = async (
-  db: TauriDatabase,
   encounter: Omit<Encounter, "id">,
 ): Promise<Encounter> => {
   const {
@@ -148,105 +142,28 @@ export const createEncounter = async (
     musicFile,
   } = encounter;
 
-  let result;
-  try {
-    result = await db.execute(
-      "INSERT INTO encounters(name,description,color,dice,difficulties,experience,images,opponents,passed,skill,type, element, completed, soundcloud, music_file) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *",
-      [
-        name,
-        description,
-        color,
-        dice,
-        difficulties,
-        experience,
-        images,
-        opponents,
-        passed,
-        skill,
-        type,
-        element,
-        completed,
-        soundcloud,
-        musicFile,
-      ],
-    );
-  } catch (error: any) {
-    if (error.toString().includes("no column named music_file")) {
-      console.warn(
-        "Music file column missing, trying without it. Restart app to fix.",
-      );
-      try {
-        result = await db.execute(
-          "INSERT INTO encounters(name,description,color,dice,difficulties,experience,images,opponents,passed,skill,type, element, completed, soundcloud) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *",
-          [
-            name,
-            description,
-            color,
-            dice,
-            difficulties,
-            experience,
-            images,
-            opponents,
-            passed,
-            skill,
-            type,
-            element,
-            completed,
-            soundcloud,
-          ],
-        );
-      } catch (e: any) {
-        if (e.toString().includes("no column named soundcloud")) {
-          console.warn(
-            "SoundCloud column also missing, saving base. Restart app.",
-          );
-          result = await db.execute(
-            "INSERT INTO encounters(name,description,color,dice,difficulties,experience,images,opponents,passed,skill,type, element, completed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *",
-            [
-              name,
-              description,
-              color,
-              dice,
-              difficulties,
-              experience,
-              images,
-              opponents,
-              passed,
-              skill,
-              type,
-              element,
-              completed,
-            ],
-          );
-        } else throw e;
-      }
-    } else if (error.toString().includes("no column named soundcloud")) {
-      console.warn("SoundCloud column missing, saving base. Restart app.");
-      result = await db.execute(
-        "INSERT INTO encounters(name,description,color,dice,difficulties,experience,images,opponents,passed,skill,type, element, completed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *",
-        [
-          name,
-          description,
-          color,
-          dice,
-          difficulties,
-          experience,
-          images,
-          opponents,
-          passed,
-          skill,
-          type,
-          element,
-          completed,
-        ],
-      );
-    } else {
-      throw error;
-    }
-  }
+  const result = await execute(
+    "INSERT INTO encounters(name,description,color,dice,difficulties,experience,images,opponents,passed,skill,type, element, completed, soundcloud, music_file) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *",
+    [
+      name,
+      description,
+      color,
+      JSON.stringify(dice), // Ensure dice is stringified if it's an object/array
+      JSON.stringify(difficulties),
+      experience,
+      JSON.stringify(images),
+      JSON.stringify(opponents),
+      passed,
+      skill,
+      type,
+      JSON.stringify(element),
+      completed,
+      soundcloud,
+      musicFile,
+    ],
+  );
 
   const createdEncounter = await getDetailedEncounterById(
-    db,
     result!.lastInsertId as number,
   );
 
@@ -254,7 +171,6 @@ export const createEncounter = async (
 };
 
 export const updateEncounter = async (
-  db: TauriDatabase,
   encounter: Encounter,
 ): Promise<Encounter> => {
   const {
@@ -276,176 +192,90 @@ export const updateEncounter = async (
     musicFile,
   } = encounter;
 
-  try {
-    await db.execute(
-      "UPDATE encounters SET name = $2, description = $3, color = $4, dice = $5, difficulties = $6, experience = $7, images = $8, opponents = $9, passed = $10, skill = $11, type = $12, element = $13, completed = $14, soundcloud = $15, music_file = $16 WHERE id = $1",
-      [
-        id,
-        name,
-        description,
-        color,
-        dice,
-        difficulties,
-        experience,
-        images,
-        opponents,
-        passed,
-        skill,
-        type,
-        element,
-        completed,
-        soundcloud,
-        musicFile,
-      ],
-    );
-  } catch (error: any) {
-    if (error.toString().includes("no column named music_file")) {
-      console.warn(
-        "Music file column missing, trying without it. Restart app to fix.",
-      );
-      try {
-        await db.execute(
-          "UPDATE encounters SET name = $2, description = $3, color = $4, dice = $5, difficulties = $6, experience = $7, images = $8, opponents = $9, passed = $10, skill = $11, type = $12, element = $13, completed = $14, soundcloud = $15 WHERE id = $1",
-          [
-            id,
-            name,
-            description,
-            color,
-            dice,
-            difficulties,
-            experience,
-            images,
-            opponents,
-            passed,
-            skill,
-            type,
-            element,
-            completed,
-            soundcloud,
-          ],
-        );
-      } catch (e: any) {
-        if (e.toString().includes("no column named soundcloud")) {
-          console.warn("SoundCloud column missing, saving base. Restart app.");
-          await db.execute(
-            "UPDATE encounters SET name = $2, description = $3, color = $4, dice = $5, difficulties = $6, experience = $7, images = $8, opponents = $9, passed = $10, skill = $11, type = $12, element = $13, completed = $14 WHERE id = $1",
-            [
-              id,
-              name,
-              description,
-              color,
-              dice,
-              difficulties,
-              experience,
-              images,
-              opponents,
-              passed,
-              skill,
-              type,
-              element,
-              completed,
-            ],
-          );
-        } else throw e;
-      }
-    } else if (error.toString().includes("no column named soundcloud")) {
-      console.warn("SoundCloud column missing, saving base. Restart app.");
-      await db.execute(
-        "UPDATE encounters SET name = $2, description = $3, color = $4, dice = $5, difficulties = $6, experience = $7, images = $8, opponents = $9, passed = $10, skill = $11, type = $12, element = $13, completed = $14 WHERE id = $1",
-        [
-          id,
-          name,
-          description,
-          color,
-          dice,
-          difficulties,
-          experience,
-          images,
-          opponents,
-          passed,
-          skill,
-          type,
-          element,
-          completed,
-        ],
-      );
-    } else {
-      throw error;
-    }
-  }
+  await execute(
+    "UPDATE encounters SET name = $2, description = $3, color = $4, dice = $5, difficulties = $6, experience = $7, images = $8, opponents = $9, passed = $10, skill = $11, type = $12, element = $13, completed = $14, soundcloud = $15, music_file = $16 WHERE id = $1",
+    [
+      id,
+      name,
+      description,
+      color,
+      JSON.stringify(dice),
+      JSON.stringify(difficulties),
+      experience,
+      JSON.stringify(images),
+      JSON.stringify(opponents),
+      passed,
+      skill,
+      type,
+      JSON.stringify(element),
+      completed,
+      soundcloud,
+      musicFile,
+    ],
+  );
 
-  return getDetailedEncounterById(db, id);
+  return getDetailedEncounterById(id);
 };
 
 export const updateEncounterProperty = async <
   T extends keyof Encounter,
   V extends Encounter[T],
 >(
-  db: TauriDatabase,
   encounterId: Encounter["id"],
   property: T,
   value: V,
 ): Promise<Encounter> => {
   const sql = `UPDATE encounters SET ${property} = $2 WHERE id = $1`;
 
-  await db.execute(sql, [encounterId, value]);
+  await execute(sql, [encounterId, value]);
 
-  return getDetailedEncounterById(db, encounterId);
+  return getDetailedEncounterById(encounterId);
 };
 
 export const deleteEncounterById = async (
-  db: TauriDatabase,
   id: Encounter["id"],
 ): Promise<Encounter> => {
-  const deletedEncounter = await getDetailedEncounterById(db, id);
-  const opponentTokens = await getDetailedEncounterTokens(db, deletedEncounter);
+  const deletedEncounter = await getDetailedEncounterById(id);
+  const opponentTokens = await getDetailedEncounterTokens(deletedEncounter);
   await deleteTokens(
-    db,
     opponentTokens.map((token) => token.id),
   );
 
   if (deletedEncounter.opponents && deletedEncounter.opponents.length > 0) {
     // Cast opponent IDs to numbers if stored as strings
     const opponentIds = deletedEncounter.opponents.map((id) => Number(id));
-    await deleteEncounterOpponents(db, opponentIds);
+    await deleteEncounterOpponents(opponentIds);
   }
 
-  await db.execute("DELETE FROM encounters WHERE id = $1", [id]);
+  await execute("DELETE FROM encounters WHERE id = $1", [id]);
 
   return deletedEncounter;
 };
 
 export const encounters = {
   getById: async (id: number) => {
-    const db = await connect();
-    return getDetailedEncounterById(db, id);
+    return getDetailedEncounterById(id);
   },
   getByChapterId: async (chapterId: number) => {
-    const db = await connect();
-    return getDetailedEncountersByChapterId(db, chapterId);
+    return getDetailedEncountersByChapterId(chapterId);
   },
   create: async (encounter: Omit<Encounter, "id">) => {
-    const db = await connect();
-    return createEncounter(db, encounter);
+    return createEncounter(encounter);
   },
   update: async (encounter: Encounter) => {
-    const db = await connect();
-    return updateEncounter(db, encounter);
+    return updateEncounter(encounter);
   },
   updateProperty: async <T extends keyof Encounter, V extends Encounter[T]>(
     id: number,
     property: T,
     value: V,
   ) => {
-    const db = await connect();
-    return updateEncounterProperty(db, id, property, value);
+    return updateEncounterProperty(id, property, value);
   },
   delete: async (id: number) => {
-    const db = await connect();
-    return deleteEncounterById(db, id);
+    return deleteEncounterById(id);
   },
   getAll: async () => {
-    const db = await connect();
-    return getAllEncounters(db);
+    return getAllEncounters();
   },
 };

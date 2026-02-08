@@ -1,0 +1,21 @@
+{
+  "backup": "Backup",
+  "export": "Export Data",
+  "import": "Import Data",
+  "exportDescription": "Export all your data including images and audio to a selected folder.",
+  "importDescription": "Import data from a selected folder. You can choose to overwrite everything (Restore) or merge with existing data.",
+  "selectFolder": "Select Folder",
+  "exportSuccess": "Data exported successfully!",
+  "importSuccess": "Data imported successfully!",
+  "importSuccessWithConflicts": "Data imported with some conflicts.",
+  "error": "An error occurred",
+  "processing": "Processing...",
+  "restore": "Full Restore",
+  "restoreDescription": "Wipes all existing data and replaces it with the backup.",
+  "merge": "Merge Data",
+  "mergeDescription": "Adds new data. Conflicts are skipped and reported.",
+  "conflictsDetected": "Conflicts Detected",
+  "conflictsDescription": "The following records already exist and were NOT imported. You can download this list as JSON.",
+  "downloadConflicts": "Download Conflicts JSON",
+  "close": "Close"
+}

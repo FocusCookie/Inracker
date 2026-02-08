@@ -93,8 +93,11 @@ const meta = {
   component: Catalog,
   parameters: {},
   args: {
+    open: true,
+    onOpenChange: fn(),
+    onExitComplete: fn(),
+    onCancel: fn(),
     placeholder: "search the catalog...",
-    trigger: <Button>Catalog</Button>,
     description: "Choose an immunity for your player.",
     title: "Immunity Catalog",
     search: "",
@@ -121,18 +124,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Primary: Story = {
-  // Uses default args with a trigger and without tooltip.
-};
+export const Primary: Story = {};
 
 export const WithAction: Story = {
   args: {
     action: <Button>Action</Button>,
-  },
-};
-
-export const WithTooltip: Story = {
-  args: {
-    tooltip: "Click here to open the catalog",
   },
 };

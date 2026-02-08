@@ -3,5 +3,15 @@
   "addResistance": "Add Resistance",
   "removeFromGroup": "Remove from Group",
   "editPlayer": "Edit Player",
-  "selectToken": "Select Token"
+  "selectToken": "Select Token",
+  "addHealth": "Add Health",
+  "removeHealth": "Remove Health",
+  "addEffect": "Add Effect",
+  "level": "Level",
+  "overview": "Overview",
+  "details": "Details",
+  "immunities": "Immunities",
+  "resistances": "Resistances",
+  "positiveEffects": "Positive Effects",
+  "negativeEffects": "Negative Effects"
 }

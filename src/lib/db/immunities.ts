@@ -1,17 +1,15 @@
 import { DBImmunity, Immunity } from "@/types/immunitiy";
-import { connect, createDatabaseError } from "./core";
-import TauriDatabase from "@tauri-apps/plugin-sql";
+import { execute, select, createDatabaseError } from "./core"; // Updated import
 import { getAllPlayers, getDetailedPlayerById } from "./players";
 import { getAllOpponents, getDetailedOpponentById } from "./opponents";
 
-export const getAllImmunities = async (db: TauriDatabase): Promise<DBImmunity[]> =>
-  await db.select<DBImmunity[]>("SELECT * FROM immunities");
+export const getAllImmunities = async (): Promise<DBImmunity[]> =>
+  await select<DBImmunity[]>("SELECT * FROM immunities"); // Changed db.select to select
 
 export const getImmunityById = async (
-  db: TauriDatabase,
   id: number,
 ): Promise<DBImmunity> => {
-  const result = await db.select<DBImmunity[]>(
+  const result = await select<DBImmunity[]>( // Changed db.select to select
     "SELECT * FROM immunities WHERE id = $1",
     [id],
   );
@@ -24,27 +22,25 @@ export const getImmunityById = async (
 };
 
 export const createImmunitiy = async (
-  db: TauriDatabase,
   immunity: Omit<Immunity, "id">,
 ): Promise<DBImmunity> => {
   const { description, icon, name } = immunity;
-  const result = await db.execute(
+  const result = await execute( // Changed db.execute to execute
     "INSERT INTO immunities (description, icon, name) VALUES ($1, $2, $3) RETURNING *",
     [description, icon, name],
   );
 
-  return getImmunityById(db, result!.lastInsertId as number);
+  return getImmunityById(result!.lastInsertId as number); // Removed db parameter
 };
 
 export const deleteImmunityById = async (
-  db: TauriDatabase,
   id: DBImmunity["id"],
 ): Promise<DBImmunity> => {
-  const deletedImmunity = await getImmunityById(db, id);
+  const deletedImmunity = await getImmunityById(id); // Removed db parameter
 
-  const allPlayers = await getAllPlayers(db);
+  const allPlayers = await getAllPlayers(); // Removed db parameter
   for (const player of allPlayers) {
-    const detailedPlayer = await getDetailedPlayerById(db, player.id);
+    const detailedPlayer = await getDetailedPlayerById(player.id); // Removed db parameter
     const hasImmunity = detailedPlayer.immunities.some(
       (immunity) => immunity.id === id,
     );
@@ -53,16 +49,16 @@ export const deleteImmunityById = async (
       const updatedImmunities = detailedPlayer.immunities.filter(
         (immunity) => immunity.id !== id,
       );
-      await db.execute("UPDATE players SET immunities = $2 WHERE id = $1", [
+      await execute("UPDATE players SET immunities = $2 WHERE id = $1", [ // Changed db.execute to execute
         player.id,
         JSON.stringify(updatedImmunities.map((im) => im.id)),
       ]);
     }
   }
 
-  const allOpponents = await getAllOpponents(db);
+  const allOpponents = await getAllOpponents(); // Removed db parameter
   for (const opponent of allOpponents) {
-    const detailedOpponent = await getDetailedOpponentById(db, opponent.id);
+    const detailedOpponent = await getDetailedOpponentById(opponent.id); // Removed db parameter
     const hasImmunity = detailedOpponent.immunities.some(
       (immunity: DBImmunity) => immunity.id === id,
     );
@@ -71,7 +67,7 @@ export const deleteImmunityById = async (
       const updatedImmunities = detailedOpponent.immunities.filter(
         (immunity: DBImmunity) => immunity.id !== id,
       );
-      await db.execute("UPDATE opponents SET immunities = $2 WHERE id = $1", [
+      await execute("UPDATE opponents SET immunities = $2 WHERE id = $1", [ // Changed db.execute to execute
         opponent.id,
         JSON.stringify(
           updatedImmunities.map((immunity: DBImmunity) => immunity.id),
@@ -80,44 +76,38 @@ export const deleteImmunityById = async (
     }
   }
 
-  await db.execute("DELETE FROM immunities WHERE id = $1", [id]);
+  await execute("DELETE FROM immunities WHERE id = $1", [id]); // Changed db.execute to execute
 
   return deletedImmunity;
 };
 
 export const updateImmunity = async (
-  db: TauriDatabase,
   immunity: DBImmunity,
 ): Promise<DBImmunity> => {
   const { id, name, icon, description } = immunity;
 
-  await db.execute(
+  await execute( // Changed db.execute to execute
     "UPDATE immunities SET name = $2, icon = $3, description = $4 WHERE id = $1",
     [id, name, icon, description],
   );
 
-  return getImmunityById(db, id);
+  return getImmunityById(id); // Removed db parameter
 };
 
-export const immunitites = {
+export const immunities = {
   getAll: async () => {
-    const db = await connect();
-    return getAllImmunities(db);
+    return getAllImmunities(); // Removed db parameter
   },
   getById: async (id: number) => {
-    const db = await connect();
-    return getImmunityById(db, id);
+    return getImmunityById(id); // Removed db parameter
   },
   create: async (immunity: Omit<DBImmunity, "id">) => {
-    const db = await connect();
-    return createImmunitiy(db, immunity);
+    return createImmunitiy(immunity); // Removed db parameter
   },
   delete: async (immunityId: DBImmunity["id"]) => {
-    const db = await connect();
-    return deleteImmunityById(db, immunityId);
+    return deleteImmunityById(immunityId); // Removed db parameter
   },
   update: async (immunity: DBImmunity) => {
-    const db = await connect();
-    return updateImmunity(db, immunity);
+    return updateImmunity(immunity); // Removed db parameter
   },
 };

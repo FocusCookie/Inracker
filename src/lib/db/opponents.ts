@@ -7,8 +7,11 @@ import {
 import { Effect } from "@/types/effect";
 import { DBImmunity } from "@/types/immunitiy";
 import { DBResistance } from "@/types/resistances";
-import { connect, createDatabaseError } from "./core";
-import TauriDatabase from "@tauri-apps/plugin-sql";
+import {
+  execute,
+  select,
+  createDatabaseError,
+} from "./core"; // Updated import
 import { getEffectById } from "./effects";
 import { getImmunityById } from "./immunities";
 import { getResistanceById } from "./resistances";
@@ -20,16 +23,13 @@ import {
 
 //* OPPONENTS (Blueprints)
 
-export const getAllOpponents = async (
-  db: TauriDatabase,
-): Promise<DBOpponent[]> =>
-  await db.select<DBOpponent[]>("SELECT * FROM opponents");
+export const getAllOpponents = async (): Promise<DBOpponent[]> =>
+  await select<DBOpponent[]>("SELECT * FROM opponents");
 
 export const getOpponentById = async (
-  db: TauriDatabase,
   id: DBOpponent["id"],
 ): Promise<DBOpponent> => {
-  const result = await db.select<DBOpponent[]>(
+  const result = await select<DBOpponent[]>(
     "SELECT * FROM opponents WHERE id = $1",
     [id],
   );
@@ -42,10 +42,9 @@ export const getOpponentById = async (
 };
 
 export const getDetailedOpponentById = async (
-  db: TauriDatabase,
   opponentId: Opponent["id"],
 ): Promise<Opponent> => {
-  const dbOpponent = await getOpponentById(db, opponentId);
+  const dbOpponent = await getOpponentById(opponentId);
   const {
     details,
     effects: dbEffects,
@@ -72,7 +71,7 @@ export const getDetailedOpponentById = async (
 
   for (const effectId of effectsIds) {
     try {
-      const effect = await getEffectById(db, effectId);
+      const effect = await getEffectById(effectId);
       effects.push(effect);
     } catch (e) {
       console.warn(`Failed to load effect ${effectId}`, e);
@@ -81,7 +80,7 @@ export const getDetailedOpponentById = async (
 
   for (const immunityId of immunitiesIds) {
     try {
-      const immunity = await getImmunityById(db, immunityId);
+      const immunity = await getImmunityById(immunityId);
       immunities.push(immunity);
     } catch (e) {
       console.warn(`Failed to load immunity ${immunityId}`, e);
@@ -90,7 +89,7 @@ export const getDetailedOpponentById = async (
 
   for (const resistanceId of resistancesIds) {
     try {
-      const resistance = await getResistanceById(db, resistanceId);
+      const resistance = await getResistanceById(resistanceId);
       resistances.push(resistance);
     } catch (e) {
       console.warn(`Failed to load resistance ${resistanceId}`, e);
@@ -115,14 +114,12 @@ export const getDetailedOpponentById = async (
   return opponent;
 };
 
-export const getAllDetailedOpponents = async (
-  db: TauriDatabase,
-): Promise<Opponent[]> => {
-  const opponentsRaw = await getAllOpponents(db);
+export const getAllDetailedOpponents = async (): Promise<Opponent[]> => {
+  const opponentsRaw = await getAllOpponents();
   const detailedOpponents: Opponent[] = [];
 
   for (const opponent of opponentsRaw) {
-    const detailedOpponent = await getDetailedOpponentById(db, opponent.id);
+    const detailedOpponent = await getDetailedOpponentById(opponent.id);
     detailedOpponents.push(detailedOpponent);
   }
 
@@ -130,7 +127,6 @@ export const getAllDetailedOpponents = async (
 };
 
 export const createOpponent = async (
-  db: TauriDatabase,
   opponent: Omit<Opponent, "id">,
 ): Promise<Opponent> => {
   const {
@@ -147,7 +143,7 @@ export const createOpponent = async (
     resistances,
   } = opponent;
 
-  const result = await db.execute(
+  const result = await execute(
     "INSERT INTO opponents (details, effects, health, icon, image, immunities, labels, level, max_health, name, resistances) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *",
     [
       details,
@@ -164,11 +160,10 @@ export const createOpponent = async (
     ],
   );
 
-  return getDetailedOpponentById(db, result!.lastInsertId as number);
+  return getDetailedOpponentById(result!.lastInsertId as number);
 };
 
 export const updateOpponent = async (
-  db: TauriDatabase,
   opponent: Opponent,
 ): Promise<Opponent> => {
   const {
@@ -186,7 +181,7 @@ export const updateOpponent = async (
     resistances,
   } = opponent;
 
-  await db.execute(
+  await execute(
     "UPDATE opponents SET details = $2, effects = $3, health = $4, icon = $5, image = $6, immunities = $7, labels = $8, level = $9, max_health = $10, name = $11, resistances = $12 WHERE id = $1",
     [
       id,
@@ -206,16 +201,15 @@ export const updateOpponent = async (
     ],
   );
 
-  return getDetailedOpponentById(db, id);
+  return getDetailedOpponentById(id);
 };
 
 export const deleteOpponentById = async (
-  db: TauriDatabase,
   id: Opponent["id"],
 ): Promise<DBOpponent> => {
-  const deletedOpponent = await getOpponentById(db, id);
+  const deletedOpponent = await getOpponentById(id);
 
-  await db.execute("DELETE FROM opponents WHERE id = $1", [id]);
+  await execute("DELETE FROM opponents WHERE id = $1", [id]);
 
   return deletedOpponent;
 };
@@ -223,10 +217,9 @@ export const deleteOpponentById = async (
 //* ENCOUNTER OPPONENTS (Instances)
 
 export const getEncounterOpponentById = async (
-  db: TauriDatabase,
   id: DBEncounterOpponent["id"],
 ): Promise<DBEncounterOpponent> => {
-  const result = await db.select<DBEncounterOpponent[]>(
+  const result = await select<DBEncounterOpponent[]>(
     "SELECT * FROM encounter_opponents WHERE id = $1",
     [id],
   );
@@ -238,16 +231,14 @@ export const getEncounterOpponentById = async (
   return result[0];
 };
 
-export const getAllEncounterOpponents = async (
-  db: TauriDatabase,
-): Promise<DBEncounterOpponent[]> =>
-  await db.select<DBEncounterOpponent[]>("SELECT * FROM encounter_opponents");
+export const getAllEncounterOpponents = async (): Promise<
+  DBEncounterOpponent[]
+> => await select<DBEncounterOpponent[]>("SELECT * FROM encounter_opponents");
 
 export const getDetailedEncounterOpponentById = async (
-  db: TauriDatabase,
   encounterOpponentId: DBEncounterOpponent["id"],
 ): Promise<EncounterOpponent> => {
-  const dbOpponent = await getEncounterOpponentById(db, encounterOpponentId);
+  const dbOpponent = await getEncounterOpponentById(encounterOpponentId);
   const {
     details,
     effects: dbEffects,
@@ -275,8 +266,37 @@ export const getDetailedEncounterOpponentById = async (
 
   for (const effectId of effectsIds) {
     try {
-      const effect = await getEffectById(db, effectId);
-      effects.push(effect);
+      const buff = await getEffectById(effectId);
+
+      const {
+        description,
+        duration: catalogDuration,
+        durationType,
+        icon,
+        id,
+        name,
+        type,
+        value,
+      } = buff;
+
+      // Try to get remaining duration from active_effects
+      const activeEffect = await select<{ remaining_duration: number }[]>(
+        "SELECT remaining_duration FROM active_effects WHERE entity_id = $1 AND entity_type = 'opponent' AND effect_id = $2",
+        [encounterOpponentId, effectId],
+      );
+
+      const duration = activeEffect.length > 0 ? activeEffect[0].remaining_duration : catalogDuration;
+
+      effects.push({
+        description,
+        duration,
+        durationType,
+        icon,
+        id,
+        name,
+        type,
+        value,
+      });
     } catch (e) {
       console.warn(`Failed to load effect ${effectId}`, e);
     }
@@ -284,7 +304,7 @@ export const getDetailedEncounterOpponentById = async (
 
   for (const immunityId of immunitiesIds) {
     try {
-      const immunity = await getImmunityById(db, immunityId);
+      const immunity = await getImmunityById(immunityId);
       immunities.push(immunity);
     } catch (e) {
       console.warn(`Failed to load immunity ${immunityId}`, e);
@@ -293,7 +313,7 @@ export const getDetailedEncounterOpponentById = async (
 
   for (const resistanceId of resistancesIds) {
     try {
-      const resistance = await getResistanceById(db, resistanceId);
+      const resistance = await getResistanceById(resistanceId);
       resistances.push(resistance);
     } catch (e) {
       console.warn(`Failed to load resistance ${resistanceId}`, e);
@@ -319,15 +339,14 @@ export const getDetailedEncounterOpponentById = async (
   return encounterOpponent;
 };
 
-export const getAllEncounterOpponentsDetailed = async (
-  db: TauriDatabase,
-): Promise<EncounterOpponent[]> => {
-  const encounterOpponentsRaw = await getAllEncounterOpponents(db);
+export const getAllEncounterOpponentsDetailed = async (): Promise<
+  EncounterOpponent[]
+> => {
+  const encounterOpponentsRaw = await getAllEncounterOpponents();
   const detailedEncounterOpponents: EncounterOpponent[] = [];
 
   for (const opponent of encounterOpponentsRaw) {
     const detailedOpponent = await getDetailedEncounterOpponentById(
-      db,
       opponent.id,
     );
     detailedEncounterOpponents.push(detailedOpponent);
@@ -337,10 +356,9 @@ export const getAllEncounterOpponentsDetailed = async (
 };
 
 export const getDetailedEncounterOpponentsByIds = async (
-  db: TauriDatabase,
   ids: Array<DBEncounterOpponent["id"]>,
 ): Promise<EncounterOpponent[]> => {
-  const promises = ids.map((id) => getDetailedEncounterOpponentById(db, id));
+  const promises = ids.map((id) => getDetailedEncounterOpponentById(id));
   const settled = await Promise.allSettled(promises);
 
   const detailed = settled
@@ -354,7 +372,6 @@ export const getDetailedEncounterOpponentsByIds = async (
 };
 
 export const createEncounterOpponent = async (
-  db: TauriDatabase,
   opponent: Omit<EncounterOpponent, "id">,
 ): Promise<EncounterOpponent> => {
   const {
@@ -373,7 +390,7 @@ export const createEncounterOpponent = async (
 
   const blueprint = opponent.blueprint;
 
-  const result = await db.execute(
+  const result = await execute(
     "INSERT INTO encounter_opponents (details, effects, health, icon, image, immunities, labels, level, max_health, name, resistances, blueprint) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
     [
       details,
@@ -391,15 +408,14 @@ export const createEncounterOpponent = async (
     ],
   );
 
-  return getDetailedEncounterOpponentById(db, result!.lastInsertId as number);
+  return getDetailedEncounterOpponentById(result!.lastInsertId as number);
 };
 
 export const createEncounterOpponents = async (
-  db: TauriDatabase,
   opponents: Array<Omit<EncounterOpponent, "id">>,
 ): Promise<EncounterOpponent[]> => {
   const createOpponentPromises = opponents.map((opponent) => {
-    return createEncounterOpponent(db, opponent);
+    return createEncounterOpponent(opponent);
   });
 
   const createOpponentsResult = await Promise.allSettled(
@@ -417,16 +433,15 @@ export const createEncounterOpponents = async (
 
 // NEW FUNCTION: Atomic creation of Opponent + Token
 export const createEncounterOpponentWithToken = async (
-  db: TauriDatabase,
   opponent: Omit<EncounterOpponent, "id">,
   chapterId: number,
 ): Promise<EncounterOpponent> => {
   // 1. Create the Encounter Opponent
-  const createdOpponent = await createEncounterOpponent(db, opponent);
+  const createdOpponent = await createEncounterOpponent(opponent);
 
   // 2. Create the Token
   // Defaulting to 0,0 or a safe spawn position.
-  await createToken(db, {
+  await createToken({
     chapter: chapterId,
     type: "opponent",
     // @ts-ignore
@@ -438,7 +453,6 @@ export const createEncounterOpponentWithToken = async (
 };
 
 export const updateEncounterOpponent = async (
-  db: TauriDatabase,
   encounterOpponent: EncounterOpponent,
 ): Promise<EncounterOpponent> => {
   const {
@@ -457,7 +471,7 @@ export const updateEncounterOpponent = async (
     blueprint,
   } = encounterOpponent;
 
-  await db.execute(
+  await execute(
     "UPDATE encounter_opponents SET details = $2, effects = $3, health = $4, icon = $5, image = $6, immunities = $7, labels = $8, level = $9, max_health = $10, name = $11, resistances = $12, blueprint = $13 WHERE id = $1",
     [
       id,
@@ -478,31 +492,29 @@ export const updateEncounterOpponent = async (
     ],
   );
 
-  return getDetailedEncounterOpponentById(db, id);
+  return getDetailedEncounterOpponentById(id);
 };
 
 export const deleteEncounterOpponentById = async (
-  db: TauriDatabase,
   id: EncounterOpponent["id"],
 ): Promise<DBEncounterOpponent> => {
-  const deletedEncounterOpponent = await getEncounterOpponentById(db, id);
-  const token = await getEncounterOpponentToken(db, id);
+  const deletedEncounterOpponent = await getEncounterOpponentById(id);
+  const token = await getEncounterOpponentToken(id);
 
   if (token) {
-    await deleteTokenById(db, token.id);
+    await deleteTokenById(token.id);
   }
 
-  await db.execute("DELETE FROM encounter_opponents WHERE id = $1", [id]);
+  await execute("DELETE FROM encounter_opponents WHERE id = $1", [id]);
 
   return deletedEncounterOpponent;
 };
 
 export const deleteEncounterOpponents = async (
-  db: TauriDatabase,
   ids: Array<EncounterOpponent["id"]>,
 ): Promise<DBEncounterOpponent[]> => {
   const deletePromises = ids.map((id) => {
-    return deleteEncounterOpponentById(db, id);
+    return deleteEncounterOpponentById(id);
   });
   const deleteOpponentsResults = await Promise.allSettled(deletePromises);
 
@@ -516,51 +528,103 @@ export const deleteEncounterOpponents = async (
   return deletedOpponents;
 };
 
+export const addEffectToEncounterOpponent = async (
+  opponentId: number,
+  effectId: number,
+): Promise<EncounterOpponent> => {
+  const { effects } = await getDetailedEncounterOpponentById(opponentId);
+  const isAlreadySet = effects.some((effect: Effect) => effect.id === effectId);
+  const update = effects.map((effect: Effect) => effect.id);
+
+  if (!isAlreadySet) {
+    update.push(effectId);
+
+    await execute("UPDATE encounter_opponents SET effects = $2 WHERE id = $1", [
+      opponentId,
+      JSON.stringify(update.map((id: number) => id)),
+    ]);
+
+    // Populate active_effects
+    const catalogEffect = await getEffectById(effectId);
+    await execute(
+      "INSERT INTO active_effects (id, effect_id, entity_id, entity_type, remaining_duration, duration_type) VALUES ($1, $2, $3, $4, $5, $6)",
+      [
+        crypto.randomUUID(),
+        effectId,
+        opponentId,
+        "opponent",
+        catalogEffect.duration,
+        catalogEffect.durationType,
+      ],
+    );
+  }
+
+  return getDetailedEncounterOpponentById(opponentId);
+};
+
+export const removeEffectFromEncounterOpponent = async (
+  opponentId: number,
+  effectId: number,
+) => {
+  const { effects } = await getDetailedEncounterOpponentById(opponentId);
+  const removedEffect = effects.find((effect: Effect) => effect.id === effectId);
+  const update = effects.filter((effect: Effect) => effect.id !== effectId);
+
+  await execute("UPDATE encounter_opponents SET effects = $2 WHERE id = $1", [
+    opponentId,
+    JSON.stringify(update.map((id: number) => id)),
+  ]);
+
+  // Remove from active_effects tracking
+  await execute(
+    "DELETE FROM active_effects WHERE entity_id = $1 AND entity_type = 'opponent' AND effect_id = $2",
+    [opponentId, effectId],
+  );
+
+  return removedEffect as Effect;
+};
+
 export const opponents = {
   getAllDetailed: async () => {
-    const db = await connect();
-    return getAllDetailedOpponents(db);
+    return getAllDetailedOpponents();
   },
   create: async (opponent: Omit<Opponent, "id">) => {
-    const db = await connect();
-    return createOpponent(db, opponent);
+    return createOpponent(opponent);
   },
   update: async (opponent: Opponent) => {
-    const db = await connect();
-    return updateOpponent(db, opponent);
+    return updateOpponent(opponent);
   },
   delete: async (id: number) => {
-    const db = await connect();
-    return deleteOpponentById(db, id);
+    return deleteOpponentById(id);
   },
 };
 
 export const encounterOpponents = {
   getAllDetailed: async () => {
-    const db = await connect();
-    return getAllEncounterOpponentsDetailed(db);
+    return getAllEncounterOpponentsDetailed();
   },
   create: async (opponent: Omit<EncounterOpponent, "id">) => {
-    const db = await connect();
-    return createEncounterOpponent(db, opponent);
+    return createEncounterOpponent(opponent);
   },
   createWithToken: async (
     opponent: Omit<EncounterOpponent, "id">,
     chapterId: number,
   ) => {
-    const db = await connect();
-    return createEncounterOpponentWithToken(db, opponent, chapterId);
+    return createEncounterOpponentWithToken(opponent, chapterId);
   },
   createMultiple: async (opponents: Array<Omit<EncounterOpponent, "id">>) => {
-    const db = await connect();
-    return createEncounterOpponents(db, opponents);
+    return createEncounterOpponents(opponents);
   },
   update: async (opponent: EncounterOpponent) => {
-    const db = await connect();
-    return updateEncounterOpponent(db, opponent);
+    return updateEncounterOpponent(opponent);
   },
   delete: async (id: number) => {
-    const db = await connect();
-    return deleteEncounterOpponentById(db, id);
+    return deleteEncounterOpponentById(id);
+  },
+  addEffect: async (opponentId: number, effectId: number) => {
+    return addEffectToEncounterOpponent(opponentId, effectId);
+  },
+  removeEffect: async (opponentId: number, effectId: number) => {
+    return removeEffectFromEncounterOpponent(opponentId, effectId);
   },
 };
