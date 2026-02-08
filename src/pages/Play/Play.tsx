@@ -45,6 +45,10 @@ import CombatControls from "@/components/CombatControls/CombatControls";
 import InitiativeMenue from "@/components/InitiativeMenue/InitiativeMenue";
 import ActiveEffectsMenue from "@/components/ActiveEffectsMenue/ActiveEffectsMenue";
 import Initiative from "@/components/Initiative/Initiative";
+import {
+  PlayerEntity,
+  EncounterOpponentEntity,
+} from "@/components/InitiativeCard/InitiativeCard";
 import { InitiativeMenuEntity } from "@/types/initiative";
 import { BedSingleIcon, CoffeeIcon, NotebookText } from "lucide-react";
 
@@ -451,6 +455,20 @@ function Play({
         console.log("Immunity Catalog cancelled:", reason);
       },
     });
+  }
+
+  function handleInitiativeRemoveCard(
+    entity: PlayerEntity | EncounterOpponentEntity,
+  ) {
+    if (!combatState) return;
+    const participant = combatState.participants.find(
+      (p) =>
+        p.entityId === entity.id &&
+        p.entityType === (entity.type === "player" ? "player" : "opponent"),
+    );
+    if (participant) {
+      removeParticipant.mutate(participant.id);
+    }
   }
 
   function handleInitiativeAdd(entity: InitiativeMenuEntity) {
@@ -965,6 +983,7 @@ function Play({
               );
               handleTokenSelect(token || null);
             }}
+            onRemove={handleInitiativeRemoveCard}
           />
         </PlayLayout.Initiative>
       )}

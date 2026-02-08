@@ -13,6 +13,7 @@ type Props = {
   activePosition: number;
   maxVisible?: number;
   onCardClick?: (entity: Entity) => void;
+  onRemove?: (entity: Entity) => void;
 };
 
 function Initiative({
@@ -20,6 +21,7 @@ function Initiative({
   activePosition,
   maxVisible = 6,
   onCardClick,
+  onRemove,
 }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<Map<number, HTMLDivElement>>(new Map());
@@ -94,6 +96,7 @@ function Initiative({
               entity={entity}
               isActive={entity.position === activePosition}
               onClick={onCardClick}
+              onRemove={onRemove}
             />
           </div>
         ))}

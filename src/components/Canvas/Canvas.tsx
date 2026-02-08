@@ -1538,7 +1538,9 @@ function Canvas({
                       {t("edit")}
                     </ContextMenuItem>
                     <ContextMenuItem onClick={() => toggleToken(token)}>
-                      {(tokenVisibility[token.id] ?? true) ? "Hide" : "Show"}
+                      {(tokenVisibility[token.id] ?? true)
+                        ? t("hide")
+                        : t("show")}
                     </ContextMenuItem>
                   </ContextMenuGroup>
 

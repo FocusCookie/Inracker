@@ -1,5 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentInitiativeCardEN from "@/translations/en/components/InitiativeCard.json";
+import ComponentInitiativeCardDE from "@/translations/de/components/InitiativeCard.json"; 
 import ComponentCollapsibleEN from "@/translations/en/components/Collapsible.json";
 import ComponentCollapsibleDE from "@/translations/de/components/Collapsible.json"; 
 import ComponentSessionLogDrawerEN from "@/translations/en/components/SessionLogDrawer.json";
@@ -12,6 +14,8 @@ import ComponentCombatControlsEN from "@/translations/en/components/CombatContro
 import ComponentCombatControlsDE from "@/translations/de/components/CombatControls.json";
 import ComponentInitiativeMenueItemEN from "@/translations/en/components/InitiativeMenueItem.json";
 import ComponentInitiativeMenueItemDE from "@/translations/de/components/InitiativeMenueItem.json";
+import ComponentInitiativeCardEN from "@/translations/en/components/InitiativeCard.json";
+import ComponentInitiativeCardDE from "@/translations/de/components/InitiativeCard.json";
 import ComponentActiveEffectsMenueEN from "@/translations/en/components/ActiveEffectsMenue.json";
 import ComponentActiveEffectsMenueDE from "@/translations/de/components/ActiveEffectsMenue.json";
 import ComponentSettingsOpponentCardEN from "@/translations/en/components/SettingsOpponentCard.json";
@@ -123,12 +127,14 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentInitiativeCard: ComponentInitiativeCardEN,
     ComponentCollapsible: ComponentCollapsibleEN,
     ComponentSessionLogDrawer: ComponentSessionLogDrawerEN,
     ComponentHealthDialog: ComponentHealthDialogEN,
     ComponentCreateCombatEffectDrawer: ComponentCreateCombatEffectDrawerEN,
     ComponentCombatControls: ComponentCombatControlsEN,
     ComponentInitiativeMenueItem: ComponentInitiativeMenueItemEN,
+    ComponentInitiativeCard: ComponentInitiativeCardEN,
     ComponentActiveEffectsMenue: ComponentActiveEffectsMenueEN,
     ComponentEditPlayerDrawer: ComponentEditPlayerDrawerEN,
     ComponentSettingsOpponentCard: ComponentSettingsOpponentCardEN,
@@ -191,12 +197,14 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentInitiativeCard: ComponentInitiativeCardDE,
     ComponentCollapsible: ComponentCollapsibleDE,
     ComponentSessionLogDrawer: ComponentSessionLogDrawerDE,
     ComponentHealthDialog: ComponentHealthDialogDE,
     ComponentCreateCombatEffectDrawer: ComponentCreateCombatEffectDrawerDE,
     ComponentCombatControls: ComponentCombatControlsDE,
     ComponentInitiativeMenueItem: ComponentInitiativeMenueItemDE,
+    ComponentInitiativeCard: ComponentInitiativeCardDE,
     ComponentActiveEffectsMenue: ComponentActiveEffectsMenueDE,
     ComponentEditPlayerDrawer: ComponentEditPlayerDrawerDE,
     ComponentSettingsOpponentCard: ComponentSettingsOpponentCardDE,
