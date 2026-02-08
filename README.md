@@ -42,6 +42,13 @@ Features 🌟
 
 - **Remove** in `index.html` the `<script src="http://localhost:8097"></script>` in the build process.
 
+## Update
+
+- this is done via the tauri updater functionality
+- the repo contains the latest.json file which contains the translations
+- the update will be published via github actions
+- the repo is the source for the update
+
 ## Templates
 
 With hygen you can create components and translations.
