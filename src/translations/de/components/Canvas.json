@@ -14,5 +14,6 @@
   "addToInitiative": "Zu Initiative hinzufügen",
   "addEffect": "Effekt hinzufügen",
   "addHealth": "Leben hinzufügen",
-  "removeHealth": "Leben entfernen"
+  "removeHealth": "Leben entfernen",
+  "activeEffects": "Aktive Effekte"
 }

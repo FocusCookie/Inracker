@@ -15,5 +15,6 @@
   "addToInitiative": "Add to Initiative",
   "addEffect": "Add Effect",
   "addHealth": "Add Health",
-  "removeHealth": "Remove Health"
+  "removeHealth": "Remove Health",
+  "activeEffects": "Active Effects"
 }

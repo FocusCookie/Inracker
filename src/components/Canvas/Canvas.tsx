@@ -27,9 +27,10 @@ import {
   CircleX,
   Sword,
   UsersRound,
-  Sparkle,
-  SparklesIcon,
   Sparkles,
+  CoffeeIcon,
+  BedSingleIcon,
+  ClockIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
@@ -40,6 +41,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
+import { formatDuration } from "@/lib/time";
 import { CanvasElementNode } from "./CanvasElementNode";
 import { MusicPlayer } from "@/components/MusicPlayer/MusicPlayer";
 
@@ -1066,6 +1074,41 @@ function Canvas({
     setIsOpponentsPanelOpen((c) => !c);
   }
 
+  const renderEffectsList = (effects: any[]) => (
+    <ul className="flex flex-col gap-1.5">
+      {effects.map((effect) => (
+        <li key={effect.id}>
+          <div className="flex items-center justify-between gap-2 rounded p-1 transition-colors hover:bg-slate-50">
+            <div className="flex items-center gap-2 overflow-hidden">
+              <span className="text-sm">{effect.icon}</span>
+              <span className="truncate text-xs font-medium">
+                {effect.name}
+              </span>
+            </div>
+            <Badge
+              variant={effect.type === "positive" ? "secondary" : "destructive"}
+              className="h-5 gap-1 px-1.5 text-[10px]"
+            >
+              {effect.durationType === "short" ? (
+                <CoffeeIcon className="h-2.5 w-2.5" />
+              ) : effect.durationType === "long" ? (
+                <BedSingleIcon className="h-2.5 w-2.5" />
+              ) : (
+                <ClockIcon className="h-2.5 w-2.5" />
+              )}
+              {effect.durationType === "time"
+                ? formatDuration(effect.duration)
+                : effect.durationType === "short" ||
+                    effect.durationType === "long"
+                  ? ""
+                  : effect.duration}
+            </Badge>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+
   return (
     <div className="relative h-full w-full" key={resetCount}>
       <svg
@@ -1282,26 +1325,29 @@ function Canvas({
                       </text>
                     </g>
                     {player.effects && player.effects.length > 0 && (
-                      <g>
-                        <circle
-                          cx={token.coordinates.x + 80}
-                          cy={token.coordinates.y + 24}
-                          r={16}
-                          fill="white"
-                          stroke="black"
-                          className="pointer-events-none"
-                        />
-
-                        <foreignObject
-                          x={token.coordinates.x + 72}
-                          y={token.coordinates.y + 16}
-                          width={24}
-                          height={24}
-                          className="pointer-events-none"
-                        >
-                          <Sparkles className="h-4 w-4" />
-                        </foreignObject>
-                      </g>
+                      <foreignObject
+                        x={token.coordinates.x + 60}
+                        y={token.coordinates.y + 10}
+                        width={24}
+                        height={24}
+                        className="pointer-events-auto"
+                      >
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button className="flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-sm hover:cursor-pointer hover:bg-black hover:text-white">
+                              <Sparkles className="h-4 w-4" />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-64 p-2">
+                            <div className="flex flex-col gap-2">
+                              <h4 className="text-sm leading-none font-semibold">
+                                {t("activeEffects")}
+                              </h4>
+                              {renderEffectsList(player.effects)}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </foreignObject>
                     )}
                   </g>
                 </ContextMenuTrigger>
@@ -1488,26 +1534,29 @@ function Canvas({
                       </g>
                     )}
                     {opponent.effects && opponent.effects.length > 0 && (
-                      <g>
-                        <circle
-                          cx={token.coordinates.x + 80}
-                          cy={token.coordinates.y + 24}
-                          r={16}
-                          fill="white"
-                          stroke="black"
-                          className="pointer-events-none"
-                        />
-
-                        <foreignObject
-                          x={token.coordinates.x + 72}
-                          y={token.coordinates.y + 16}
-                          width={24}
-                          height={24}
-                          className="pointer-events-none"
-                        >
-                          <Sparkles className="h-4 w-4" />
-                        </foreignObject>
-                      </g>
+                      <foreignObject
+                        x={token.coordinates.x + 60}
+                        y={token.coordinates.y + 10}
+                        width={24}
+                        height={24}
+                        className="pointer-events-auto"
+                      >
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button className="flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-sm hover:cursor-pointer hover:bg-black hover:text-white">
+                              <Sparkles className="h-4 w-4" />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-64 p-2">
+                            <div className="flex flex-col gap-2">
+                              <h4 className="text-sm leading-none font-semibold">
+                                {t("activeEffects")}
+                              </h4>
+                              {renderEffectsList(opponent.effects)}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </foreignObject>
                     )}
                   </g>
                 </ContextMenuTrigger>
