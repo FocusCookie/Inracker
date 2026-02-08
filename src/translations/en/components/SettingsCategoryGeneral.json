@@ -1,4 +1,7 @@
 {
   "secondsPerRound": "Seconds per Round",
+  "language": "Language",
+  "en": "English (US)",
+  "de": "German",
   "save": "Save"
 }

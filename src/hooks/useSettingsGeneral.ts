@@ -8,15 +8,20 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Database from "@/lib/database";
 import { useEffect } from "react";
 import { useMutationWithErrorToast } from "./useMutationWithErrorToast";
+import i18n from "@/i18next";
 
 export const useSettingsGeneral = () => {
   const queryClient = useQueryClient();
 
-  const { data: secondsPerRound, isLoading } = useQuery({
-    queryKey: ["settings", "secondsPerRound"],
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ["settings", "general"],
     queryFn: async () => {
-      const value = await Database.settings.get("seconds_per_round");
-      return value ? parseInt(value, 10) : 6;
+      const secondsPerRound = await Database.settings.get("seconds_per_round");
+      const language = await Database.settings.get("language");
+      return {
+        secondsPerRound: secondsPerRound ? parseInt(secondsPerRound, 10) : 6,
+        language: (language as "en" | "de") || "en",
+      };
     },
   });
 
@@ -24,14 +29,15 @@ export const useSettingsGeneral = () => {
     resolver: zodResolver(settingsGeneralSchema),
     defaultValues: {
       secondsPerRound: 6,
+      language: "en",
     },
   });
 
   useEffect(() => {
-    if (secondsPerRound !== undefined) {
-      form.reset({ secondsPerRound });
+    if (settings) {
+      form.reset(settings);
     }
-  }, [secondsPerRound, form]);
+  }, [settings, form]);
 
   const mutation = useMutationWithErrorToast({
     mutationFn: async (values: SettingsGeneral) => {
@@ -39,6 +45,8 @@ export const useSettingsGeneral = () => {
         "seconds_per_round",
         values.secondsPerRound.toString(),
       );
+      await Database.settings.update("language", values.language);
+      await i18n.changeLanguage(values.language);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["settings"] });
