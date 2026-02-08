@@ -2,7 +2,6 @@ import { OverlayHost } from "@/components/Overlay/OverlayHost";
 import SettingsButton from "@/components/SettingsButton/SettingsButton";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { createRootRoute, Outlet } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { useEffect } from "react";
 import Database from "@/lib/database";
 import i18n from "@/i18next";
@@ -31,7 +30,9 @@ export const Route = createRootRoute({
 
         <OverlayHost />
 
-        <TanStackRouterDevtools />
+        {
+          //         <TanStackRouterDevtools />
+        }
       </TooltipProvider>
     );
   },

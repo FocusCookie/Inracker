@@ -9,7 +9,6 @@ import { routeTree } from "./routeTree.gen";
 import "./styles/global.css";
 import { appDataDir } from "@tauri-apps/api/path";
 import { createTauriAppDataSubfolders } from "./lib/utils";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const queryClient = new QueryClient();
 const router = createRouter({ routeTree });
@@ -32,7 +31,9 @@ createTauriAppDataSubfolders().then(() =>
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools buttonPosition="bottom-left" initialIsOpen={false} />
+      {
+        // <ReactQueryDevtools buttonPosition="bottom-left" initialIsOpen={false} />
+      }
 
       <div className="h-full w-full bg-black p-4">
         <RouterProvider router={router} />
