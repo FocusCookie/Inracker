@@ -1,0 +1,6 @@
+{
+  "availableTitle": "Update verfügbar",
+  "availableDescription": "Eine neue Version ({{version}}) ist verfügbar.",
+  "viewChangelog": "Changelog im Repository ansehen",
+  "updateNow": "Jetzt aktualisieren"
+}
