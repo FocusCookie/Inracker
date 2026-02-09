@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "start": "npm run tauri:dev",
-    "dev": "VITE_ENV=dev vite",
-    "build": "VITE_ENV=inracker tsc && vite build",
-    "preview": "VITE_ENV=dev vite preview",
+    "dev": "cross-env VITE_ENV=dev vite",
+    "build": "cross-env VITE_ENV=inracker tsc && vite build",
+    "preview": "cross-env VITE_ENV=dev vite preview",
     "tauri": "tauri",
-    "tauri:dev": "VITE_ENV=dev tauri dev",
-    "tauri:build": "VITE_ENV=inracker tauri build",
+    "tauri:dev": "cross-env VITE_ENV=dev tauri dev",
+    "tauri:build": "cross-env VITE_ENV=inracker tauri build",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
@@ -68,6 +68,7 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "@chromatic-com/storybook": "^3.2.4",
     "@storybook/addon-essentials": "^8.5.1",
     "@storybook/addon-interactions": "^8.5.1",

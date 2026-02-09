@@ -103,8 +103,8 @@ import ComponentResistanceCatalogDE from "@/translations/de/components/Resistanc
 import ComponentCatalogEN from "@/translations/en/components/Catalog.json";
 import ComponentCatalogDE from "@/translations/de/components/Catalog.json";
 import LanguageDetector from "i18next-browser-languagedetector";
-import PageWelcomeEN from "@/translations/en/pages/welcome.json";
-import PageWelcomeDE from "@/translations/de/pages/welcome.json";
+import PageWelcomeEN from "@/translations/en/pages/Welcome.json";
+import PageWelcomeDE from "@/translations/de/pages/Welcome.json";
 import PagePartySelectionEN from "@/translations/en/pages/PartySelection.json";
 import PagePartySelectionDE from "@/translations/de/pages/PartySelection.json";
 import PageChapterSelectionEN from "@/translations/en/pages/ChapterSelection.json";
