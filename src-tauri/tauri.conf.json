@@ -42,7 +42,10 @@
       "endpoints": [
         "https://github.com/FocusCookie/Inracker/releases/latest/download/latest.json"
       ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQ0MEEzMzU0MTZFQ0Y5OUQKUldTZCtld1dWRE1LMUNoZE41U0t4WmpIWDJIamlHRTluMUQrcWdNTFoxRGRJODM5OW9OZFhjMDIK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQ0MEEzMzU0MTZFQ0Y5OUQKUldTZCtld1dWRE1LMUNoZE41U0t4WmpIWDJIamlHRTluMUQrcWdNTFoxRGRJODM5OW9OZFhjMDIK",
+      "windows": {
+        "installMode": "passive"
+      }
     }
   }
 }
