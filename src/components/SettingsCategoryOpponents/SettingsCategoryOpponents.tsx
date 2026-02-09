@@ -89,7 +89,7 @@ function SettingsCategoryOpponents({ database }: Props) {
               {t("noOpponentsDescription")}
               <div className="flex w-full justify-center">
                 <Button onClick={handleOpenCreateOpponent} className="mt-2">
-                  {t("createOpponents")}
+                  {t("createOpponent")}
                 </Button>
               </div>
             </AlertDescription>

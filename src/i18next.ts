@@ -125,8 +125,6 @@ import ComponentCreatePlayerDrawerEN from "@/translations/en/components/CreatePl
 import ComponentCreatePlayerDrawerDE from "@/translations/de/components/CreatePlayerDrawer.json";
 import HookUseMutationWithErrorTaostEN from "@/translations/en/hooks/useMutationWithErrorTaost.json";
 import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutationWithErrorTaost.json";
-import HookUseAppUpdatesEN from "@/translations/en/hooks/useAppUpdates.json";
-import HookUseAppUpdatesDE from "@/translations/de/hooks/useAppUpdates.json";
 
 const resources = {
   en: {
@@ -193,7 +191,6 @@ const resources = {
     // hygen-en-hooks - DO NOT DELETE THIS LINE
     HookUseAppUpdates: HookUseAppUpdatesEN,
     HookUseMutationWithErrorTaost: HookUseMutationWithErrorTaostEN,
-    HookUseAppUpdates: HookUseAppUpdatesEN,
 
     // hygen-en-pages - DO NOT DELETE THIS LINE
     PagePlay: PagePlayEN,
@@ -265,7 +262,6 @@ const resources = {
     // hygen-de-hooks - DO NOT DELETE THIS LINE
     HookUseAppUpdates: HookUseAppUpdatesDE,
     HookUseMutationWithErrorTaost: HookUseMutationWithErrorTaostDE,
-    HookUseAppUpdates: HookUseAppUpdatesDE,
 
     // hygen-de-pages - DO NOT DELETE THIS LINE
     PagePlay: PagePlayDE,

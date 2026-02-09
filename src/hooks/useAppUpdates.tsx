@@ -13,7 +13,7 @@ export function useAppUpdates() {
   const checkForUpdates = useCallback(async () => {
     try {
       const update = await check();
-      if (update?.available) {
+      if (update) {
         toast({
           title: t("HookUseAppUpdates:availableTitle", "Update Available"),
           description: (

@@ -1,4 +1,10 @@
 {
-  "minName": "at least x characters"
+  "descriptionText": "Edit the details of the opponent. Customize their stats, abilities, and resistances to craft unique adversaries that will test your players' skills and strategies.",
+  "title": "Edit Opponent",
+  "cancel": "Cancel",
+  "create": "Save Changes",
+  "immunities": "Immunities",
+  "catalog": "Catalog",
+  "resistances": "Resistances",
+  "minName": "Name must be at least 2 characters"
 }
-
