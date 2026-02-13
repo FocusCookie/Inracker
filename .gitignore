@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 
 *storybook.log
+
+*.ico binary
+*.png binary
+*.icns binary
+*.webp binary
