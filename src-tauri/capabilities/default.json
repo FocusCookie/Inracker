@@ -17,7 +17,7 @@
     "fs:allow-copy-file",
     {
       "identifier": "fs:scope",
-      "allow": [{ "path": "**" }]
+      "allow": [{ "path": "$APPDATA/**" }]
     }
   ]
 }
