@@ -68,7 +68,6 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3",
     "@chromatic-com/storybook": "^3.2.4",
     "@storybook/addon-essentials": "^8.5.1",
     "@storybook/addon-interactions": "^8.5.1",
@@ -88,6 +87,7 @@
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",
+    "cross-env": "^7.0.3",
     "postcss": "^8.5.1",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.7.2",
