@@ -1,11 +1,9 @@
-import EmojiPicker, {
-  EmojiClickData,
-  EmojiStyle,
-  SkinTonePickerLocation,
-} from "emoji-picker-react";
-import { useEffect, useState } from "react";
+import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
+import "emoji-mart";
+import { useState } from "react";
 import { Button } from "../ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import * as PopoverPrimitive from "@radix-ui/react-popover";
 
 type Props = {
   onIconClick: (icon: string) => void;
@@ -13,57 +11,48 @@ type Props = {
   disabled: boolean;
 };
 
-function DeferredEmojiPicker(props: React.ComponentProps<typeof EmojiPicker>) {
-  const [shouldRender, setShouldRender] = useState(false);
-
-  useEffect(() => {
-    // Defer rendering to allow Popover animation to start/finish
-    const timer = requestAnimationFrame(() => {
-      setShouldRender(true);
-    });
-    return () => cancelAnimationFrame(timer);
-  }, []);
-
-  if (!shouldRender) {
-    return (
-      <div className="flex h-[450px] w-[350px] items-center justify-center bg-muted/20 text-muted-foreground">
-        Loading...
-      </div>
-    );
-  }
-
-  return <EmojiPicker {...props} />;
-}
-
 function IconPicker({ initialIcon, disabled, onIconClick }: Props) {
   const [selectedIcon, setSelectedIcon] = useState(initialIcon || "🧙‍♂️");
   const [isOpen, setIsOpen] = useState(false);
 
-  function handleEmojiClick(emojiData: EmojiClickData) {
-    onIconClick(emojiData.emoji);
-    setSelectedIcon(emojiData.emoji);
+  function handleEmojiSelect(emojiData: any) {
+    const emoji = emojiData.native;
+    onIconClick(emoji);
+    setSelectedIcon(emoji);
     setIsOpen(false);
   }
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button disabled={disabled} variant="outline" className="w-full">
+    <PopoverPrimitive.Root open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverPrimitive.Trigger asChild>
+        <Button
+          disabled={disabled}
+          variant="outline"
+          className="w-full text-lg"
+        >
           {selectedIcon}
         </Button>
-      </PopoverTrigger>
+      </PopoverPrimitive.Trigger>
 
-      <PopoverContent className="w-auto p-0 border-none shadow-none">
-        <DeferredEmojiPicker
-          key="picker"
-          lazyLoadEmojis
-          open={isOpen}
-          onEmojiClick={handleEmojiClick}
-          emojiStyle={EmojiStyle.NATIVE}
-          skinTonePickerLocation={SkinTonePickerLocation.PREVIEW}
-        />
-      </PopoverContent>
-    </Popover>
+      <PopoverPrimitive.Portal>
+        <PopoverPrimitive.Content
+          side="right"
+          align="start"
+          sideOffset={4}
+          onWheel={(e) => e.stopPropagation()}
+        >
+          <div className="rounded-lg border bg-white shadow-xl">
+            <Picker
+              data={data}
+              onEmojiSelect={handleEmojiSelect}
+              theme="light"
+              autoFocus={true}
+              set="native"
+            />
+          </div>
+        </PopoverPrimitive.Content>
+      </PopoverPrimitive.Portal>
+    </PopoverPrimitive.Root>
   );
 }
 
