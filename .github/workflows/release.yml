@@ -40,7 +40,7 @@ jobs:
           cache: "npm"
 
       - name: Install frontend dependencies
-        run: npm ci --legacy-peer-deps
+        run: npm install --legacy-peer-deps
 
       - name: Build and Create Release
         uses: tauri-apps/tauri-action@v0.5.15
