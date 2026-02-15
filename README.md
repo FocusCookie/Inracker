@@ -117,3 +117,4 @@ hygen translation new
 - [ ] Refactor image Upload
 - [ ] Smooth page transitions
 - [ ] Patch/Update function
+- [ ] fix windows pipeline build - icon.ico format 3 issue
