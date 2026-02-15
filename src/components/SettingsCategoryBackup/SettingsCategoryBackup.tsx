@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { TypographyH1 } from "../ui/typographyH1";
 
 function SettingsCategoryBackup() {
   const { t } = useTranslation("ComponentSettingsCategoryBackup");
@@ -50,6 +51,7 @@ function SettingsCategoryBackup() {
 
   return (
     <div className="flex flex-col gap-4 p-1">
+      <TypographyH1>{t("import-export")}</TypographyH1>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

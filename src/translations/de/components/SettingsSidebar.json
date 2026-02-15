@@ -10,5 +10,7 @@
   "immunities": "Immunitäten",
   "resistances": "Resistenzen",
   "backup": "Import / Export",
-  "close": "Schließen"
+  "close": "Schließen",
+  "import-export": "Importieren & Exportieren"
 }
+
