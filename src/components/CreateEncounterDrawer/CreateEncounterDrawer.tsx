@@ -89,13 +89,15 @@ function CreateEncounterDrawer({
   const createEncounterOpponent = useCreateEncounterOpponent();
   const deleteEncounterOpponent = useDeleteEncounterOpponent();
 
-  const { setCurrentColor, setCurrentIcon, setCurrenTitle } = useEncounterStore(
-    useShallow((state) => ({
-      setCurrentColor: state.setCurrentColor,
-      setCurrentIcon: state.setCurrentIcon,
-      setCurrenTitle: state.setCurrentTitle,
-    })),
-  );
+  const { setCurrentColor, setCurrentIcon, setCurrenTitle, resetStore } =
+    useEncounterStore(
+      useShallow((state) => ({
+        setCurrentColor: state.setCurrentColor,
+        setCurrentIcon: state.setCurrentIcon,
+        setCurrenTitle: state.setCurrentTitle,
+        resetStore: state.reset,
+      })),
+    );
 
   const opponentsQuery = useOpponents();
 
@@ -123,6 +125,7 @@ function CreateEncounterDrawer({
       const created = await onCreate(values);
 
       onComplete(created);
+      resetStore();
       setClosingReason("success");
       onOpenChange(false);
 
@@ -135,6 +138,7 @@ function CreateEncounterDrawer({
   function handleCancelation() {
     setClosingReason("cancel");
     onCancel?.("cancel");
+    resetStore();
     onOpenChange(false);
     form.reset();
   }
