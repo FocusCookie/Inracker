@@ -70,6 +70,11 @@
     "zod": "^3.24.1",
     "zustand": "^5.0.3"
   },
+  "overrides": {
+    "@emoji-mart/react": {
+      "react": "$react"
+    }
+  },
   "devDependencies": {
     "@chromatic-com/storybook": "^3.2.4",
     "@storybook/addon-essentials": "^8.5.1",
