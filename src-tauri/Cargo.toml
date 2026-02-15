@@ -1,8 +1,8 @@
 [package]
 name = "inracker"
-version = "0.1.1"
-description = "A Tauri App"
-authors = ["you"]
+version = "0.1.2"
+description = "A dungeon master tool to create the best adventures possible."
+authors = ["Stephan Lüddemann"]
 edition = "2021"
 
 [lib]
