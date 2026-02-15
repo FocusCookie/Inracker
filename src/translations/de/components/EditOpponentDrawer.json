@@ -1,10 +1,10 @@
 {
-  "descriptionText": "Bearbeiten Sie die Details des Gegners. Passen Sie dessen Werte, Fähigkeiten und Resistenzen an, um einzigartige Widersacher zu erschaffen, die die Fähigkeiten und Strategien Ihrer Spieler auf die Probe stellen.",
+  "descriptionText": "Bearbeiten Sie die Details des Gegners. Passen Sie dessen Werte, Fähigkeiten und Widerstände an, um einzigartige Widersacher zu erschaffen, die die Fähigkeiten und Strategien Ihrer Spieler auf die Probe stellen.",
   "title": "Gegner bearbeiten",
   "cancel": "Abbrechen",
   "create": "Änderungen speichern",
   "immunities": "Immunitäten",
   "catalog": "Katalog",
-  "resistances": "Resistenzen",
+  "resistances": "Widerstände",
   "minName": "Der Name muss mindestens 2 Zeichen lang sein"
 }

@@ -1,12 +1,12 @@
 {
   "minNameChars": "Der Name des Widerstands muss mindestens drei Zeichen lang sein.",
-  "descriptionText": "Erstelle einen individuelle Resistenz, um deinen Spieler vor bestimmten Schadensarten, Umweltgefahren oder schwächenden Effekten zu schützen. Passe seine Verteidigung an seine Stärken und Hintergrundgeschichte an.",
-  "title": "Erstelle eine Resistenz",
+  "descriptionText": "Erstelle einen individuellen Widerstand, um deinen Spieler vor bestimmten Schadensarten, Umweltgefahren oder schwächenden Effekten zu schützen. Passe seine Verteidigung an seine Stärken und Hintergrundgeschichte an.",
+  "title": "Erstelle einen Widerstand",
   "create": "Erstellen",
   "cancel": "Abbrechen",
   "icon": "Symbol",
   "name": "Name",
-  "namePlaceholder": "Resistenz gegen Fallschaden",
+  "namePlaceholder": "Widerstand gegen Fallschaden",
   "description": "Beschreibung",
-  "descriptionPlaceholder": "Füge ein Details zu diesen Effekt hinzu..."
+  "descriptionPlaceholder": "Füge Details zu diesem Effekt hinzu..."
 }

@@ -16,12 +16,12 @@
     "placeholder": "Suche..."
   },
   "resistanceCatalog": {
-    "title": "Resistenzen",
-    "descriptionText": "Wähle aus einer Liste bestehender Resistenzen, um deinen Charakter anzupassen.",
+    "title": "Widerstände",
+    "descriptionText": "Wähle aus einer Liste bestehender Widerstände, um deinen Charakter anzupassen.",
     "placeholder": "Suche..."
   },
   "add": "Hinzufügen",
-  "resistances": "Resistenzen",
+  "resistances": "Widerstände",
   "level": "Stufe",
   "health": "Trefferpunkte",
   "minName": "Der Name muss mindestens zwei Zeichen lang sein.",

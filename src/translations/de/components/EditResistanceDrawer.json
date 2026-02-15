@@ -1,11 +1,11 @@
 {
-  "descriptionText": "Ändere eine bestehende Resistenz, um die Verteidigungsfähigkeiten deines Charakters zu verbessern. Aktualisiere, wogegen dein Charakter resistent ist, sei es spezifische Schadensarten, magische Effekte, Umweltbedingungen oder physische Angriffe.",
-  "title": "Resistenz bearbeiten",
+  "descriptionText": "Ändere einen bestehenden Widerstand, um die Verteidigungsfähigkeiten deines Charakters zu verbessern. Aktualisiere, wogegen dein Charakter resistent ist, sei es spezifische Schadensarten, magische Effekte, Umweltbedingungen oder physische Angriffe.",
+  "title": "Widerstand bearbeiten",
   "edit": "Änderungen speichern",
   "cancel": "Abbrechen",
   "icon": "Symbol",
   "name": "Name",
-  "namePlaceholder": "Feuer-Resistenz",
+  "namePlaceholder": "Feuer-Widerstand",
   "description": "Beschreibung",
-  "minNameChars": "Der Resistenzname muss mindestens 3 Zeichen lang sein."
+  "minNameChars": "Der Widerstandsname muss mindestens 3 Zeichen lang sein."
 }

@@ -1,7 +1,7 @@
 {
-  "resistances": "Resistenzen",
-  "createResistance": "Resistenz erstellen",
-  "noResistances": "Keine Resistenzen",
-  "noResistancesDescription": "Du hast noch keine Resistenzen erstellt. Erstelle eine, um loszulegen.",
-  "searchPlaceholder": "Suche nach Resistenzen..."
+  "resistances": "Widerstände",
+  "createResistance": "Widerstand erstellen",
+  "noResistances": "Keine Widerstände",
+  "noResistancesDescription": "Du hast noch keine Widerstände erstellt. Erstelle einen, um loszulegen.",
+  "searchPlaceholder": "Suche nach Widerständen..."
 }
