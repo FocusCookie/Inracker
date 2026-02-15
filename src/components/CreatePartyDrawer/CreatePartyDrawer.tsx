@@ -116,7 +116,10 @@ export default function CreatePartyDrawer({
       }
     >
       <Form {...form}>
-        <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+        <form
+          onSubmit={(e) => e.preventDefault()}
+          className="flex flex-col gap-4 pr-4"
+        >
           <div className="flex items-start gap-2">
             <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
               <FormLabel>{t("icon")}</FormLabel>
@@ -154,7 +157,11 @@ export default function CreatePartyDrawer({
               <FormItem className="px-0.5">
                 <FormLabel>{t("description")}</FormLabel>
                 <FormControl>
-                  <MarkdownEditor disabled={isCreating} placeholder="" {...field} />
+                  <MarkdownEditor
+                    disabled={isCreating}
+                    placeholder=""
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

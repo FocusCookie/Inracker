@@ -56,7 +56,7 @@ function PartyCard({ party, animationDelay = 0, onEdit, onOpen }: Props) {
         <CardContent className="flex">
           <div className="h-full w-8"></div>
 
-          <div className="flex grow flex-col gap-2">
+          <div className="flex grow flex-col gap-4">
             {party.description && (
               <CardDescription>
                 <div className="line-clamp-3">{party.description}</div>
@@ -64,7 +64,7 @@ function PartyCard({ party, animationDelay = 0, onEdit, onOpen }: Props) {
             )}
 
             {party.players.length > 0 && (
-              <div className="flex gap-2">
+              <div className="flex gap-6">
                 {party.players.map((player) => (
                   <IconAvatar
                     player={player}

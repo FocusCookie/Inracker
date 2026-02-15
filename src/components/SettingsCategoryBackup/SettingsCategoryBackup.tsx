@@ -52,7 +52,7 @@ function SettingsCategoryBackup() {
   return (
     <div className="flex flex-col gap-4 p-1">
       <TypographyH1>{t("import-export")}</TypographyH1>
-      <Card>
+      <Card className="flex flex-col gap-4">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Download className="h-5 w-5" />
@@ -67,7 +67,7 @@ function SettingsCategoryBackup() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="flex flex-col gap-4">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Upload className="h-5 w-5" />

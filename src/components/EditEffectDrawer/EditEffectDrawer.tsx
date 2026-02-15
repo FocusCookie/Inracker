@@ -142,7 +142,7 @@ function EditEffectDrawer({
   function handleDurationTypeChange(value: "rounds" | "time") {
     form.setValue("durationType", value);
     setDurationType(value);
-    
+
     if (value === "time") {
       const current = form.getValues("duration");
       setSeconds(current);
@@ -203,105 +203,153 @@ function EditEffectDrawer({
         <Form {...form} key={effect.id}>
           <form
             onSubmit={(e) => e.preventDefault()}
-            className="flex flex-col gap-4"
+            className="flex flex-col gap-4 pr-4"
           >
-              <div className="flex items-start gap-2">
-                <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
-                  <FormLabel>{t("icon")}</FormLabel>
+            <div className="flex items-start gap-2">
+              <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
+                <FormLabel>{t("icon")}</FormLabel>
 
-                  <IconPicker
-                    initialIcon={effect.icon}
-                    disabled={isLoading}
-                    onIconClick={handleIconSelect}
-                  />
-                  <FormMessage />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-0.5">
-                      <FormLabel>{t("name")}</FormLabel>
-                      <FormControl>
-                        <Input
-                          disabled={isLoading}
-                          placeholder={t("namePlaceholder")}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <IconPicker
+                  initialIcon={effect.icon}
+                  disabled={isLoading}
+                  onIconClick={handleIconSelect}
                 />
+                <FormMessage />
               </div>
 
               <FormField
                 control={form.control}
-                name="description"
+                name="name"
                 render={({ field }) => (
-                  <FormItem className="px-0.5">
-                    <FormLabel>{t("description")}</FormLabel>
-
-                    <FormControl className="rounded-md border">
-                      <MarkdownEditor
+                  <FormItem className="w-full px-0.5">
+                    <FormLabel>{t("name")}</FormLabel>
+                    <FormControl>
+                      <Input
                         disabled={isLoading}
+                        placeholder={t("namePlaceholder")}
                         {...field}
-                        placeholder={t("descriptionPlaceholder")}
                       />
                     </FormControl>
-
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            </div>
 
-              <div className="flex w-full gap-2">
-                <div className="flex h-full w-2/3 flex-col gap-[0.25rem+1px] pt-1.5">
-                  <FormLabel>{t("type")}</FormLabel>
-                  <Tabs
-                    // @ts-ignore
-                    onValueChange={handleTypeChange}
-                    // @ts-ignore
-                    defaultValue={effect.type}
-                  >
-                    <TabsList className="mt-px grid h-9 w-full grid-cols-2 gap-2">
-                      <TabsTrigger
-                        className="hover:cursor-pointer hover:bg-white/80"
-                        value="positive"
-                      >
-                        {t("positive")}
-                      </TabsTrigger>
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem className="px-0.5">
+                  <FormLabel>{t("description")}</FormLabel>
 
-                      <TabsTrigger
-                        className="hover:cursor-pointer hover:bg-white/80"
-                        value="negative"
-                      >
-                        {t("negative")}
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
+                  <FormControl className="rounded-md border">
+                    <MarkdownEditor
+                      disabled={isLoading}
+                      {...field}
+                      placeholder={t("descriptionPlaceholder")}
+                    />
+                  </FormControl>
 
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex w-full gap-2">
+              <div className="flex h-full w-2/3 flex-col gap-[0.25rem+1px] pt-1.5">
+                <FormLabel>{t("type")}</FormLabel>
+                <Tabs
+                  // @ts-ignore
+                  onValueChange={handleTypeChange}
+                  // @ts-ignore
+                  defaultValue={effect.type}
+                >
+                  <TabsList className="mt-px grid h-9 w-full grid-cols-2 gap-2">
+                    <TabsTrigger
+                      className="hover:cursor-pointer hover:bg-white/80"
+                      value="positive"
+                    >
+                      {t("positive")}
+                    </TabsTrigger>
+
+                    <TabsTrigger
+                      className="hover:cursor-pointer hover:bg-white/80"
+                      value="negative"
+                    >
+                      {t("negative")}
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="value"
+                render={({ field }: { field: any }) => (
+                  <FormItem className="flex flex-col gap-0.5 px-0.5">
+                    <div className="flex h-[1.3125rem] gap-2 pt-1.5">
+                      <FormLabel>{t("value")}</FormLabel>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <InfoCircledIcon />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-2xs">
+                            <p>{t("valueTooltip")}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+
+                    <FormControl>
+                      <Input
+                        type="number"
+                        className="mt-0.5"
+                        disabled={isLoading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="flex w-full gap-2">
+              <div className="flex h-full w-2/3 flex-col gap-[0.25rem+1px] pt-1.5">
+                <FormLabel>{t("durationType")}</FormLabel>
+                <Tabs
+                  // @ts-ignore
+                  onValueChange={handleDurationTypeChange}
+                  // @ts-ignore
+                  defaultValue={effect.durationType}
+                >
+                  <TabsList className="mt-px grid h-9 w-full grid-cols-2 gap-2">
+                    <TabsTrigger
+                      className="hover:cursor-pointer hover:bg-white/80"
+                      value="rounds"
+                    >
+                      {t("rounds")}
+                    </TabsTrigger>
+
+                    <TabsTrigger
+                      className="hover:cursor-pointer hover:bg-white/80"
+                      value="time"
+                    >
+                      {t("time")}
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+
+              {durationType === "rounds" && (
                 <FormField
                   control={form.control}
-                  name="value"
+                  name="duration"
                   render={({ field }: { field: any }) => (
-                    <FormItem className="flex flex-col gap-0.5 px-0.5">
-                      <div className="flex h-[1.3125rem] gap-2 pt-1.5">
-                        <FormLabel>{t("value")}</FormLabel>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <InfoCircledIcon />
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-2xs">
-                              <p>{t("valueTooltip")}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-
+                    <FormItem className="flex w-full flex-col gap-0.5 px-0.5">
+                      <FormLabel>{t("durationRounds")}</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -314,88 +362,44 @@ function EditEffectDrawer({
                     </FormItem>
                   )}
                 />
-              </div>
+              )}
 
-              <div className="flex w-full gap-2">
-                <div className="flex h-full w-2/3 flex-col gap-[0.25rem+1px] pt-1.5">
-                  <FormLabel>{t("durationType")}</FormLabel>
-                  <Tabs
-                    // @ts-ignore
-                    onValueChange={handleDurationTypeChange}
-                    // @ts-ignore
-                    defaultValue={effect.durationType}
-                  >
-                    <TabsList className="mt-px grid h-9 w-full grid-cols-2 gap-2">
-                      <TabsTrigger
-                        className="hover:cursor-pointer hover:bg-white/80"
-                        value="rounds"
-                      >
-                        {t("rounds")}
-                      </TabsTrigger>
-
-                      <TabsTrigger
-                        className="hover:cursor-pointer hover:bg-white/80"
-                        value="time"
-                      >
-                        {t("time")}
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
+              {durationType === "time" && (
+                <div className="flex w-full gap-4 px-0.5">
+                  <FormItem className="flex w-1/2 flex-col gap-0.5">
+                    <FormLabel>{t("durationMinutes")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        value={minutes}
+                        onChange={(e) =>
+                          handleMinutesChange(Number(e.target.value))
+                        }
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                  </FormItem>
+                  <FormItem className="flex w-1/2 flex-col gap-0.5">
+                    <FormLabel>{t("durationSeconds")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        value={seconds}
+                        onChange={(e) =>
+                          handleSecondsChange(Number(e.target.value))
+                        }
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                  </FormItem>
                 </div>
+              )}
+            </div>
+          </form>
+        </Form>
+      }
+    />
+  );
+}
 
-                {durationType === "rounds" && (
-                  <FormField
-                    control={form.control}
-                    name="duration"
-                    render={({ field }: { field: any }) => (
-                      <FormItem className="flex flex-col gap-0.5 px-0.5 w-full">
-                        <FormLabel>{t("durationRounds")}</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            className="mt-0.5"
-                            disabled={isLoading}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-
-                {durationType === "time" && (
-                  <div className="flex gap-4 px-0.5 w-full">
-                    <FormItem className="flex flex-col gap-0.5 w-1/2">
-                      <FormLabel>{t("durationMinutes")}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          value={minutes}
-                          onChange={(e) => handleMinutesChange(Number(e.target.value))}
-                          disabled={isLoading}
-                        />
-                      </FormControl>
-                    </FormItem>
-                    <FormItem className="flex flex-col gap-0.5 w-1/2">
-                      <FormLabel>{t("durationSeconds")}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          value={seconds}
-                          onChange={(e) => handleSecondsChange(Number(e.target.value))}
-                          disabled={isLoading}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  </div>
-                )}
-                          </div>
-                        </form>
-                      </Form>
-                    }
-                  />
-                );
-              }
-              
-              export default EditEffectDrawer;
+export default EditEffectDrawer;

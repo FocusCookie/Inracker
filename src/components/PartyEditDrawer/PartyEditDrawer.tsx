@@ -194,7 +194,10 @@ function PartyEditDrawer({
       }
     >
       <Form {...form} key={party?.id}>
-        <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+        <form
+          onSubmit={(e) => e.preventDefault()}
+          className="flex flex-col gap-4 pr-4"
+        >
           <div className="flex items-start gap-2">
             <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
               <FormLabel>{t("icon")}</FormLabel>

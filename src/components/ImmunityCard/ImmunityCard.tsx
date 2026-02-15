@@ -46,6 +46,7 @@ function ImmunityCard({
             <span>{immunity.icon}</span>
             <span className="font-semibold">{immunity.name}</span>
           </div>
+
           {actions || (
             <div className="flex gap-1">
               {onEdit && (
@@ -57,6 +58,7 @@ function ImmunityCard({
                   <Pencil1Icon />
                 </Button>
               )}
+
               {(onRemove || onDelete) && (
                 <Button
                   variant="ghost"
