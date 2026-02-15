@@ -13,6 +13,7 @@ export function useAppUpdates() {
   const checkForUpdates = useCallback(async () => {
     try {
       const update = await check();
+
       if (update) {
         toast({
           title: t("HookUseAppUpdates:availableTitle", "Update Available"),
@@ -26,12 +27,16 @@ export function useAppUpdates() {
               </p>
               <button
                 onClick={async () => {
-                  const url = "https://github.com/FocusCookie/Inracker/releases";
+                  const url =
+                    "https://github.com/FocusCookie/Inracker/releases";
                   await open(url);
                 }}
-                className="text-primary hover:underline text-xs text-left"
+                className="text-primary text-left text-xs hover:underline"
               >
-                {t("HookUseAppUpdates:viewChangelog", "View changelog in repository")}
+                {t(
+                  "HookUseAppUpdates:viewChangelog",
+                  "View changelog in repository",
+                )}
               </button>
             </div>
           ),
