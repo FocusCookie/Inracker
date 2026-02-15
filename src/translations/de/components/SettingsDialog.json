@@ -6,7 +6,7 @@
   "effects": "Effekte",
   "cleanup": "Aufräumen",
   "immunities": "Immunitäten",
-  "resistances": "Resistenzen",
+  "resistances": "Widerstände",
   "opponents": "Gegner",
   "level": "Level",
   "delete": "Löschen",
@@ -15,7 +15,7 @@
   "playerSearchPlaceholder": "Suche nach einem bestimmten Helden...",
   "effectSearchPlaceholder": "Suche nach einem bestimmten Effekt...",
   "immunitySearchPlaceholder": "Suche nach einer bestimmten Immunität...",
-  "resistanceSearchPlaceholder": "Suche nach einer bestimmten Resistenz...",
+  "resistanceSearchPlaceholder": "Suche nach einem bestimmten Widerstand...",
   "cleanupDescription": "TODO: Implementiere Aufräumfunktion-Button um Encounter-Gegner zu bereinigen, die nicht an einen Encounter angehängt sind",
   "opponentsDescription": "TODO: Implementiere Bearbeitung und Löschung von Gegnern"
 }

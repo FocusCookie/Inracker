@@ -1,11 +1,11 @@
 {
-  "descriptionText": "Erstelle einen neuen Gegner, um deine Spieler in spannenden Begegnungen herauszufordern. Passe ihre Werte, Fähigkeiten und Resistenzen an, um einzigartige Widersacher zu schaffen, die die Fähigkeiten und Strategien deiner Spieler auf die Probe stellen. Egal, ob es sich um einen gerissenen Drahtzieher, ein furchterregendes Biest oder eine Horde unerbittlicher Schergen handelt, dieses Tool ermöglicht es dir, unvergessliche Begegnungen zu gestalten, die deine Spieler fesseln werden.",
+  "descriptionText": "Erstelle einen neuen Gegner, um deine Spieler in spannenden Begegnungen herauszufordern. Passe ihre Werte, Fähigkeiten und Widerstände an, um einzigartige Widersacher zu schaffen, die die Fähigkeiten und Strategien deiner Spieler auf die Probe stellen. Egal, ob es sich um einen gerissenen Drahtzieher, ein furchterregendes Biest oder eine Horde unerbittlicher Schergen handelt, dieses Tool ermöglicht es dir, unvergessliche Begegnungen zu gestalten, die deine Spieler fesseln werden.",
   "title": "Gegner erstellen",
   "cancel": "Abbrechen",
   "create": "Erstellen",
   "immunities": "Immunitäten",
   "catalog": "Katalog",
-  "resistances": "Resistenzen",
+  "resistances": "Widerstände",
   "icon": "Symbol",
   "profilePictureAlt": "Gegnerbild",
   "opponentPicture": "Gegnerbild",

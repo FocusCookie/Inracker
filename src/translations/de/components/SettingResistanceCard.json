@@ -1,6 +1,6 @@
 {
-  "deletionWarning": "Sind Sie sicher, dass Sie diese Resistenz löschen möchten? Dies kann nicht rückgängig gemacht werden.",
+  "deletionWarning": "Sind Sie sicher, dass Sie diesen Widerstand löschen möchten? Dies kann nicht rückgängig gemacht werden.",
   "edit": "Bearbeiten",
   "delete": "Löschen",
-  "deleteResistance": "Resistenz löschen"
+  "deleteResistance": "Widerstand löschen"
 }

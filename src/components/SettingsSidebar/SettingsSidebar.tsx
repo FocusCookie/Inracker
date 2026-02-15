@@ -136,7 +136,7 @@ function SettingsSidebar({ activeItem, onClose, onSelect }: Props) {
                   onClick={() => onSelect("backup")}
                 >
                   <Save />
-                  <span>{t("backup")}</span>
+                  <span>{t("import-export")}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 

@@ -54,8 +54,6 @@ import { MusicPlayer } from "@/components/MusicPlayer/MusicPlayer";
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
 const ZOOM_DELTA = 0.5;
-const TEMP_DEFAULT_COLOR = "#FFFFFF";
-const TEMP_DEFAULT_ICON = "📝";
 
 type Props = {
   database: typeof db;
@@ -145,25 +143,15 @@ function Canvas({
     Record<string, boolean>
   >({});
 
-  const {
-    currentColor,
-    setCurrentColor,
-    currentIcon,
-    currentTitle,
-    setCurrentTitle,
-    setCurrentIcon,
-    resetCount,
-  } = useEncounterStore(
-    useShallow((state) => ({
-      currentIcon: state.currentIcon,
-      currentColor: state.currentColor,
-      setCurrentColor: state.setCurrentColor,
-      setCurrentIcon: state.setCurrentIcon,
-      setCurrentTitle: state.setCurrentTitle,
-      currentTitle: state.currentTitle,
-      resetCount: state.resetCount,
-    })),
-  );
+  const { currentColor, currentIcon, currentTitle, resetCount } =
+    useEncounterStore(
+      useShallow((state) => ({
+        currentIcon: state.currentIcon,
+        currentColor: state.currentColor,
+        currentTitle: state.currentTitle,
+        resetCount: state.resetCount,
+      })),
+    );
 
   const encounterOpponents = useQueryWithToast({
     queryKey: ["encounter-opponents"],
@@ -264,12 +252,6 @@ function Canvas({
   const [tempResizedElement, setTempResizedElement] = useState<
     (ClickableCanvasElement & { id: any }) | null
   >(null);
-
-  useEffect(() => {
-    setCurrentColor(TEMP_DEFAULT_COLOR);
-    setCurrentIcon(TEMP_DEFAULT_ICON);
-    setCurrentTitle("");
-  }, []);
 
   useEffect(() => {
     if (background && background !== "") {
@@ -1248,13 +1230,26 @@ function Canvas({
             {/* Icon */}
             <g
               id="temp-element-icon"
-              transform={`translate(${temporaryElement.x + 6}, ${temporaryElement.y + 30})`}
+              transform={`translate(${temporaryElement.x + 6}, ${temporaryElement.y + 34})`}
             >
               <text
                 className="font-sans text-4xl font-bold shadow-sm select-none"
                 dominantBaseline="middle"
               >
-                {currentIcon} {currentTitle}
+                {currentIcon}
+              </text>
+            </g>
+
+            {/* Title */}
+            <g
+              id="temp-element-name"
+              transform={`translate(${temporaryElement.x + 60}, ${temporaryElement.y + 30})`}
+            >
+              <text
+                className="font-sans text-lg font-medium text-white select-none"
+                dominantBaseline="middle"
+              >
+                {currentTitle}
               </text>
             </g>
           </g>

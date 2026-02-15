@@ -37,7 +37,7 @@ function Collapsible({ actions, children, title, disabled }: Props) {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div>
+                  <div className="cursor-not-allowed">
                     <Button size="icon" variant="ghost" disabled>
                       <ChevronDownIcon />
                     </Button>

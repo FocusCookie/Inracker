@@ -23,6 +23,7 @@ interface EncounterStoreState {
   setCurrentTitle: (title: string) => void;
   setCurrentIcon: (icon: string) => void;
   setResetCount: (value: number) => void;
+  reset: () => void;
 }
 
 export const useEncounterStore = create<EncounterStoreState>((set) => ({
@@ -58,4 +59,10 @@ export const useEncounterStore = create<EncounterStoreState>((set) => ({
   setCurrentTitle: (title: string) => set({ currentTitle: title }),
   setCurrentIcon: (icon: string) => set({ currentIcon: icon }),
   setResetCount: (value: number) => set({ resetCount: value }),
+  reset: () =>
+    set({
+      currentTitle: "",
+      currentColor: "#FFFFFF",
+      currentIcon: "📝",
+    }),
 }));

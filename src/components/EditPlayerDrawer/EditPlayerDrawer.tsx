@@ -202,6 +202,23 @@ function EditPlayerDrawer({
     });
   }
 
+  function handleCreateEffect() {
+    openOverlay("effect.create", {
+      onCreate: async (effect) => {
+        const createdEffect = await db.effects.create(effect);
+        return createdEffect;
+      },
+      onComplete: (effect) => {
+        const currentEffects = form.getValues("effects") || [];
+        form.setValue("effects", [...currentEffects, effect.id]);
+        effects.refetch();
+      },
+      onCancel: (reason) => {
+        console.log("Effect creation cancelled:", reason);
+      },
+    });
+  }
+
   function handleRemoveImmunity(id: number) {
     const currentImmunities = form.getValues("immunities") || [];
     form.setValue(
@@ -325,6 +342,13 @@ function EditPlayerDrawer({
               <div className="flex justify-between gap-4">
                 <TypographyH2> {t("effects")}</TypographyH2>
                 <div className="flex grow justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleCreateEffect}
+                  >
+                    {t("create")}
+                  </Button>
                   <Button type="button" onClick={handleOpenEffectCatalog}>
                     {t("catalog")}
                   </Button>
