@@ -40,7 +40,7 @@ jobs:
           cache: "npm"
 
       - name: Install frontend dependencies
-        run: npm install --legacy-peer-deps
+        run: npm install
 
       - name: Build and Create Release
         uses: tauri-apps/tauri-action@v0.5.15
@@ -54,4 +54,5 @@ jobs:
           releaseBody: "See the assets to download this version and install."
           releaseDraft: true
           prerelease: false
+          npm-install: false
           args: ${{ matrix.platform == 'macos-latest' && '--target universal-apple-darwin' || '' }}
