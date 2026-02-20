@@ -60,7 +60,8 @@ function Drawer({
             )}
 
             <Dialog.Content
-              onInteractOutside={modal ? (e) => e.preventDefault() : undefined}
+              onInteractOutside={(e) => e.preventDefault()}
+              onEscapeKeyDown={(e) => e.preventDefault()}
             >
               <motion.div
                 initial={{ opacity: 0, x: "100%" }}

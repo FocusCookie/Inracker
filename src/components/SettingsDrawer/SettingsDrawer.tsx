@@ -106,7 +106,10 @@ function SettingsDrawer({
               />
             </Dialog.Overlay>
 
-            <Dialog.Content>
+            <Dialog.Content
+              onInteractOutside={(e) => e.preventDefault()}
+              onEscapeKeyDown={(e) => e.preventDefault()}
+            >
               <motion.div
                 initial={{ opacity: 0, y: "100%" }}
                 animate={{ opacity: 1, y: 0 }}
