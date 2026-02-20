@@ -205,7 +205,10 @@ function EncounterSelection({
             container={document.getElementById("drawer-portal")}
             forceMount
           >
-            <Dialog.Content>
+            <Dialog.Content
+              onInteractOutside={(e) => e.preventDefault()}
+              onEscapeKeyDown={(e) => e.preventDefault()}
+            >
               {/* Ensure a11y title/description exist immediately on mount */}
               <Dialog.Title className="sr-only">
                 {encounter ? encounter.name : "Encounter"}
@@ -477,7 +480,11 @@ function EncounterSelection({
       >
         <Dialog.Portal container={document.getElementById("drawer-portal")}>
           <Dialog.Overlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80" />
-          <Dialog.Content className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 translate-x-[-50%] translate-y-[-50%] duration-200 outline-none">
+          <Dialog.Content
+            onInteractOutside={(e) => e.preventDefault()}
+            onEscapeKeyDown={(e) => e.preventDefault()}
+            className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 translate-x-[-50%] translate-y-[-50%] duration-200 outline-none"
+          >
             <Dialog.Title className="sr-only">Full screen image</Dialog.Title>
             <div className="relative">
               <img
