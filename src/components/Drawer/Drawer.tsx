@@ -19,7 +19,6 @@ type Props = {
   createTrigger?: React.ReactNode;
   cancelTrigger: React.ReactNode;
   noBackgdrop?: boolean;
-  modal?: boolean;
   onExitComplete: () => void;
 };
 
@@ -32,7 +31,6 @@ function Drawer({
   createTrigger,
   cancelTrigger,
   noBackgdrop,
-  modal,
   onExitComplete,
   onOpenChange,
 }: Props) {
