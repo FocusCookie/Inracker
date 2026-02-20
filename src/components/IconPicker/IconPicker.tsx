@@ -1,9 +1,11 @@
-import data from "@emoji-mart/data";
-import Picker from "@emoji-mart/react";
-import "emoji-mart";
 import { useState } from "react";
 import { Button } from "../ui/button";
-import * as PopoverPrimitive from "@radix-ui/react-popover";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import {
+  EmojiPicker,
+  EmojiPickerContent,
+  EmojiPickerSearch,
+} from "@/components/ui/emoji-picker";
 
 type Props = {
   onIconClick: (icon: string) => void;
@@ -15,16 +17,15 @@ function IconPicker({ initialIcon, disabled, onIconClick }: Props) {
   const [selectedIcon, setSelectedIcon] = useState(initialIcon || "🧙‍♂️");
   const [isOpen, setIsOpen] = useState(false);
 
-  function handleEmojiSelect(emojiData: any) {
-    const emoji = emojiData.native;
+  function handleEmojiSelect({ emoji }: { emoji: string }) {
     onIconClick(emoji);
     setSelectedIcon(emoji);
     setIsOpen(false);
   }
 
   return (
-    <PopoverPrimitive.Root open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverPrimitive.Trigger asChild>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
         <Button
           disabled={disabled}
           variant="outline"
@@ -32,27 +33,24 @@ function IconPicker({ initialIcon, disabled, onIconClick }: Props) {
         >
           {selectedIcon}
         </Button>
-      </PopoverPrimitive.Trigger>
+      </PopoverTrigger>
 
-      <PopoverPrimitive.Portal>
-        <PopoverPrimitive.Content
-          side="right"
-          align="start"
-          sideOffset={4}
-          onWheel={(e) => e.stopPropagation()}
+      <PopoverContent
+        side="right"
+        align="start"
+        sideOffset={4}
+        onWheel={(e) => e.stopPropagation()}
+        className="w-fit p-0"
+      >
+        <EmojiPicker
+          onEmojiSelect={handleEmojiSelect}
+          className="h-[326px] border-none shadow-none"
         >
-          <div className="rounded-lg border bg-white shadow-xl">
-            <Picker
-              data={data}
-              onEmojiSelect={handleEmojiSelect}
-              theme="light"
-              autoFocus={true}
-              set="native"
-            />
-          </div>
-        </PopoverPrimitive.Content>
-      </PopoverPrimitive.Portal>
-    </PopoverPrimitive.Root>
+          <EmojiPickerSearch />
+          <EmojiPickerContent />
+        </EmojiPicker>
+      </PopoverContent>
+    </Popover>
   );
 }
 

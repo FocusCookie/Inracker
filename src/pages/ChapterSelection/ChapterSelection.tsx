@@ -37,10 +37,7 @@ import { useTranslation } from "react-i18next";
 import { RiArrowLeftBoxLine, RiUserAddFill } from "react-icons/ri";
 import { useOverlayStore } from "@/stores/useOverlayStore";
 import { toast } from "@/hooks/use-toast";
-import {
-  useAddPlayer,
-  useRemovePlayer,
-} from "@/hooks/useParties";
+import { useAddPlayer, useRemovePlayer } from "@/hooks/useParties";
 import {
   useAddEffectToPlayer,
   useAddImmunityToPlayer,
@@ -56,14 +53,8 @@ import {
   useDeleteChapter,
   useUpdateChapter,
 } from "@/hooks/useChapters";
-import {
-  useCreateEffect,
-  useUpdateEffect,
-} from "@/hooks/useEffects";
-import {
-  useCreateImmunity,
-  useUpdateImmunity,
-} from "@/hooks/useImmunities";
+import { useCreateEffect, useUpdateEffect } from "@/hooks/useEffects";
+import { useCreateImmunity, useUpdateImmunity } from "@/hooks/useImmunities";
 import {
   useCreateResistance,
   useUpdateResistance,
@@ -93,9 +84,11 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
   const addEffectToPlayerMutation = useAddEffectToPlayer(database);
   const removeEffectFromPlayerMutation = useRemoveEffectFromPlayer(database);
   const addImmunityToPlayerMutation = useAddImmunityToPlayer(database);
-  const removeImmunityFromPlayerMutation = useRemoveImmunityFromPlayer(database);
+  const removeImmunityFromPlayerMutation =
+    useRemoveImmunityFromPlayer(database);
   const addResistanceToPlayerMutation = useAddResistanceToPlayer(database);
-  const removeResistanceFromPlayerMutation = useRemoveResistanceFromPlayer(database);
+  const removeResistanceFromPlayerMutation =
+    useRemoveResistanceFromPlayer(database);
 
   const createChapterMutation = useCreateChapter(database);
   const editChapterMutation = useUpdateChapter(database);
@@ -579,7 +572,7 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
                 <Loader size="large" title="loading chapters..." key="loader" />
               )}
               {!isLoading && (
-                <div className="scrollable-y flex w-full flex-col gap-4 overflow-y-scroll rounded pt-1 pr-2 pb-4">
+                <div className="scrollable-y flex w-full flex-col gap-6 overflow-y-scroll rounded pt-1 pr-2 pb-4">
                   {chapters.map((chapter, index) => (
                     <ChapterCard
                       key={`chapter-${chapter.id}`}

@@ -38,7 +38,7 @@ function PartyCard({ party, animationDelay = 0, onEdit, onOpen }: Props) {
       transition={{ delay: animationDelay }}
       exit={{ opacity: 0, x: "2rem" }}
     >
-      <Card className="flex flex-col">
+      <Card className="flex flex-col gap-4">
         <CardHeader className="flex flex-row">
           <div className="w-8 text-center">
             <TypographyH3>{party.icon}</TypographyH3>
