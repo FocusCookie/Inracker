@@ -95,7 +95,8 @@ function EditEncounterDrawer({
 
   function handleRemoveImage(indexToRemove: number) {
     const currentImages = form.getValues("images") || [];
-    form.setValue("images",
+    form.setValue(
+      "images",
       currentImages.filter((_, index) => index !== indexToRemove),
     );
   }
@@ -380,680 +381,626 @@ function EditEncounterDrawer({
         onSelect={handleAddImage}
       />
       <Drawer
-        modal={false}
-      onExitComplete={onExitComplete}
-      description={t("titleDescription")}
-      open={open}
-      onOpenChange={handleOpenChange}
-      title={t("title")}
-      actions={
-        <>
-          <Button onClick={form.handleSubmit(onSubmit)}>{t("save")}</Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" disabled={isLoading}>
-                {t("delete")}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t("areYouSure")}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t("deleteNote")}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="flex gap-4">
-                <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteEncounter}>
-                  {t("yesDelete")}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </>
-      }
-      cancelTrigger={
-        <Button
-          disabled={isLoading}
-          variant="ghost"
-          onClick={handleCancelClick}
-        >
-          {t("cancel")}
-        </Button>
-      }
-    >
-      <div className="scrollable-y grow overflow-y-scroll pr-0.5">
-        <div className="flex w-full grow flex-col gap-4 overflow-hidden">
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="flex flex-col gap-4"
-            >
-              <div className="flex w-full gap-2 px-0.5">
-                <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
-                  <FormLabel>{t("icon")}</FormLabel>
-                  <IconPicker
-                    initialIcon={form.getValues("icon")}
-                    disabled={isLoading}
-                    onIconClick={handleIconSelect}
-                  />
-                  <FormMessage />
-                </div>
+        onExitComplete={onExitComplete}
+        description={t("titleDescription")}
+        open={open}
+        onOpenChange={handleOpenChange}
+        title={t("title")}
+        actions={
+          <>
+            <Button onClick={form.handleSubmit(onSubmit)}>{t("save")}</Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" disabled={isLoading}>
+                  {t("delete")}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t("areYouSure")}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t("deleteNote")}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="flex gap-4">
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteEncounter}>
+                    {t("yesDelete")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
+        }
+        cancelTrigger={
+          <Button
+            disabled={isLoading}
+            variant="ghost"
+            onClick={handleCancelClick}
+          >
+            {t("cancel")}
+          </Button>
+        }
+      >
+        <div className="scrollable-y grow overflow-y-scroll pr-0.5">
+          <div className="flex w-full grow flex-col gap-4 overflow-hidden">
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="flex flex-col gap-4"
+              >
+                <div className="flex w-full gap-2 px-0.5">
+                  <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
+                    <FormLabel>{t("icon")}</FormLabel>
+                    <IconPicker
+                      initialIcon={form.getValues("icon")}
+                      disabled={isLoading}
+                      onIconClick={handleIconSelect}
+                    />
+                    <FormMessage />
+                  </div>
 
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem className="grow px-0.5">
-                      <FormLabel>{t("name")}</FormLabel>
-                      <FormControl>
-                        <Input
-                          disabled={isLoading}
-                          placeholder={t("namePlaceholder")}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="completed"
-                  render={({ field }) => (
-                    <FormItem className="flex w-40 flex-col gap-1 px-0.5 pt-1.5">
-                      <FormLabel>{t("completionState")}</FormLabel>
-                      <FormControl>
-                        <Button
-                          type="button"
-                          variant={field.value ? "success" : "outline"}
-                          className="w-full"
-                          onClick={() => field.onChange(!field.value)}
-                        >
-                          <CheckIcon />
-                          {field.value ? t("completed") : t("open")}
-                        </Button>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="flex w-full gap-2 px-0.5">
-                <FormField
-                  control={form.control}
-                  name="color"
-                  render={({ field }) => (
-                    <FormItem className="flex grow flex-col gap-1 pt-1.5">
-                      <FormLabel>{t("color")}</FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={(val) => field.onChange(val)}
-                          value={field.value}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder={t("white")} />
-                          </SelectTrigger>
-
-                          <SelectContent>
-                            <SelectItem value="#ffffff">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-white"></span>
-                                {t("white")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#f44336">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-red-500"></span>
-                                {t("red")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#ff9800">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-orange-500"></span>
-                                {t("orange")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#ffc107">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-amber-500"></span>
-                                {t("amber")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#ffeb3b">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-yellow-500"></span>
-                                {t("yellow")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#cddc39">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-lime-500"></span>
-                                {t("lime")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#4caf50">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-green-500"></span>
-                                {t("green")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#10b981">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-emerald-500"></span>
-                                {t("emerald")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#009688">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-teal-500"></span>
-                                {t("teal")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#00bcd4">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-cyan-500"></span>
-                                {t("cyan")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#0ea5e9">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-sky-500"></span>
-                                {t("sky")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#2196f3">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-blue-500"></span>
-                                {t("blue")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#3f51b5">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-indigo-500"></span>
-                                {t("indigo")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#8b5cf6">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-violet-500"></span>
-                                {t("violet")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#9c27b0">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-purple-500"></span>
-                                {t("purple")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#d946ef">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-fuchsia-500"></span>
-                                {t("fuchsia")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#e91e63">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-pink-500"></span>
-                                {t("pink")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#f43f5e">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-rose-500"></span>
-                                {t("rose")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#64748b">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-slate-500"></span>
-                                {t("slate")}
-                              </div>
-                            </SelectItem>
-
-                            <SelectItem value="#9e9e9e">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block h-4 w-4 rounded bg-gray-500"></span>
-                                {t("gray")}
-                              </div>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {(type === "roll" || type === "fight") && (
                   <FormField
                     control={form.control}
-                    name="experience"
+                    name="name"
                     render={({ field }) => (
-                      <FormItem className="w-1/2">
-                        <FormLabel>{t("experience")}</FormLabel>
+                      <FormItem className="grow px-0.5">
+                        <FormLabel>{t("name")}</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
                             disabled={isLoading}
+                            placeholder={t("namePlaceholder")}
                             {...field}
-                            onChange={(e) => {
-                              const parsedValue = e.target.value
-                                ? parseInt(e.target.value, 10)
-                                : undefined;
-                              field.onChange(parsedValue);
-                            }}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                )}
-              </div>
 
-                            <FormField
+                  <FormField
+                    control={form.control}
+                    name="completed"
+                    render={({ field }) => (
+                      <FormItem className="flex w-40 flex-col gap-1 px-0.5 pt-1.5">
+                        <FormLabel>{t("completionState")}</FormLabel>
+                        <FormControl>
+                          <Button
+                            type="button"
+                            variant={field.value ? "success" : "outline"}
+                            className="w-full"
+                            onClick={() => field.onChange(!field.value)}
+                          >
+                            <CheckIcon />
+                            {field.value ? t("completed") : t("open")}
+                          </Button>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                              control={form.control}
+                <div className="flex w-full gap-2 px-0.5">
+                  <FormField
+                    control={form.control}
+                    name="color"
+                    render={({ field }) => (
+                      <FormItem className="flex grow flex-col gap-1 pt-1.5">
+                        <FormLabel>{t("color")}</FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={(val) => field.onChange(val)}
+                            value={field.value}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder={t("white")} />
+                            </SelectTrigger>
 
-                              name="description"
+                            <SelectContent>
+                              <SelectItem value="#ffffff">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-white"></span>
+                                  {t("white")}
+                                </div>
+                              </SelectItem>
 
-                              render={({ field }) => (
+                              <SelectItem value="#f44336">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-red-500"></span>
+                                  {t("red")}
+                                </div>
+                              </SelectItem>
 
-                                <FormItem className="w-full px-0.5">
+                              <SelectItem value="#ff9800">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-orange-500"></span>
+                                  {t("orange")}
+                                </div>
+                              </SelectItem>
 
-                                  <FormLabel>{t("description")}</FormLabel>
+                              <SelectItem value="#ffc107">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-amber-500"></span>
+                                  {t("amber")}
+                                </div>
+                              </SelectItem>
 
-                                  <FormControl>
+                              <SelectItem value="#ffeb3b">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-yellow-500"></span>
+                                  {t("yellow")}
+                                </div>
+                              </SelectItem>
 
-                                    <MarkdownEditor
+                              <SelectItem value="#cddc39">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-lime-500"></span>
+                                  {t("lime")}
+                                </div>
+                              </SelectItem>
 
-                                      disabled={isLoading}
+                              <SelectItem value="#4caf50">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-green-500"></span>
+                                  {t("green")}
+                                </div>
+                              </SelectItem>
 
-                                      placeholder={t("descriptionPlaceholder")}
+                              <SelectItem value="#10b981">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-emerald-500"></span>
+                                  {t("emerald")}
+                                </div>
+                              </SelectItem>
 
-                                      {...field}
+                              <SelectItem value="#009688">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-teal-500"></span>
+                                  {t("teal")}
+                                </div>
+                              </SelectItem>
 
-                                    />
+                              <SelectItem value="#00bcd4">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-cyan-500"></span>
+                                  {t("cyan")}
+                                </div>
+                              </SelectItem>
 
-                                  </FormControl>
+                              <SelectItem value="#0ea5e9">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-sky-500"></span>
+                                  {t("sky")}
+                                </div>
+                              </SelectItem>
 
-                                  <FormMessage />
+                              <SelectItem value="#2196f3">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-blue-500"></span>
+                                  {t("blue")}
+                                </div>
+                              </SelectItem>
 
-                                </FormItem>
+                              <SelectItem value="#3f51b5">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-indigo-500"></span>
+                                  {t("indigo")}
+                                </div>
+                              </SelectItem>
 
-                              )}
+                              <SelectItem value="#8b5cf6">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-violet-500"></span>
+                                  {t("violet")}
+                                </div>
+                              </SelectItem>
 
+                              <SelectItem value="#9c27b0">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-purple-500"></span>
+                                  {t("purple")}
+                                </div>
+                              </SelectItem>
+
+                              <SelectItem value="#d946ef">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-fuchsia-500"></span>
+                                  {t("fuchsia")}
+                                </div>
+                              </SelectItem>
+
+                              <SelectItem value="#e91e63">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-pink-500"></span>
+                                  {t("pink")}
+                                </div>
+                              </SelectItem>
+
+                              <SelectItem value="#f43f5e">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-rose-500"></span>
+                                  {t("rose")}
+                                </div>
+                              </SelectItem>
+
+                              <SelectItem value="#64748b">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-slate-500"></span>
+                                  {t("slate")}
+                                </div>
+                              </SelectItem>
+
+                              <SelectItem value="#9e9e9e">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block h-4 w-4 rounded bg-gray-500"></span>
+                                  {t("gray")}
+                                </div>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {(type === "roll" || type === "fight") && (
+                    <FormField
+                      control={form.control}
+                      name="experience"
+                      render={({ field }) => (
+                        <FormItem className="w-1/2">
+                          <FormLabel>{t("experience")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              disabled={isLoading}
+                              {...field}
+                              onChange={(e) => {
+                                const parsedValue = e.target.value
+                                  ? parseInt(e.target.value, 10)
+                                  : undefined;
+                                field.onChange(parsedValue);
+                              }}
                             />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
 
-              
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem className="w-full px-0.5">
+                      <FormLabel>{t("description")}</FormLabel>
 
-                            <FormField
+                      <FormControl>
+                        <MarkdownEditor
+                          disabled={isLoading}
+                          placeholder={t("descriptionPlaceholder")}
+                          {...field}
+                        />
+                      </FormControl>
 
-                              control={form.control}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                              name="images"
+                <FormField
+                  control={form.control}
+                  name="images"
+                  render={({ field }) => (
+                    <FormItem className="w-full px-0.5">
+                      <FormLabel>{t("images")}</FormLabel>
 
-                              render={({ field }) => (
+                      <div className="flex flex-wrap gap-2">
+                        {field.value &&
+                          field.value.map((img: string, index: number) => (
+                            <div
+                              key={index}
+                              className="group relative h-16 w-16 overflow-hidden rounded-md border"
+                            >
+                              <img
+                                src={img}
+                                className="h-full w-full object-cover"
+                                alt={`Encounter image ${index}`}
+                              />
 
-                                <FormItem className="w-full px-0.5">
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 text-white hover:text-red-500"
+                                  onClick={() => handleRemoveImage(index)}
+                                >
+                                  <TrashIcon className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
 
-                                  <FormLabel>{t("images")}</FormLabel>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-16 w-16 border-dashed"
+                          onClick={() => setIsImageSelectionOpen(true)}
+                        >
+                          <PlusIcon className="text-muted-foreground h-6 w-6" />
+                        </Button>
+                      </div>
 
-                                  <div className="flex flex-wrap gap-2">
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                                    {field.value &&
+                <FormField
+                  control={form.control}
+                  name="soundcloud"
+                  render={({ field }) => (
+                    <FormItem className="w-full px-0.5">
+                      <FormLabel>SoundCloud</FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={isLoading}
+                          placeholder="SoundCloud Link (e.g. https://soundcloud.com/...)"
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                                      field.value.map((img: string, index: number) => (
+                <FormField
+                  control={form.control}
+                  name="musicFile"
+                  render={({ field }) => (
+                    <FormItem className="w-full px-0.5">
+                      <FormLabel>Music File</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept="audio/*"
+                          disabled={isLoading}
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const url = await storeAudio(file);
+                              if (url) field.onChange(url);
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                                        <div
-
-                                          key={index}
-
-                                          className="group relative h-16 w-16 overflow-hidden rounded-md border"
-
-                                        >
-
-                                          <img
-
-                                            src={img}
-
-                                            className="h-full w-full object-cover"
-
-                                            alt={`Encounter image ${index}`}
-
-                                          />
-
-                                          <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-
-                                            <Button
-
-                                              type="button"
-
-                                              variant="ghost"
-
-                                              size="icon"
-
-                                              className="h-6 w-6 text-white hover:text-red-500"
-
-                                              onClick={() => handleRemoveImage(index)}
-
-                                            >
-
-                                              <TrashIcon className="h-4 w-4" />
-
-                                            </Button>
-
-                                          </div>
-
-                                        </div>
-
-                                      ))}
-
-                                    <Button
-
-                                      type="button"
-
-                                      variant="outline"
-
-                                      className="h-16 w-16 border-dashed"
-
-                                      onClick={() => setIsImageSelectionOpen(true)}
-
-                                    >
-
-                                      <PlusIcon className="h-6 w-6 text-muted-foreground" />
-
-                                    </Button>
-
-                                  </div>
-
-                                  <FormMessage />
-
-                                </FormItem>
-
-                              )}
-
-                            />
-
-              
-
-              <FormField
-                control={form.control}
-                name="soundcloud"
-                render={({ field }) => (
-                  <FormItem className="w-full px-0.5">
-                    <FormLabel>SoundCloud</FormLabel>
-                    <FormControl>
-                      <Input
-                        disabled={isLoading}
-                        placeholder="SoundCloud Link (e.g. https://soundcloud.com/...)"
-                        {...field}
-                        value={field.value || ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="musicFile"
-                render={({ field }) => (
-                  <FormItem className="w-full px-0.5">
-                    <FormLabel>Music File</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="file"
-                        accept="audio/*"
-                        disabled={isLoading}
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const url = await storeAudio(file);
-                            if (url) field.onChange(url);
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex flex-col gap-1">
-                <FormLabel>{t("type")}</FormLabel>
-                <Tabs
-                  onValueChange={(v) =>
-                    handleTypeChange(v as "roll" | "note" | "fight")
-                  }
-                  value={type}
-                  className="w-full"
-                >
-                  <TabsList className="grid w-full grid-cols-3 gap-2">
-                    <TabsTrigger
-                      className="hover:cursor-pointer hover:bg-white/80"
-                      value="note"
-                    >
-                      {t("note")}
-                    </TabsTrigger>
-                    <TabsTrigger
-                      className="hover:cursor-pointer hover:bg-white/80"
-                      value="roll"
-                    >
-                      {t("roll")}
-                    </TabsTrigger>
-                    <TabsTrigger
-                      className="hover:cursor-pointer hover:bg-white/80"
-                      value="fight"
-                    >
-                      {t("fight")}
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent
-                    value="roll"
-                    className="flex flex-col gap-4 py-4"
+                <div className="flex flex-col gap-1">
+                  <FormLabel>{t("type")}</FormLabel>
+                  <Tabs
+                    onValueChange={(v) =>
+                      handleTypeChange(v as "roll" | "note" | "fight")
+                    }
+                    value={type}
+                    className="w-full"
                   >
-                    <div className="flex gap-2 px-0.5">
-                      <div className="flex flex-col gap-1">
-                        <FormLabel>{t("dice")}</FormLabel>
+                    <TabsList className="grid w-full grid-cols-3 gap-2">
+                      <TabsTrigger
+                        className="hover:cursor-pointer hover:bg-white/80"
+                        value="note"
+                      >
+                        {t("note")}
+                      </TabsTrigger>
+                      <TabsTrigger
+                        className="hover:cursor-pointer hover:bg-white/80"
+                        value="roll"
+                      >
+                        {t("roll")}
+                      </TabsTrigger>
+                      <TabsTrigger
+                        className="hover:cursor-pointer hover:bg-white/80"
+                        value="fight"
+                      >
+                        {t("fight")}
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent
+                      value="roll"
+                      className="flex flex-col gap-4 py-4"
+                    >
+                      <div className="flex gap-2 px-0.5">
+                        <div className="flex flex-col gap-1">
+                          <FormLabel>{t("dice")}</FormLabel>
+                          <FormField
+                            control={form.control}
+                            name="dice"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col gap-1 px-0.5">
+                                <FormControl>
+                                  <Select
+                                    value={field.value?.toString()}
+                                    onValueChange={(val) =>
+                                      field.onChange(val ? +val : undefined)
+                                    }
+                                  >
+                                    <SelectTrigger className="w-[180px]">
+                                      <SelectValue
+                                        placeholder={t("selectDice")}
+                                      />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="2">D2</SelectItem>
+                                      <SelectItem value="4">D4</SelectItem>
+                                      <SelectItem value="6">D6</SelectItem>
+                                      <SelectItem value="8">D8</SelectItem>
+                                      <SelectItem value="10">D10</SelectItem>
+                                      <SelectItem value="12">D12</SelectItem>
+                                      <SelectItem value="20">D20</SelectItem>
+                                      <SelectItem value="100">D100</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
                         <FormField
                           control={form.control}
-                          name="dice"
+                          name="skill"
                           render={({ field }) => (
-                            <FormItem className="flex flex-col gap-1 px-0.5">
+                            <FormItem className="flex w-full flex-col gap-1 px-0.5">
+                              <FormLabel>{t("skill")}</FormLabel>
                               <FormControl>
-                                <Select
-                                  value={field.value?.toString()}
-                                  onValueChange={(val) =>
-                                    field.onChange(val ? +val : undefined)
-                                  }
-                                >
-                                  <SelectTrigger className="w-[180px]">
-                                    <SelectValue
-                                      placeholder={t("selectDice")}
-                                    />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="2">D2</SelectItem>
-                                    <SelectItem value="4">D4</SelectItem>
-                                    <SelectItem value="6">D6</SelectItem>
-                                    <SelectItem value="8">D8</SelectItem>
-                                    <SelectItem value="10">D10</SelectItem>
-                                    <SelectItem value="12">D12</SelectItem>
-                                    <SelectItem value="20">D20</SelectItem>
-                                    <SelectItem value="100">D100</SelectItem>
-                                  </SelectContent>
-                                </Select>
+                                <Input
+                                  disabled={isLoading}
+                                  placeholder={t("skillPlaceholder")}
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                       </div>
-                      <FormField
-                        control={form.control}
-                        name="skill"
-                        render={({ field }) => (
-                          <FormItem className="flex w-full flex-col gap-1 px-0.5">
-                            <FormLabel>{t("skill")}</FormLabel>
-                            <FormControl>
-                              <Input
-                                disabled={isLoading}
-                                placeholder={t("skillPlaceholder")}
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="flex flex-col items-start gap-2 px-0.5">
-                      <FormLabel>{t("difficulties")}</FormLabel>
-                      {fields.map((field, index) => (
-                        <div className="flex w-full gap-2" key={field.id}>
-                          <Controller
-                            control={form.control}
-                            name={`difficulties.${index}.value`}
-                            render={({ field }) => (
-                              <Input
-                                {...field}
-                                type="number"
-                                min={1}
-                                max={100}
-                                className="w-20"
-                                onChange={(e) =>
-                                  field.onChange(e.target.valueAsNumber)
-                                }
-                              />
-                            )}
-                          />
-                          <Controller
-                            control={form.control}
-                            name={`difficulties.${index}.description`}
-                            render={({ field }) => (
-                              <Input {...field} type="text" className="grow" />
-                            )}
-                          />
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            size="icon"
-                            onClick={() => remove(index)}
-                          >
-                            <TrashIcon />
-                          </Button>
-                        </div>
-                      ))}
-                      <div className="flex w-full justify-center">
-                        <Button
-                          type="button"
-                          onClick={handleAddDifficulty}
-                          variant="secondary"
-                        >
-                          {t("addDifficulty")}
-                        </Button>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="fight">
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between gap-2 pt-4">
-                        <FormLabel>{t("opponents")}</FormLabel>
-                        <div className="flex gap-4 p-0.5">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={handleCreateOpponent}
-                          >
-                            {t("createOpponent")}
-                          </Button>
-                          <Button
-                            onClick={handleOpenOpponentsCatalog}
-                            type="button"
-                          >
-                            {t("catalog")}
-                          </Button>
-                        </div>
-                      </div>
-
-                      <Alert>
-                        <InfoIcon />
-                        <AlertTitle>{t("encounterOpponents")}</AlertTitle>
-                        <AlertDescription>
-                          {t("encounterOpponentsDescription")}
-                        </AlertDescription>
-                      </Alert>
-
-                      <div className="flex flex-col gap-4">
-                        {selectedOpponents.map(
-                          (opponent: EncounterOpponent) => (
-                            <div
-                              key={`encounter-opponent-${opponent.id}`}
-                              className="flex items-center gap-2"
-                            >
-                              <div className="grow">
-                                <OpponentCard
-                                  opponent={opponent}
-                                  onRemove={handleRemoveOpponent}
-                                  onEdit={undefined}
-                                />
-                              </div>
-                            </div>
-                          ),
-                        )}
-
-                        {encounterOpponentsToAttache.map(
-                          (opponent: EncounterOpponent, index: number) => (
-                            <div
-                              key={`encounter-opponent-to-attache-${index}`}
-                              className="flex items-center gap-2"
-                            >
-                              <div className="grow">
-                                <OpponentCard
-                                  opponent={opponent}
-                                  onRemove={() =>
-                                    handleRemoveEncounterOpponentToAttache(
-                                      index,
-                                    )
+                      <div className="flex flex-col items-start gap-2 px-0.5">
+                        <FormLabel>{t("difficulties")}</FormLabel>
+                        {fields.map((field, index) => (
+                          <div className="flex w-full gap-2" key={field.id}>
+                            <Controller
+                              control={form.control}
+                              name={`difficulties.${index}.value`}
+                              render={({ field }) => (
+                                <Input
+                                  {...field}
+                                  type="number"
+                                  min={1}
+                                  max={100}
+                                  className="w-20"
+                                  onChange={(e) =>
+                                    field.onChange(e.target.valueAsNumber)
                                   }
-                                  onEdit={undefined}
                                 />
-                              </div>
-                            </div>
-                          ),
-                        )}
+                              )}
+                            />
+                            <Controller
+                              control={form.control}
+                              name={`difficulties.${index}.description`}
+                              render={({ field }) => (
+                                <Input
+                                  {...field}
+                                  type="text"
+                                  className="grow"
+                                />
+                              )}
+                            />
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="icon"
+                              onClick={() => remove(index)}
+                            >
+                              <TrashIcon />
+                            </Button>
+                          </div>
+                        ))}
+                        <div className="flex w-full justify-center">
+                          <Button
+                            type="button"
+                            onClick={handleAddDifficulty}
+                            variant="secondary"
+                          >
+                            {t("addDifficulty")}
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </div>
-            </form>
-          </Form>
+                    </TabsContent>
+                    <TabsContent value="fight">
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between gap-2 pt-4">
+                          <FormLabel>{t("opponents")}</FormLabel>
+                          <div className="flex gap-4 p-0.5">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              onClick={handleCreateOpponent}
+                            >
+                              {t("createOpponent")}
+                            </Button>
+                            <Button
+                              onClick={handleOpenOpponentsCatalog}
+                              type="button"
+                            >
+                              {t("catalog")}
+                            </Button>
+                          </div>
+                        </div>
+
+                        <Alert>
+                          <InfoIcon />
+                          <AlertTitle>{t("encounterOpponents")}</AlertTitle>
+                          <AlertDescription>
+                            {t("encounterOpponentsDescription")}
+                          </AlertDescription>
+                        </Alert>
+
+                        <div className="flex flex-col gap-4">
+                          {selectedOpponents.map(
+                            (opponent: EncounterOpponent) => (
+                              <div
+                                key={`encounter-opponent-${opponent.id}`}
+                                className="flex items-center gap-2"
+                              >
+                                <div className="grow">
+                                  <OpponentCard
+                                    opponent={opponent}
+                                    onRemove={handleRemoveOpponent}
+                                    onEdit={undefined}
+                                  />
+                                </div>
+                              </div>
+                            ),
+                          )}
+
+                          {encounterOpponentsToAttache.map(
+                            (opponent: EncounterOpponent, index: number) => (
+                              <div
+                                key={`encounter-opponent-to-attache-${index}`}
+                                className="flex items-center gap-2"
+                              >
+                                <div className="grow">
+                                  <OpponentCard
+                                    opponent={opponent}
+                                    onRemove={() =>
+                                      handleRemoveEncounterOpponentToAttache(
+                                        index,
+                                      )
+                                    }
+                                    onEdit={undefined}
+                                  />
+                                </div>
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </div>
+              </form>
+            </Form>
+          </div>
         </div>
-      </div>
-    </Drawer>
+      </Drawer>
     </>
   );
 }
