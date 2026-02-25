@@ -128,7 +128,16 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
                 <FormItem className="w-full px-0.5">
                   <FormLabel>{t("level")}</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={disabled} {...field} />
+                    <Input
+                      type="number"
+                      disabled={disabled}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? undefined : Number(val));
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -142,7 +151,16 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
                 <FormItem className="w-full px-0.5">
                   <FormLabel>{t("health")}</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={disabled} {...field} />
+                    <Input
+                      type="number"
+                      disabled={disabled}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? undefined : Number(val));
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -203,7 +221,16 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
                 <FormItem className="w-full px-0.5">
                   <FormLabel>{t("gold")}</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={disabled} {...field} />
+                    <Input
+                      type="number"
+                      disabled={disabled}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? undefined : Number(val));
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -217,7 +244,16 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
                 <FormItem className="w-full px-0.5">
                   <FormLabel>{t("silver")}</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={disabled} {...field} />
+                    <Input
+                      type="number"
+                      disabled={disabled}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? undefined : Number(val));
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -231,7 +267,16 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
                 <FormItem className="w-full px-0.5">
                   <FormLabel>{t("copper")}</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={disabled} {...field} />
+                    <Input
+                      type="number"
+                      disabled={disabled}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? undefined : Number(val));
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -253,6 +298,11 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
                       max={3}
                       disabled={disabled}
                       {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? undefined : Number(val));
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
