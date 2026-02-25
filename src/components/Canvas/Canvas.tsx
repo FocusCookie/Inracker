@@ -1,5 +1,5 @@
 import db from "@/lib/database";
-import { cn } from "@/lib/utils";
+import { cn, getModifierKey } from "@/lib/utils";
 import { useEncounterStore } from "@/stores/useEncounterStore";
 import { Player } from "@/types/player";
 import { Token } from "@/types/tokens";
@@ -1917,7 +1917,7 @@ function Canvas({
             <TooltipContent className="flex items-center gap-2">
               <p>{t("zoomOut")}</p>
               <div className="flex gap-0.5">
-                <Kbd>⌘</Kbd>
+                <Kbd>{getModifierKey()}</Kbd>
                 <Kbd>-</Kbd>
               </div>
             </TooltipContent>
@@ -1935,7 +1935,7 @@ function Canvas({
             <TooltipContent className="flex items-center gap-2">
               <p>{t("zoomIn")}</p>
               <div className="flex gap-0.5">
-                <Kbd>⌘</Kbd>
+                <Kbd>{getModifierKey()}</Kbd>
                 <Kbd>+</Kbd>
               </div>
             </TooltipContent>
@@ -1953,7 +1953,7 @@ function Canvas({
             <TooltipContent className="flex items-center gap-2">
               <p>{t("resetZoom")}</p>
               <div className="flex gap-0.5">
-                <Kbd>⌘</Kbd>
+                <Kbd>{getModifierKey()}</Kbd>
                 <Kbd>0</Kbd>
               </div>
             </TooltipContent>
@@ -1978,7 +1978,7 @@ function Canvas({
             <TooltipContent className="flex items-center gap-2">
               <p>{t("drawEncounter")}</p>
               <div className="flex gap-0.5">
-                <Kbd>⌘</Kbd>
+                <Kbd>{getModifierKey()}</Kbd>
                 <Kbd>D</Kbd>
               </div>
             </TooltipContent>

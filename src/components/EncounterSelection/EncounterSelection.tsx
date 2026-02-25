@@ -1,7 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { useState } from "react";
 import db from "@/lib/database";
-import { cn } from "@/lib/utils";
+import { cn, getModifierKey } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { OverlayMap } from "@/types/overlay";
 import { Button } from "../ui/button";
@@ -350,7 +350,7 @@ function EncounterSelection({
                                     : t("startFight")}
                                   {!isCombatActive && (
                                     <div className="flex gap-0.5">
-                                      <Kbd>⌘</Kbd>
+                                      <Kbd>{getModifierKey()}</Kbd>
                                       <Kbd>F</Kbd>
                                     </div>
                                   )}

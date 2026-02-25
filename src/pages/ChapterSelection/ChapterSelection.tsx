@@ -61,6 +61,7 @@ import {
   useUpdateResistance,
 } from "@/hooks/useResistances";
 import database from "@/lib/database";
+import { getModifierKey } from "@/lib/utils";
 
 type Props = {
   database: typeof database;
@@ -568,7 +569,7 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
                       <p>{t("openDetails")}</p>
                     )}
                     <div className="flex gap-0.5">
-                      <Kbd>⌘</Kbd>
+                      <Kbd>{getModifierKey()}</Kbd>
                       <Kbd>S</Kbd>
                     </div>
                   </TooltipContent>

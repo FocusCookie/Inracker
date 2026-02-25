@@ -1,4 +1,5 @@
 import db from "@/lib/database";
+import { getModifierKey } from "@/lib/utils";
 import PlayLayout from "@/components/PlayLayout/PlayLayout";
 import { AnimatePresence, motion } from "framer-motion";
 import Canvas, {
@@ -1218,7 +1219,7 @@ function Play({
                   <p>{t("openDetails")}</p>
                 )}
                 <div className="flex gap-0.5">
-                  <Kbd>⌘</Kbd>
+                  <Kbd>{getModifierKey()}</Kbd>
                   <Kbd>S</Kbd>
                 </div>
               </TooltipContent>
@@ -1242,7 +1243,7 @@ function Play({
                 <TooltipContent className="flex items-center gap-2">
                   <p>{t("sessionLog")}</p>
                   <div className="flex gap-0.5">
-                    <Kbd>⌘</Kbd>
+                    <Kbd>{getModifierKey()}</Kbd>
                     <Kbd>P</Kbd>
                   </div>
                 </TooltipContent>

@@ -8,7 +8,7 @@ import { CheckIcon, ExternalLinkIcon } from "@radix-ui/react-icons";
 import { useTranslation } from "react-i18next";
 import { ClickableCanvasElement } from "./Canvas";
 import { Button } from "../ui/button";
-import { cn } from "@/lib/utils";
+import { cn, getModifierKey } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
   Tooltip,
@@ -190,7 +190,7 @@ export function CanvasElementNode({
                     <TooltipContent className="flex items-center gap-2" side="right">
                       <p>{t("select")}</p>
                       <div className="flex gap-0.5">
-                        <Kbd>⌘</Kbd>
+                        <Kbd>{getModifierKey()}</Kbd>
                         <Kbd>O</Kbd>
                       </div>
                     </TooltipContent>
