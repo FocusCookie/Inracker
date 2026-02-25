@@ -35,6 +35,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { RiArrowLeftBoxLine, RiUserAddFill } from "react-icons/ri";
+import { Kbd } from "@/components/ui/kbd";
 import { useOverlayStore } from "@/stores/useOverlayStore";
 import { toast } from "@/hooks/use-toast";
 import { useAddPlayer, useRemovePlayer } from "@/hooks/useParties";
@@ -560,12 +561,16 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
                       {isAsideOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent className="flex items-center gap-2">
                     {isAsideOpen ? (
-                      <p>{t("closeDetails")} (⌘S)</p>
+                      <p>{t("closeDetails")}</p>
                     ) : (
-                      <p>{t("openDetails")} (⌘S)</p>
+                      <p>{t("openDetails")}</p>
                     )}
+                    <div className="flex gap-0.5">
+                      <Kbd>⌘</Kbd>
+                      <Kbd>S</Kbd>
+                    </div>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

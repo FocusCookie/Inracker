@@ -47,6 +47,7 @@ import {
 import { useCombatState } from "@/hooks/useCombat";
 import { useEncounterQuery } from "@/hooks/useEncounters";
 import { useMusicStore } from "@/stores/useMusicStore";
+import { Kbd } from "../ui/kbd";
 
 type OverlayProps = OverlayMap["encounter.selection"];
 
@@ -343,10 +344,16 @@ function EncounterSelection({
                                     </Button>
                                   </div>
                                 </TooltipTrigger>
-                                <TooltipContent>
+                                <TooltipContent className="flex items-center gap-2">
                                   {isCombatActive
                                     ? t("fightOngoing")
                                     : t("startFight")}
+                                  {!isCombatActive && (
+                                    <div className="flex gap-0.5">
+                                      <Kbd>⌘</Kbd>
+                                      <Kbd>F</Kbd>
+                                    </div>
+                                  )}
                                 </TooltipContent>
                               </Tooltip>
                             </>

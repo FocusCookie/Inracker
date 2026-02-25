@@ -7,7 +7,6 @@ import {
   Cross2Icon,
   EyeNoneIcon,
   PaddingIcon,
-  ResetIcon,
   ZoomInIcon,
   ZoomOutIcon,
 } from "@radix-ui/react-icons";
@@ -31,6 +30,7 @@ import {
   CoffeeIcon,
   BedSingleIcon,
   ClockIcon,
+  MinimizeIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
@@ -50,6 +50,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatDuration } from "@/lib/time";
 import { CanvasElementNode } from "./CanvasElementNode";
 import { MusicPlayer } from "@/components/MusicPlayer/MusicPlayer";
+import { Kbd } from "../ui/kbd";
 
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
@@ -85,6 +86,8 @@ type Props = {
   onHealOpponent?: (opponentId: number) => void;
   onDamageOpponent?: (opponentId: number) => void;
   onToggleAside?: () => void;
+  onOpenSessionLog?: () => void;
+  onStartFight?: (encounterId: number) => void;
 };
 
 export type CanvasElement = {
@@ -98,6 +101,7 @@ export type CanvasElement = {
   completed?: boolean;
   opponents?: number[];
   isCombatActive?: boolean;
+  type?: string;
 };
 
 export type ClickableCanvasElement = CanvasElement & {
@@ -126,6 +130,8 @@ function Canvas({
   onHealOpponent,
   onDamageOpponent,
   onToggleAside,
+  onOpenSessionLog,
+  onStartFight,
 }: Props) {
   const { t } = useTranslation("ComponentCanvas");
   const queryClient = useQueryClient();
@@ -500,6 +506,9 @@ function Canvas({
         } else if (event.key === "-" || event.key === "_") {
           event.preventDefault();
           applyZoom(0.8);
+        } else if (event.key === "0") {
+          event.preventDefault();
+          resetZoom();
         } else if (event.key === "s") {
           event.preventDefault();
           onToggleAside?.();
@@ -507,6 +516,25 @@ function Canvas({
           event.preventDefault();
           setIsPanning(false);
           setIsDrawing((prev) => !prev);
+        } else if (event.key.toLowerCase() === "p") {
+          event.preventDefault();
+          onOpenSessionLog?.();
+        } else if (event.key.toLowerCase() === "f") {
+          event.preventDefault();
+          if (resizingElementId !== null) {
+            const element = elements.find((e) => e.id === resizingElementId);
+            if (element?.type === "fight") {
+              onStartFight?.(resizingElementId);
+            }
+          }
+        } else if (event.key.toLowerCase() === "o") {
+          event.preventDefault();
+          if (resizingElementId !== null) {
+            const element = elements.find((e) => e.id === resizingElementId);
+            if (element?.onClick) {
+              element.onClick(element);
+            }
+          }
         }
       }
     };
@@ -1033,6 +1061,8 @@ function Canvas({
   function unselectSelectedToken(event: KeyboardEvent) {
     if (event.key === "Escape") {
       onTokenSelect(null);
+      setIsDrawing(false);
+      setIsPanning(false);
     }
   }
 
@@ -1859,8 +1889,12 @@ function Canvas({
                 <ZoomOutIcon className="h-4 w-4" />
               </button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent className="flex items-center gap-2">
               <p>{t("zoomOut")}</p>
+              <div className="flex gap-0.5">
+                <Kbd>⌘</Kbd>
+                <Kbd>-</Kbd>
+              </div>
             </TooltipContent>
           </Tooltip>
 
@@ -1873,8 +1907,12 @@ function Canvas({
                 <ZoomInIcon className="h-4 w-4" />
               </button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent className="flex items-center gap-2">
               <p>{t("zoomIn")}</p>
+              <div className="flex gap-0.5">
+                <Kbd>⌘</Kbd>
+                <Kbd>+</Kbd>
+              </div>
             </TooltipContent>
           </Tooltip>
 
@@ -1884,11 +1922,15 @@ function Canvas({
                 onClick={resetZoom}
                 className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
               >
-                <ResetIcon className="h-4 w-4" />
+                <MinimizeIcon className="h-4 w-4" />
               </button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent className="flex items-center gap-2">
               <p>{t("resetZoom")}</p>
+              <div className="flex gap-0.5">
+                <Kbd>⌘</Kbd>
+                <Kbd>0</Kbd>
+              </div>
             </TooltipContent>
           </Tooltip>
 
@@ -1908,8 +1950,12 @@ function Canvas({
                 )}
               </button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent className="flex items-center gap-2">
               <p>{t("drawEncounter")}</p>
+              <div className="flex gap-0.5">
+                <Kbd>⌘</Kbd>
+                <Kbd>D</Kbd>
+              </div>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

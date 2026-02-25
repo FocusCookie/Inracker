@@ -51,6 +51,7 @@ import {
 } from "@/components/InitiativeCard/InitiativeCard";
 import { InitiativeMenuEntity } from "@/types/initiative";
 import { BedSingleIcon, CoffeeIcon, NotebookText } from "lucide-react";
+import { Kbd } from "@/components/ui/kbd";
 
 // Hooks
 import { useCombatState, useCombatActions } from "@/hooks/useCombat";
@@ -762,6 +763,12 @@ function Play({
 
   function handleOpenSessionLog() {
     if (!chapter.id) return;
+    const isAlreadyOpen = useOverlayStore
+      .getState()
+      .stack.some((item) => item.type === "session.log");
+
+    if (isAlreadyOpen) return;
+
     openOverlay("session.log", { chapterId: chapter.id });
   }
 
@@ -1204,12 +1211,16 @@ function Play({
                   {isAsideOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent className="flex items-center gap-2">
                 {isAsideOpen ? (
-                  <p>{t("closeDetails")} (⌘S)</p>
+                  <p>{t("closeDetails")}</p>
                 ) : (
-                  <p>{t("openDetails")} (⌘S)</p>
+                  <p>{t("openDetails")}</p>
                 )}
+                <div className="flex gap-0.5">
+                  <Kbd>⌘</Kbd>
+                  <Kbd>S</Kbd>
+                </div>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -1219,19 +1230,23 @@ function Play({
       <PlayLayout.SessionLog>
         <div className="flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
           <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={handleOpenSessionLog}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
-                >
-                  <NotebookText className="h-4 w-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t("sessionLog")}</p>
-              </TooltipContent>
-            </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleOpenSessionLog}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
+                  >
+                    <NotebookText className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="flex items-center gap-2">
+                  <p>{t("sessionLog")}</p>
+                  <div className="flex gap-0.5">
+                    <Kbd>⌘</Kbd>
+                    <Kbd>P</Kbd>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
           </TooltipProvider>
         </div>
       </PlayLayout.SessionLog>
@@ -1248,6 +1263,7 @@ function Play({
               completed: enc.completed,
               onEdit: () => handleElementEdit(enc),
               onClick: () => handleElementClick(enc),
+              type: enc.type,
             })) || []
           }
           temporaryElement={tempElement}
@@ -1267,6 +1283,11 @@ function Play({
           onHealOpponent={handleHealOpponent}
           onDamageOpponent={handleDamageOpponent}
           onToggleAside={handleAsideToggle}
+          onOpenSessionLog={handleOpenSessionLog}
+          onStartFight={(id) => {
+            const encounter = encounters.find((e) => e.id === id);
+            if (encounter) handleStartFight(encounter);
+          }}
         />
       </AnimatePresence>
     </PlayLayout>
