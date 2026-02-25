@@ -205,6 +205,7 @@ function EncounterSelection({
             container={document.getElementById("drawer-portal")}
             forceMount
           >
+            <Dialog.Overlay className="fixed inset-0 z-50 bg-transparent" />
             <Dialog.Content
               onInteractOutside={(e) => e.preventDefault()}
               onEscapeKeyDown={(e) => e.preventDefault()}
@@ -228,7 +229,7 @@ function EncounterSelection({
                   exit={{ opacity: 0, y: "100%" }}
                   transition={{ type: "tween", duration: 0.2 }}
                   className={cn(
-                    "shadow-4xl border-opacity-50 fixed bottom-4 left-[calc(50%+64px)] flex -translate-x-1/2 flex-col rounded-t-lg border-t-4 border-r-4 border-l-4 bg-white",
+                    "shadow-4xl border-opacity-50 fixed bottom-4 left-[calc(50%+64px)] flex -translate-x-1/2 flex-col rounded-t-lg border-t-4 border-r-4 border-l-4 bg-white z-50",
                     isExpanded ? "h-[80vh] w-[80vw]" : "w-full max-w-lg",
                   )}
                   onClick={(e) => e.stopPropagation()}

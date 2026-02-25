@@ -662,6 +662,12 @@ function Play({
   }
 
   function handleElementClick(encounter: Encounter) {
+    const isAlreadyOpen = useOverlayStore
+      .getState()
+      .stack.some((item) => item.type === "encounter.selection");
+
+    if (isAlreadyOpen) return;
+
     openOverlay("encounter.selection", {
       encounterId: encounter.id,
       chapterId: chapter.id,
