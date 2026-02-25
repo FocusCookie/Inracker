@@ -1,19 +1,50 @@
-.markdown-reader table {
+.markdown-reader,
+.markdown-editor {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Only target paragraphs inside the actual markdown content area */
+.markdown-reader .wmde-markdown p,
+.markdown-editor .wmde-markdown p {
+  margin-top: 4px !important;
+  margin-bottom: 4px !important;
+}
+
+.markdown-reader table,
+.markdown-editor .wmde-markdown table {
   width: 100%;
   text-align: left;
   margin-bottom: 1rem;
 }
 
-.markdown-reader table > thead > tr > th {
+.markdown-reader table > thead > tr > th,
+.markdown-editor .wmde-markdown table > thead > tr > th {
   font-size: 1.5rem;
 }
 
-.markdown-reader ul > li {
+.markdown-reader .wmde-markdown ul > li,
+.markdown-editor .wmde-markdown ul > li {
   padding-left: 0rem;
   margin-left: 1.5rem;
   list-style-type: disc;
 }
-.markdown-reader ol > li {
+
+.markdown-reader .wmde-markdown li.task-list-item,
+.markdown-editor .wmde-markdown li.task-list-item {
+  list-style-type: none !important;
+  margin-left: 0.25rem !important;
+}
+
+.markdown-reader .wmde-markdown li.task-list-item input,
+.markdown-editor .wmde-markdown li.task-list-item input {
+  margin-right: 0.5rem;
+  pointer-events: auto !important;
+  cursor: pointer;
+}
+
+.markdown-reader .wmde-markdown ol > li,
+.markdown-editor .wmde-markdown ol > li {
   padding-left: 0rem;
   margin-left: 1.5rem;
   list-style-type: decimal;

@@ -229,7 +229,7 @@ function EncounterSelection({
                   transition={{ type: "tween", duration: 0.2 }}
                   className={cn(
                     "shadow-4xl border-opacity-50 fixed bottom-4 left-[calc(50%+64px)] flex -translate-x-1/2 flex-col rounded-t-lg border-t-4 border-r-4 border-l-4 bg-white",
-                    isExpanded ? "h-[80vh] w-[80vw]" : "w-lg",
+                    isExpanded ? "h-[80vh] w-[80vw]" : "w-full max-w-lg",
                   )}
                   onClick={(e) => e.stopPropagation()}
                   style={{ borderColor: encounter.element.color }}
@@ -384,7 +384,15 @@ function EncounterSelection({
                   >
                     <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
                       {!!encounter.description && (
-                        <MarkdownReader markdown={encounter.description} />
+                        <MarkdownReader
+                          markdown={encounter.description}
+                          onChange={(newMarkdown) => {
+                            updateEncounterMutation.mutate({
+                              ...encounter,
+                              description: newMarkdown,
+                            });
+                          }}
+                        />
                       )}
 
                       <div className="flex flex-wrap gap-2">

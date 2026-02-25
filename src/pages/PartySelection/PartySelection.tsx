@@ -60,7 +60,7 @@ const PartySelection = ({
   }
 
   return (
-    <div className="flex h-full w-full flex-col items-center gap-8 rounded-md bg-white p-2">
+    <div className="scrollable-y flex h-full w-full flex-col items-center gap-8 overflow-y-scroll rounded-md bg-white p-2">
       <div className="md:w-content flex w-full flex-col items-center gap-4">
         <div className="flex w-full flex-col gap-2">
           <TypographyH1>{t("headline")}</TypographyH1>
@@ -81,7 +81,7 @@ const PartySelection = ({
           )}
 
           {!isLoading && (
-            <div className="scrollable-y w-full overflow-y-scroll pr-0.5">
+            <div className="w-full pr-0.5">
               <div className="flex w-full flex-col gap-4 pb-4">
                 {parties.map((party, index) => (
                   <PartyCard

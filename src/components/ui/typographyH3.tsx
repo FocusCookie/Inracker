@@ -10,7 +10,7 @@ export function TypographyH3({ children, truncate, ...props }: Props) {
     <h3
       {...props}
       className={cn([
-        "scroll-m-20 truncate text-2xl font-semibold tracking-tight",
+        "scroll-m-20 text-2xl font-semibold tracking-tight",
         truncate && "truncate",
       ])}
     >
