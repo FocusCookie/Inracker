@@ -898,6 +898,13 @@ function Play({
     });
   }
 
+  function handleToggleHeroPoint(player: Player, point: number) {
+    // If the point clicked is already the current value, decrease it by 1
+    // Otherwise set it to the clicked point
+    const newPoints = player.hero_points === point ? point - 1 : point;
+    editPlayer.mutate({ ...player, hero_points: newPoints });
+  }
+
   function handleHealOpponent(opponentId: number) {
     const opponent = encounterOpponents.data?.find((o) => o.id === opponentId);
     if (!opponent) return;
@@ -1110,6 +1117,7 @@ function Play({
             onHeal={handleHealPlayer}
             onDamage={handleDamagePlayer}
             onEditMoney={handleEditMoney}
+            onToggleHeroPoint={handleToggleHeroPoint}
           />
         ))}
       </PlayLayout.Players>

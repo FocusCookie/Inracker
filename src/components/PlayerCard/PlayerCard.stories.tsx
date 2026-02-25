@@ -20,6 +20,7 @@ const meta = {
     onOpenResistancesCatalog: fn(),
     onOpenEffectsCatalog: fn(),
     onEditMoney: fn(),
+    onToggleHeroPoint: fn(),
     expanded: false,
     player: {
       id: 1,
@@ -35,6 +36,7 @@ const meta = {
       gold: 10,
       silver: 5,
       copper: 100,
+      hero_points: 1,
       resistances: [
         {
           id: 1,

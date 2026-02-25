@@ -28,6 +28,7 @@ export type DBPlayer = {
   gold: number;
   silver: number;
   copper: number;
+  hero_points: number;
 };
 
 export type Player = Prettify<

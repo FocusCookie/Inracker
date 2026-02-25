@@ -20,4 +20,5 @@ export const createPlayerSchema = z.object({
   gold: z.coerce.number(),
   silver: z.coerce.number(),
   copper: z.coerce.number(),
+  hero_points: z.coerce.number().min(0).max(3),
 });

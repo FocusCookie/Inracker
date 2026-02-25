@@ -1,4 +1,9 @@
-import { HeartFilledIcon, TargetIcon } from "@radix-ui/react-icons";
+import {
+  HeartFilledIcon,
+  TargetIcon,
+  StarFilledIcon,
+  StarIcon,
+} from "@radix-ui/react-icons";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { motion } from "framer-motion";
@@ -47,6 +52,7 @@ type Props = {
   onHeal?: (playerId: Player["id"]) => void;
   onDamage?: (playerId: Player["id"]) => void;
   onEditMoney?: (player: Player) => void;
+  onToggleHeroPoint?: (player: Player, point: number) => void;
 };
 
 function PlayerCard({
@@ -67,6 +73,7 @@ function PlayerCard({
   onHeal,
   onDamage,
   onEditMoney,
+  onToggleHeroPoint,
 }: Props) {
   const { t } = useTranslation("ComponentPlayerCard");
 
@@ -146,6 +153,36 @@ function PlayerCard({
         </>
       )}
 
+      {onToggleHeroPoint && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="flex justify-between py-1 text-xs font-normal opacity-70">
+              <span>{t("heroPoints")}</span>
+              <div className="flex gap-1">
+                {[1, 2, 3].map((point) => (
+                  <button
+                    key={`hero-point-ctx-${point}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onToggleHeroPoint(player, point);
+                    }}
+                    className="hover:bg-accent rounded-sm p-0.5 hover:cursor-pointer"
+                  >
+                    {player.hero_points >= point ? (
+                      <StarFilledIcon className="text-yellow-500" />
+                    ) : (
+                      <StarIcon className="text-gray-400" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </DropdownMenuLabel>
+          </DropdownMenuGroup>
+        </>
+      )}
+
       {onEditMoney && (
         <>
           <DropdownMenuSeparator />
@@ -153,9 +190,15 @@ function PlayerCard({
             <DropdownMenuLabel className="flex justify-between py-1 text-xs font-normal opacity-70">
               <span>{t("money")}</span>
               <div className="flex gap-2 font-bold">
-                <span className="text-yellow-600 dark:text-yellow-500">G: {player.gold}</span>
-                <span className="text-gray-600 dark:text-gray-400">S: {player.silver}</span>
-                <span className="text-orange-600 dark:text-orange-400">C: {player.copper}</span>
+                <span className="text-yellow-600 dark:text-yellow-500">
+                  G: {player.gold}
+                </span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  S: {player.silver}
+                </span>
+                <span className="text-orange-600 dark:text-orange-400">
+                  C: {player.copper}
+                </span>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuItem onClick={handleEditMoney}>
@@ -204,6 +247,25 @@ function PlayerCard({
                 <div className="flex items-center gap-2">
                   <span className="grow text-xl font-bold">{player.name}</span>
 
+                  {onToggleHeroPoint && (
+                    <div className="flex gap-1">
+                      {[1, 2, 3].map((point) => (
+                        <button
+                          key={`hero-point-exp-${point}`}
+                          onClick={() => onToggleHeroPoint(player, point)}
+                          className="hover:bg-accent rounded-full p-1 hover:cursor-pointer"
+                          title={t("heroPoints")}
+                        >
+                          {player.hero_points >= point ? (
+                            <StarFilledIcon className="h-4 w-4 text-yellow-500" />
+                          ) : (
+                            <StarIcon className="h-4 w-4 text-gray-400" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
                   <Badge>
                     {t("level")} {player.level}
                   </Badge>
@@ -215,20 +277,22 @@ function PlayerCard({
                       </span>
                     </div>
                   </Badge>
+                </div>
 
+                <div className="mt-1 flex items-center justify-end gap-4">
                   <div className="flex gap-2">
-                    <Badge className="bg-yellow-500 hover:bg-yellow-600 text-black border-none">
+                    <Badge className="border-none bg-yellow-500 text-black hover:bg-yellow-600">
                       G: {player.gold}
                     </Badge>
-                    <Badge className="bg-gray-400 hover:bg-gray-500 text-black border-none">
+                    <Badge className="border-none bg-gray-400 text-black hover:bg-gray-500">
                       S: {player.silver}
                     </Badge>
-                    <Badge className="bg-orange-400 hover:bg-orange-500 text-black border-none">
+                    <Badge className="border-none bg-orange-400 text-black hover:bg-orange-500">
                       C: {player.copper}
                     </Badge>
                   </div>
                 </div>
-                <span>{player.role}</span>
+                <span className="mt-1">{player.role}</span>
               </div>
             </div>
 

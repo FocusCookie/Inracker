@@ -16,7 +16,8 @@
   "selectToken": "Token auswählen",
   "addHealth": "Leben hinzufügen",
     "removeHealth": "Leben entfernen",
-    "money": "Geld",
-    "changeMoney": "Geld ändern"
-  }
-  
+      "money": "Geld",
+      "changeMoney": "Geld ändern",
+      "heroPoints": "Heldenpunkte"
+    }
+    

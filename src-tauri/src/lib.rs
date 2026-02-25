@@ -293,6 +293,12 @@ pub fn run() {
                   ALTER TABLE players ADD COLUMN copper INTEGER DEFAULT 0;",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 24,
+            description: "add hero_points to players table",
+            sql: "ALTER TABLE players ADD COLUMN hero_points INTEGER DEFAULT 0;",
+            kind: MigrationKind::Up,
+        },
     ];
 
 tauri::Builder::default()

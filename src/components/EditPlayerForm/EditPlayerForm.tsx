@@ -168,6 +168,51 @@ const EditPlayerForm: EditPlayerFormCompound = ({
           </div>
 
           <div className="flex items-start gap-2 pl-1">
+            <Avatar className="mt-5">
+              <AvatarImage src={picturePreview} alt={t("profilePictureAlt")} />
+              <AvatarFallback>{form.watch("name")}</AvatarFallback>
+            </Avatar>
+
+            <FormItem className="mb-1.5 w-full px-0.5">
+              <FormLabel>{t("playerPicture")}</FormLabel>
+              <FormControl>
+                <div className="flex w-full gap-2">
+                  <Input
+                    key={`refresh-key-${refreshKey}`}
+                    className="grow"
+                    onChange={handleFileChange}
+                    type="file"
+                    disabled={disabled}
+                    placeholder={t("picturePlaceholder")}
+                    accept="image/*"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setIsImageSelectorOpen(true)}
+                    title="Select existing image"
+                    disabled={disabled}
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                  </Button>
+                  {!!picturePreview && (
+                    <Button
+                      type="button"
+                      onClick={handleResetPicture}
+                      variant="destructive"
+                      size="icon"
+                    >
+                      <TrashIcon />
+                    </Button>
+                  )}
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </div>
+
+          <div className="flex items-start gap-2 pl-1">
             <FormField
               control={form.control}
               name="gold"
@@ -212,48 +257,25 @@ const EditPlayerForm: EditPlayerFormCompound = ({
           </div>
 
           <div className="flex items-start gap-2 pl-1">
-            <Avatar className="mt-5">
-              <AvatarImage src={picturePreview} alt={t("profilePictureAlt")} />
-              <AvatarFallback>{form.watch("name")}</AvatarFallback>
-            </Avatar>
-
-            <FormItem className="mb-1.5 w-full px-0.5">
-              <FormLabel>{t("playerPicture")}</FormLabel>
-              <FormControl>
-                <div className="flex w-full gap-2">
-                  <Input
-                    key={`refresh-key-${refreshKey}`}
-                    className="grow"
-                    onChange={handleFileChange}
-                    type="file"
-                    disabled={disabled}
-                    placeholder={t("picturePlaceholder")}
-                    accept="image/*"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setIsImageSelectorOpen(true)}
-                    title="Select existing image"
-                    disabled={disabled}
-                  >
-                    <ImageIcon className="h-4 w-4" />
-                  </Button>
-                  {!!picturePreview && (
-                    <Button
-                      type="button"
-                      onClick={handleResetPicture}
-                      variant="destructive"
-                      size="icon"
-                    >
-                      <TrashIcon />
-                    </Button>
-                  )}
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <FormField
+              control={form.control}
+              name="hero_points"
+              render={({ field }: { field: any }) => (
+                <FormItem className="w-full px-0.5">
+                  <FormLabel>{t("heroPoints")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={3}
+                      disabled={disabled}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           <FormField

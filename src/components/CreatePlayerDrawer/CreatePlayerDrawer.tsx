@@ -89,6 +89,7 @@ export default function CreatePlayerDrawer({
         gold: values.gold,
         silver: values.silver,
         copper: values.copper,
+        hero_points: values.hero_points,
       };
 
       console.log("create ", input);

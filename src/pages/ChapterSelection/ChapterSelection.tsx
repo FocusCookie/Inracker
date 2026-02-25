@@ -412,6 +412,11 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
     });
   }
 
+  function handleToggleHeroPoint(player: Player, point: number) {
+    const newPoints = player.hero_points === point ? point - 1 : point;
+    editPlayer.mutate({ ...player, hero_points: newPoints });
+  }
+
   return (
     <AnimatePresence mode="wait">
       {isLoading && (
@@ -464,6 +469,7 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
                 onHeal={handleHealPlayer}
                 onDamage={handleDamagePlayer}
                 onEditMoney={handleEditMoney}
+                onToggleHeroPoint={handleToggleHeroPoint}
               />
             ))}
           </MainLayout.Players>
