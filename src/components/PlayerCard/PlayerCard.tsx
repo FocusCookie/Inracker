@@ -221,11 +221,11 @@ function PlayerCard({
   return (
     <>
       {expanded ? (
-        <div className="flex h-full w-full gap-2">
-          <div className="w-16">
+        <div className="flex h-auto w-full max-w-full min-w-0 gap-2 overflow-hidden">
+          <div className="w-16 shrink-0">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="focus-visible:ring-ring hover:bg-accent relative grid h-16 w-16 flex-col place-content-center gap-1 rounded-md ring-offset-1 hover:cursor-pointer focus-visible:ring-1 focus-visible:outline-hidden">
+                <button className="focus-visible:ring-ring hover:bg-accent relative grid h-16 w-16 shrink-0 flex-col place-content-center gap-1 rounded-md ring-offset-1 hover:cursor-pointer focus-visible:ring-1 focus-visible:outline-hidden">
                   <IconAvatar player={player} />
                 </button>
               </DropdownMenuTrigger>
@@ -240,59 +240,72 @@ function PlayerCard({
               x: 0,
               transition: { duration: 0.3, delay: 0.15 },
             }}
-            className="flex w-full flex-col gap-2 pt-0.5"
+            className="flex w-full min-w-0 flex-col gap-2 overflow-hidden pt-0.5"
           >
-            <div className="grow">
-              <div className="flex flex-col py-1">
-                <div className="flex items-center gap-2">
-                  <span className="grow text-xl font-bold">{player.name}</span>
+            <div className="min-w-0 grow w-full overflow-hidden">
+              <div className="flex min-w-0 flex-col py-1 w-full max-w-full overflow-hidden">
+                {/* Row 1: Name | Level | EP | Health */}
+                <div className="flex min-w-0 items-center gap-2 flex-nowrap w-full overflow-hidden">
+                  <div className="min-w-0 flex-1 truncate text-xl font-bold max-w-[307px]">
+                    {player.name}
+                  </div>
 
-                  {onToggleHeroPoint && (
-                    <div className="flex gap-1">
-                      {[1, 2, 3].map((point) => (
-                        <button
-                          key={`hero-point-exp-${point}`}
-                          onClick={() => onToggleHeroPoint(player, point)}
-                          className="hover:bg-accent rounded-full p-1 hover:cursor-pointer"
-                          title={t("heroPoints")}
-                        >
-                          {player.hero_points >= point ? (
-                            <StarFilledIcon className="h-4 w-4 text-yellow-500" />
-                          ) : (
-                            <StarIcon className="h-4 w-4 text-gray-400" />
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  <Badge>
+                  <Badge className="shrink-0 !whitespace-nowrap">
                     {t("level")} {player.level}
                   </Badge>
-                  <Badge>
-                    <div className="flex items-center gap-1">
-                      <HeartFilledIcon />
-                      <span>
+                  <Badge
+                    className="shrink-0 !whitespace-nowrap"
+                    variant="secondary"
+                  >
+                    {player.ep} EP
+                  </Badge>
+                  <Badge className="shrink-0 !whitespace-nowrap">
+                    <div className="flex items-center gap-1 flex-nowrap">
+                      <HeartFilledIcon className="shrink-0" />
+                      <span className="shrink-0 !whitespace-nowrap">
                         {player.health}/{player.max_health}
                       </span>
                     </div>
                   </Badge>
                 </div>
 
-                <div className="mt-1 flex items-center justify-end gap-4">
-                  <div className="flex gap-2">
-                    <Badge className="border-none bg-yellow-500 text-black hover:bg-yellow-600">
+                {/* Row 2: Role | Hero points | Money */}
+                <div className="mt-1 flex min-w-0 items-center gap-4 w-full max-w-full overflow-hidden">
+                  <div className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+                    {player.role}
+                  </div>
+
+                  {onToggleHeroPoint && (
+                    <div className="flex shrink-0 gap-1 flex-nowrap items-center">
+                      {[1, 2, 3].map((point) => (
+                        <button
+                          key={`hero-point-exp-${point}`}
+                          onClick={() => onToggleHeroPoint(player, point)}
+                          className="hover:bg-accent rounded-full p-1 shrink-0 hover:cursor-pointer"
+                          title={t("heroPoints")}
+                        >
+                          {player.hero_points >= point ? (
+                            <StarFilledIcon className="h-4 w-4 text-yellow-500 shrink-0" />
+                          ) : (
+                            <StarIcon className="h-4 w-4 text-gray-400 shrink-0" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex min-w-0 shrink-0 gap-2 flex-nowrap">
+                    <Badge className="shrink-0 border-none bg-yellow-500 !whitespace-nowrap text-black hover:bg-yellow-600">
                       G: {player.gold}
                     </Badge>
-                    <Badge className="border-none bg-gray-400 text-black hover:bg-gray-500">
+                    <Badge className="shrink-0 border-none bg-gray-400 !whitespace-nowrap text-black hover:bg-gray-500">
                       S: {player.silver}
                     </Badge>
-                    <Badge className="border-none bg-orange-400 text-black hover:bg-orange-500">
+                    <Badge className="shrink-0 border-none bg-orange-400 !whitespace-nowrap text-black hover:bg-orange-500">
                       C: {player.copper}
                     </Badge>
                   </div>
                 </div>
-                <span className="mt-1">{player.role}</span>
               </div>
             </div>
 

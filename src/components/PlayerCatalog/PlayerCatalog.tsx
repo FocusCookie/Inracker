@@ -120,12 +120,18 @@ function PlayerCatalog({
                     </span>
                   </div>
 
-                  <div className="flex grow flex-col items-start justify-start">
-                    <span className="text-xl font-bold">{player.name}</span>
+                  <div className="flex grow flex-col items-start justify-start min-w-0">
+                    <span className="text-xl font-bold truncate w-full text-left">
+                      {player.name}
+                    </span>
                   </div>
 
-                  <Badge variant="outline">{player.role}</Badge>
-                  <Badge variant="outline">LVL {player.level}</Badge>
+                  <Badge variant="outline" className="shrink-0 whitespace-nowrap">
+                    {player.role}
+                  </Badge>
+                  <Badge variant="outline" className="shrink-0 whitespace-nowrap">
+                    LVL {player.level}
+                  </Badge>
                 </button>
               ))}
           </div>

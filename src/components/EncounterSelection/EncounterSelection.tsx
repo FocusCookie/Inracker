@@ -239,9 +239,9 @@ function EncounterSelection({
                     className="flex flex-col gap-4 border-b-4 p-4"
                     style={{ borderColor: encounter.element.color }}
                   >
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center justify-between gap-2 min-w-0">
                       <Dialog.Title asChild>
-                        <TypographyH4 truncate>
+                        <TypographyH4 truncate className="truncate">
                           {encounter.element.icon} {encounter.name}
                         </TypographyH4>
                       </Dialog.Title>
