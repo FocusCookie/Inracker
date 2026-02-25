@@ -1,4 +1,7 @@
 {
   "edit": "Edit",
-  "select": "Select"
+  "select": "Select",
+  "gold": "Gold",
+  "silver": "Silver",
+  "copper": "Copper"
 }

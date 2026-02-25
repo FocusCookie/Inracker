@@ -18,6 +18,13 @@ import { Input } from "../ui/input";
 import { MarkdownEditor } from "../MarkdownEditor/MarkdownEditor";
 import { ImageSelectionDialog } from "../ImageSelectionDialog/ImageSelectionDialog";
 import { Image as ImageIcon } from "lucide-react";
+import { Badge } from "../ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
 type Props = {
   disabled: boolean;
@@ -228,6 +235,39 @@ const EditPlayerForm: EditPlayerFormCompound = ({
               </FormControl>
               <FormMessage />
             </FormItem>
+          </div>
+
+          <div className="flex items-start gap-2 pl-1">
+            <div className="flex w-full justify-end gap-2 pr-0.5">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge className="shrink-0 border-none bg-yellow-500 !whitespace-nowrap text-black hover:bg-yellow-600">
+                      G: {player.gold}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>{t("gold")}</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge className="shrink-0 border-none bg-gray-400 !whitespace-nowrap text-black hover:bg-gray-500">
+                      S: {player.silver}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>{t("silver")}</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge className="shrink-0 border-none bg-orange-400 !whitespace-nowrap text-black hover:bg-orange-500">
+                      C: {player.copper}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>{t("copper")}</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
 
           <div className="flex items-start gap-2 pl-1">
