@@ -15,5 +15,8 @@
   "negativeEffects": "Negative Effekte",
   "selectToken": "Token auswählen",
   "addHealth": "Leben hinzufügen",
-  "removeHealth": "Leben entfernen"
-}
+    "removeHealth": "Leben entfernen",
+    "money": "Geld",
+    "changeMoney": "Geld ändern"
+  }
+  

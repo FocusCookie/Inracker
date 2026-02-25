@@ -151,6 +151,50 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
           </div>
 
           <div className="flex items-start gap-2 pl-1">
+            <FormField
+              control={form.control}
+              name="gold"
+              render={({ field }: { field: any }) => (
+                <FormItem className="w-full px-0.5">
+                  <FormLabel>{t("gold")}</FormLabel>
+                  <FormControl>
+                    <Input type="number" disabled={disabled} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="silver"
+              render={({ field }: { field: any }) => (
+                <FormItem className="w-full px-0.5">
+                  <FormLabel>{t("silver")}</FormLabel>
+                  <FormControl>
+                    <Input type="number" disabled={disabled} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="copper"
+              render={({ field }: { field: any }) => (
+                <FormItem className="w-full px-0.5">
+                  <FormLabel>{t("copper")}</FormLabel>
+                  <FormControl>
+                    <Input type="number" disabled={disabled} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="flex items-start gap-2 pl-1">
             <Avatar className="mt-5">
               <AvatarImage src={picturePreview} alt={t("profilePictureAlt")} />
               <AvatarFallback>{form.watch("name").slice(0, 2)}</AvatarFallback>

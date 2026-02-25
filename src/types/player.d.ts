@@ -25,6 +25,9 @@ export type DBPlayer = {
   overview: string;
   resistances: string;
   role: string;
+  gold: number;
+  silver: number;
+  copper: number;
 };
 
 export type Player = Prettify<

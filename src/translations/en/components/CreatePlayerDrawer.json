@@ -76,5 +76,8 @@
   "detailsDescription": "This section is for all the essential skills and additional important information about the character. Expand it when you need to access specific details during your adventures!",
   "details": "Details",
   "select": "Select",
-  "catalog": "Catalog"
+  "catalog": "Catalog",
+  "gold": "Gold",
+  "silver": "Silver",
+  "copper": "Copper"
 }

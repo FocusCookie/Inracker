@@ -24,6 +24,9 @@ export const useEditPlayer = () => {
       picture: "",
       role: "",
       resistances: [],
+      gold: 0,
+      silver: 0,
+      copper: 0,
     },
   });
 

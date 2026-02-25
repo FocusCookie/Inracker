@@ -19,6 +19,7 @@ const meta = {
     onOpenImmunitiesCatalog: fn(),
     onOpenResistancesCatalog: fn(),
     onOpenEffectsCatalog: fn(),
+    onEditMoney: fn(),
     expanded: false,
     player: {
       id: 1,
@@ -31,6 +32,9 @@ const meta = {
       level: 4,
       immunities: [],
       name: "H. Potter",
+      gold: 10,
+      silver: 5,
+      copper: 100,
       resistances: [
         {
           id: 1,

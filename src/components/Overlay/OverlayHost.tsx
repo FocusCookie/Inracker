@@ -25,6 +25,7 @@ import OpponentsCatalog from "../OpponentsCatalog/OpponentsCatalog";
 import EditOpponentDrawer from "../EditOpponentDrawer/EditOpponentDrawer";
 import EditEncounterOpponentDrawer from "../EditEncounterOpponentDrawer/EditEncounterOpponentDrawer";
 import HealthDialog from "../HealthDialog/HealthDialog";
+import MoneyDialog from "../MoneyDialog/MoneyDialog";
 import SessionLogDrawer from "../SessionLogDrawer/SessionLogDrawer";
 
 type RuntimeOverlayProps = {
@@ -51,6 +52,7 @@ const registry: Record<OverlayKind, OverlayComponent<any>> = {
   "immunity.create": CreateImmunityDrawer,
   "immunity.catalog": ImmunitiesCatalog,
   "health.dialog": HealthDialog,
+  "money.dialog": MoneyDialog,
   "opponent.create": CreateOpponentDrawer,
   "opponent.edit": EditOpponentDrawer,
   "opponent.catalog": OpponentsCatalog,

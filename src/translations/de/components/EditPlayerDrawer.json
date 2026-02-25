@@ -22,5 +22,8 @@
   "immunities": "Immunitäten",
   "resistances": "Widerstände",
   "effects": "Effekte",
-  "catalog": "Katalog"
+  "catalog": "Katalog",
+  "gold": "Gold",
+  "silver": "Silber",
+  "copper": "Kupfer"
 }

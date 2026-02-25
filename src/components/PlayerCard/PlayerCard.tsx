@@ -46,6 +46,7 @@ type Props = {
   onOpenEffectsCatalog: () => void;
   onHeal?: (playerId: Player["id"]) => void;
   onDamage?: (playerId: Player["id"]) => void;
+  onEditMoney?: (player: Player) => void;
 };
 
 function PlayerCard({
@@ -65,6 +66,7 @@ function PlayerCard({
   onOpenEffectsCatalog,
   onHeal,
   onDamage,
+  onEditMoney,
 }: Props) {
   const { t } = useTranslation("ComponentPlayerCard");
 
@@ -81,6 +83,10 @@ function PlayerCard({
 
   function handleEditPlayer() {
     onEdit(player);
+  }
+
+  function handleEditMoney() {
+    if (onEditMoney) onEditMoney(player);
   }
 
   function handleRemoveImmunity(immunityId: DBImmunity["id"]) {
@@ -140,6 +146,25 @@ function PlayerCard({
         </>
       )}
 
+      {onEditMoney && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="flex justify-between py-1 text-xs font-normal opacity-70">
+              <span>{t("money")}</span>
+              <div className="flex gap-2 font-bold">
+                <span className="text-yellow-600 dark:text-yellow-500">G: {player.gold}</span>
+                <span className="text-gray-600 dark:text-gray-400">S: {player.silver}</span>
+                <span className="text-orange-600 dark:text-orange-400">C: {player.copper}</span>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuItem onClick={handleEditMoney}>
+              {t("changeMoney")}
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </>
+      )}
+
       <DropdownMenuSeparator />
       <DropdownMenuItem onClick={handleRemovePlayer}>
         {t("removeFromGroup")}
@@ -190,6 +215,18 @@ function PlayerCard({
                       </span>
                     </div>
                   </Badge>
+
+                  <div className="flex gap-2">
+                    <Badge className="bg-yellow-500 hover:bg-yellow-600 text-black border-none">
+                      G: {player.gold}
+                    </Badge>
+                    <Badge className="bg-gray-400 hover:bg-gray-500 text-black border-none">
+                      S: {player.silver}
+                    </Badge>
+                    <Badge className="bg-orange-400 hover:bg-orange-500 text-black border-none">
+                      C: {player.copper}
+                    </Badge>
+                  </div>
                 </div>
                 <span>{player.role}</span>
               </div>

@@ -44,6 +44,9 @@ export const getDetailedPlayerById = async (
     resistances: dbResistances,
     role,
     overview,
+    gold,
+    silver,
+    copper,
   } = dbPlayer;
 
   const effectsIds = JSON.parse(dbEffects) as number[];
@@ -125,6 +128,9 @@ export const getDetailedPlayerById = async (
     overview,
     resistances,
     role,
+    gold,
+    silver,
+    copper,
   };
 
   return player;
@@ -162,10 +168,13 @@ export const createPlayer = async (
     overview,
     resistances,
     role,
+    gold,
+    silver,
+    copper,
   } = player;
 
   const result = await execute( // Changed db.execute to execute
-    "INSERT INTO players (details, effects, ep, health, max_health, image, icon, immunities, level, name, overview, resistances, role) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)  RETURNING *",
+    "INSERT INTO players (details, effects, ep, health, max_health, image, icon, immunities, level, name, overview, resistances, role, gold, silver, copper) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)  RETURNING *",
     [
       details,
       effects.length > 0 ? JSON.stringify(effects.map((id) => id)) : "[]",
@@ -184,6 +193,9 @@ export const createPlayer = async (
         ? JSON.stringify(resistances.map((id) => id))
         : "[]",
       role,
+      gold,
+      silver,
+      copper,
     ],
   );
 
@@ -208,10 +220,13 @@ export const updatePlayer = async (
     overview,
     resistances,
     role,
+    gold,
+    silver,
+    copper,
   } = player;
 
   await execute( // Changed db.execute to execute
-    "UPDATE players SET details = $2, effects = $3, ep = $4, health = $5, max_health = $6, image = $7, icon = $8, immunities = $9, level = $10, name = $11, overview = $12, resistances = $13, role = $14 WHERE id = $1",
+    "UPDATE players SET details = $2, effects = $3, ep = $4, health = $5, max_health = $6, image = $7, icon = $8, immunities = $9, level = $10, name = $11, overview = $12, resistances = $13, role = $14, gold = $15, silver = $16, copper = $17 WHERE id = $1",
     [
       id, // 1
       details, // 2
@@ -227,6 +242,9 @@ export const updatePlayer = async (
       overview, // 12
       JSON.stringify(resistances.map((r) => r.id)), // 13
       role, // 14
+      gold, // 15
+      silver, // 16
+      copper, // 17
     ],
   );
 

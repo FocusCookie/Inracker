@@ -400,6 +400,18 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
     });
   }
 
+  function handleEditMoney(player: Player) {
+    openOverlay("money.dialog", {
+      player,
+      onSave: async (gold, silver, copper) => {
+        await editPlayer.mutateAsync({ ...player, gold, silver, copper });
+        toast({ title: t("moneyChanged", { name: player.name }) });
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+      },
+    });
+  }
+
   return (
     <AnimatePresence mode="wait">
       {isLoading && (
@@ -451,6 +463,7 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
                 onOpenImmunitiesCatalog={() => handleImmunitiesCatalog(player)}
                 onHeal={handleHealPlayer}
                 onDamage={handleDamagePlayer}
+                onEditMoney={handleEditMoney}
               />
             ))}
           </MainLayout.Players>

@@ -10,6 +10,8 @@ import ComponentSessionLogDrawerEN from "@/translations/en/components/SessionLog
 import ComponentSessionLogDrawerDE from "@/translations/de/components/SessionLogDrawer.json";
 import ComponentHealthDialogEN from "@/translations/en/components/HealthDialog.json";
 import ComponentHealthDialogDE from "@/translations/de/components/HealthDialog.json";
+import ComponentMoneyDialogEN from "@/translations/en/components/MoneyDialog.json";
+import ComponentMoneyDialogDE from "@/translations/de/components/MoneyDialog.json";
 import ComponentCreateCombatEffectDrawerEN from "@/translations/en/components/CreateCombatEffectDrawer.json";
 import ComponentCreateCombatEffectDrawerDE from "@/translations/de/components/CreateCombatEffectDrawer.json";
 import ComponentCombatControlsEN from "@/translations/en/components/CombatControls.json";
@@ -134,6 +136,7 @@ const resources = {
     ComponentCollapsible: ComponentCollapsibleEN,
     ComponentSessionLogDrawer: ComponentSessionLogDrawerEN,
     ComponentHealthDialog: ComponentHealthDialogEN,
+    ComponentMoneyDialog: ComponentMoneyDialogEN,
     ComponentCreateCombatEffectDrawer: ComponentCreateCombatEffectDrawerEN,
     ComponentCombatControls: ComponentCombatControlsEN,
     ComponentInitiativeMenueItem: ComponentInitiativeMenueItemEN,
@@ -205,6 +208,7 @@ const resources = {
     ComponentCollapsible: ComponentCollapsibleDE,
     ComponentSessionLogDrawer: ComponentSessionLogDrawerDE,
     ComponentHealthDialog: ComponentHealthDialogDE,
+    ComponentMoneyDialog: ComponentMoneyDialogDE,
     ComponentCreateCombatEffectDrawer: ComponentCreateCombatEffectDrawerDE,
     ComponentCombatControls: ComponentCombatControlsDE,
     ComponentInitiativeMenueItem: ComponentInitiativeMenueItemDE,

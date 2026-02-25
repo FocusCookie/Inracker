@@ -878,6 +878,26 @@ function Play({
     });
   }
 
+  function handleEditMoney(player: Player) {
+    openOverlay("money.dialog", {
+      player,
+      onSave: async (gold, silver, copper) => {
+        await editPlayer.mutateAsync({ ...player, gold, silver, copper });
+
+        await createLogMutation.mutateAsync({
+          chapterId: chapter.id,
+          title: t("changedMoney", { name: player.name }),
+          description: `G: ${gold}, S: ${silver}, C: ${copper}`,
+          icon: "💰",
+          type: "money",
+        });
+
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+      },
+    });
+  }
+
   function handleHealOpponent(opponentId: number) {
     const opponent = encounterOpponents.data?.find((o) => o.id === opponentId);
     if (!opponent) return;
@@ -1089,6 +1109,7 @@ function Play({
             onOpenImmunitiesCatalog={() => handleImmunitiesCatalog(player)}
             onHeal={handleHealPlayer}
             onDamage={handleDamagePlayer}
+            onEditMoney={handleEditMoney}
           />
         ))}
       </PlayLayout.Players>
