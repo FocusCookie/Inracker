@@ -562,13 +562,54 @@ function Canvas({
           }
         }
       }
+
+      if (isPanning) {
+        if (event.key.startsWith("Arrow")) {
+          event.preventDefault();
+          const step = 20 / zoomRef.current;
+          let dx = 0;
+          let dy = 0;
+
+          if (event.key === "ArrowUp") dy = -step;
+          if (event.key === "ArrowDown") dy = step;
+          if (event.key === "ArrowLeft") dx = -step;
+          if (event.key === "ArrowRight") dx = step;
+
+          currentViewBoxRef.current = {
+            ...currentViewBoxRef.current,
+            x: currentViewBoxRef.current.x + dx,
+            y: currentViewBoxRef.current.y + dy,
+          };
+
+          if (panRafId.current == null) {
+            panRafId.current = requestAnimationFrame(() => {
+              panRafId.current = null;
+              if (!svgRef.current) return;
+              const { x, y, width, height } = currentViewBoxRef.current;
+              svgRef.current.setAttribute(
+                "viewBox",
+                `${x} ${y} ${width} ${height}`,
+              );
+              setViewBox(currentViewBoxRef.current);
+            });
+          }
+        }
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [applyZoom, onToggleAside]);
+  }, [
+    applyZoom,
+    onToggleAside,
+    isPanning,
+    elements,
+    resizingElementId,
+    onOpenSessionLog,
+    onStartFight,
+  ]);
 
   function zoomIn() {
     setIsPanning(false);
