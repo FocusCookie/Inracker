@@ -275,16 +275,20 @@ function Canvas({
   }, [background]);
 
   useEffect(() => {
+    const handleBlur = () => setIsPanning(false);
+
     window.addEventListener("keydown", showPaneCursor);
     window.addEventListener("keyup", hidePaneCursor);
     window.addEventListener("keydown", unselectSelectedToken);
+    window.addEventListener("blur", handleBlur);
 
     return () => {
       window.removeEventListener("keydown", showPaneCursor);
       window.removeEventListener("keyup", hidePaneCursor);
       window.removeEventListener("keydown", unselectSelectedToken);
+      window.removeEventListener("blur", handleBlur);
     };
-  }, []);
+  }, [isPanning]); // Re-bind if showPaneCursor/hidePaneCursor change or depend on isPanning
 
   const transformScreenCoordsToSvgCoords = (
     event:
@@ -342,6 +346,7 @@ function Canvas({
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
       window.addEventListener("keyup", hidePaneCursor);
+      return;
     }
 
     if (isDrawing && svgRef.current) {
@@ -491,20 +496,23 @@ function Canvas({
     };
   }, [handleZoom, onToggleAside]);
 
-  const resetZoom = useCallback(() => {
+  function zoomIn() {
+    setIsPanning(false);
+    handleZoom("in");
+  }
+
+  function zoomOut() {
+    setIsPanning(false);
+    handleZoom("out");
+  }
+
+  function resetZoom() {
+    setIsPanning(false);
     const defaultViewBox = initialViewBoxRef.current;
     currentViewBoxRef.current = defaultViewBox;
     setViewBox(defaultViewBox);
     setZoom(1);
     zoomRef.current = 1;
-  }, []);
-
-  function zoomIn() {
-    handleZoom("in");
-  }
-
-  function zoomOut() {
-    handleZoom("out");
   }
 
   function showPaneCursor(event: KeyboardEvent) {
@@ -1006,18 +1014,6 @@ function Canvas({
       onTokenSelect(null);
     }
   }
-
-  useEffect(() => {
-    window.addEventListener("keydown", showPaneCursor);
-    window.addEventListener("keyup", hidePaneCursor);
-    window.addEventListener("keydown", unselectSelectedToken);
-
-    return () => {
-      window.removeEventListener("keydown", showPaneCursor);
-      window.removeEventListener("keyup", hidePaneCursor);
-      window.removeEventListener("keydown", unselectSelectedToken);
-    };
-  }, []);
 
   useEffect(() => {
     if (temporaryElement && tempRectRef.current) {
@@ -1877,7 +1873,10 @@ function Canvas({
           <Tooltip>
             <TooltipTrigger asChild>
               <button
-                onClick={() => setIsDrawing((c) => !c)}
+                onClick={() => {
+                  setIsPanning(false);
+                  setIsDrawing((c) => !c);
+                }}
                 className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
               >
                 {isDrawing ? (
