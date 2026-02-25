@@ -7,6 +7,7 @@ import ComponentInitiativeCard from "@/translations/en/components/InitiativeCard
 import ComponentCollapsible from "@/translations/en/components/Collapsible.json";
 import ComponentSessionLogDrawer from "@/translations/en/components/SessionLogDrawer.json";
 import ComponentHealthDialog from "@/translations/en/components/HealthDialog.json";
+import ComponentMoneyDialog from "@/translations/en/components/MoneyDialog.json";
 import ComponentCreateCombatEffectDrawer from "@/translations/en/components/CreateCombatEffectDrawer.json";
 import ComponentCombatControls from "@/translations/en/components/CombatControls.json";
 import ComponentInitiativeMenueItem from "@/translations/en/components/InitiativeMenueItem.json";
@@ -72,6 +73,7 @@ declare module "i18next" {
       ComponentCollapsible: typeof ComponentCollapsible;
       ComponentSessionLogDrawer: typeof ComponentSessionLogDrawer;
       ComponentHealthDialog: typeof ComponentHealthDialog;
+      ComponentMoneyDialog: typeof ComponentMoneyDialog;
       ComponentCreateCombatEffectDrawer: typeof ComponentCreateCombatEffectDrawer;
       ComponentCombatControls: typeof ComponentCombatControls;
       ComponentInitiativeMenueItem: typeof ComponentInitiativeMenueItem;

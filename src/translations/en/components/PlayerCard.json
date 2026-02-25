@@ -13,5 +13,11 @@
   "immunities": "Immunities",
   "resistances": "Resistances",
   "positiveEffects": "Positive Effects",
-  "negativeEffects": "Negative Effects"
+  "negativeEffects": "Negative Effects",
+  "money": "Money",
+  "changeMoney": "Change Money",
+  "heroPoints": "Hero Points",
+  "gold": "Gold",
+  "silver": "Silver",
+  "copper": "Copper"
 }

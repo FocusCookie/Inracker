@@ -20,4 +20,8 @@ export const editPlayerSchema = z.object({
   }),
   picture: z.instanceof(File).or(z.string()),
   resistances: z.array(z.number()),
+  gold: z.coerce.number(),
+  silver: z.coerce.number(),
+  copper: z.coerce.number(),
+  hero_points: z.coerce.number().min(0).max(3),
 });

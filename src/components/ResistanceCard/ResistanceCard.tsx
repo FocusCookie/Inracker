@@ -35,10 +35,10 @@ function ResistanceCard({ resistance, actions, onRemove, onEdit, onDelete }: Pro
     <Collapsible
       disabled={!resistance.description}
       title={
-        <div className="flex w-full items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex w-full items-center justify-between min-w-0 gap-2">
+          <div className="flex items-center gap-4 min-w-0">
             <span>{resistance.icon}</span>
-            <span className="font-semibold">{resistance.name}</span>
+            <span className="font-semibold truncate">{resistance.name}</span>
           </div>
           {actions || (
             <div className="flex gap-1">

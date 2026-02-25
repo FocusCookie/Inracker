@@ -1,0 +1,9 @@
+{
+  "title": "Change Money",
+  "description": "Update the money for {{name}}.",
+  "gold": "Gold",
+  "silver": "Silver",
+  "copper": "Copper",
+  "save": "Save",
+  "cancel": "Cancel"
+}

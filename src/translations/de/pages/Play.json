@@ -19,5 +19,6 @@
   "healedViaEffects": "Heilte {{name}} um {{amount}} HP durch Effekte",
   "damagedViaEffects": "{{name}} um {{amount}}HP durch Effekte geschädigt",
   "healedByEffect": "{{name}} um {{amount}} HP durch {{effect}} geheilt",
-  "damagedByEffect": "{{name}} um {{amount}}HP durch {{effect}} geschädigt"
+  "damagedByEffect": "{{name}} um {{amount}}HP durch {{effect}} geschädigt",
+  "changedMoney": "Das Geld von {{name}} hat sich geändert"
 }

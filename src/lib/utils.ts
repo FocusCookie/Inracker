@@ -127,3 +127,9 @@ export function getSoundCloudEmbedUrl(input: string): string | null {
 
   return null;
 }
+
+export function getModifierKey(): string {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  const isMac = userAgent.includes("mac");
+  return isMac ? "⌘" : "Ctrl";
+}

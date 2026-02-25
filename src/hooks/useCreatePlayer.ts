@@ -24,6 +24,10 @@ export const useCreatePlayer = () => {
       picture: "",
       role: "",
       resistances: [],
+      gold: 0,
+      silver: 0,
+      copper: 0,
+      hero_points: 0,
     },
   });
 

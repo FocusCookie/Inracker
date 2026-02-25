@@ -480,31 +480,28 @@ function CreateEncounterDrawer({
                     )}
                   />
 
-                  {(type === "roll" || type === "fight") && (
-                    <FormField
-                      control={form.control}
-                      name="experience"
-                      render={({ field }) => (
-                        <FormItem className="w-1/2">
-                          <FormLabel>{t("experience")}</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              disabled={isCreating}
-                              {...field}
-                              onChange={(e) => {
-                                const parsedValue = e.target.value
-                                  ? parseInt(e.target.value, 10)
-                                  : undefined;
-                                field.onChange(parsedValue);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                  <FormField
+                    control={form.control}
+                    name="experience"
+                    render={({ field }) => (
+                      <FormItem className="w-1/2">
+                        <FormLabel>{t("experience")}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            disabled={isCreating}
+                            {...field}
+                            value={field.value ?? ""}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              field.onChange(val === "" ? undefined : Number(val));
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 <FormField

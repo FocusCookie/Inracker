@@ -23,5 +23,8 @@
   "immunities": "Immunities",
   "resistances": "Resistances",
   "effects": "Effects",
-  "catalog": "Catalog"
+  "catalog": "Catalog",
+  "gold": "Gold",
+  "silver": "Silver",
+  "copper": "Copper"
 }

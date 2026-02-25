@@ -8,8 +8,15 @@ import { CheckIcon, ExternalLinkIcon } from "@radix-ui/react-icons";
 import { useTranslation } from "react-i18next";
 import { ClickableCanvasElement } from "./Canvas";
 import { Button } from "../ui/button";
-import { cn } from "@/lib/utils";
+import { cn, getModifierKey } from "@/lib/utils";
 import { motion } from "framer-motion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+import { Kbd } from "../ui/kbd";
 
 type Props = {
   element: ClickableCanvasElement & { id: any };
@@ -165,17 +172,30 @@ export function CanvasElementNode({
                   isSelected && "pointer-events-auto", // Enable when selected
                 )}
               >
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-10 w-10 bg-black text-white hover:bg-black/80 hover:text-white"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onClick();
-                  }}
-                >
-                  <ExternalLinkIcon className="h-6 w-6" />
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-10 w-10 bg-black text-white hover:bg-black/80 hover:text-white pointer-events-auto"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onClick();
+                        }}
+                      >
+                        <ExternalLinkIcon className="h-6 w-6" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="flex items-center gap-2" side="right">
+                      <p>{t("select")}</p>
+                      <div className="flex gap-0.5">
+                        <Kbd>{getModifierKey()}</Kbd>
+                        <Kbd>O</Kbd>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </foreignObject>
             </g>
 

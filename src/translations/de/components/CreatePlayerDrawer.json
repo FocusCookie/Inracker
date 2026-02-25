@@ -76,5 +76,8 @@
   "details": "Details",
   "detailsDescription": "Dieser Bereich ist für alle wichtigen Fähigkeiten und zusätzliche relevante Informationen über den Charakter gedacht. Öffne ihn, wenn du spezifische Details während deiner Abenteuer benötigst!",
   "select": "Auswahl",
-  "catalog": "Katalog"
+  "catalog": "Katalog",
+  "gold": "Gold",
+  "silver": "Silber",
+  "copper": "Kupfer"
 }

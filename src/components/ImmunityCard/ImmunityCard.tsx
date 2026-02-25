@@ -41,10 +41,10 @@ function ImmunityCard({
     <Collapsible
       disabled={!immunity.description}
       title={
-        <div className="flex w-full items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex w-full items-center justify-between min-w-0 gap-2">
+          <div className="flex items-center gap-4 min-w-0">
             <span>{immunity.icon}</span>
-            <span className="font-semibold">{immunity.name}</span>
+            <span className="font-semibold truncate">{immunity.name}</span>
           </div>
 
           {actions || (

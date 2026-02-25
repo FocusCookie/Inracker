@@ -1,7 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { useState } from "react";
 import db from "@/lib/database";
-import { cn } from "@/lib/utils";
+import { cn, getModifierKey } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { OverlayMap } from "@/types/overlay";
 import { Button } from "../ui/button";
@@ -47,6 +47,7 @@ import {
 import { useCombatState } from "@/hooks/useCombat";
 import { useEncounterQuery } from "@/hooks/useEncounters";
 import { useMusicStore } from "@/stores/useMusicStore";
+import { Kbd } from "../ui/kbd";
 
 type OverlayProps = OverlayMap["encounter.selection"];
 
@@ -205,6 +206,7 @@ function EncounterSelection({
             container={document.getElementById("drawer-portal")}
             forceMount
           >
+            <Dialog.Overlay className="fixed inset-0 z-50 bg-transparent" />
             <Dialog.Content
               onInteractOutside={(e) => e.preventDefault()}
               onEscapeKeyDown={(e) => e.preventDefault()}
@@ -228,8 +230,8 @@ function EncounterSelection({
                   exit={{ opacity: 0, y: "100%" }}
                   transition={{ type: "tween", duration: 0.2 }}
                   className={cn(
-                    "shadow-4xl border-opacity-50 fixed bottom-4 left-[calc(50%+64px)] flex -translate-x-1/2 flex-col rounded-t-lg border-t-4 border-r-4 border-l-4 bg-white",
-                    isExpanded ? "h-[80vh] w-[80vw]" : "w-lg",
+                    "shadow-4xl border-opacity-50 fixed bottom-4 left-[calc(50%+64px)] flex -translate-x-1/2 flex-col rounded-t-lg border-t-4 border-r-4 border-l-4 bg-white z-50",
+                    isExpanded ? "h-[80vh] w-[80vw]" : "w-full max-w-lg",
                   )}
                   onClick={(e) => e.stopPropagation()}
                   style={{ borderColor: encounter.element.color }}
@@ -238,9 +240,9 @@ function EncounterSelection({
                     className="flex flex-col gap-4 border-b-4 p-4"
                     style={{ borderColor: encounter.element.color }}
                   >
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center justify-between gap-2 min-w-0">
                       <Dialog.Title asChild>
-                        <TypographyH4 truncate>
+                        <TypographyH4 truncate className="truncate">
                           {encounter.element.icon} {encounter.name}
                         </TypographyH4>
                       </Dialog.Title>
@@ -342,10 +344,16 @@ function EncounterSelection({
                                     </Button>
                                   </div>
                                 </TooltipTrigger>
-                                <TooltipContent>
+                                <TooltipContent className="flex items-center gap-2">
                                   {isCombatActive
                                     ? t("fightOngoing")
                                     : t("startFight")}
+                                  {!isCombatActive && (
+                                    <div className="flex gap-0.5">
+                                      <Kbd>{getModifierKey()}</Kbd>
+                                      <Kbd>F</Kbd>
+                                    </div>
+                                  )}
                                 </TooltipContent>
                               </Tooltip>
                             </>
@@ -384,7 +392,15 @@ function EncounterSelection({
                   >
                     <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
                       {!!encounter.description && (
-                        <MarkdownReader markdown={encounter.description} />
+                        <MarkdownReader
+                          markdown={encounter.description}
+                          onChange={(newMarkdown) => {
+                            updateEncounterMutation.mutate({
+                              ...encounter,
+                              description: newMarkdown,
+                            });
+                          }}
+                        />
                       )}
 
                       <div className="flex flex-wrap gap-2">

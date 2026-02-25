@@ -33,8 +33,8 @@ function EffectCard({ actions, effect, onRemove, onEdit }: Props) {
     <Collapsible
       disabled={!effect.description}
       title={
-        <div className="flex w-full items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex w-full items-center justify-between min-w-0 gap-2">
+          <div className="flex items-center gap-4 min-w-0">
             <span
               className={cn(
                 effect.type === "positive" ? "bg-emerald-300" : "bg-red-300",
@@ -43,7 +43,7 @@ function EffectCard({ actions, effect, onRemove, onEdit }: Props) {
             >
               {effect.icon}
             </span>
-            <span className="font-semibold">{effect.name}</span>
+            <span className="font-semibold truncate">{effect.name}</span>
           </div>
           {actions || (
             <div className="flex gap-1">

@@ -1,0 +1,9 @@
+{
+  "title": "Geld ändern",
+  "description": "Aktualisiere das Geld für {{name}}.",
+  "gold": "Gold",
+  "silver": "Silber",
+  "copper": "Kupfer",
+  "save": "Speichern",
+  "cancel": "Abbrechen"
+}

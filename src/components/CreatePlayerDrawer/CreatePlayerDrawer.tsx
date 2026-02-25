@@ -86,6 +86,10 @@ export default function CreatePlayerDrawer({
         immunities: values.immunities,
         resistances: values.resistances,
         effects: [],
+        gold: values.gold,
+        silver: values.silver,
+        copper: values.copper,
+        hero_points: values.hero_points,
       };
 
       console.log("create ", input);

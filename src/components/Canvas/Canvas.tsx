@@ -1,5 +1,5 @@
 import db from "@/lib/database";
-import { cn } from "@/lib/utils";
+import { cn, getModifierKey } from "@/lib/utils";
 import { useEncounterStore } from "@/stores/useEncounterStore";
 import { Player } from "@/types/player";
 import { Token } from "@/types/tokens";
@@ -7,7 +7,6 @@ import {
   Cross2Icon,
   EyeNoneIcon,
   PaddingIcon,
-  ResetIcon,
   ZoomInIcon,
   ZoomOutIcon,
 } from "@radix-ui/react-icons";
@@ -31,6 +30,7 @@ import {
   CoffeeIcon,
   BedSingleIcon,
   ClockIcon,
+  MinimizeIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
@@ -50,10 +50,10 @@ import { Badge } from "@/components/ui/badge";
 import { formatDuration } from "@/lib/time";
 import { CanvasElementNode } from "./CanvasElementNode";
 import { MusicPlayer } from "@/components/MusicPlayer/MusicPlayer";
+import { Kbd } from "../ui/kbd";
 
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
-const ZOOM_DELTA = 0.5;
 
 type Props = {
   database: typeof db;
@@ -86,6 +86,8 @@ type Props = {
   onHealOpponent?: (opponentId: number) => void;
   onDamageOpponent?: (opponentId: number) => void;
   onToggleAside?: () => void;
+  onOpenSessionLog?: () => void;
+  onStartFight?: (encounterId: number) => void;
 };
 
 export type CanvasElement = {
@@ -99,6 +101,7 @@ export type CanvasElement = {
   completed?: boolean;
   opponents?: number[];
   isCombatActive?: boolean;
+  type?: string;
 };
 
 export type ClickableCanvasElement = CanvasElement & {
@@ -127,6 +130,8 @@ function Canvas({
   onHealOpponent,
   onDamageOpponent,
   onToggleAside,
+  onOpenSessionLog,
+  onStartFight,
 }: Props) {
   const { t } = useTranslation("ComponentCanvas");
   const queryClient = useQueryClient();
@@ -275,35 +280,41 @@ function Canvas({
   }, [background]);
 
   useEffect(() => {
+    const handleBlur = () => setIsPanning(false);
+
     window.addEventListener("keydown", showPaneCursor);
     window.addEventListener("keyup", hidePaneCursor);
     window.addEventListener("keydown", unselectSelectedToken);
+    window.addEventListener("blur", handleBlur);
 
     return () => {
       window.removeEventListener("keydown", showPaneCursor);
       window.removeEventListener("keyup", hidePaneCursor);
       window.removeEventListener("keydown", unselectSelectedToken);
+      window.removeEventListener("blur", handleBlur);
     };
-  }, []);
+  }, [isPanning]); // Re-bind if showPaneCursor/hidePaneCursor change or depend on isPanning
 
   const transformScreenCoordsToSvgCoords = (
     event:
       | MouseEvent
+      | WheelEvent
       | React.MouseEvent<SVGSVGElement>
       | React.MouseEvent<SVGImageElement>
       | React.MouseEvent<SVGGElement>
       | React.MouseEvent<SVGRectElement>,
   ) => {
-    if (!svgRef.current || !initialCTM.current) return { x: 0, y: 0 };
+    if (!svgRef.current) return { x: 0, y: 0 };
 
     const svg = svgRef.current;
+    const CTM = initialCTM.current || svg.getScreenCTM();
+    if (!CTM) return { x: 0, y: 0 };
+
     const point = svg.createSVGPoint();
     point.x = event.clientX;
     point.y = event.clientY;
 
-    const transformedPoint = point.matrixTransform(
-      initialCTM.current.inverse(),
-    );
+    const transformedPoint = point.matrixTransform(CTM.inverse());
 
     return {
       x: transformedPoint.x,
@@ -342,6 +353,7 @@ function Canvas({
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
       window.addEventListener("keyup", hidePaneCursor);
+      return;
     }
 
     if (isDrawing && svgRef.current) {
@@ -417,42 +429,83 @@ function Canvas({
     window.removeEventListener("mouseup", handleMouseUp);
   };
 
-  const handleZoom = useCallback((direction: "in" | "out") => {
-    const delta = direction === "in" ? ZOOM_DELTA : -ZOOM_DELTA;
-    const currentZoom = zoomRef.current;
-    const newZoom = Math.max(MIN_ZOOM, Math.min(currentZoom + delta, MAX_ZOOM));
+  const applyZoom = useCallback(
+    (scaleFactor: number, anchor?: { x: number; y: number }) => {
+      const currentZoom = zoomRef.current;
+      let newZoom = currentZoom * scaleFactor;
 
-    const { x, y, width, height } = currentViewBoxRef.current;
-    const currentCenterX = x + width / 2;
-    const currentCenterY = y + height / 2;
+      // Clamp zoom
+      newZoom = Math.max(MIN_ZOOM, Math.min(newZoom, MAX_ZOOM));
 
-    const newWidth = (width * currentZoom) / newZoom;
-    const newHeight = (height * currentZoom) / newZoom;
+      // Actual scale factor used (after clamping)
+      const actualFactor = newZoom / currentZoom;
+      if (Math.abs(actualFactor - 1) < 0.0001) return; // No change
 
-    const newX = currentCenterX - newWidth / 2;
-    const newY = currentCenterY - newHeight / 2;
+      const { x, y, width, height } = currentViewBoxRef.current;
 
-    const newViewBox = {
-      x: newX,
-      y: newY,
-      width: newWidth,
-      height: newHeight,
-    };
+      // Default to center if no anchor provided
+      const px = anchor ? anchor.x : x + width / 2;
+      const py = anchor ? anchor.y : y + height / 2;
 
-    currentViewBoxRef.current = newViewBox;
-    setViewBox(newViewBox);
-    setZoom(newZoom);
-    zoomRef.current = newZoom;
-  }, []);
+      const newWidth = width / actualFactor;
+      const newHeight = height / actualFactor;
+      const newX = px - (px - x) / actualFactor;
+      const newY = py - (py - y) / actualFactor;
+
+      const newViewBox = {
+        x: newX,
+        y: newY,
+        width: newWidth,
+        height: newHeight,
+      };
+
+      currentViewBoxRef.current = newViewBox;
+      setViewBox(newViewBox);
+      setZoom(newZoom);
+      zoomRef.current = newZoom;
+    },
+    [],
+  );
 
   useEffect(() => {
     const handleWheel = (event: WheelEvent) => {
-      if (event.metaKey) {
+      // Pinch-to-zoom is ctrlKey: true on trackpads.
+      // Meta (Cmd/Win) + scroll is also used for zoom.
+      if (event.ctrlKey || event.metaKey) {
         event.preventDefault();
-        if (event.deltaY < 0) {
-          handleZoom("in");
-        } else {
-          handleZoom("out");
+
+        // Calculate a granular scale factor.
+        const delta = -event.deltaY;
+        const scaleFactor = Math.pow(1.005, delta);
+
+        const anchor = transformScreenCoordsToSvgCoords(event);
+        applyZoom(scaleFactor, anchor);
+      } else {
+        // Panning movement (two fingers or mouse wheel)
+        event.preventDefault();
+
+        const currentZoom = zoomRef.current;
+        // Adjust delta by zoom level so panning speed feels consistent
+        const dx = event.deltaX / currentZoom;
+        const dy = event.deltaY / currentZoom;
+
+        const newX = currentViewBoxRef.current.x + dx;
+        const newY = currentViewBoxRef.current.y + dy;
+
+        currentViewBoxRef.current = {
+          ...currentViewBoxRef.current,
+          x: newX,
+          y: newY,
+        };
+
+        if (panRafId.current == null) {
+          panRafId.current = requestAnimationFrame(() => {
+            panRafId.current = null;
+            if (!svgRef.current) return;
+            const { x, y, width, height } = currentViewBoxRef.current;
+            svgRef.current.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
+            setViewBox(currentViewBoxRef.current);
+          });
         }
       }
     };
@@ -467,20 +520,79 @@ function Canvas({
         svg.removeEventListener("wheel", handleWheel);
       }
     };
-  }, [handleZoom]);
+  }, [applyZoom, transformScreenCoordsToSvgCoords]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey) {
         if (event.key === "+" || event.key === "=") {
           event.preventDefault();
-          handleZoom("in");
+          applyZoom(1.2);
         } else if (event.key === "-" || event.key === "_") {
           event.preventDefault();
-          handleZoom("out");
+          applyZoom(0.8);
+        } else if (event.key === "0") {
+          event.preventDefault();
+          resetZoom();
         } else if (event.key === "s") {
           event.preventDefault();
           onToggleAside?.();
+        } else if (event.key.toLowerCase() === "d") {
+          event.preventDefault();
+          setIsPanning(false);
+          setIsDrawing((prev) => !prev);
+        } else if (event.key.toLowerCase() === "p") {
+          event.preventDefault();
+          onOpenSessionLog?.();
+        } else if (event.key.toLowerCase() === "f") {
+          event.preventDefault();
+          if (resizingElementId !== null) {
+            const element = elements.find((e) => e.id === resizingElementId);
+            if (element?.type === "fight") {
+              onStartFight?.(resizingElementId);
+            }
+          }
+        } else if (event.key.toLowerCase() === "o") {
+          event.preventDefault();
+          if (resizingElementId !== null) {
+            const element = elements.find((e) => e.id === resizingElementId);
+            if (element?.onClick) {
+              element.onClick(element);
+            }
+          }
+        }
+      }
+
+      if (isPanning) {
+        if (event.key.startsWith("Arrow")) {
+          event.preventDefault();
+          const step = 20 / zoomRef.current;
+          let dx = 0;
+          let dy = 0;
+
+          if (event.key === "ArrowUp") dy = -step;
+          if (event.key === "ArrowDown") dy = step;
+          if (event.key === "ArrowLeft") dx = -step;
+          if (event.key === "ArrowRight") dx = step;
+
+          currentViewBoxRef.current = {
+            ...currentViewBoxRef.current,
+            x: currentViewBoxRef.current.x + dx,
+            y: currentViewBoxRef.current.y + dy,
+          };
+
+          if (panRafId.current == null) {
+            panRafId.current = requestAnimationFrame(() => {
+              panRafId.current = null;
+              if (!svgRef.current) return;
+              const { x, y, width, height } = currentViewBoxRef.current;
+              svgRef.current.setAttribute(
+                "viewBox",
+                `${x} ${y} ${width} ${height}`,
+              );
+              setViewBox(currentViewBoxRef.current);
+            });
+          }
         }
       }
     };
@@ -489,22 +601,33 @@ function Canvas({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [handleZoom, onToggleAside]);
+  }, [
+    applyZoom,
+    onToggleAside,
+    isPanning,
+    elements,
+    resizingElementId,
+    onOpenSessionLog,
+    onStartFight,
+  ]);
 
-  const resetZoom = useCallback(() => {
+  function zoomIn() {
+    setIsPanning(false);
+    applyZoom(1.2);
+  }
+
+  function zoomOut() {
+    setIsPanning(false);
+    applyZoom(0.8);
+  }
+
+  function resetZoom() {
+    setIsPanning(false);
     const defaultViewBox = initialViewBoxRef.current;
     currentViewBoxRef.current = defaultViewBox;
     setViewBox(defaultViewBox);
     setZoom(1);
     zoomRef.current = 1;
-  }, []);
-
-  function zoomIn() {
-    handleZoom("in");
-  }
-
-  function zoomOut() {
-    handleZoom("out");
   }
 
   function showPaneCursor(event: KeyboardEvent) {
@@ -1004,20 +1127,10 @@ function Canvas({
   function unselectSelectedToken(event: KeyboardEvent) {
     if (event.key === "Escape") {
       onTokenSelect(null);
+      setIsDrawing(false);
+      setIsPanning(false);
     }
   }
-
-  useEffect(() => {
-    window.addEventListener("keydown", showPaneCursor);
-    window.addEventListener("keyup", hidePaneCursor);
-    window.addEventListener("keydown", unselectSelectedToken);
-
-    return () => {
-      window.removeEventListener("keydown", showPaneCursor);
-      window.removeEventListener("keyup", hidePaneCursor);
-      window.removeEventListener("keydown", unselectSelectedToken);
-    };
-  }, []);
 
   useEffect(() => {
     if (temporaryElement && tempRectRef.current) {
@@ -1124,6 +1237,7 @@ function Canvas({
         className={cn(
           "h-full w-full rounded-md border-2 border-neutral-50 bg-neutral-50 bg-contain bg-center bg-no-repeat shadow-md",
           isPanning && "cursor-grab",
+          isDrawing && "cursor-copy",
         )}
         onMouseDownCapture={handleMouseDown}
       >
@@ -1841,8 +1955,12 @@ function Canvas({
                 <ZoomOutIcon className="h-4 w-4" />
               </button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent className="flex items-center gap-2">
               <p>{t("zoomOut")}</p>
+              <div className="flex gap-0.5">
+                <Kbd>{getModifierKey()}</Kbd>
+                <Kbd>-</Kbd>
+              </div>
             </TooltipContent>
           </Tooltip>
 
@@ -1855,8 +1973,12 @@ function Canvas({
                 <ZoomInIcon className="h-4 w-4" />
               </button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent className="flex items-center gap-2">
               <p>{t("zoomIn")}</p>
+              <div className="flex gap-0.5">
+                <Kbd>{getModifierKey()}</Kbd>
+                <Kbd>+</Kbd>
+              </div>
             </TooltipContent>
           </Tooltip>
 
@@ -1866,18 +1988,25 @@ function Canvas({
                 onClick={resetZoom}
                 className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
               >
-                <ResetIcon className="h-4 w-4" />
+                <MinimizeIcon className="h-4 w-4" />
               </button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent className="flex items-center gap-2">
               <p>{t("resetZoom")}</p>
+              <div className="flex gap-0.5">
+                <Kbd>{getModifierKey()}</Kbd>
+                <Kbd>0</Kbd>
+              </div>
             </TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
               <button
-                onClick={() => setIsDrawing((c) => !c)}
+                onClick={() => {
+                  setIsPanning(false);
+                  setIsDrawing((c) => !c);
+                }}
                 className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
               >
                 {isDrawing ? (
@@ -1887,8 +2016,12 @@ function Canvas({
                 )}
               </button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent className="flex items-center gap-2">
               <p>{t("drawEncounter")}</p>
+              <div className="flex gap-0.5">
+                <Kbd>{getModifierKey()}</Kbd>
+                <Kbd>D</Kbd>
+              </div>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

@@ -129,19 +129,21 @@ const PlayLayout: PlayLayoutCompound = ({
         <motion.aside
           key="aside"
           className={cn(
-            "absolute top-0 bottom-0 left-0 w-24 rounded-md bg-white p-4 pr-0",
+            "absolute top-0 bottom-0 left-0 w-24 rounded-md bg-white p-4 pr-0 overflow-hidden",
             isAsideFloating && "shadow-2xl",
           )}
           animate={{
             left: isEncounterOpen ? -96 : 0,
             width: isAsideOpen && !isEncounterOpen ? 640 : 96,
+            minWidth: isAsideOpen && !isEncounterOpen ? 640 : 96,
+            maxWidth: isAsideOpen && !isEncounterOpen ? 640 : 96,
             display: isEncounterOpen ? "none" : "block",
           }}
         >
-          <div className="flex h-full flex-col">
-            <div className="grow gap-4 overflow-hidden">
-              <ScrollArea className="h-full">
-                <div className="flex h-full w-full flex-col gap-4 pt-0.5 pr-4 pl-0.5">
+          <div className="flex h-full w-full flex-col min-w-0 max-w-full overflow-hidden">
+            <div className="grow w-full gap-4 overflow-hidden min-w-0 max-w-full">
+              <ScrollArea className="h-full w-full">
+                <div className="flex h-full w-full flex-col gap-4 pt-0.5 pr-4 pl-0.5 min-w-0 max-w-full overflow-hidden">
                   {playersChild}
                 </div>
               </ScrollArea>

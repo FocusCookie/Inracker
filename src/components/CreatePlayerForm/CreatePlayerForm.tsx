@@ -17,6 +17,13 @@ import { Input } from "../ui/input";
 import { MarkdownEditor } from "../MarkdownEditor/MarkdownEditor";
 import { ImageSelectionDialog } from "../ImageSelectionDialog/ImageSelectionDialog";
 import { Image as ImageIcon } from "lucide-react";
+import { Badge } from "../ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
 type Props = {
   disabled: boolean;
@@ -128,7 +135,16 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
                 <FormItem className="w-full px-0.5">
                   <FormLabel>{t("level")}</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={disabled} {...field} />
+                    <Input
+                      type="number"
+                      disabled={disabled}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? undefined : Number(val));
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -142,7 +158,16 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
                 <FormItem className="w-full px-0.5">
                   <FormLabel>{t("health")}</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={disabled} {...field} />
+                    <Input
+                      type="number"
+                      disabled={disabled}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? undefined : Number(val));
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -193,6 +218,104 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
               </FormControl>
               <FormMessage />
             </FormItem>
+          </div>
+
+          <div className="flex items-start gap-2 pl-1">
+            <FormField
+              control={form.control}
+              name="gold"
+              render={({ field }: { field: any }) => (
+                <FormItem className="w-full px-0.5">
+                  <FormLabel>{t("gold")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      disabled={disabled}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? undefined : Number(val));
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="silver"
+              render={({ field }: { field: any }) => (
+                <FormItem className="w-full px-0.5">
+                  <FormLabel>{t("silver")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      disabled={disabled}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? undefined : Number(val));
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="copper"
+              render={({ field }: { field: any }) => (
+                <FormItem className="w-full px-0.5">
+                  <FormLabel>{t("copper")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      disabled={disabled}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? undefined : Number(val));
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="flex items-start gap-2 pl-1">
+            <FormField
+              control={form.control}
+              name="hero_points"
+              render={({ field }: { field: any }) => (
+                <FormItem className="w-full px-0.5">
+                  <FormLabel>{t("heroPoints")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={3}
+                      disabled={disabled}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? undefined : Number(val));
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           <FormField

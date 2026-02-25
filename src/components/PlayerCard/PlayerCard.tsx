@@ -1,4 +1,9 @@
-import { HeartFilledIcon, TargetIcon } from "@radix-ui/react-icons";
+import {
+  HeartFilledIcon,
+  TargetIcon,
+  StarFilledIcon,
+  StarIcon,
+} from "@radix-ui/react-icons";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { motion } from "framer-motion";
@@ -22,6 +27,12 @@ import { useTranslation } from "react-i18next";
 import { DBEffect, Effect } from "@/types/effect";
 import EffectCard from "../EffectCard/EffectCard";
 import { Player } from "@/types/player";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
 type Props = {
   player: Player;
@@ -46,6 +57,8 @@ type Props = {
   onOpenEffectsCatalog: () => void;
   onHeal?: (playerId: Player["id"]) => void;
   onDamage?: (playerId: Player["id"]) => void;
+  onEditMoney?: (player: Player) => void;
+  onToggleHeroPoint?: (player: Player, point: number) => void;
 };
 
 function PlayerCard({
@@ -65,6 +78,8 @@ function PlayerCard({
   onOpenEffectsCatalog,
   onHeal,
   onDamage,
+  onEditMoney,
+  onToggleHeroPoint,
 }: Props) {
   const { t } = useTranslation("ComponentPlayerCard");
 
@@ -81,6 +96,10 @@ function PlayerCard({
 
   function handleEditPlayer() {
     onEdit(player);
+  }
+
+  function handleEditMoney() {
+    if (onEditMoney) onEditMoney(player);
   }
 
   function handleRemoveImmunity(immunityId: DBImmunity["id"]) {
@@ -140,6 +159,61 @@ function PlayerCard({
         </>
       )}
 
+      {onToggleHeroPoint && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="flex justify-between py-1 text-xs font-normal opacity-70">
+              <span>{t("heroPoints")}</span>
+              <div className="flex gap-1">
+                {[1, 2, 3].map((point) => (
+                  <button
+                    key={`hero-point-ctx-${point}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onToggleHeroPoint(player, point);
+                    }}
+                    className="hover:bg-accent rounded-sm p-0.5 hover:cursor-pointer"
+                  >
+                    {player.hero_points >= point ? (
+                      <StarFilledIcon className="text-yellow-500" />
+                    ) : (
+                      <StarIcon className="text-gray-400" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </DropdownMenuLabel>
+          </DropdownMenuGroup>
+        </>
+      )}
+
+      {onEditMoney && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="flex justify-between py-1 text-xs font-normal opacity-70">
+              <span>{t("money")}</span>
+              <div className="flex gap-2 font-bold">
+                <span className="text-yellow-600 dark:text-yellow-500">
+                  G: {player.gold}
+                </span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  S: {player.silver}
+                </span>
+                <span className="text-orange-600 dark:text-orange-400">
+                  C: {player.copper}
+                </span>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuItem onClick={handleEditMoney}>
+              {t("changeMoney")}
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </>
+      )}
+
       <DropdownMenuSeparator />
       <DropdownMenuItem onClick={handleRemovePlayer}>
         {t("removeFromGroup")}
@@ -153,11 +227,11 @@ function PlayerCard({
   return (
     <>
       {expanded ? (
-        <div className="flex h-full w-full gap-2">
-          <div className="w-16">
+        <div className="flex h-auto w-full max-w-full min-w-0 gap-2 overflow-hidden">
+          <div className="w-16 shrink-0">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="focus-visible:ring-ring hover:bg-accent relative grid h-16 w-16 flex-col place-content-center gap-1 rounded-md ring-offset-1 hover:cursor-pointer focus-visible:ring-1 focus-visible:outline-hidden">
+                <button className="focus-visible:ring-ring hover:bg-accent relative grid h-16 w-16 shrink-0 flex-col place-content-center gap-1 rounded-md ring-offset-1 hover:cursor-pointer focus-visible:ring-1 focus-visible:outline-hidden">
                   <IconAvatar player={player} />
                 </button>
               </DropdownMenuTrigger>
@@ -172,26 +246,93 @@ function PlayerCard({
               x: 0,
               transition: { duration: 0.3, delay: 0.15 },
             }}
-            className="flex w-full flex-col gap-2 pt-0.5"
+            className="flex w-full min-w-0 flex-col gap-2 overflow-hidden pt-0.5"
           >
-            <div className="grow">
-              <div className="flex flex-col py-1">
-                <div className="flex items-center gap-2">
-                  <span className="grow text-xl font-bold">{player.name}</span>
+            <div className="w-full min-w-0 grow overflow-hidden">
+              <div className="flex w-full max-w-full min-w-0 flex-col overflow-hidden py-1">
+                {/* Row 1: Name | Level | EP | Health */}
+                <div className="flex w-full min-w-0 flex-nowrap items-center gap-2 overflow-hidden">
+                  <div className="max-w-64 min-w-0 flex-1 truncate text-xl font-bold">
+                    {player.name}
+                  </div>
 
-                  <Badge>
-                    {t("level")} {player.level}
-                  </Badge>
-                  <Badge>
-                    <div className="flex items-center gap-1">
-                      <HeartFilledIcon />
-                      <span>
-                        {player.health}/{player.max_health}
-                      </span>
-                    </div>
-                  </Badge>
+                  <div className="flex shrink-0 grow items-center justify-end gap-2">
+                    <Badge className="shrink-0 !whitespace-nowrap">
+                      {t("level")} {player.level}
+                    </Badge>
+                    <Badge
+                      className="shrink-0 !whitespace-nowrap"
+                      variant="secondary"
+                    >
+                      {player.ep} EP
+                    </Badge>
+                    <Badge className="shrink-0 !whitespace-nowrap">
+                      <div className="flex flex-nowrap items-center gap-1">
+                        <HeartFilledIcon className="shrink-0" />
+                        <span className="shrink-0 !whitespace-nowrap">
+                          {player.health}/{player.max_health}
+                        </span>
+                      </div>
+                    </Badge>
+                  </div>
                 </div>
-                <span>{player.role}</span>
+
+                {/* Row 2: Role | Hero points | Money */}
+                <div className="mt-1 flex w-full max-w-full min-w-0 items-center gap-4 overflow-hidden">
+                  <div className="text-muted-foreground min-w-0 flex-1 truncate text-sm">
+                    {player.role}
+                  </div>
+
+                  {onToggleHeroPoint && (
+                    <div className="flex shrink-0 flex-nowrap items-center gap-1">
+                      {[1, 2, 3].map((point) => (
+                        <button
+                          key={`hero-point-exp-${point}`}
+                          onClick={() => onToggleHeroPoint(player, point)}
+                          className="hover:bg-accent shrink-0 rounded-full p-1 hover:cursor-pointer"
+                          title={t("heroPoints")}
+                        >
+                          {player.hero_points >= point ? (
+                            <StarFilledIcon className="h-4 w-4 shrink-0 text-yellow-500" />
+                          ) : (
+                            <StarIcon className="h-4 w-4 shrink-0 text-gray-400" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex min-w-0 shrink-0 flex-nowrap gap-2">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge className="shrink-0 border-none bg-yellow-500 !whitespace-nowrap text-black hover:bg-yellow-600">
+                            G: {player.gold}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>{t("gold")}</TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge className="shrink-0 border-none bg-gray-400 !whitespace-nowrap text-black hover:bg-gray-500">
+                            S: {player.silver}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>{t("silver")}</TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge className="shrink-0 border-none bg-orange-400 !whitespace-nowrap text-black hover:bg-orange-500">
+                            C: {player.copper}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>{t("copper")}</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </div>
               </div>
             </div>
 

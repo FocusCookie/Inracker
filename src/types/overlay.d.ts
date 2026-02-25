@@ -34,6 +34,7 @@ export type OverlaySuccessMap = {
   "immunity.catalog": DBImmunity;
   "immunity.edit": DBImmunity;
   "health.dialog": number;
+  "money.dialog": { gold: number; silver: number; copper: number };
   "session.log": void;
   settings: void;
 };
@@ -164,6 +165,11 @@ export type OverlayMap = {
     entityName: string;
     type: "heal" | "damage";
     onConfirm: (amount: number, note?: string) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "money.dialog": {
+    player: Player;
+    onSave: (gold: number, silver: number, copper: number) => Promise<void>;
     onCancel?: (reason: CancelReason) => void;
   };
   "session.log": {
