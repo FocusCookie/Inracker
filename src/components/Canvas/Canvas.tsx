@@ -53,7 +53,6 @@ import { MusicPlayer } from "@/components/MusicPlayer/MusicPlayer";
 
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
-const ZOOM_DELTA = 0.5;
 
 type Props = {
   database: typeof db;
@@ -293,21 +292,23 @@ function Canvas({
   const transformScreenCoordsToSvgCoords = (
     event:
       | MouseEvent
+      | WheelEvent
       | React.MouseEvent<SVGSVGElement>
       | React.MouseEvent<SVGImageElement>
       | React.MouseEvent<SVGGElement>
       | React.MouseEvent<SVGRectElement>,
   ) => {
-    if (!svgRef.current || !initialCTM.current) return { x: 0, y: 0 };
+    if (!svgRef.current) return { x: 0, y: 0 };
 
     const svg = svgRef.current;
+    const CTM = initialCTM.current || svg.getScreenCTM();
+    if (!CTM) return { x: 0, y: 0 };
+
     const point = svg.createSVGPoint();
     point.x = event.clientX;
     point.y = event.clientY;
 
-    const transformedPoint = point.matrixTransform(
-      initialCTM.current.inverse(),
-    );
+    const transformedPoint = point.matrixTransform(CTM.inverse());
 
     return {
       x: transformedPoint.x,
@@ -422,43 +423,59 @@ function Canvas({
     window.removeEventListener("mouseup", handleMouseUp);
   };
 
-  const handleZoom = useCallback((direction: "in" | "out") => {
-    const delta = direction === "in" ? ZOOM_DELTA : -ZOOM_DELTA;
-    const currentZoom = zoomRef.current;
-    const newZoom = Math.max(MIN_ZOOM, Math.min(currentZoom + delta, MAX_ZOOM));
+  const applyZoom = useCallback(
+    (scaleFactor: number, anchor?: { x: number; y: number }) => {
+      const currentZoom = zoomRef.current;
+      let newZoom = currentZoom * scaleFactor;
 
-    const { x, y, width, height } = currentViewBoxRef.current;
-    const currentCenterX = x + width / 2;
-    const currentCenterY = y + height / 2;
+      // Clamp zoom
+      newZoom = Math.max(MIN_ZOOM, Math.min(newZoom, MAX_ZOOM));
 
-    const newWidth = (width * currentZoom) / newZoom;
-    const newHeight = (height * currentZoom) / newZoom;
+      // Actual scale factor used (after clamping)
+      const actualFactor = newZoom / currentZoom;
+      if (Math.abs(actualFactor - 1) < 0.0001) return; // No change
 
-    const newX = currentCenterX - newWidth / 2;
-    const newY = currentCenterY - newHeight / 2;
+      const { x, y, width, height } = currentViewBoxRef.current;
 
-    const newViewBox = {
-      x: newX,
-      y: newY,
-      width: newWidth,
-      height: newHeight,
-    };
+      // Default to center if no anchor provided
+      const px = anchor ? anchor.x : x + width / 2;
+      const py = anchor ? anchor.y : y + height / 2;
 
-    currentViewBoxRef.current = newViewBox;
-    setViewBox(newViewBox);
-    setZoom(newZoom);
-    zoomRef.current = newZoom;
-  }, []);
+      const newWidth = width / actualFactor;
+      const newHeight = height / actualFactor;
+      const newX = px - (px - x) / actualFactor;
+      const newY = py - (py - y) / actualFactor;
+
+      const newViewBox = {
+        x: newX,
+        y: newY,
+        width: newWidth,
+        height: newHeight,
+      };
+
+      currentViewBoxRef.current = newViewBox;
+      setViewBox(newViewBox);
+      setZoom(newZoom);
+      zoomRef.current = newZoom;
+    },
+    [],
+  );
 
   useEffect(() => {
     const handleWheel = (event: WheelEvent) => {
-      if (event.metaKey) {
+      // Pinch-to-zoom is ctrlKey: true on trackpads.
+      // Meta (Cmd/Win) + scroll is also used for zoom.
+      if (event.ctrlKey || event.metaKey) {
         event.preventDefault();
-        if (event.deltaY < 0) {
-          handleZoom("in");
-        } else {
-          handleZoom("out");
-        }
+
+        // Calculate a granular scale factor.
+        // deltaY is negative when zooming in, positive when zooming out.
+        // Sensitivity factor 0.01 is common for smooth zooming.
+        const delta = -event.deltaY;
+        const scaleFactor = Math.pow(1.005, delta);
+
+        const anchor = transformScreenCoordsToSvgCoords(event);
+        applyZoom(scaleFactor, anchor);
       }
     };
 
@@ -472,17 +489,17 @@ function Canvas({
         svg.removeEventListener("wheel", handleWheel);
       }
     };
-  }, [handleZoom]);
+  }, [applyZoom, transformScreenCoordsToSvgCoords]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey) {
         if (event.key === "+" || event.key === "=") {
           event.preventDefault();
-          handleZoom("in");
+          applyZoom(1.2);
         } else if (event.key === "-" || event.key === "_") {
           event.preventDefault();
-          handleZoom("out");
+          applyZoom(0.8);
         } else if (event.key === "s") {
           event.preventDefault();
           onToggleAside?.();
@@ -494,16 +511,16 @@ function Canvas({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [handleZoom, onToggleAside]);
+  }, [applyZoom, onToggleAside]);
 
   function zoomIn() {
     setIsPanning(false);
-    handleZoom("in");
+    applyZoom(1.2);
   }
 
   function zoomOut() {
     setIsPanning(false);
-    handleZoom("out");
+    applyZoom(0.8);
   }
 
   function resetZoom() {
