@@ -475,13 +475,38 @@ function Canvas({
         event.preventDefault();
 
         // Calculate a granular scale factor.
-        // deltaY is negative when zooming in, positive when zooming out.
-        // Sensitivity factor 0.01 is common for smooth zooming.
         const delta = -event.deltaY;
         const scaleFactor = Math.pow(1.005, delta);
 
         const anchor = transformScreenCoordsToSvgCoords(event);
         applyZoom(scaleFactor, anchor);
+      } else {
+        // Panning movement (two fingers or mouse wheel)
+        event.preventDefault();
+
+        const currentZoom = zoomRef.current;
+        // Adjust delta by zoom level so panning speed feels consistent
+        const dx = event.deltaX / currentZoom;
+        const dy = event.deltaY / currentZoom;
+
+        const newX = currentViewBoxRef.current.x + dx;
+        const newY = currentViewBoxRef.current.y + dy;
+
+        currentViewBoxRef.current = {
+          ...currentViewBoxRef.current,
+          x: newX,
+          y: newY,
+        };
+
+        if (panRafId.current == null) {
+          panRafId.current = requestAnimationFrame(() => {
+            panRafId.current = null;
+            if (!svgRef.current) return;
+            const { x, y, width, height } = currentViewBoxRef.current;
+            svgRef.current.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
+            setViewBox(currentViewBoxRef.current);
+          });
+        }
       }
     };
 
