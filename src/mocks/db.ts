@@ -19,6 +19,10 @@ const players: Player[] = [
     immunities: [],
     resistances: [],
     image: null,
+    gold: 10,
+    silver: 5,
+    copper: 2,
+    hero_points: 1,
   },
   {
     id: 2,
@@ -35,6 +39,10 @@ const players: Player[] = [
     immunities: [],
     resistances: [],
     image: null,
+    gold: 10,
+    silver: 5,
+    copper: 2,
+    hero_points: 1,
   },
 ];
 

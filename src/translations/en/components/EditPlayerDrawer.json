@@ -26,5 +26,6 @@
   "catalog": "Catalog",
   "gold": "Gold",
   "silver": "Silver",
-  "copper": "Copper"
+  "copper": "Copper",
+  "heroPoints": "Hero Points"
 }

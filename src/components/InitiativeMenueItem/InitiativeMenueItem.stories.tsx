@@ -33,6 +33,10 @@ export const Primary: Story = {
         effects: [],
         immunities: [],
         resistances: [],
+        gold: 0,
+        silver: 0,
+        copper: 0,
+        hero_points: 0,
       },
     },
     onRemove: fn((entity) =>

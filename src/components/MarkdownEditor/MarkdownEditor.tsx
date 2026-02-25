@@ -90,7 +90,6 @@ export function MarkdownEditor({
           background: "transparent",
         }}
         previewOptions={{
-          source: (value || "").trim(),
           components: components,
           style: {
             backgroundColor: "transparent",

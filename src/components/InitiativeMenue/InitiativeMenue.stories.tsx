@@ -38,6 +38,10 @@ export const Primary: Story = {
         effects: [],
         immunities: [],
         resistances: [],
+        gold: 0,
+        silver: 0,
+        copper: 0,
+        hero_points: 0,
       },
       {
         id: 2,
@@ -54,6 +58,10 @@ export const Primary: Story = {
         effects: [],
         immunities: [],
         resistances: [],
+        gold: 0,
+        silver: 0,
+        copper: 0,
+        hero_points: 0,
       },
     ],
     encounterOpponents: [
@@ -107,6 +115,10 @@ export const Primary: Story = {
           effects: [],
           immunities: [],
           resistances: [],
+          gold: 0,
+          silver: 0,
+          copper: 0,
+          hero_points: 0,
         },
       },
       {

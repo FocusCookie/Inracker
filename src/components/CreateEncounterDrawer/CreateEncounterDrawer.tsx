@@ -11,7 +11,6 @@ import { MarkdownEditor } from "@/components/MarkdownEditor/MarkdownEditor";
 import { Controller, useFieldArray } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Button } from "../ui/button";
-import { Encounter } from "@/types/encounter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import {
   Select,
@@ -64,7 +63,6 @@ function CreateEncounterDrawer({
 }: Props) {
   const { t } = useTranslation("ComponentCreateEncounterDrawer");
   const openOverlay = useOverlayStore((s) => s.open);
-  const [type, setType] = useState<Encounter["type"]>("note");
   const [isCreating, setIsCreating] = useState(false);
   const [isImageSelectionOpen, setIsImageSelectionOpen] = useState(false);
   const [closingReason, setClosingReason] = useState<
@@ -158,7 +156,6 @@ function CreateEncounterDrawer({
 
   function handleTypeChange(value: "roll" | "note" | "fight") {
     form.setValue("type", value);
-    setType(value);
   }
 
   const handleRemoveOpponent = async (id: EncounterOpponent["id"]) => {

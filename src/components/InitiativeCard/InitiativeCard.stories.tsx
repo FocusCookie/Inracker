@@ -31,6 +31,10 @@ const fakePlayer: PlayerEntity = {
   effects: [],
   resistances: [],
   immunities: [],
+  gold: 0,
+  silver: 0,
+  copper: 0,
+  hero_points: 0,
 
   position: 1,
   type: "player",

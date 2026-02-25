@@ -24,6 +24,10 @@ const meta = {
       effects: [],
       immunities: [],
       resistances: [],
+      gold: 0,
+      silver: 0,
+      copper: 0,
+      hero_points: 0,
     },
   },
 } satisfies Meta<typeof IconAvatar>;
