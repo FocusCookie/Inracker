@@ -503,6 +503,10 @@ function Canvas({
         } else if (event.key === "s") {
           event.preventDefault();
           onToggleAside?.();
+        } else if (event.key.toLowerCase() === "d") {
+          event.preventDefault();
+          setIsPanning(false);
+          setIsDrawing((prev) => !prev);
         }
       }
     };
@@ -1137,6 +1141,7 @@ function Canvas({
         className={cn(
           "h-full w-full rounded-md border-2 border-neutral-50 bg-neutral-50 bg-contain bg-center bg-no-repeat shadow-md",
           isPanning && "cursor-grab",
+          isDrawing && "cursor-copy",
         )}
         onMouseDownCapture={handleMouseDown}
       >
