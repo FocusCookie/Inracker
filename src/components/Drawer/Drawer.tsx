@@ -3,6 +3,16 @@ import { AnimatePresence, motion } from "framer-motion";
 import { TypographyH1 } from "../ui/typographyH1";
 import { TypographyMuted } from "../ui/typographyhMuted";
 
+import { useEffect } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+import { Kbd } from "../ui/kbd";
+import { getModifierKey } from "@/lib/utils";
+
 type Props = {
   open: boolean;
   onOpenChange: (state: boolean) => void;
@@ -34,6 +44,19 @@ function Drawer({
   onExitComplete,
   onOpenChange,
 }: Props) {
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && (event.metaKey || event.ctrlKey)) {
+        onOpenChange(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onOpenChange]);
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       {createTrigger && (
@@ -84,7 +107,19 @@ function Drawer({
 
                 <div className="flex w-full gap-4 pr-4">
                   {actions}
-                  <Dialog.Close asChild>{cancelTrigger}</Dialog.Close>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Dialog.Close asChild>{cancelTrigger}</Dialog.Close>
+                      </TooltipTrigger>
+                      <TooltipContent className="flex items-center gap-2">
+                        <div className="flex gap-0.5">
+                          <Kbd>{getModifierKey()}</Kbd>
+                          <Kbd>Esc</Kbd>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </motion.div>
             </Dialog.Content>

@@ -22,6 +22,14 @@ import {
 import { useTranslation } from "react-i18next";
 import { OverlayMap } from "@/types/overlay";
 import { useEffect, useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Kbd } from "@/components/ui/kbd";
+import { getModifierKey } from "@/lib/utils";
 
 type OverlayProps = OverlayMap["money.dialog"];
 
@@ -148,14 +156,26 @@ function MoneyDialog({
             </div>
 
             <DialogFooter className="flex gap-4">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => handleOpenChange(false)}
-                disabled={isLoading}
-              >
-                {t("cancel")}
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={() => handleOpenChange(false)}
+                      disabled={isLoading}
+                    >
+                      {t("cancel")}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="flex items-center gap-2">
+                    <div className="flex gap-0.5">
+                      <Kbd>{getModifierKey()}</Kbd>
+                      <Kbd>Esc</Kbd>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <Button type="submit" disabled={isLoading}>
                 {t("save")}
               </Button>

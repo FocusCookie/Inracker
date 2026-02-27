@@ -21,6 +21,14 @@ import {
 } from "@/components/ui/form";
 import { useTranslation } from "react-i18next";
 import { OverlayMap } from "@/types/overlay";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Kbd } from "@/components/ui/kbd";
+import { getModifierKey } from "@/lib/utils";
 
 type OverlayProps = OverlayMap["health.dialog"];
 
@@ -122,13 +130,25 @@ function HealthDialog({
             />
 
             <DialogFooter className="flex gap-4">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => handleOpenChange(false)}
-              >
-                {t("cancel")}
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={() => handleOpenChange(false)}
+                    >
+                      {t("cancel")}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="flex items-center gap-2">
+                    <div className="flex gap-0.5">
+                      <Kbd>{getModifierKey()}</Kbd>
+                      <Kbd>Esc</Kbd>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <Button
                 type="submit"
                 variant={isHeal ? "default" : "destructive"}
