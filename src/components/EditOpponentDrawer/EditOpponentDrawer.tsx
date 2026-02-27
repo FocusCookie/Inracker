@@ -174,7 +174,7 @@ function EditOpponentDrawer({
       }
       actions={
         <Button disabled={isEditing} onClick={form.handleSubmit(handleSubmit)}>
-          {t("create")}
+          {t("save")}
         </Button>
       }
     >

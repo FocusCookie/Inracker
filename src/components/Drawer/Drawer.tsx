@@ -78,7 +78,7 @@ function Drawer({
                   </Dialog.Description>
                 )}
 
-                <div className="flex w-full grow flex-col gap-4 overflow-hidden">
+                <div className="scrollable-y flex w-full grow flex-col gap-4 overflow-y-auto pr-3.5">
                   {children}
                 </div>
 
