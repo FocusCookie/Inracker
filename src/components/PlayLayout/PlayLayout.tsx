@@ -135,8 +135,6 @@ const PlayLayout: PlayLayoutCompound = ({
           animate={{
             left: isEncounterOpen ? -96 : 0,
             width: isAsideOpen && !isEncounterOpen ? 640 : 96,
-            minWidth: isAsideOpen && !isEncounterOpen ? 640 : 96,
-            maxWidth: isAsideOpen && !isEncounterOpen ? 640 : 96,
             display: isEncounterOpen ? "none" : "block",
           }}
         >
