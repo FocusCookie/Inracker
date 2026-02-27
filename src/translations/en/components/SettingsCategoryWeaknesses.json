@@ -1,0 +1,10 @@
+{
+  "weaknesses": "Weaknesses",
+  "createWeakness": "Create Weakness",
+  "noWeaknesses": "No weaknesses",
+  "noWeaknessesDescription": "Manage the weaknesses of your entities here.",
+  "searchPlaceholder": "Search weaknesses...",
+  "createdToast": "Created",
+  "deletedToast": "Deleted",
+  "successfully": "successfully"
+}

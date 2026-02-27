@@ -27,6 +27,7 @@ type Props = {
 type CreatePlayerDrawerCompound = React.FC<Props> & {
   Immunities: React.FC<{ children: React.ReactNode }>;
   Resistances: React.FC<{ children: React.ReactNode }>;
+  Weaknesses: React.FC<{ children: React.ReactNode }>;
 };
 
 const CreatePlayerForm: CreatePlayerDrawerCompound = ({
@@ -49,6 +50,11 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
     (child) =>
       React.isValidElement(child) &&
       child.type === CreatePlayerForm.Resistances,
+  );
+
+  const weaknessesChild = childrenArray.find(
+    (child) =>
+      React.isValidElement(child) && child.type === CreatePlayerForm.Weaknesses,
   );
 
   function handleResetPicture() {
@@ -357,6 +363,8 @@ const CreatePlayerForm: CreatePlayerDrawerCompound = ({
         {immunitiesChild}
 
         {resistancesChild}
+
+        {weaknessesChild}
       </form>
       <ImageSelectionDialog
         open={isImageSelectorOpen}
@@ -376,5 +384,10 @@ CreatePlayerForm.Resistances = ({ children }) => {
   return <>{children}</>;
 };
 CreatePlayerForm.Resistances.displayName = "ChapterLayout.Resistances";
+
+CreatePlayerForm.Weaknesses = ({ children }) => {
+  return <>{children}</>;
+};
+CreatePlayerForm.Weaknesses.displayName = "ChapterLayout.Weaknesses";
 
 export default CreatePlayerForm;

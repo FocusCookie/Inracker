@@ -6,6 +6,7 @@
   "create": "Create",
   "immunities": "Immunities",
   "resistances": "Resistances",
+  "weaknesses": "Weaknesses",
   "effects": "Effects",
   "catalog": "Catalog",
   "delete": "Delete",

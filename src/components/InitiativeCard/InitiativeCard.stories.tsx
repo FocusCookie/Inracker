@@ -31,6 +31,7 @@ const fakePlayer: PlayerEntity = {
   effects: [],
   resistances: [],
   immunities: [],
+  weaknesses: [],
   gold: 0,
   silver: 0,
   copper: 0,

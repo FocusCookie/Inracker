@@ -7,6 +7,7 @@ import {
 import { Effect } from "@/types/effect";
 import { DBImmunity } from "@/types/immunitiy";
 import { DBResistance } from "@/types/resistances";
+import { DBWeakness } from "@/types/weakness";
 import {
   execute,
   select,
@@ -15,6 +16,7 @@ import {
 import { getEffectById } from "./effects";
 import { getImmunityById } from "./immunities";
 import { getResistanceById } from "./resistances";
+import { getWeaknessById } from "./weaknesses";
 import {
   deleteTokenById,
   createToken,
@@ -58,16 +60,19 @@ export const getDetailedOpponentById = async (
     max_health,
     name,
     resistances: dbResistances,
+    weaknesses: dbWeaknesses,
   } = dbOpponent;
 
   const effectsIds = (JSON.parse(dbEffects) as number[]).filter((id) => id != null);
   const immunitiesIds = (JSON.parse(dbImmunities) as number[]).filter((id) => id != null);
   const resistancesIds = (JSON.parse(dbResistances) as number[]).filter((id) => id != null);
+  const weaknessesIds = (JSON.parse(dbWeaknesses || "[]") as number[]).filter((id) => id != null);
   const labelList = JSON.parse(labels) as string[];
 
   let effects: Effect[] = [];
   let immunities: DBImmunity[] = [];
   let resistances: DBResistance[] = [];
+  let weaknesses: DBWeakness[] = [];
 
   for (const effectId of effectsIds) {
     try {
@@ -96,6 +101,15 @@ export const getDetailedOpponentById = async (
     }
   }
 
+  for (const weaknessId of weaknessesIds) {
+    try {
+      const weakness = await getWeaknessById(weaknessId);
+      weaknesses.push(weakness);
+    } catch (e) {
+      console.warn(`Failed to load weakness ${weaknessId}`, e);
+    }
+  }
+
   const opponent: Opponent = {
     details,
     effects,
@@ -109,6 +123,7 @@ export const getDetailedOpponentById = async (
     max_health,
     name,
     resistances,
+    weaknesses,
   };
 
   return opponent;
@@ -141,10 +156,11 @@ export const createOpponent = async (
     max_health,
     name,
     resistances,
+    weaknesses,
   } = opponent;
 
   const result = await execute(
-    "INSERT INTO opponents (details, effects, health, icon, image, immunities, labels, level, max_health, name, resistances) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *",
+    "INSERT INTO opponents (details, effects, health, icon, image, immunities, labels, level, max_health, name, resistances, weaknesses) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
     [
       details,
       JSON.stringify(effects.map((e: Effect) => e.id)),
@@ -157,6 +173,7 @@ export const createOpponent = async (
       max_health,
       name,
       JSON.stringify(resistances.map((r: DBResistance) => r.id)),
+      JSON.stringify(weaknesses.map((w: DBWeakness) => w.id)),
     ],
   );
 
@@ -179,10 +196,11 @@ export const updateOpponent = async (
     max_health,
     name,
     resistances,
+    weaknesses,
   } = opponent;
 
   await execute(
-    "UPDATE opponents SET details = $2, effects = $3, health = $4, icon = $5, image = $6, immunities = $7, labels = $8, level = $9, max_health = $10, name = $11, resistances = $12 WHERE id = $1",
+    "UPDATE opponents SET details = $2, effects = $3, health = $4, icon = $5, image = $6, immunities = $7, labels = $8, level = $9, max_health = $10, name = $11, resistances = $12, weaknesses = $13 WHERE id = $1",
     [
       id,
       details,
@@ -198,6 +216,7 @@ export const updateOpponent = async (
       JSON.stringify(
         resistances.map((resistance: DBResistance) => resistance.id),
       ),
+      JSON.stringify(weaknesses.map((weakness: DBWeakness) => weakness.id)),
     ],
   );
 
@@ -252,17 +271,20 @@ export const getDetailedEncounterOpponentById = async (
     max_health,
     name,
     resistances: dbResistances,
+    weaknesses: dbWeaknesses,
     blueprint,
   } = dbOpponent;
 
   const effectsIds = (JSON.parse(dbEffects) as number[]).filter((id) => id != null);
   const immunitiesIds = (JSON.parse(dbImmunities) as number[]).filter((id) => id != null);
   const resistancesIds = (JSON.parse(dbResistances) as number[]).filter((id) => id != null);
+  const weaknessesIds = (JSON.parse(dbWeaknesses || "[]") as number[]).filter((id) => id != null);
   const labelList = JSON.parse(labels) as string[];
 
   let effects: Effect[] = [];
   let immunities: DBImmunity[] = [];
   let resistances: DBResistance[] = [];
+  let weaknesses: DBWeakness[] = [];
 
   for (const effectId of effectsIds) {
     try {
@@ -320,6 +342,15 @@ export const getDetailedEncounterOpponentById = async (
     }
   }
 
+  for (const weaknessId of weaknessesIds) {
+    try {
+      const weakness = await getWeaknessById(weaknessId);
+      weaknesses.push(weakness);
+    } catch (e) {
+      console.warn(`Failed to load weakness ${weaknessId}`, e);
+    }
+  }
+
   const encounterOpponent: EncounterOpponent = {
     details,
     effects,
@@ -333,6 +364,7 @@ export const getDetailedEncounterOpponentById = async (
     max_health,
     name,
     resistances,
+    weaknesses,
     blueprint,
   };
 
@@ -386,12 +418,13 @@ export const createEncounterOpponent = async (
     max_health,
     name,
     resistances,
+    weaknesses,
   } = opponent;
 
   const blueprint = opponent.blueprint;
 
   const result = await execute(
-    "INSERT INTO encounter_opponents (details, effects, health, icon, image, immunities, labels, level, max_health, name, resistances, blueprint) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
+    "INSERT INTO encounter_opponents (details, effects, health, icon, image, immunities, labels, level, max_health, name, resistances, weaknesses, blueprint) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *",
     [
       details,
       JSON.stringify(effects.map((e: Effect) => e.id)),
@@ -404,6 +437,7 @@ export const createEncounterOpponent = async (
       max_health,
       name,
       JSON.stringify(resistances.map((r: DBResistance) => r.id)),
+      JSON.stringify(weaknesses.map((w: DBWeakness) => w.id)),
       blueprint,
     ],
   );
@@ -468,11 +502,12 @@ export const updateEncounterOpponent = async (
     max_health,
     name,
     resistances,
+    weaknesses,
     blueprint,
   } = encounterOpponent;
 
   await execute(
-    "UPDATE encounter_opponents SET details = $2, effects = $3, health = $4, icon = $5, image = $6, immunities = $7, labels = $8, level = $9, max_health = $10, name = $11, resistances = $12, blueprint = $13 WHERE id = $1",
+    "UPDATE encounter_opponents SET details = $2, effects = $3, health = $4, icon = $5, image = $6, immunities = $7, labels = $8, level = $9, max_health = $10, name = $11, resistances = $12, weaknesses = $13, blueprint = $14 WHERE id = $1",
     [
       id,
       details,
@@ -488,6 +523,7 @@ export const updateEncounterOpponent = async (
       JSON.stringify(
         resistances.map((resistance: DBResistance) => resistance.id),
       ),
+      JSON.stringify(weaknesses.map((weakness: DBWeakness) => weakness.id)),
       blueprint,
     ],
   );

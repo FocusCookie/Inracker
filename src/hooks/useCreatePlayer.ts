@@ -24,6 +24,7 @@ export const useCreatePlayer = () => {
       picture: "",
       role: "",
       resistances: [],
+      weaknesses: [],
       gold: 0,
       silver: 0,
       copper: 0,

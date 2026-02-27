@@ -14,7 +14,9 @@ import { useOverlayStore } from "@/stores/useOverlayStore";
 import type { CancelReason, OverlayMap } from "@/types/overlay";
 import { DBImmunity } from "@/types/immunitiy";
 import { DBResistance } from "@/types/resistances";
+import { DBWeakness } from "@/types/weakness";
 import { Opponent } from "@/types/opponents";
+import WeaknessCard from "../WeaknessCard/WeaknessCard";
 
 type OverlayProps = OverlayMap["opponent.create"];
 
@@ -51,6 +53,11 @@ function CreateOpponentDrawer({
     queryFn: () => db.resistances.getAll(),
   });
 
+  const weaknesses = useQueryWithToast({
+    queryKey: ["weaknesses"],
+    queryFn: () => db.weaknesses.getAll(),
+  });
+
   async function handleSubmit() {
     try {
       setIsCreating(true);
@@ -73,6 +80,10 @@ function CreateOpponentDrawer({
         .map((id) => resistances.data?.find((r) => r.id === id))
         .filter((r): r is DBResistance => !!r);
 
+      const selectedWeaknesses = (values.weaknesses || [])
+        .map((id) => weaknesses.data?.find((w) => w.id === id))
+        .filter((w): w is DBWeakness => !!w);
+
       const input: Omit<Opponent, "id"> = {
         ...values,
         health: values.max_health,
@@ -80,6 +91,7 @@ function CreateOpponentDrawer({
         effects: [],
         immunities: selectedImmunities,
         resistances: selectedResistances,
+        weaknesses: selectedWeaknesses,
       };
 
       const created = await onCreate(input);
@@ -140,6 +152,23 @@ function CreateOpponentDrawer({
     });
   }
 
+  function handleCreateWeakness() {
+    openOverlay("weakness.create", {
+      onCreate: async (weakness) => {
+        const created = await db.weaknesses.create(weakness);
+        return created;
+      },
+      onComplete: (weakness) => {
+        const currentWeaknesses = form.getValues("weaknesses") || [];
+        form.setValue("weaknesses", [...currentWeaknesses, weakness.id]);
+        weaknesses.refetch();
+      },
+      onCancel: (reason) => {
+        console.log("Weakness creation cancelled:", reason);
+      },
+    });
+  }
+
   function handleOpenImmunityCatalog() {
     openOverlay("immunity.catalog", {
       onSelect: async (immunity) => {
@@ -160,6 +189,18 @@ function CreateOpponentDrawer({
       },
       onCancel: (reason) => {
         console.log("Resistance catalog cancelled:", reason);
+      },
+    });
+  }
+
+  function handleOpenWeaknessCatalog() {
+    openOverlay("weakness.catalog", {
+      onSelect: async (weakness) => {
+        const currentWeaknesses = form.getValues("weaknesses") || [];
+        form.setValue("weaknesses", [...currentWeaknesses, weakness.id]);
+      },
+      onCancel: (reason) => {
+        console.log("Weakness catalog cancelled:", reason);
       },
     });
   }
@@ -254,6 +295,40 @@ function CreateOpponentDrawer({
             </div>
           </div>
         </CreateOpponentForm.Resistances>
+
+        <CreateOpponentForm.Weaknesses>
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between gap-4">
+              <TypographyH2> {t("weaknesses")}</TypographyH2>
+              <div className="flex grow justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleCreateWeakness}
+                >
+                  {t("create")}
+                </Button>
+
+                <Button type="button" onClick={handleOpenWeaknessCatalog}>
+                  {t("catalog")}
+                </Button>
+              </div>
+            </div>
+            <div className="flex flex-col gap-4">
+              {(form.watch("weaknesses") || [])
+                .map((id: number) =>
+                  weaknesses.data?.find((w) => w.id === id),
+                )
+                .filter((w): w is DBWeakness => !!w)
+                .map((weakness: DBWeakness) => (
+                  <WeaknessCard
+                    key={`weakness-${weakness.id}`}
+                    weakness={weakness}
+                  />
+                ))}
+            </div>
+          </div>
+        </CreateOpponentForm.Weaknesses>
       </CreateOpponentForm>
     </Drawer>
   );

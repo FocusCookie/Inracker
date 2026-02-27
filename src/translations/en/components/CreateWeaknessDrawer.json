@@ -1,0 +1,12 @@
+{
+  "descriptionText": "Create a new weakness. Weaknesses are vulnerabilities that entities have against certain types of damage or effects.",
+  "title": "Create Weakness",
+  "cancel": "Cancel",
+  "create": "Create",
+  "icon": "Icon",
+  "name": "Name",
+  "namePlaceholder": "Fire, Cold, etc.",
+  "description": "Description",
+  "descriptionPlaceholder": "Describe the weakness...",
+  "minNameChars": "Name must be at least 3 characters"
+}

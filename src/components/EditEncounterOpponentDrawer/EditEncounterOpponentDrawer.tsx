@@ -17,6 +17,7 @@ import CreateOpponentForm from "../CreateOpponentForm/CreateOpponentForm";
 import { TypographyH2 } from "../ui/typographyh2";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
 import ResistanceCard from "../ResistanceCard/ResistanceCard";
+import WeaknessCard from "../WeaknessCard/WeaknessCard";
 import EffectCard from "../EffectCard/EffectCard";
 import { useState } from "react";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
@@ -25,6 +26,7 @@ import { useOverlayStore } from "@/stores/useOverlayStore";
 import type { CancelReason, OverlayMap } from "@/types/overlay";
 import { DBImmunity } from "@/types/immunitiy";
 import { DBResistance } from "@/types/resistances";
+import { DBWeakness } from "@/types/weakness";
 import { EncounterOpponent } from "@/types/opponents";
 import { useEditOpponent } from "@/hooks/useEditOpponent";
 import { useEffects } from "@/hooks/useEffects";
@@ -64,6 +66,11 @@ function EditEncounterOpponentDrawer({
   const resistances = useQueryWithToast({
     queryKey: ["resistances"],
     queryFn: () => db.resistances.getAll(),
+  });
+
+  const weaknesses = useQueryWithToast({
+    queryKey: ["weaknesses"],
+    queryFn: () => db.weaknesses.getAll(),
   });
 
   const effects = useEffects(db);
@@ -110,6 +117,9 @@ function EditEncounterOpponentDrawer({
         resistances: (values.resistances || [])
           .map((id) => resistances.data?.find((r) => r.id === id))
           .filter((r): r is DBResistance => !!r),
+        weaknesses: (values.weaknesses || [])
+          .map((id) => weaknesses.data?.find((w) => w.id === id))
+          .filter((w): w is DBWeakness => !!w),
         effects: (values.effects || [])
           .map((id) => effects.data?.find((e) => e.id === id))
           .filter((e): e is any => !!e),
@@ -175,6 +185,23 @@ function EditEncounterOpponentDrawer({
     });
   }
 
+  function handleCreateWeakness() {
+    openOverlay("weakness.create", {
+      onCreate: async (weakness) => {
+        const created = await db.weaknesses.create(weakness);
+        return created;
+      },
+      onComplete: (weakness) => {
+        const currentWeaknesses = form.getValues("weaknesses") || [];
+        form.setValue("weaknesses", [...currentWeaknesses, weakness.id]);
+        weaknesses.refetch();
+      },
+      onCancel: (reason) => {
+        console.log("Weakness creation cancelled:", reason);
+      },
+    });
+  }
+
   function handleOpenImmunityCatalog() {
     openOverlay("immunity.catalog", {
       onSelect: async (immunity) => {
@@ -199,6 +226,18 @@ function EditEncounterOpponentDrawer({
     });
   }
 
+  function handleOpenWeaknessCatalog() {
+    openOverlay("weakness.catalog", {
+      onSelect: async (weakness) => {
+        const currentWeaknesses = form.getValues("weaknesses") || [];
+        form.setValue("weaknesses", [...currentWeaknesses, weakness.id]);
+      },
+      onCancel: (reason) => {
+        console.log("Weakness catalog cancelled:", reason);
+      },
+    });
+  }
+
   function handleOpenEffectCatalog() {
     openOverlay("effect.catalog", {
       onSelect: async (effect) => {
@@ -207,6 +246,23 @@ function EditEncounterOpponentDrawer({
       },
       onCancel: (reason) => {
         console.log("Effect catalog cancelled:", reason);
+      },
+    });
+  }
+
+  function handleCreateEffect() {
+    openOverlay("effect.create", {
+      onCreate: async (effect) => {
+        const createdEffect = await db.effects.create(effect);
+        return createdEffect;
+      },
+      onComplete: (effect) => {
+        const currentEffects = form.getValues("effects") || [];
+        form.setValue("effects", [...currentEffects, effect.id]);
+        effects.refetch();
+      },
+      onCancel: (reason) => {
+        console.log("Effect creation cancelled:", reason);
       },
     });
   }
@@ -224,6 +280,14 @@ function EditEncounterOpponentDrawer({
     form.setValue(
       "resistances",
       currentResistances.filter((resistanceId) => resistanceId !== id),
+    );
+  }
+
+  function handleRemoveWeakness(id: number) {
+    const currentWeaknesses = form.getValues("weaknesses") || [];
+    form.setValue(
+      "weaknesses",
+      currentWeaknesses.filter((weaknessId) => weaknessId !== id),
     );
   }
 
@@ -357,11 +421,53 @@ function EditEncounterOpponentDrawer({
           </div>
         </CreateOpponentForm.Resistances>
 
+        <CreateOpponentForm.Weaknesses>
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between gap-4">
+              <TypographyH2> {t("weaknesses")}</TypographyH2>
+              <div className="flex grow justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleCreateWeakness}
+                >
+                  {t("create")}
+                </Button>
+
+                <Button type="button" onClick={handleOpenWeaknessCatalog}>
+                  {t("catalog")}
+                </Button>
+              </div>
+            </div>
+            <div className="flex flex-col gap-4">
+              {(form.watch("weaknesses") || [])
+                .map((id: number) =>
+                  weaknesses.data?.find((w) => w.id === id),
+                )
+                .filter((w): w is DBWeakness => !!w)
+                .map((weakness: DBWeakness) => (
+                  <WeaknessCard
+                    key={`weakness-${weakness.id}`}
+                    weakness={weakness}
+                    onDelete={() => handleRemoveWeakness(weakness.id)}
+                  />
+                ))}
+            </div>
+          </div>
+        </CreateOpponentForm.Weaknesses>
+
         <CreateOpponentForm.Effects>
           <div className="flex flex-col gap-2">
             <div className="flex justify-between gap-4">
               <TypographyH2> {t("effects")}</TypographyH2>
               <div className="flex grow justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleCreateEffect}
+                >
+                  {t("create")}
+                </Button>
                 <Button type="button" onClick={handleOpenEffectCatalog}>
                   {t("catalog")}
                 </Button>

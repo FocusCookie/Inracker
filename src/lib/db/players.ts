@@ -1,11 +1,13 @@
 import { DBPlayer, Player, TCreatePlayer } from "@/types/player";
 import { DBImmunity } from "@/types/immunitiy";
 import { DBResistance } from "@/types/resistances";
+import { DBWeakness } from "@/types/weakness";
 import { Effect } from "@/types/effect";
 import { execute, select, createDatabaseError } from "./core"; // Updated import
 import { getEffectById } from "./effects";
 import { getImmunityById } from "./immunities";
 import { getResistanceById } from "./resistances";
+import { getWeaknessById } from "./weaknesses";
 import { getAllParties } from "./parties";
 import { DBToken } from "@/types/tokens";
 import { deleteTokenById } from "./tokens";
@@ -42,6 +44,7 @@ export const getDetailedPlayerById = async (
     name,
     max_health,
     resistances: dbResistances,
+    weaknesses: dbWeaknesses,
     role,
     overview,
     gold,
@@ -53,10 +56,12 @@ export const getDetailedPlayerById = async (
   const effectsIds = JSON.parse(dbEffects) as number[];
   const immunitiesIds = JSON.parse(dbImmunities) as number[];
   const resistancesIds = JSON.parse(dbResistances) as number[];
+  const weaknessesIds = JSON.parse(dbWeaknesses || "[]") as number[];
 
   let effects: Effect[] = [];
   let immunities: DBImmunity[] = [];
   let resistances: DBResistance[] = [];
+  let weaknesses: DBWeakness[] = [];
 
   for (const effectId of effectsIds) {
     try {
@@ -114,6 +119,15 @@ export const getDetailedPlayerById = async (
     }
   }
 
+  for (const weaknessId of weaknessesIds) {
+    try {
+      const weakness = await getWeaknessById(weaknessId);
+      weaknesses.push(weakness);
+    } catch (e) {
+      console.warn(`Failed to load weakness ${weaknessId}`, e);
+    }
+  }
+
   const player: Player = {
     details,
     effects,
@@ -128,6 +142,7 @@ export const getDetailedPlayerById = async (
     name,
     overview,
     resistances,
+    weaknesses,
     role,
     gold,
     silver,
@@ -169,6 +184,7 @@ export const createPlayer = async (
     name,
     overview,
     resistances,
+    weaknesses,
     role,
     gold,
     silver,
@@ -177,7 +193,7 @@ export const createPlayer = async (
   } = player;
 
   const result = await execute( // Changed db.execute to execute
-    "INSERT INTO players (details, effects, ep, health, max_health, image, icon, immunities, level, name, overview, resistances, role, gold, silver, copper, hero_points) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)  RETURNING *",
+    "INSERT INTO players (details, effects, ep, health, max_health, image, icon, immunities, level, name, overview, resistances, weaknesses, role, gold, silver, copper, hero_points) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)  RETURNING *",
     [
       details,
       effects.length > 0 ? JSON.stringify(effects.map((id) => id)) : "[]",
@@ -194,6 +210,9 @@ export const createPlayer = async (
       overview,
       resistances.length > 0
         ? JSON.stringify(resistances.map((id) => id))
+        : "[]",
+      weaknesses.length > 0
+        ? JSON.stringify(weaknesses.map((id) => id))
         : "[]",
       role,
       gold,
@@ -223,6 +242,7 @@ export const updatePlayer = async (
     name,
     overview,
     resistances,
+    weaknesses,
     role,
     gold,
     silver,
@@ -231,7 +251,7 @@ export const updatePlayer = async (
   } = player;
 
   await execute( // Changed db.execute to execute
-    "UPDATE players SET details = $2, effects = $3, ep = $4, health = $5, max_health = $6, image = $7, icon = $8, immunities = $9, level = $10, name = $11, overview = $12, resistances = $13, role = $14, gold = $15, silver = $16, copper = $17, hero_points = $18 WHERE id = $1",
+    "UPDATE players SET details = $2, effects = $3, ep = $4, health = $5, max_health = $6, image = $7, icon = $8, immunities = $9, level = $10, name = $11, overview = $12, resistances = $13, weaknesses = $14, role = $15, gold = $16, silver = $17, copper = $18, hero_points = $19 WHERE id = $1",
     [
       id, // 1
       details, // 2
@@ -246,11 +266,12 @@ export const updatePlayer = async (
       name, // 11
       overview, // 12
       JSON.stringify(resistances.map((r) => r.id)), // 13
-      role, // 14
-      gold, // 15
-      silver, // 16
-      copper, // 17
-      hero_points, // 18
+      JSON.stringify(weaknesses.map((w) => w.id)), // 14
+      role, // 15
+      gold, // 16
+      silver, // 17
+      copper, // 18
+      hero_points, // 19
     ],
   );
 
@@ -347,6 +368,52 @@ export const removeResistanceFromPlayer = async (
   ]);
 
   return removedResistance;
+};
+
+export const addWeaknessToPlayer = async (
+  playerId: Player["id"],
+  weaknessId: DBWeakness["id"],
+): Promise<Player> => {
+  const { weaknesses } = await getDetailedPlayerById(playerId);
+  const isAlreadySet = weaknesses.some(
+    (weakness) => weakness.id === weaknessId,
+  );
+  const update = weaknesses.map((weakness) => weakness.id);
+
+  if (!isAlreadySet) {
+    update.push(weaknessId);
+
+    await execute("UPDATE players SET weaknesses = $2 WHERE id = $1", [
+      playerId,
+      JSON.stringify(update.map((id: number) => id)),
+    ]);
+  }
+
+  return getDetailedPlayerById(playerId);
+};
+
+export const removeWeaknessFromPlayer = async (
+  playerId: Player["id"],
+  weaknessId: DBWeakness["id"],
+) => {
+  const { weaknesses } = await getDetailedPlayerById(playerId);
+  const removedWeakness = weaknesses.find(
+    (weakness) => weakness.id === weaknessId,
+  ) as DBWeakness;
+  const update = weaknesses.filter(
+    (weakness) => weakness.id !== weaknessId,
+  );
+
+  await execute("UPDATE players SET weaknesses = $2 WHERE id = $1", [
+    playerId,
+    JSON.stringify(
+      update
+        .map((w) => w.id)
+        .map((id: number) => id),
+    ),
+  ]);
+
+  return removedWeakness;
 };
 
 export const deletePlayerById = async (
@@ -491,5 +558,17 @@ export const players = {
     resistanceId: DBResistance["id"],
   ) => {
     return removeResistanceFromPlayer(playerId, resistanceId); // Removed db parameter
+  },
+  addWeakness: async (
+    playerId: Player["id"],
+    weaknessId: DBWeakness["id"],
+  ) => {
+    return addWeaknessToPlayer(playerId, weaknessId);
+  },
+  removeWeakness: async (
+    playerId: Player["id"],
+    weaknessId: DBWeakness["id"],
+  ) => {
+    return removeWeaknessFromPlayer(playerId, weaknessId);
   },
 };

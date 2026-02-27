@@ -1,0 +1,10 @@
+{
+  "weaknesses": "Schwächen",
+  "createWeakness": "Schwäche erstellen",
+  "noWeaknesses": "Keine Schwächen",
+  "noWeaknessesDescription": "Verwalten Sie hier die Schwächen Ihrer Einheiten.",
+  "searchPlaceholder": "Schwächen suchen...",
+  "createdToast": "Erstellt",
+  "deletedToast": "Gelöscht",
+  "successfully": "erfolgreich"
+}

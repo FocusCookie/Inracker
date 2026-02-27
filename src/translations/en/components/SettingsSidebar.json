@@ -9,6 +9,7 @@
   "effects": "Effects",
   "immunities": "Immunities",
   "resistances": "Resistances",
+  "weaknesses": "Weaknesses",
   "backup": "Import / Export",
   "close": "Close",
   "import-export": "Import & Export"

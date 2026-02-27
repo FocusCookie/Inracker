@@ -27,6 +27,7 @@ type Props = {
 type CreateOpponentDrawerCompound = React.FC<Props> & {
   Immunities: React.FC<{ children: React.ReactNode }>;
   Resistances: React.FC<{ children: React.ReactNode }>;
+  Weaknesses: React.FC<{ children: React.ReactNode }>;
   Effects: React.FC<{ children: React.ReactNode }>;
 };
 
@@ -58,6 +59,12 @@ const CreateOpponentForm: CreateOpponentDrawerCompound = ({
     (child) =>
       React.isValidElement(child) &&
       child.type === CreateOpponentForm.Resistances,
+  );
+
+  const weaknessesChild = childrenArray.find(
+    (child) =>
+      React.isValidElement(child) &&
+      child.type === CreateOpponentForm.Weaknesses,
   );
 
   const effectsChild = childrenArray.find(
@@ -239,6 +246,8 @@ const CreateOpponentForm: CreateOpponentDrawerCompound = ({
 
         {resistancesChild}
 
+        {weaknessesChild}
+
         {effectsChild}
       </form>
       <ImageSelectionDialog
@@ -259,6 +268,11 @@ CreateOpponentForm.Resistances = ({ children }) => {
   return <>{children}</>;
 };
 CreateOpponentForm.Resistances.displayName = "ChapterLayout.Resistances";
+
+CreateOpponentForm.Weaknesses = ({ children }) => {
+  return <>{children}</>;
+};
+CreateOpponentForm.Weaknesses.displayName = "ChapterLayout.Weaknesses";
 
 CreateOpponentForm.Effects = ({ children }) => {
   return <>{children}</>;

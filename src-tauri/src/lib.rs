@@ -299,6 +299,21 @@ pub fn run() {
             sql: "ALTER TABLE players ADD COLUMN hero_points INTEGER DEFAULT 0;",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 25,
+            description: "add weaknesses table and columns to entities",
+            sql: "CREATE TABLE IF NOT EXISTS weaknesses (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                description TEXT,
+                icon TEXT NOT NULL
+            );
+            ALTER TABLE players ADD COLUMN weaknesses TEXT; -- JSON array ids
+            ALTER TABLE opponents ADD COLUMN weaknesses TEXT; -- JSON array ids
+            ALTER TABLE encounter_opponents ADD COLUMN weaknesses TEXT; -- JSON array ids
+            ",
+            kind: MigrationKind::Up,
+        },
     ];
 
 tauri::Builder::default()

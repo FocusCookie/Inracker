@@ -10,9 +10,11 @@ import { useOverlayStore } from "@/stores/useOverlayStore";
 import { TypographyH2 } from "../ui/typographyh2";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
 import ResistanceCard from "../ResistanceCard/ResistanceCard";
+import WeaknessCard from "../WeaknessCard/WeaknessCard";
 import EffectCard from "../EffectCard/EffectCard";
 import { DBImmunity } from "@/types/immunitiy";
 import { DBResistance } from "@/types/resistances";
+import { DBWeakness } from "@/types/weakness";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
 import { useEffects } from "@/hooks/useEffects";
@@ -55,6 +57,11 @@ function EditPlayerDrawer({
     queryFn: () => db.resistances.getAll(),
   });
 
+  const weaknesses = useQueryWithToast({
+    queryKey: ["weaknesses"],
+    queryFn: () => db.weaknesses.getAll(),
+  });
+
   const effects = useEffects(db);
 
   useEffect(() => {
@@ -65,6 +72,7 @@ function EditPlayerDrawer({
         picture: player.image || "",
         immunities: player.immunities.map((i) => i.id),
         resistances: player.resistances.map((r) => r.id),
+        weaknesses: player.weaknesses.map((w) => w.id),
         effects: player.effects.map((e) => e.id),
       });
     }
@@ -75,8 +83,15 @@ function EditPlayerDrawer({
       setIsLoading(true);
 
       const values = form.getValues();
-      const { picture, resistances: resIds, immunities: immIds, effects: effIds, ...update } = values;
-      
+      const {
+        picture,
+        resistances: resIds,
+        immunities: immIds,
+        weaknesses: weakIds,
+        effects: effIds,
+        ...update
+      } = values;
+
       let pictureFilePath: string | null = player?.image || null;
 
       if (!!picture) {
@@ -97,6 +112,9 @@ function EditPlayerDrawer({
         resistances: (resIds || [])
           .map((id: number) => resistances.data?.find((r) => r.id === id))
           .filter((r): r is DBResistance => !!r),
+        weaknesses: (weakIds || [])
+          .map((id: number) => weaknesses.data?.find((w) => w.id === id))
+          .filter((w): w is DBWeakness => !!w),
         effects: (effIds || [])
           .map((id: number) => effects.data?.find((e) => e.id === id))
           .filter((e): e is any => !!e),
@@ -166,6 +184,23 @@ function EditPlayerDrawer({
     });
   }
 
+  function handleCreateWeakness() {
+    openOverlay("weakness.create", {
+      onCreate: async (weakness) => {
+        const created = await db.weaknesses.create(weakness);
+        return created;
+      },
+      onComplete: (weakness) => {
+        const currentWeaknesses = form.getValues("weaknesses") || [];
+        form.setValue("weaknesses", [...currentWeaknesses, weakness.id]);
+        weaknesses.refetch();
+      },
+      onCancel: (reason) => {
+        console.log("Weakness creation cancelled:", reason);
+      },
+    });
+  }
+
   function handleOpenImmunityCatalog() {
     openOverlay("immunity.catalog", {
       onSelect: async (immunity) => {
@@ -186,6 +221,18 @@ function EditPlayerDrawer({
       },
       onCancel: (reason) => {
         console.log("Resistance catalog cancelled:", reason);
+      },
+    });
+  }
+
+  function handleOpenWeaknessCatalog() {
+    openOverlay("weakness.catalog", {
+      onSelect: async (weakness) => {
+        const currentWeaknesses = form.getValues("weaknesses") || [];
+        form.setValue("weaknesses", [...currentWeaknesses, weakness.id]);
+      },
+      onCancel: (reason) => {
+        console.log("Weakness catalog cancelled:", reason);
       },
     });
   }
@@ -235,6 +282,14 @@ function EditPlayerDrawer({
     );
   }
 
+  function handleRemoveWeakness(id: number) {
+    const currentWeaknesses = form.getValues("weaknesses") || [];
+    form.setValue(
+      "weaknesses",
+      currentWeaknesses.filter((weaknessId) => weaknessId !== id),
+    );
+  }
+
   function handleRemoveEffect(id: number) {
     const currentEffects = form.getValues("effects") || [];
     form.setValue(
@@ -248,7 +303,7 @@ function EditPlayerDrawer({
       onExitComplete={onExitComplete}
       open={open}
       onOpenChange={handleOpenChange}
-      description={""}
+      description={t("editPlayerDescription")}
       title={t("editPlayer")}
       cancelTrigger={
         <Button
@@ -265,7 +320,7 @@ function EditPlayerDrawer({
         </Button>
       }
     >
-      <div className="scrollable-y overflow-y-scroll pr-0.5 pb-10">
+      <div className="scrollable-y w-full overflow-y-scroll pb-10">
         <EditPlayerForm form={form} disabled={isLoading} player={player!}>
           <EditPlayerForm.Immunities>
             <div className="mt-4 flex flex-col gap-2 px-1">
@@ -337,6 +392,41 @@ function EditPlayerDrawer({
             </div>
           </EditPlayerForm.Resistances>
 
+          <EditPlayerForm.Weaknesses>
+            <div className="mt-4 flex flex-col gap-2 px-1">
+              <div className="flex justify-between gap-4">
+                <TypographyH2> {t("weaknesses")}</TypographyH2>
+                <div className="flex grow justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleCreateWeakness}
+                  >
+                    {t("create")}
+                  </Button>
+
+                  <Button type="button" onClick={handleOpenWeaknessCatalog}>
+                    {t("catalog")}
+                  </Button>
+                </div>
+              </div>
+              <div className="flex flex-col gap-4">
+                {(form.watch("weaknesses") || [])
+                  .map((id: number) =>
+                    weaknesses.data?.find((w) => w.id === id),
+                  )
+                  .filter((w): w is DBWeakness => !!w)
+                  .map((weakness: DBWeakness) => (
+                    <WeaknessCard
+                      key={`weakness-${weakness.id}`}
+                      weakness={weakness}
+                      onDelete={() => handleRemoveWeakness(weakness.id)}
+                    />
+                  ))}
+              </div>
+            </div>
+          </EditPlayerForm.Weaknesses>
+
           <EditPlayerForm.Effects>
             <div className="mt-4 flex flex-col gap-2 px-1">
               <div className="flex justify-between gap-4">
@@ -375,3 +465,4 @@ function EditPlayerDrawer({
 }
 
 export default EditPlayerDrawer;
+

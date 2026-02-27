@@ -13,6 +13,7 @@ export const createOpponentSchema = z.object({
   image: z.instanceof(File).or(z.string()),
   resistances: z.array(z.coerce.number()),
   immunities: z.array(z.coerce.number()),
+  weaknesses: z.array(z.coerce.number()),
 });
 
 export type TCreateOpponent = z.infer<typeof createOpponentSchema>;

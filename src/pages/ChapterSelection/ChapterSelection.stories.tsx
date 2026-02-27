@@ -24,6 +24,12 @@ const mockDatabase = {
     update: fn,
     edit: fn,
   },
+  weaknesses: {
+    create: fn,
+    update: fn,
+    edit: fn,
+    getAll: fn(() => Promise.resolve([])),
+  },
   effects: {
     create: fn,
     update: fn,
@@ -65,6 +71,7 @@ const meta = {
           name: "tester",
           overview: "overview",
           resistances: [],
+          weaknesses: [],
           gold: 0,
           silver: 0,
           copper: 0,

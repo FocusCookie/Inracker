@@ -1,0 +1,11 @@
+{
+  "descriptionText": "Edit the weakness details.",
+  "title": "Edit Weakness",
+  "cancel": "Cancel",
+  "edit": "Save Changes",
+  "icon": "Icon",
+  "name": "Name",
+  "namePlaceholder": "Fire, Cold, etc.",
+  "description": "Description",
+  "minName": "Name must be at least 2 characters"
+}

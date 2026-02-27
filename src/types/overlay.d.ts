@@ -3,6 +3,7 @@ import type { Party } from "@/types/party";
 import type { Player, TCreatePlayer } from "@/types/player";
 import type { DBImmunity, Immunity } from "@/types/immunitiy";
 import type { DBResistance, Resistance } from "@/types/resistances";
+import type { DBWeakness, Weakness } from "@/types/weakness";
 import { DBEffect, Effect } from "./effect";
 import { Chapter, DBChapter } from "./chapters";
 import { Encounter } from "./encounter";
@@ -33,6 +34,9 @@ export type OverlaySuccessMap = {
   "immunity.create": DBImmunity;
   "immunity.catalog": DBImmunity;
   "immunity.edit": DBImmunity;
+  "weakness.create": DBWeakness;
+  "weakness.catalog": DBWeakness;
+  "weakness.edit": DBWeakness;
   "health.dialog": number;
   "money.dialog": { gold: number; silver: number; copper: number };
   "session.log": void;
@@ -157,6 +161,22 @@ export type OverlayMap = {
     immunity: DBImmunity;
     onEdit: (immunity: DBImmunity) => Promise<DBImmunity>;
     onComplete?: (result: OverlaySuccessMap["immunity.edit"]) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "weakness.create": {
+    onCreate: (weakness: Weakness) => Promise<DBWeakness>;
+    onComplete?: (result: OverlaySuccessMap["weakness.create"]) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "weakness.catalog": {
+    database?: typeof db;
+    onSelect: (weakness: DBWeakness) => Promise<void>;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "weakness.edit": {
+    weakness: DBWeakness;
+    onEdit: (weakness: DBWeakness) => Promise<DBWeakness>;
+    onComplete?: (result: OverlaySuccessMap["weakness.edit"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
   "health.dialog": {

@@ -12,6 +12,7 @@ export const useEditOpponent = (opponent: Opponent) => {
       ...opponent,
       resistances: opponent.resistances.map((r: { id: number }) => r.id),
       immunities: opponent.immunities.map((i: { id: number }) => i.id),
+      weaknesses: opponent.weaknesses.map((w: { id: number }) => w.id),
       effects: opponent.effects.map((e: { id: number }) => e.id),
     },
   });

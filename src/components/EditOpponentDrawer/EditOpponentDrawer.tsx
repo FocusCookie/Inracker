@@ -6,6 +6,7 @@ import CreateOpponentForm from "../CreateOpponentForm/CreateOpponentForm";
 import { TypographyH2 } from "../ui/typographyh2";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
 import ResistanceCard from "../ResistanceCard/ResistanceCard";
+import WeaknessCard from "../WeaknessCard/WeaknessCard";
 import { useState } from "react";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import db from "@/lib/database";
@@ -13,6 +14,7 @@ import { useOverlayStore } from "@/stores/useOverlayStore";
 import type { CancelReason, OverlayMap } from "@/types/overlay";
 import { DBImmunity } from "@/types/immunitiy";
 import { DBResistance } from "@/types/resistances";
+import { DBWeakness } from "@/types/weakness";
 import { Opponent } from "@/types/opponents";
 import { useEditOpponent } from "@/hooks/useEditOpponent";
 
@@ -52,6 +54,11 @@ function EditOpponentDrawer({
     queryFn: () => db.resistances.getAll(),
   });
 
+  const weaknesses = useQueryWithToast({
+    queryKey: ["weaknesses"],
+    queryFn: () => db.weaknesses.getAll(),
+  });
+
   async function handleSubmit() {
     try {
       setIsEditing(true);
@@ -70,6 +77,15 @@ function EditOpponentDrawer({
         ...values,
         health: values.max_health,
         image: pictureFilePath || "",
+        immunities: (values.immunities || [])
+          .map((id: number) => immunities.data?.find((i) => i.id === id))
+          .filter((i): i is DBImmunity => !!i),
+        resistances: (values.resistances || [])
+          .map((id: number) => resistances.data?.find((r) => r.id === id))
+          .filter((r): r is DBResistance => !!r),
+        weaknesses: (values.weaknesses || [])
+          .map((id: number) => weaknesses.data?.find((w) => w.id === id))
+          .filter((w): w is DBWeakness => !!w),
       };
 
       const created = await onEdit(input);
@@ -132,6 +148,23 @@ function EditOpponentDrawer({
     });
   }
 
+  function handleCreateWeakness() {
+    openOverlay("weakness.create", {
+      onCreate: async (weakness) => {
+        const created = await db.weaknesses.create(weakness);
+        return created;
+      },
+      onComplete: (weakness) => {
+        const currentWeaknesses = form.getValues("weaknesses") || [];
+        form.setValue("weaknesses", [...currentWeaknesses, weakness.id]);
+        weaknesses.refetch();
+      },
+      onCancel: (reason) => {
+        console.log("Weakness creation cancelled:", reason);
+      },
+    });
+  }
+
   function handleOpenImmunityCatalog() {
     openOverlay("immunity.catalog", {
       onSelect: async (immunity) => {
@@ -154,6 +187,42 @@ function EditOpponentDrawer({
         console.log("Resistance catalog cancelled:", reason);
       },
     });
+  }
+
+  function handleOpenWeaknessCatalog() {
+    openOverlay("weakness.catalog", {
+      onSelect: async (weakness) => {
+        const currentWeaknesses = form.getValues("weaknesses") || [];
+        form.setValue("weaknesses", [...currentWeaknesses, weakness.id]);
+      },
+      onCancel: (reason) => {
+        console.log("Weakness catalog cancelled:", reason);
+      },
+    });
+  }
+
+  function handleRemoveImmunity(id: number) {
+    const currentImmunities = form.getValues("immunities") || [];
+    form.setValue(
+      "immunities",
+      currentImmunities.filter((immunityId) => immunityId !== id),
+    );
+  }
+
+  function handleRemoveResistance(id: number) {
+    const currentResistances = form.getValues("resistances") || [];
+    form.setValue(
+      "resistances",
+      currentResistances.filter((resistanceId) => resistanceId !== id),
+    );
+  }
+
+  function handleRemoveWeakness(id: number) {
+    const currentWeaknesses = form.getValues("weaknesses") || [];
+    form.setValue(
+      "weaknesses",
+      currentWeaknesses.filter((weaknessId) => weaknessId !== id),
+    );
   }
 
   return (
@@ -207,6 +276,7 @@ function EditOpponentDrawer({
                   <ImmunityCard
                     key={`immunity-${immunity.id}`}
                     immunity={immunity}
+                    onDelete={() => handleRemoveImmunity(immunity.id)}
                   />
                 ))}
             </div>
@@ -241,11 +311,47 @@ function EditOpponentDrawer({
                   <ResistanceCard
                     key={`resistance-${resistance.id}`}
                     resistance={resistance}
+                    onDelete={() => handleRemoveResistance(resistance.id)}
                   />
                 ))}
             </div>
           </div>
         </CreateOpponentForm.Resistances>
+
+        <CreateOpponentForm.Weaknesses>
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between gap-4">
+              <TypographyH2> {t("weaknesses")}</TypographyH2>
+              <div className="flex grow justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleCreateWeakness}
+                >
+                  {t("create")}
+                </Button>
+
+                <Button type="button" onClick={handleOpenWeaknessCatalog}>
+                  {t("catalog")}
+                </Button>
+              </div>
+            </div>
+            <div className="flex flex-col gap-4">
+              {(form.watch("weaknesses") || [])
+                .map((id: number) =>
+                  weaknesses.data?.find((w) => w.id === id),
+                )
+                .filter((w): w is DBWeakness => !!w)
+                .map((weakness: DBWeakness) => (
+                  <WeaknessCard
+                    key={`weakness-${weakness.id}`}
+                    weakness={weakness}
+                    onDelete={() => handleRemoveWeakness(weakness.id)}
+                  />
+                ))}
+            </div>
+          </div>
+        </CreateOpponentForm.Weaknesses>
       </CreateOpponentForm>
     </Drawer>
   );

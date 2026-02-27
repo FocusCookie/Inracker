@@ -44,7 +44,7 @@ export type SettingsCategory =
   | "immunities"
   | "opponents"
   | "resistances"
-  | "effects"
+  | "weaknesses"
   | "backup";
 
 type Props = {
@@ -148,6 +148,7 @@ function SettingsSidebar({ activeItem, onClose, onSelect }: Props) {
                       isActive={
                         activeItem === "immunities" ||
                         activeItem === "resistances" ||
+                        activeItem === "weaknesses" ||
                         activeItem === "effects"
                       }
                     >
@@ -190,6 +191,18 @@ function SettingsSidebar({ activeItem, onClose, onSelect }: Props) {
                         >
                           <Shield />
                           <span>{t("resistances")}</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          isActive={activeItem === "weaknesses"}
+                          onClick={() => onSelect("weaknesses")}
+                        >
+                          <Skull />
+                          <span>{t("weaknesses")}</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>

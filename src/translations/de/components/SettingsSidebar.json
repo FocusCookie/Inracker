@@ -9,6 +9,7 @@
   "effects": "Effekte",
   "immunities": "Immunitäten",
   "resistances": "Widerstände",
+  "weaknesses": "Schwächen",
   "backup": "Import / Export",
   "close": "Schließen",
   "import-export": "Importieren & Exportieren"

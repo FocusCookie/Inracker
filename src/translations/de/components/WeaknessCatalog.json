@@ -1,0 +1,10 @@
+{
+  "weaknesses": "Schwächen",
+  "description": "Wählen Sie eine Schwäche aus dem Katalog aus, um sie der Einheit hinzuzufügen.",
+  "placeholderSearch": "Schwächen suchen...",
+  "add": "Hinzufügen",
+  "noWeaknesses": "Keine Schwächen gefunden",
+  "noWeaknessesDescription": "Sie haben noch keine Schwächen erstellt.",
+  "createWeakness": "Schwäche erstellen",
+  "createdToast": "Erstellt"
+}

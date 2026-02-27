@@ -18,6 +18,7 @@ const players: Player[] = [
     effects: [],
     immunities: [],
     resistances: [],
+    weaknesses: [],
     image: null,
     gold: 10,
     silver: 5,
@@ -38,11 +39,21 @@ const players: Player[] = [
     effects: [],
     immunities: [],
     resistances: [],
+    weaknesses: [],
     image: null,
     gold: 10,
     silver: 5,
     copper: 2,
     hero_points: 1,
+  },
+];
+
+const weaknesses: any[] = [
+  {
+    id: 1,
+    name: "Fire Weakness",
+    icon: "🔥",
+    description: "Weak to fire damage.",
   },
 ];
 
@@ -117,6 +128,7 @@ export const db = {
         effects: [],
         immunities: [],
         resistances: [],
+        weaknesses: [],
       };
       players.push(newPlayer);
       return Promise.resolve(newPlayer);
@@ -175,6 +187,14 @@ export const db = {
     },
     removeResistance: async (playerId: number, resistanceId: number) => {
       console.log("STORYBOOK MOCK: removeResistance", playerId, resistanceId);
+      return Promise.resolve({} as any);
+    },
+    addWeakness: async (playerId: number, weaknessId: number) => {
+      console.log("STORYBOOK MOCK: addWeakness", playerId, weaknessId);
+      return Promise.resolve({} as any);
+    },
+    removeWeakness: async (playerId: number, weaknessId: number) => {
+      console.log("STORYBOOK MOCK: removeWeakness", playerId, weaknessId);
       return Promise.resolve({} as any);
     },
   },
@@ -292,6 +312,44 @@ export const db = {
         resistances.splice(index, 1);
       }
       return Promise.resolve(deletedResistance);
+    },
+  },
+  weaknesses: {
+    getAll: async (): Promise<any[]> => {
+      console.log("STORYBOOK MOCK: getAll weaknesses");
+      return Promise.resolve(weaknesses);
+    },
+    getById: async (id: number): Promise<any> => {
+      console.log("STORYBOOK MOCK: getById weakness", id);
+      const weakness = weaknesses.find((w) => w.id === id);
+      if (!weakness) throw new Error(`Weakness ${id} not found`);
+      return Promise.resolve(weakness);
+    },
+    create: async (weakness: any): Promise<any> => {
+      console.log("STORYBOOK MOCK: create weakness", weakness);
+      const newWeakness = {
+        ...weakness,
+        id: Math.max(...weaknesses.map((w) => w.id)) + 1,
+      };
+      weaknesses.push(newWeakness);
+      return Promise.resolve(newWeakness);
+    },
+    update: async (weakness: any): Promise<any> => {
+      console.log("STORYBOOK MOCK: update weakness", weakness);
+      const index = weaknesses.findIndex((w) => w.id === weakness.id);
+      if (index !== -1) {
+        weaknesses[index] = weakness;
+      }
+      return Promise.resolve(weakness);
+    },
+    delete: async (weaknessId: number): Promise<any> => {
+      console.log("STORYBOOK MOCK: delete weakness", weaknessId);
+      const index = weaknesses.findIndex((w) => w.id === weaknessId);
+      const deletedWeakness = weaknesses[index];
+      if (index !== -1) {
+        weaknesses.splice(index, 1);
+      }
+      return Promise.resolve(deletedWeakness);
     },
   },
   tokens: {

@@ -13,6 +13,7 @@ import SettingsCategoryPlayers from "../SettingsCategoryPlayers/SettingsCategory
 import SettingsCategoryEffects from "../SettingsCategoryEffects/SettingsCategoryEffects";
 import SettingsCategoryImmunities from "../SettingsCategoryImmunities/SettingsCategoryImmunities";
 import SettingsCategoryResistances from "../SettingsCategoryResistances/SettingsCategoryResistances";
+import SettingsCategoryWeaknesses from "../SettingsCategoryWeaknesses/SettingsCategoryWeaknesses";
 import SettingsCategoryOpponents from "../SettingsCategoryOpponents/SettingsCategoryOpponents";
 import SettingsCategoryAudio from "../SettingsCategoryAudio/SettingsCategoryAudio";
 import SettingsCategoryBackup from "../SettingsCategoryBackup/SettingsCategoryBackup";
@@ -74,6 +75,9 @@ function SettingsDrawer({
 
       case "resistances":
         return <SettingsCategoryResistances database={database} />;
+
+      case "weaknesses":
+        return <SettingsCategoryWeaknesses database={database} />;
 
       case "opponents":
         return <SettingsCategoryOpponents database={database} />;

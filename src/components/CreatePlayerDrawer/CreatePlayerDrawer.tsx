@@ -5,7 +5,9 @@ import Drawer from "../Drawer/Drawer";
 import { DBImmunity } from "@/types/immunitiy";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
 import { DBResistance } from "@/types/resistances";
+import { DBWeakness } from "@/types/weakness";
 import ResistanceCard from "../ResistanceCard/ResistanceCard";
+import WeaknessCard from "../WeaknessCard/WeaknessCard";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useOverlayStore } from "@/stores/useOverlayStore";
@@ -17,6 +19,7 @@ import { Button } from "../ui/button";
 import { TypographyH2 } from "../ui/typographyh2";
 import { useCreateImmunity } from "@/hooks/useImmunities";
 import { useCreateResistance } from "@/hooks/useResistances";
+import { useCreateWeakness } from "@/hooks/useWeaknesses";
 import { toast } from "@/hooks/use-toast";
 
 type OverlayProps = OverlayMap["player.create"];
@@ -48,6 +51,7 @@ export default function CreatePlayerDrawer({
 
   const createImmunity = useCreateImmunity(database);
   const createResistance = useCreateResistance(database);
+  const createWeakness = useCreateWeakness(database);
 
   const immunities = useQueryWithToast({
     queryKey: ["immunities"],
@@ -57,6 +61,11 @@ export default function CreatePlayerDrawer({
   const resistances = useQueryWithToast({
     queryKey: ["resistances"],
     queryFn: () => database.resistances.getAll(),
+  });
+
+  const weaknesses = useQueryWithToast({
+    queryKey: ["weaknesses"],
+    queryFn: () => database.weaknesses.getAll(),
   });
 
   async function handleSubmit(values: any) {
@@ -85,6 +94,7 @@ export default function CreatePlayerDrawer({
         image: pictureFilePath || "",
         immunities: values.immunities,
         resistances: values.resistances,
+        weaknesses: values.weaknesses,
         effects: [],
         gold: values.gold,
         silver: values.silver,
@@ -165,6 +175,28 @@ export default function CreatePlayerDrawer({
     });
   }
 
+  function handleCreateWeakness() {
+    openOverlay("weakness.create", {
+      onCreate: async (weakness) => {
+        const created = await createWeakness.mutateAsync(weakness);
+
+        return created;
+      },
+      onComplete: (weakness) => {
+        const currentWeaknesses = form.getValues("weaknesses");
+        form.setValue("weaknesses", [...currentWeaknesses, weakness.id]);
+
+        weaknesses.refetch();
+        toast({
+          title: `Created ${weakness.icon} ${weakness.name}`,
+        });
+      },
+      onCancel: (reason) => {
+        console.log("Weakness creation cancelled:", reason);
+      },
+    });
+  }
+
   function handleOpenImmunityCatalog() {
     openOverlay("immunity.catalog", {
       database,
@@ -187,6 +219,19 @@ export default function CreatePlayerDrawer({
       },
       onCancel: (reason) => {
         console.log("Resistance catalog cancelled:", reason);
+      },
+    });
+  }
+
+  function handleOpenWeaknessCatalog() {
+    openOverlay("weakness.catalog", {
+      database,
+      onSelect: async (weakness) => {
+        const currentWeaknesses = form.getValues("weaknesses");
+        form.setValue("weaknesses", [...currentWeaknesses, weakness.id]);
+      },
+      onCancel: (reason) => {
+        console.log("Weakness catalog cancelled:", reason);
       },
     });
   }
@@ -234,8 +279,7 @@ export default function CreatePlayerDrawer({
                 </div>
               </div>
               <div className="flex flex-col gap-4">
-                {form
-                  .watch("immunities")
+                {(form.watch("immunities") || [])
                   .map((id: number) =>
                     immunities.data?.find((im) => im.id === id),
                   )
@@ -272,8 +316,7 @@ export default function CreatePlayerDrawer({
                 </div>
               </div>
               <div className="flex flex-col gap-4">
-                {form
-                  .watch("resistances")
+                {(form.watch("resistances") || [])
                   .map((id: number) =>
                     resistances.data?.find((re) => re.id === id),
                   )
@@ -290,6 +333,43 @@ export default function CreatePlayerDrawer({
               </div>
             </div>
           </CreatePlayerForm.Resistances>
+
+          <CreatePlayerForm.Weaknesses>
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between gap-4">
+                <TypographyH2> {t("weaknesses")}</TypographyH2>
+                <div className="flex grow justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleCreateWeakness}
+                  >
+                    {t("create")}
+                  </Button>
+
+                  <Button type="button" onClick={handleOpenWeaknessCatalog}>
+                    {t("catalog")}
+                  </Button>
+                </div>
+              </div>
+              <div className="flex flex-col gap-4">
+                {(form.watch("weaknesses") || [])
+                  .map((id: number) =>
+                    weaknesses.data?.find((w) => w.id === id),
+                  )
+                  .filter(
+                    (weakness): weakness is DBWeakness =>
+                      weakness !== undefined,
+                  )
+                  .map((weakness: DBWeakness) => (
+                    <WeaknessCard
+                      key={`weakness-${weakness.id}`}
+                      weakness={weakness}
+                    />
+                  ))}
+              </div>
+            </div>
+          </CreatePlayerForm.Weaknesses>
         </CreatePlayerForm>
       </div>
     </Drawer>

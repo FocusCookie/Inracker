@@ -21,6 +21,7 @@ export const useCreateOpponent = () => {
       image: "",
       resistances: [],
       immunities: [],
+      weaknesses: [],
     },
   });
 

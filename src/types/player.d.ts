@@ -2,6 +2,7 @@ import { Attributes } from "./attributes";
 import { Buff, DBEffect, Debuff, Effect, HarmfulEffect } from "./effect";
 import { DBImmunity } from "./immunitiy";
 import { DBResistance, Resistance } from "./resistances";
+import { DBWeakness, Weakness } from "./weakness";
 import { Skills } from "./skills";
 import { Prettify } from "./utils";
 
@@ -24,6 +25,7 @@ export type DBPlayer = {
   /** markdown notes that are shown first on player info */
   overview: string;
   resistances: string;
+  weaknesses: string;
   role: string;
   gold: number;
   silver: number;
@@ -32,17 +34,22 @@ export type DBPlayer = {
 };
 
 export type Player = Prettify<
-  Omit<DBPlayer, "effects" | "immunities" | "resistances"> & {
+  Omit<DBPlayer, "effects" | "immunities" | "resistances" | "weaknesses"> & {
     effects: Effect[];
     immunities: DBImmunity[];
     resistances: DBResistance[];
+    weaknesses: DBWeakness[];
   }
 >;
 
 export type TCreatePlayer = Prettify<
-  Omit<DBPlayer, "effects" | "immunities" | "id" | "resistances"> & {
+  Omit<
+    DBPlayer,
+    "effects" | "immunities" | "id" | "resistances" | "weaknesses"
+  > & {
     effects: Array<Effect["id"]>;
     immunities: Array<DBImmunity["id"]>;
     resistances: Array<Resistance["id"]>;
+    weaknesses: Array<Weakness["id"]>;
   }
 >;

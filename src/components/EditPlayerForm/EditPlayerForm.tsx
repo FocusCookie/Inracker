@@ -18,13 +18,6 @@ import { Input } from "../ui/input";
 import { MarkdownEditor } from "../MarkdownEditor/MarkdownEditor";
 import { ImageSelectionDialog } from "../ImageSelectionDialog/ImageSelectionDialog";
 import { Image as ImageIcon } from "lucide-react";
-import { Badge } from "../ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
 
 type Props = {
   disabled: boolean;
@@ -36,6 +29,7 @@ type Props = {
 type EditPlayerFormCompound = React.FC<Props> & {
   Immunities: React.FC<{ children: React.ReactNode }>;
   Resistances: React.FC<{ children: React.ReactNode }>;
+  Weaknesses: React.FC<{ children: React.ReactNode }>;
   Effects: React.FC<{ children: React.ReactNode }>;
 };
 
@@ -62,6 +56,11 @@ const EditPlayerForm: EditPlayerFormCompound = ({
   const resistancesChild = childrenArray.find(
     (child) =>
       React.isValidElement(child) && child.type === EditPlayerForm.Resistances,
+  );
+
+  const weaknessesChild = childrenArray.find(
+    (child) =>
+      React.isValidElement(child) && child.type === EditPlayerForm.Weaknesses,
   );
 
   const effectsChild = childrenArray.find(
@@ -101,8 +100,8 @@ const EditPlayerForm: EditPlayerFormCompound = ({
   }
 
   return (
-    <Form {...form} id="test">
-      <form className="scroll flex flex-col gap-6 pt-4">
+    <Form {...form}>
+      <form className="flex flex-col gap-6 pt-4">
         <div className="flex flex-col gap-4">
           <div className="flex items-start gap-2">
             <div className="flex flex-col gap-1 pt-1.5 pl-0.5">
@@ -235,39 +234,6 @@ const EditPlayerForm: EditPlayerFormCompound = ({
               </FormControl>
               <FormMessage />
             </FormItem>
-          </div>
-
-          <div className="flex items-start gap-2 pl-1">
-            <div className="flex w-full justify-end gap-2 pr-0.5">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Badge className="shrink-0 border-none bg-yellow-500 !whitespace-nowrap text-black hover:bg-yellow-600">
-                      G: {player.gold}
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent>{t("gold")}</TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Badge className="shrink-0 border-none bg-gray-400 !whitespace-nowrap text-black hover:bg-gray-500">
-                      S: {player.silver}
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent>{t("silver")}</TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Badge className="shrink-0 border-none bg-orange-400 !whitespace-nowrap text-black hover:bg-orange-500">
-                      C: {player.copper}
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent>{t("copper")}</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
           </div>
 
           <div className="flex items-start gap-2 pl-1">
@@ -417,6 +383,8 @@ const EditPlayerForm: EditPlayerFormCompound = ({
 
         {resistancesChild}
 
+        {weaknessesChild}
+
         {effectsChild}
       </form>
       <ImageSelectionDialog
@@ -438,10 +406,14 @@ EditPlayerForm.Resistances = ({ children }) => {
 };
 EditPlayerForm.Resistances.displayName = "EditPlayerForm.Resistances";
 
+EditPlayerForm.Weaknesses = ({ children }) => {
+  return <>{children}</>;
+};
+EditPlayerForm.Weaknesses.displayName = "EditPlayerForm.Weaknesses";
+
 EditPlayerForm.Effects = ({ children }) => {
   return <>{children}</>;
 };
 EditPlayerForm.Effects.displayName = "EditPlayerForm.Effects";
 
 export default EditPlayerForm;
-

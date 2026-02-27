@@ -1,0 +1,10 @@
+{
+  "weaknesses": "Weaknesses",
+  "description": "Select a weakness from the catalog to add it to the entity.",
+  "placeholderSearch": "Search weaknesses...",
+  "add": "Add",
+  "noWeaknesses": "No weaknesses found",
+  "noWeaknessesDescription": "You haven't created any weaknesses yet.",
+  "createWeakness": "Create Weakness",
+  "createdToast": "Created"
+}

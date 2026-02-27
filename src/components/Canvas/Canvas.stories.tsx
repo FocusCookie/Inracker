@@ -46,6 +46,7 @@ const meta = {
             description: "# Resistance markdown",
           },
         ],
+        weaknesses: [],
         image: player1,
         max_health: 10,
         overview: "overview",

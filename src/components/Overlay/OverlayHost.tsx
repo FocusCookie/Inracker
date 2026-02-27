@@ -17,6 +17,9 @@ import SettingsDrawer from "../SettingsDrawer/SettingsDrawer";
 import EditEffectDrawer from "../EditEffectDrawer/EditEffectDrawer";
 import EditImmunityDrawer from "../EditImmunityDrawer/EditImmunityDrawer";
 import EditResistanceDrawer from "../EditResistanceDrawer/EditResistanceDrawer";
+import CreateWeaknessDrawer from "../CreateWeaknessDrawer/CreateWeaknessDrawer";
+import EditWeaknessDrawer from "../EditWeaknessDrawer/EditWeaknessDrawer";
+import WeaknessesCatalog from "../WeaknessesCatalog/WeaknessesCatalog";
 import CreateEncounterDrawer from "../CreateEncounterDrawer/CreateEncounterDrawer";
 import CreateOpponentDrawer from "../CreateOpponentDrawer/CreateOpponentDrawer";
 import EditEncounterDrawer from "../EditEncounterDrawer/EditEncounterDrawer";
@@ -64,6 +67,9 @@ const registry: Record<OverlayKind, OverlayComponent<any>> = {
   "resistance.create": CreateResistanceDrawer,
   "resistance.catalog": ResistancesCatalog,
   "resistance.edit": EditResistanceDrawer,
+  "weakness.create": CreateWeaknessDrawer,
+  "weakness.catalog": WeaknessesCatalog,
+  "weakness.edit": EditWeaknessDrawer,
   "session.log": SessionLogDrawer,
   settings: SettingsDrawer,
 };

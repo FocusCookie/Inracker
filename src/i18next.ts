@@ -1,5 +1,17 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import ComponentSettingsCategoryWeaknessesEN from "@/translations/en/components/SettingsCategoryWeaknesses.json";
+import ComponentSettingsCategoryWeaknessesDE from "@/translations/de/components/SettingsCategoryWeaknesses.json"; 
+import ComponentSettingWeaknessCardEN from "@/translations/en/components/SettingWeaknessCard.json";
+import ComponentSettingWeaknessCardDE from "@/translations/de/components/SettingWeaknessCard.json"; 
+import ComponentEditWeaknessDrawerEN from "@/translations/en/components/EditWeaknessDrawer.json";
+import ComponentEditWeaknessDrawerDE from "@/translations/de/components/EditWeaknessDrawer.json"; 
+import ComponentCreateWeaknessDrawerEN from "@/translations/en/components/CreateWeaknessDrawer.json";
+import ComponentCreateWeaknessDrawerDE from "@/translations/de/components/CreateWeaknessDrawer.json"; 
+import ComponentWeaknessCatalogEN from "@/translations/en/components/WeaknessCatalog.json";
+import ComponentWeaknessCatalogDE from "@/translations/de/components/WeaknessCatalog.json"; 
+import ComponentWeaknessCardEN from "@/translations/en/components/WeaknessCard.json";
+import ComponentWeaknessCardDE from "@/translations/de/components/WeaknessCard.json"; 
 import HookUseAppUpdatesEN from "@/translations/en/hooks/useAppUpdates.json";
 import HookUseAppUpdatesDE from "@/translations/de/hooks/useAppUpdates.json"; 
 import ComponentSettingsCategoryBackupEN from "@/translations/en/components/SettingsCategoryBackup.json";
@@ -131,6 +143,12 @@ import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutation
 const resources = {
   en: {
     // hygen-en-components - DO NOT DELETE THIS LINE
+    ComponentSettingsCategoryWeaknesses: ComponentSettingsCategoryWeaknessesEN,
+    ComponentSettingWeaknessCard: ComponentSettingWeaknessCardEN,
+    ComponentEditWeaknessDrawer: ComponentEditWeaknessDrawerEN,
+    ComponentCreateWeaknessDrawer: ComponentCreateWeaknessDrawerEN,
+    ComponentWeaknessCatalog: ComponentWeaknessCatalogEN,
+    ComponentWeaknessCard: ComponentWeaknessCardEN,
     ComponentSettingsCategoryBackup: ComponentSettingsCategoryBackupEN,
     ComponentInitiativeCard: ComponentInitiativeCardEN,
     ComponentCollapsible: ComponentCollapsibleEN,
@@ -203,6 +221,12 @@ const resources = {
   },
   de: {
     // hygen-de-components - DO NOT DELETE THIS LINE
+    ComponentSettingsCategoryWeaknesses: ComponentSettingsCategoryWeaknessesDE,
+    ComponentSettingWeaknessCard: ComponentSettingWeaknessCardDE,
+    ComponentEditWeaknessDrawer: ComponentEditWeaknessDrawerDE,
+    ComponentCreateWeaknessDrawer: ComponentCreateWeaknessDrawerDE,
+    ComponentWeaknessCatalog: ComponentWeaknessCatalogDE,
+    ComponentWeaknessCard: ComponentWeaknessCardDE,
     ComponentSettingsCategoryBackup: ComponentSettingsCategoryBackupDE,
     ComponentInitiativeCard: ComponentInitiativeCardDE,
     ComponentCollapsible: ComponentCollapsibleDE,

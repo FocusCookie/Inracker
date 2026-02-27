@@ -1,0 +1,11 @@
+{
+  "descriptionText": "Bearbeiten Sie die Details der Schwäche.",
+  "title": "Schwäche bearbeiten",
+  "cancel": "Abbrechen",
+  "edit": "Änderungen speichern",
+  "icon": "Symbol",
+  "name": "Name",
+  "namePlaceholder": "Feuer, Kälte, etc.",
+  "description": "Beschreibung",
+  "minName": "Der Name muss mindestens 2 Zeichen lang sein"
+}

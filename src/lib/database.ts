@@ -2,6 +2,7 @@ import { connect, disconnect } from "./db/core";
 import { effects } from "./db/effects";
 import { immunities } from "./db/immunities";
 import { resistances } from "./db/resistances";
+import { weaknesses } from "./db/weaknesses";
 import { players } from "./db/players";
 import { parties } from "./db/parties";
 import { chapters } from "./db/chapters";
@@ -22,6 +23,7 @@ const database = {
   effects,
   immunities,
   resistances,
+  weaknesses,
   players,
   chapters,
   encounters,

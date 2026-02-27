@@ -7,5 +7,6 @@
   "immunities": "Immunitäten",
   "catalog": "Katalog",
   "resistances": "Widerstände",
+  "weaknesses": "Schwächen",
   "minName": "Der Name muss mindestens 2 Zeichen lang sein"
 }

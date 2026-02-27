@@ -15,6 +15,7 @@ const meta = {
       image: null,
       immunities: [],
       resistances: [],
+      weaknesses: [],
       gold: 0,
       silver: 0,
       copper: 0,

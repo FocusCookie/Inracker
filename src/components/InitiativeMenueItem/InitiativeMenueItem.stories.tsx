@@ -33,6 +33,7 @@ export const Primary: Story = {
         effects: [],
         immunities: [],
         resistances: [],
+        weaknesses: [],
         gold: 0,
         silver: 0,
         copper: 0,

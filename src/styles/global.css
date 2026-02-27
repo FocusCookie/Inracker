@@ -84,7 +84,6 @@
 
 @layer utilities {
   .scrollable-y {
-    scrollbar-gutter: stable;
   }
   .scrollable-y::-webkit-scrollbar {
     width: 0.5rem;

@@ -1,4 +1,10 @@
 import "i18next";
+import ComponentSettingsCategoryWeaknesses from "@/translations/en/components/SettingsCategoryWeaknesses.json";
+import ComponentSettingWeaknessCard from "@/translations/en/components/SettingWeaknessCard.json";
+import ComponentEditWeaknessDrawer from "@/translations/en/components/EditWeaknessDrawer.json";
+import ComponentCreateWeaknessDrawer from "@/translations/en/components/CreateWeaknessDrawer.json";
+import ComponentWeaknessCatalog from "@/translations/en/components/WeaknessCatalog.json";
+import ComponentWeaknessCard from "@/translations/en/components/WeaknessCard.json";
 import HookUseAppUpdates from "@/translations/en/hooks/useAppUpdates.json";
 import HookUseMutationWithErrorTaost from "@/translations/en/hooks/useMutationWithErrorTaost.json";
 import ComponentSettingsCategoryBackup from "@/translations/en/components/SettingsCategoryBackup.json";
@@ -67,6 +73,12 @@ declare module "i18next" {
   interface CustomTypeOptions {
     resources: {
       // hygen-components - DO NOT DELETE THIS LINE
+      ComponentSettingsCategoryWeaknesses: typeof ComponentSettingsCategoryWeaknesses;
+      ComponentSettingWeaknessCard: typeof ComponentSettingWeaknessCard;
+      ComponentEditWeaknessDrawer: typeof ComponentEditWeaknessDrawer;
+      ComponentCreateWeaknessDrawer: typeof ComponentCreateWeaknessDrawer;
+      ComponentWeaknessCatalog: typeof ComponentWeaknessCatalog;
+      ComponentWeaknessCard: typeof ComponentWeaknessCard;
       ComponentSettingsCategoryBackup: typeof ComponentSettingsCategoryBackup;
       ComponentSettingsCategoryAudio: typeof ComponentSettingsCategoryAudio;
       ComponentInitiativeCard: typeof ComponentInitiativeCard;
