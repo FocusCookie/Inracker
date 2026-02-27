@@ -96,7 +96,7 @@ function PartyCard({ party, animationDelay = 0, onEdit, onOpen }: Props) {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Badge className="bg-yellow-500 text-black hover:bg-yellow-600 shrink-0 border-none whitespace-nowrap">
+                        <Badge className="bg-yellow-50 border-yellow-500 border text-black hover:bg-yellow-100 transition-colors shrink-0 whitespace-nowrap">
                           G: {displayGold}
                         </Badge>
                       </TooltipTrigger>
@@ -105,7 +105,7 @@ function PartyCard({ party, animationDelay = 0, onEdit, onOpen }: Props) {
 
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Badge className="bg-gray-400 text-black hover:bg-gray-500 shrink-0 border-none whitespace-nowrap">
+                        <Badge className="bg-gray-50 border-gray-400 border text-black hover:bg-gray-100 transition-colors shrink-0 whitespace-nowrap">
                           S: {displaySilver}
                         </Badge>
                       </TooltipTrigger>
@@ -114,7 +114,7 @@ function PartyCard({ party, animationDelay = 0, onEdit, onOpen }: Props) {
 
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Badge className="bg-orange-400 text-black hover:bg-orange-500 shrink-0 border-none whitespace-nowrap">
+                        <Badge className="bg-orange-50 border-orange-400 border text-black hover:bg-orange-100 transition-colors shrink-0 whitespace-nowrap">
                           C: {displayCopper}
                         </Badge>
                       </TooltipTrigger>

@@ -306,7 +306,7 @@ function PlayerCard({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Badge className="shrink-0 border-none bg-yellow-500 !whitespace-nowrap text-black hover:bg-yellow-600">
+                          <Badge className="shrink-0 bg-yellow-50 border-yellow-500 border !whitespace-nowrap text-black hover:bg-yellow-100 transition-colors">
                             G: {player.gold}
                           </Badge>
                         </TooltipTrigger>
@@ -315,7 +315,7 @@ function PlayerCard({
 
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Badge className="shrink-0 border-none bg-gray-400 !whitespace-nowrap text-black hover:bg-gray-500">
+                          <Badge className="shrink-0 bg-gray-50 border-gray-400 border !whitespace-nowrap text-black hover:bg-gray-100 transition-colors">
                             S: {player.silver}
                           </Badge>
                         </TooltipTrigger>
@@ -324,7 +324,7 @@ function PlayerCard({
 
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Badge className="shrink-0 border-none bg-orange-400 !whitespace-nowrap text-black hover:bg-orange-500">
+                          <Badge className="shrink-0 bg-orange-50 border-orange-400 border !whitespace-nowrap text-black hover:bg-orange-100 transition-colors">
                             C: {player.copper}
                           </Badge>
                         </TooltipTrigger>
