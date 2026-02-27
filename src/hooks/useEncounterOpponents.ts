@@ -37,7 +37,7 @@ export function useCreateEncounterOpponent(database = defaultDb) {
       opponent: Omit<EncounterOpponent, "id">;
       chapterId: number;
     }) =>
-      database.encounterOpponents.create(data.opponent),
+      database.encounterOpponents.createWithToken(data.opponent, data.chapterId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["encounter-opponents"] });
       queryClient.invalidateQueries({ queryKey: ["tokens"] });
