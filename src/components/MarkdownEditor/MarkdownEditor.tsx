@@ -87,12 +87,12 @@ export function MarkdownEditor({
         hideToolbar={disabled}
         style={{
           border: "none",
-          background: "transparent",
+          background: "white",
         }}
         previewOptions={{
           components: components,
           style: {
-            backgroundColor: "transparent",
+            backgroundColor: "white",
             color: "inherit",
           },
         }}
