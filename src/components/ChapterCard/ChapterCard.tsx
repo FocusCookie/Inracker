@@ -63,10 +63,10 @@ function ChapterCard({ chapter, onEdit, onPlay, animationDelay }: Props) {
       <Card className="px-0">
         <CardHeader className="px-4 pb-4">
           <div className="flex items-start justify-between">
-            <div className="flex grow gap-2">
+            <div className="flex min-w-0 grow gap-2">
               <span className="w-8 text-center text-2xl">{chapter.icon}</span>
 
-              <TypographyH3>{chapter.name}</TypographyH3>
+              <TypographyH3 truncate>{chapter.name}</TypographyH3>
             </div>
 
             <div className="flex items-center gap-2">
