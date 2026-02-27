@@ -83,7 +83,7 @@ function CreateOpponentDrawer({
       };
 
       const created = await onCreate(input);
-      onComplete(created);
+      await Promise.resolve(onComplete(created));
       setClosingReason("success");
       onOpenChange(false);
       form.reset();

@@ -133,18 +133,51 @@ function CreateEncounterDrawer({
     }
   }
 
+  async function cleanupDraftEncounterOpponents() {
+    const opponentIds = Array.from(new Set(form.getValues("opponents") || []));
+
+    if (opponentIds.length === 0) return;
+
+    const deleteResults = await Promise.allSettled(
+      opponentIds.map((opponentId: number) =>
+        deleteEncounterOpponent.mutateAsync(opponentId),
+      ),
+    );
+
+    const failedDeletes = deleteResults.filter(
+      (result) => result.status === "rejected",
+    );
+
+    if (failedDeletes.length > 0) {
+      console.error(
+        `Failed to delete ${failedDeletes.length} encounter opponents during encounter draft cleanup`,
+        failedDeletes,
+      );
+    }
+  }
+
+  async function discardEncounterDraft(reason: CancelReason) {
+    try {
+      setIsCreating(true);
+      await cleanupDraftEncounterOpponents();
+    } finally {
+      form.reset();
+      resetStore();
+      setClosingReason(reason);
+      onCancel?.(reason);
+      onOpenChange(false);
+      setIsCreating(false);
+    }
+  }
+
   function handleCancelation() {
-    setClosingReason("cancel");
-    onCancel?.("cancel");
-    resetStore();
-    onOpenChange(false);
-    form.reset();
+    void discardEncounterDraft("cancel");
   }
 
   function handleOpenChange(state: boolean) {
     if (!state && closingReason === null) {
-      onCancel?.("dismissed");
-      setClosingReason("dismissed");
+      void discardEncounterDraft("dismissed");
+      return;
     }
 
     onOpenChange(state);
@@ -172,12 +205,13 @@ function CreateEncounterDrawer({
   function handleCreateOpponent() {
     openOverlay("opponent.create", {
       onCreate: async (opponent) => {
-        const createdOpponent = await db.opponents.create(opponent);
-
-        if (chapterId === null)
+        if (!chapterId) {
           throw new Error(
             "Chapter id is missing in creating the token for the opponent",
           );
+        }
+
+        const createdOpponent = await db.opponents.create(opponent);
 
         return createdOpponent;
       },
@@ -203,6 +237,12 @@ function CreateEncounterDrawer({
     openOverlay("opponent.catalog", {
       database: db,
       onSelect: async (opponent) => {
+        if (!chapterId) {
+          throw new Error(
+            "Chapter id is missing in creating the token for the opponent",
+          );
+        }
+
         const currentOpponents = form.getValues("opponents") || [];
 
         const encounterOpponent = await createEncounterOpponent.mutateAsync({
