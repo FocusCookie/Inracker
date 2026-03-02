@@ -1419,20 +1419,11 @@ function Canvas({
                       cy={token.coordinates.y + 50}
                       r={40}
                       fill="white"
-                      stroke="black"
-                      strokeWidth={2}
+                      stroke="#10b981"
+                      strokeWidth={4}
                       className="pointer-events-none"
                     />
 
-                    <g>
-                      <text
-                        className="pointer-events-none text-4xl select-none"
-                        x={token.coordinates.x}
-                        y={token.coordinates.y + 32}
-                      >
-                        {player.icon}
-                      </text>
-                    </g>
                     <image
                       className="hover:cursor-pointer"
                       data-token-id={token.id}
@@ -1458,6 +1449,17 @@ function Canvas({
                         {player.icon}
                       </text>
                     </g>
+                    {!player.image && (
+                      <text
+                        x={token.coordinates.x + 50}
+                        y={token.coordinates.y + 50}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        className="pointer-events-none select-none text-2xl font-bold fill-black"
+                      >
+                        {player.name.slice(0, 2).toUpperCase()}
+                      </text>
+                    )}
                     {player.effects && player.effects.length > 0 && (
                       <foreignObject
                         x={token.coordinates.x + 60}
@@ -1623,22 +1625,10 @@ function Canvas({
                       cy={token.coordinates.y + 50}
                       r={40}
                       fill="white"
-                      stroke="black"
-                      strokeWidth={2}
+                      stroke="#ef4444"
+                      strokeWidth={4}
                       className="pointer-events-none"
                     />
-
-                    {!opponent.image && (
-                      <g>
-                        <text
-                          className="pointer-events-none text-4xl select-none"
-                          x={token.coordinates.x + 32}
-                          y={token.coordinates.y + 64}
-                        >
-                          {opponent.icon}
-                        </text>
-                      </g>
-                    )}
 
                     <image
                       className="hover:cursor-pointer"
@@ -1656,16 +1646,25 @@ function Canvas({
                       onMouseDown={(e) => handleTokenDragStart(e, token)}
                       onClick={() => handleTokenClick(token)}
                     />
-                    {opponent.image && (
-                      <g>
-                        <text
-                          className="pointer-events-none text-4xl select-none"
-                          x={token.coordinates.x}
-                          y={token.coordinates.y + 32}
-                        >
-                          {opponent.icon}
-                        </text>
-                      </g>
+                    <g>
+                      <text
+                        className="pointer-events-none text-4xl select-none"
+                        x={token.coordinates.x}
+                        y={token.coordinates.y + 32}
+                      >
+                        {opponent.icon}
+                      </text>
+                    </g>
+                    {!opponent.image && (
+                      <text
+                        x={token.coordinates.x + 50}
+                        y={token.coordinates.y + 50}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        className="pointer-events-none select-none text-2xl font-bold fill-black"
+                      >
+                        {opponent.name.slice(0, 2).toUpperCase()}
+                      </text>
                     )}
                     {opponent.effects && opponent.effects.length > 0 && (
                       <foreignObject
