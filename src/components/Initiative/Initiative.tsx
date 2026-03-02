@@ -58,7 +58,7 @@ function Initiative({
   }
 
   return (
-    <div className="items-center gap-2 rounded-xl border border-white/80 bg-white/20 px-3 shadow-md backdrop-blur-sm">
+    <div className="flex max-w-128 items-center gap-2 rounded-xl border border-white/80 bg-white/20 px-3 shadow-md backdrop-blur-sm">
       {showButtons && (
         <button
           onClick={() => scroll("left")}
