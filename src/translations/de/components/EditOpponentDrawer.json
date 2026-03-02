@@ -8,5 +8,7 @@
   "catalog": "Katalog",
   "resistances": "Widerstände",
   "weaknesses": "Schwächen",
+  "health": "Trefferpunkte",
+  "maxHealth": "Max. Trefferpunkte",
   "minName": "Der Name muss mindestens 2 Zeichen lang sein"
 }

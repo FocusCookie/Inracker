@@ -455,7 +455,9 @@ function PlayerCard({
                     src={player.image || undefined}
                     alt={player.name}
                   />
-                  <AvatarFallback>{player.icon}</AvatarFallback>
+                  <AvatarFallback>
+                    {player.name.slice(0, 0 + 2).toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
 
                 <span className="absolute top-0 right-0 rounded-full bg-white p-0.5 text-sm shadow">

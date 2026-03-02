@@ -14,6 +14,7 @@ export const useCreateOpponent = () => {
     defaultValues: {
       details: detailsTemplate[language],
       level: 1,
+      health: 10,
       max_health: 10,
       name: "",
       icon: "🧙",
@@ -22,6 +23,7 @@ export const useCreateOpponent = () => {
       resistances: [],
       immunities: [],
       weaknesses: [],
+      effects: [],
     },
   });
 

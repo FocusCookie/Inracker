@@ -22,7 +22,9 @@ function IconAvatar({ player, ...props }: Props) {
           >
             <Avatar>
               <AvatarImage src={player.image || undefined} alt={player.name} />
-              <AvatarFallback>{player.icon}</AvatarFallback>
+              <AvatarFallback>
+                {player.name.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
             </Avatar>
 
             <span className="absolute -top-2 -right-2 rounded-full bg-white p-1 text-xs shadow">

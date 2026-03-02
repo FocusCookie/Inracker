@@ -108,7 +108,6 @@ function EditEncounterOpponentDrawer({
 
       const input: EncounterOpponent = {
         ...values,
-        health: values.max_health,
         image: pictureFilePath || "",
         blueprint: opponent.blueprint,
         immunities: (values.immunities || [])

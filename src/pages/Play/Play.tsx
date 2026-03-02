@@ -25,6 +25,7 @@ import { Token } from "@/types/tokens";
 import { Player } from "@/types/player";
 import { DBImmunity, Immunity } from "@/types/immunitiy";
 import { DBResistance, Resistance } from "@/types/resistances";
+import { DBWeakness, Weakness } from "@/types/weakness";
 import { Effect } from "@/types/effect";
 import { toast } from "@/hooks/use-toast";
 import { Chapter } from "@/types/chapters";
@@ -79,6 +80,7 @@ import {
   useUpdateResistance,
   useCreateResistance,
 } from "@/hooks/useResistances";
+import { useUpdateWeakness, useCreateWeakness } from "@/hooks/useWeaknesses";
 import { useUpdateEffect, useCreateEffect } from "@/hooks/useEffects";
 import {
   useUpdateEncounter,
@@ -419,6 +421,7 @@ function Play({
   const createEffectMutation = useCreateEffect(database);
   const createImmunityMutation = useCreateImmunity(database);
   const createResistanceMutation = useCreateResistance(database);
+  const createWeaknessMutation = useCreateWeakness(database);
   const createPlayerMutation = useCreatePlayer(database);
 
   function handleOpenEditPlayer(player: Player) {
@@ -830,6 +833,25 @@ function Play({
     });
   }
 
+  function handleCreateWeakness() {
+    openOverlay("weakness.create", {
+      onCreate: (weakness: Omit<Weakness, "id">) =>
+        createWeaknessMutation.mutateAsync(weakness),
+      onComplete: (weakness) => {
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["weaknesses"] });
+
+        toast({
+          title: `Created ${weakness.icon} ${weakness.name}`,
+        });
+      },
+      onCancel: (reason) => {
+        console.log("Weakness creation cancelled:", reason);
+      },
+    });
+  }
+
   function handlePlayersCatalog() {
     openOverlay("player.catalog", {
       database,
@@ -1162,6 +1184,9 @@ function Play({
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleCreateResistance}>
                       {t("createResistance")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleCreateWeakness}>
+                      {t("createWeakness")}
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>

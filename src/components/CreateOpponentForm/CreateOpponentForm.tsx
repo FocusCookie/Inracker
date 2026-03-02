@@ -153,10 +153,33 @@ const CreateOpponentForm: CreateOpponentDrawerCompound = ({
 
             <FormField
               control={form.control}
-              name="max_health"
+              name="health"
               render={({ field }: { field: any }) => (
                 <FormItem className="w-full px-0.5">
                   <FormLabel>{t("health")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      disabled={disabled}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? undefined : Number(val));
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="max_health"
+              render={({ field }: { field: any }) => (
+                <FormItem className="w-full px-0.5">
+                  <FormLabel>{t("maxHealth")}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"

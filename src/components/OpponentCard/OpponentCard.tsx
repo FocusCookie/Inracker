@@ -71,7 +71,9 @@ function OpponentCard({ opponent, onRemove, onEdit, onSelectToken }: Props) {
               src={opponent?.image || undefined}
               alt={opponent.name}
             />
-            <AvatarFallback>{opponent.icon}</AvatarFallback>
+            <AvatarFallback>
+              {opponent.name.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
           </Avatar>
           <span className="absolute -top-2 -left-2 rounded-full bg-white shadow">
             {opponent.icon}

@@ -7,6 +7,7 @@ export const createOpponentSchema = z.object({
   }),
   icon: z.string().emoji(),
   details: z.string(),
+  health: z.coerce.number(),
   max_health: z.coerce.number(),
   level: z.coerce.number(),
   labels: z.array(z.string().min(1)),

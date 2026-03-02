@@ -8,5 +8,7 @@
   "catalog": "Catalog",
   "resistances": "Resistances",
   "weaknesses": "Weaknesses",
+  "health": "Current Health",
+  "maxHealth": "Max Health",
   "minName": "Name must be at least 2 characters"
 }

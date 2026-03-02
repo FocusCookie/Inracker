@@ -1390,7 +1390,7 @@ function Canvas({
                 (opponent) =>
                   token.type === "opponent" && opponent.id === token.entity,
               )
-            : [];
+            : undefined;
 
           if (player) {
             return (

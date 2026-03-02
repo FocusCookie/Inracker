@@ -1,5 +1,5 @@
 import { Player } from "@/types/player";
-import { TrashIcon } from "@radix-ui/react-icons";
+import { StarFilledIcon, StarIcon, TrashIcon } from "@radix-ui/react-icons";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import IconPicker from "../IconPicker/IconPicker";
@@ -169,10 +169,33 @@ const EditPlayerForm: EditPlayerFormCompound = ({
 
             <FormField
               control={form.control}
-              name="max_health"
+              name="health"
               render={({ field }: { field: any }) => (
                 <FormItem className="w-full px-0.5">
                   <FormLabel>{t("health")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      disabled={disabled}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? undefined : Number(val));
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="max_health"
+              render={({ field }: { field: any }) => (
+                <FormItem className="w-full px-0.5">
+                  <FormLabel>{t("maxHealth")}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -315,18 +338,27 @@ const EditPlayerForm: EditPlayerFormCompound = ({
                 <FormItem className="w-full px-0.5">
                   <FormLabel>{t("heroPoints")}</FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      min={0}
-                      max={3}
-                      disabled={disabled}
-                      {...field}
-                      value={field.value ?? ""}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        field.onChange(val === "" ? undefined : Number(val));
-                      }}
-                    />
+                    <div className="flex gap-1 py-1">
+                      {[1, 2, 3].map((point) => (
+                        <button
+                          key={`hero-point-edit-${point}`}
+                          type="button"
+                          disabled={disabled}
+                          onClick={() => {
+                            const currentValue = field.value || 0;
+                            const newPoints = currentValue === point ? point - 1 : point;
+                            field.onChange(newPoints);
+                          }}
+                          className="hover:bg-accent rounded-sm p-1 hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {(field.value || 0) >= point ? (
+                            <StarFilledIcon className="h-6 w-6 text-yellow-500" />
+                          ) : (
+                            <StarIcon className="h-6 w-6 text-gray-400" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

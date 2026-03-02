@@ -13,7 +13,8 @@
   "picturePlaceholder": "Select an image",
   "name": "Name",
   "level": "Level",
-  "health": "Health",
+  "health": "Current Health",
+  "maxHealth": "Max Health",
   "details": "Details",
   "detailsDescription": "Detailed information about the opponent (supports Markdown)"
 }

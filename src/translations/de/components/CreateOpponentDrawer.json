@@ -13,7 +13,8 @@
   "picturePlaceholder": "Bild auswählen",
   "name": "Name",
   "level": "Stufe",
-  "health": "Gesundheit",
+  "health": "Trefferpunkte",
+  "maxHealth": "Max. Trefferpunkte",
   "details": "Details",
   "detailsDescription": "Detaillierte Informationen über den Gegner (unterstützt Markdown)"
 }

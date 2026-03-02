@@ -75,7 +75,6 @@ function EditOpponentDrawer({
 
       const input: Opponent = {
         ...values,
-        health: values.max_health,
         image: pictureFilePath || "",
         immunities: (values.immunities || [])
           .map((id: number) => immunities.data?.find((i) => i.id === id))

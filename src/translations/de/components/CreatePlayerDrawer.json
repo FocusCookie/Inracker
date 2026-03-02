@@ -51,6 +51,7 @@
   "attributes": "Attribute",
   "level": "Stufe",
   "health": "Trefferpunkte",
+  "maxHealth": "Max. Trefferpunkte",
   "skillKeys": {
     "acrobatics": "Akrobatik",
     "arcane": "Arkane",

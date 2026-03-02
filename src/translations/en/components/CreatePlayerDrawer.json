@@ -50,7 +50,8 @@
   "skills": "Skills",
   "attributes": "Attributes",
   "level": "Level",
-  "health": "Health",
+  "health": "Current Health",
+  "maxHealth": "Max Health",
   "skillKeys": {
     "acrobatics": "Acrobatics",
     "arcane": "Arcane",

@@ -16,7 +16,8 @@ export const useCreatePlayer = () => {
       details: detailsTemplate[language],
       ep: 0,
       level: 1,
-      maxHealth: 10,
+      health: 10,
+      max_health: 10,
       name: "",
       overview: overviewTemplate[language],
       icon: "🧙",
@@ -25,10 +26,11 @@ export const useCreatePlayer = () => {
       role: "",
       resistances: [],
       weaknesses: [],
+      effects: [],
       gold: 0,
       silver: 0,
       copper: 0,
-      hero_points: 0,
+      hero_points: 1,
     },
   });
 
