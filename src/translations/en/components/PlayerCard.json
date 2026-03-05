@@ -1,6 +1,7 @@
 {
   "addImmunity": "Add Immunity",
   "addResistance": "Add Resistance",
+  "addWeakness": "Add Weakness",
   "removeFromGroup": "Remove from Group",
   "editPlayer": "Edit Player",
   "selectToken": "Select Token",
@@ -12,6 +13,7 @@
   "details": "Details",
   "immunities": "Immunities",
   "resistances": "Resistances",
+  "weaknesses": "Weaknesses",
   "positiveEffects": "Positive Effects",
   "negativeEffects": "Negative Effects",
   "money": "Money",

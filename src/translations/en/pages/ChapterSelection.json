@@ -14,6 +14,7 @@
   "createChapter": "Create a Chapter",
   "createImmunity": "Create Immunity",
   "createResistance": "Create Resistance",
+  "createWeakness": "Create Weakness",
   "createEffect": "Create Effect",
   "moneyChanged": "{{name}}'s money changed"
 }

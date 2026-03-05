@@ -68,9 +68,11 @@ import {
   useUpdatePlayer,
   useAddEffectToPlayer,
   useAddResistanceToPlayer,
+  useAddWeaknessToPlayer,
   useAddImmunityToPlayer,
   useRemoveImmunityFromPlayer,
   useRemoveResistanceFromPlayer,
+  useRemoveWeaknessFromPlayer,
   useRemoveEffectFromPlayer,
   useCreatePlayer,
 } from "@/hooks/usePlayers";
@@ -80,7 +82,11 @@ import {
   useUpdateResistance,
   useCreateResistance,
 } from "@/hooks/useResistances";
-import { useUpdateWeakness, useCreateWeakness } from "@/hooks/useWeaknesses";
+import {
+  useCreateWeakness,
+  useUpdateWeakness,
+  useDeleteWeakness,
+} from "@/hooks/useWeaknesses";
 import { useUpdateEffect, useCreateEffect } from "@/hooks/useEffects";
 import {
   useUpdateEncounter,
@@ -245,10 +251,13 @@ function Play({
 
   const editImmunity = useUpdateImmunity(database);
   const editResistance = useUpdateResistance(database);
+  const editWeakness = useUpdateWeakness(database);
+  const deleteWeakness = useDeleteWeakness(database);
   const editEffect = useUpdateEffect(database);
   const editPlayer = useUpdatePlayer(database);
   const addEffectToPlayerMutation = useAddEffectToPlayer(database);
   const addResistanceToPlayerMutation = useAddResistanceToPlayer(database);
+  const addWeaknessToPlayerMutation = useAddWeaknessToPlayer(database);
   const addImmunityToPlayerMutation = useAddImmunityToPlayer(database);
   const addPlayerToPartyMutation = useAddPlayer(database);
   const removePlayerFromPartyMutation = useRemovePlayer(database);
@@ -256,6 +265,8 @@ function Play({
     useRemoveImmunityFromPlayer(database);
   const removeResistanceFromPlayerMutation =
     useRemoveResistanceFromPlayer(database);
+  const removeWeaknessFromPlayerMutation =
+    useRemoveWeaknessFromPlayer(database);
   const removeEffectFromPlayerMutation = useRemoveEffectFromPlayer(database);
 
   const updateEncounterMutation = useUpdateEncounter(database);
@@ -381,6 +392,29 @@ function Play({
     });
   }
 
+  function handleWeaknessesCatalog(player: Player) {
+    openOverlay("weakness.catalog", {
+      database,
+      onSelect: async (weakness) => {
+        await addWeaknessToPlayerMutation.mutateAsync({
+          playerId: player.id,
+          weaknessId: weakness.id,
+        });
+
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["parties"] });
+
+        toast({
+          title: `Added ${weakness.icon} ${weakness.name} to ${player.name}`,
+        });
+      },
+      onCancel: (reason) => {
+        console.log("Weakness Catalog cancelled:", reason);
+      },
+    });
+  }
+
   function handleOpenEditImmunity(immunity: DBImmunity) {
     openOverlay("immunity.edit", {
       immunity,
@@ -388,7 +422,7 @@ function Play({
       onComplete: (_immunity) => {
         queryClient.invalidateQueries({ queryKey: ["players"] });
         queryClient.invalidateQueries({ queryKey: ["party"] });
-        queryClient.invalidateQueries({ queryKey: ["immunites"] });
+        queryClient.invalidateQueries({ queryKey: ["immunities"] });
       },
     });
   }
@@ -402,6 +436,18 @@ function Play({
         queryClient.invalidateQueries({ queryKey: ["players"] });
         queryClient.invalidateQueries({ queryKey: ["party"] });
         queryClient.invalidateQueries({ queryKey: ["resistances"] });
+      },
+    });
+  }
+
+  function handleOpenEditWeakness(weakness: DBWeakness) {
+    openOverlay("weakness.edit", {
+      weakness,
+      onEdit: (weakness: DBWeakness) => editWeakness.mutateAsync(weakness),
+      onComplete: (_weakness) => {
+        queryClient.invalidateQueries({ queryKey: ["players"] });
+        queryClient.invalidateQueries({ queryKey: ["party"] });
+        queryClient.invalidateQueries({ queryKey: ["weaknesses"] });
       },
     });
   }
@@ -1121,6 +1167,7 @@ function Play({
             expanded={isAsideOpen}
             onEditImmunity={handleOpenEditImmunity}
             onEditResistance={handleOpenEditResistance}
+            onEditWeakness={handleOpenEditWeakness}
             onEditEffect={handleOpenEditEffect}
             onRemove={(playerId) => {
               removePlayerFromPartyMutation.mutate({
@@ -1141,6 +1188,12 @@ function Play({
                 resistanceId,
               });
             }}
+            onRemoveWeakness={(playerId, weaknessId) => {
+              removeWeaknessFromPlayerMutation.mutate({
+                playerId,
+                weaknessId,
+              });
+            }}
             onRemoveEffect={(playerId, effectId) => {
               removeEffectFromPlayerMutation.mutate({
                 playerId,
@@ -1149,6 +1202,7 @@ function Play({
             }}
             onOpenEffectsCatalog={() => handleEffectsCatalog(player)}
             onOpenResistancesCatalog={() => handleResistancesCatalog(player)}
+            onOpenWeaknessesCatalog={() => handleWeaknessesCatalog(player)}
             onOpenImmunitiesCatalog={() => handleImmunitiesCatalog(player)}
             onHeal={handleHealPlayer}
             onDamage={handleDamagePlayer}
@@ -1256,23 +1310,23 @@ function Play({
       <PlayLayout.SessionLog>
         <div className="flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
           <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={handleOpenSessionLog}
-                    className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
-                  >
-                    <NotebookText className="h-4 w-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent className="flex items-center gap-2">
-                  <p>{t("sessionLog")}</p>
-                  <div className="flex gap-0.5">
-                    <Kbd>{getModifierKey()}</Kbd>
-                    <Kbd>P</Kbd>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleOpenSessionLog}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
+                >
+                  <NotebookText className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="flex items-center gap-2">
+                <p>{t("sessionLog")}</p>
+                <div className="flex gap-0.5">
+                  <Kbd>{getModifierKey()}</Kbd>
+                  <Kbd>P</Kbd>
+                </div>
+              </TooltipContent>
+            </Tooltip>
           </TooltipProvider>
         </div>
       </PlayLayout.SessionLog>

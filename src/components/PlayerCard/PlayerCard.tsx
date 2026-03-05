@@ -20,8 +20,10 @@ import {
 } from "../ui/dropdown-menu";
 import { DBImmunity } from "@/types/immunitiy";
 import { DBResistance } from "@/types/resistances";
+import { DBWeakness } from "@/types/weakness";
 import ImmunityCard from "../ImmunityCard/ImmunityCard";
 import ResistanceCard from "../ResistanceCard/ResistanceCard";
+import WeaknessCard from "../WeaknessCard/WeaknessCard";
 import IconAvatar from "../IconAvatar/IconAvatar";
 import { useTranslation } from "react-i18next";
 import { DBEffect, Effect } from "@/types/effect";
@@ -48,12 +50,18 @@ type Props = {
     playerId: Player["id"],
     resistanceId: DBResistance["id"],
   ) => void;
+  onRemoveWeakness: (
+    playerId: Player["id"],
+    weaknessId: DBWeakness["id"],
+  ) => void;
   onRemoveEffect: (playerId: Player["id"], effectId: DBEffect["id"]) => void;
   onEditImmunity: (immunity: DBImmunity) => void;
   onEditResistance: (resistances: DBResistance) => void;
+  onEditWeakness: (weakness: DBWeakness) => void;
   onEditEffect: (effect: Effect) => void;
   onOpenImmunitiesCatalog: () => void;
   onOpenResistancesCatalog: () => void;
+  onOpenWeaknessesCatalog: () => void;
   onOpenEffectsCatalog: () => void;
   onHeal?: (playerId: Player["id"]) => void;
   onDamage?: (playerId: Player["id"]) => void;
@@ -70,10 +78,13 @@ function PlayerCard({
   onEditEffect,
   onEditImmunity,
   onEditResistance,
+  onEditWeakness,
   onRemoveImmunity,
   onRemoveResistance,
+  onRemoveWeakness,
   onRemoveEffect,
   onOpenResistancesCatalog,
+  onOpenWeaknessesCatalog,
   onOpenImmunitiesCatalog,
   onOpenEffectsCatalog,
   onHeal,
@@ -110,6 +121,10 @@ function PlayerCard({
     onRemoveResistance(player.id, resistanceId);
   }
 
+  function handleRemoveWeakness(weaknessId: DBWeakness["id"]) {
+    onRemoveWeakness(player.id, weaknessId);
+  }
+
   function handleRemoveEffect(effectId: DBEffect["id"]) {
     onRemoveEffect(player.id, effectId);
   }
@@ -138,6 +153,9 @@ function PlayerCard({
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onOpenResistancesCatalog}>
           {t("addResistance")}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onOpenWeaknessesCatalog}>
+          {t("addWeakness")}
         </DropdownMenuItem>
       </DropdownMenuGroup>
 
@@ -390,6 +408,30 @@ function PlayerCard({
                       resistance={resistance}
                       onRemove={() => handleRemoveResistance(resistance.id)}
                       onEdit={onEditResistance}
+                    />
+                  ))}
+                </div>
+              </Collapsible>
+            )}
+
+            {player.weaknesses.length > 0 && (
+              <Collapsible
+                title={
+                  <div className="items-cent flex justify-between gap-2">
+                    <span>{t("weaknesses")}</span>
+                    <span className="rounded-md bg-black px-2 py-1 text-sm text-white">
+                      {player.weaknesses.length}
+                    </span>
+                  </div>
+                }
+              >
+                <div className="flex w-full flex-col gap-4">
+                  {player.weaknesses.map((weakness) => (
+                    <WeaknessCard
+                      key={`player-${player.id}-weakness-${weakness.id}`}
+                      weakness={weakness}
+                      onRemove={() => handleRemoveWeakness(weakness.id)}
+                      onEdit={onEditWeakness}
                     />
                   ))}
                 </div>

@@ -15,6 +15,7 @@
   "createChapter": "Erstelle ein Kapitlel",
   "createImmunity": "Immunität erstellen",
   "createResistance": "Widerstand erstellen",
+  "createWeakness": "Schwäche erstellen",
   "createEffect": "Effekt erstellen",
   "moneyChanged": "Das Geld von {{name}} hat sich geändert"
 }

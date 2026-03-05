@@ -24,6 +24,7 @@ import { DBImmunity, Immunity } from "@/types/immunitiy";
 import { Party } from "@/types/party";
 import { Player } from "@/types/player";
 import { DBResistance, Resistance } from "@/types/resistances";
+import { DBWeakness, Weakness } from "@/types/weakness";
 import {
   CardStackPlusIcon,
   ChevronLeftIcon,
@@ -43,10 +44,12 @@ import {
   useAddEffectToPlayer,
   useAddImmunityToPlayer,
   useAddResistanceToPlayer,
+  useAddWeaknessToPlayer,
   useCreatePlayer,
   useRemoveEffectFromPlayer,
   useRemoveImmunityFromPlayer,
   useRemoveResistanceFromPlayer,
+  useRemoveWeaknessFromPlayer,
   useUpdatePlayer,
 } from "@/hooks/usePlayers";
 import {
@@ -60,6 +63,11 @@ import {
   useCreateResistance,
   useUpdateResistance,
 } from "@/hooks/useResistances";
+import {
+  useCreateWeakness,
+  useUpdateWeakness,
+  useDeleteWeakness,
+} from "@/hooks/useWeaknesses";
 import database from "@/lib/database";
 import { getModifierKey } from "@/lib/utils";
 
@@ -91,6 +99,9 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
   const addResistanceToPlayerMutation = useAddResistanceToPlayer(database);
   const removeResistanceFromPlayerMutation =
     useRemoveResistanceFromPlayer(database);
+  const addWeaknessToPlayerMutation = useAddWeaknessToPlayer(database);
+  const removeWeaknessFromPlayerMutation =
+    useRemoveWeaknessFromPlayer(database);
 
   const createChapterMutation = useCreateChapter(database);
   const editChapterMutation = useUpdateChapter(database);
@@ -104,6 +115,9 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
 
   const createResistanceMutation = useCreateResistance(database);
   const editResistance = useUpdateResistance(database);
+
+  const createWeaknessMutation = useCreateWeakness(database);
+  const editWeakness = useUpdateWeakness(database);
 
   useEffect(() => {
     //TODO: Shortcut for other OS
@@ -260,6 +274,25 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
     });
   }
 
+  function handleWeaknessesCatalog(player: Player) {
+    openOverlay("weakness.catalog", {
+      database,
+      onSelect: async (weakness) => {
+        await addWeaknessToPlayerMutation.mutateAsync({
+          playerId: player.id,
+          weaknessId: weakness.id,
+        });
+
+        toast({
+          title: `Added ${weakness.icon} ${weakness.name} to ${player.name}`,
+        });
+      },
+      onCancel: (reason) => {
+        console.log("Weakness Catalog cancelled:", reason);
+      },
+    });
+  }
+
   function handleCreateResistance() {
     openOverlay("resistance.create", {
       onCreate: (resistance: Omit<Resistance, "id">) =>
@@ -271,6 +304,21 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
       },
       onCancel: (reason) => {
         console.log("Resitance creation cancelled:", reason);
+      },
+    });
+  }
+
+  function handleCreateWeakness() {
+    openOverlay("weakness.create", {
+      onCreate: (weakness: Omit<Weakness, "id">) =>
+        createWeaknessMutation.mutateAsync(weakness),
+      onComplete: (weakness) => {
+        toast({
+          title: `Created ${weakness.icon} ${weakness.name}`,
+        });
+      },
+      onCancel: (reason) => {
+        console.log("Weakness creation cancelled:", reason);
       },
     });
   }
@@ -358,6 +406,16 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
     });
   }
 
+  function handleOpenEditWeakness(weakness: DBWeakness) {
+    openOverlay("weakness.edit", {
+      weakness,
+      onEdit: (weakness: DBWeakness) => editWeakness.mutateAsync(weakness),
+      onComplete: (weakness) => {
+        console.log(`Updated ${weakness.name}`);
+      },
+    });
+  }
+
   function handleOpenEditEffect(effect: Effect) {
     openOverlay("effect.edit", {
       effect,
@@ -437,6 +495,7 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
                 expanded={isAsideOpen}
                 onEditImmunity={handleOpenEditImmunity}
                 onEditResistance={handleOpenEditResistance}
+                onEditWeakness={handleOpenEditWeakness}
                 onEditEffect={handleOpenEditEffect}
                 onRemove={(playerId) => {
                   removePlayerFromPartyMutation.mutate({
@@ -457,6 +516,12 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
                     resistanceId,
                   });
                 }}
+                onRemoveWeakness={(playerId, weaknessId) => {
+                  removeWeaknessFromPlayerMutation.mutate({
+                    playerId,
+                    weaknessId,
+                  });
+                }}
                 onRemoveEffect={(playerId, effectId) => {
                   removeEffectFromPlayerMutation.mutate({
                     playerId,
@@ -467,6 +532,7 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
                 onOpenResistancesCatalog={() =>
                   handleResistancesCatalog(player)
                 }
+                onOpenWeaknessesCatalog={() => handleWeaknessesCatalog(player)}
                 onOpenImmunitiesCatalog={() => handleImmunitiesCatalog(player)}
                 onHeal={handleHealPlayer}
                 onDamage={handleDamagePlayer}
@@ -508,6 +574,9 @@ function ChapterSelection({ database, party, chapters, isLoading }: Props) {
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleCreateResistance}>
                           {t("createResistance")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleCreateWeakness}>
+                          {t("createWeakness")}
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                     </DropdownMenuContent>

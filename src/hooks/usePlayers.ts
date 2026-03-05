@@ -4,6 +4,7 @@ import { useMutationWithErrorToast } from "./useMutationWithErrorToast";
 import { Player, TCreatePlayer } from "@/types/player";
 import { DBImmunity } from "@/types/immunitiy";
 import { DBResistance } from "@/types/resistances";
+import { DBWeakness } from "@/types/weakness";
 import { Effect } from "@/types/effect";
 import { useQueryWithToast } from "./useQueryWithErrorToast";
 
@@ -175,6 +176,46 @@ export function useRemoveResistanceFromPlayer(database = defaultDb) {
   >({
     mutationFn: (data: { playerId: Player["id"]; resistanceId: number }) =>
       database.players.removeResistance(data.playerId, data.resistanceId),
+    onSuccess: invalidate,
+  });
+}
+
+export function useAddWeaknessToPlayer(database = defaultDb) {
+  const queryClient = useQueryClient();
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["players"] });
+    queryClient.invalidateQueries({ queryKey: ["party"] });
+    queryClient.invalidateQueries({ queryKey: ["parties"] });
+  };
+
+  return useMutationWithErrorToast<
+    Player,
+    Error,
+    { playerId: Player["id"]; weaknessId: number }
+  >({
+    mutationFn: (data: { playerId: Player["id"]; weaknessId: number }) =>
+      database.players.addWeakness(data.playerId, data.weaknessId),
+    onSuccess: invalidate,
+  });
+}
+
+export function useRemoveWeaknessFromPlayer(database = defaultDb) {
+  const queryClient = useQueryClient();
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["players"] });
+    queryClient.invalidateQueries({ queryKey: ["party"] });
+    queryClient.invalidateQueries({ queryKey: ["parties"] });
+  };
+
+  return useMutationWithErrorToast<
+    DBWeakness,
+    Error,
+    { playerId: Player["id"]; weaknessId: number }
+  >({
+    mutationFn: (data: { playerId: Player["id"]; weaknessId: number }) =>
+      database.players.removeWeakness(data.playerId, data.weaknessId),
     onSuccess: invalidate,
   });
 }
