@@ -2,10 +2,11 @@ import db from "@/lib/database";
 import { getModifierKey } from "@/lib/utils";
 import PlayLayout from "@/components/PlayLayout/PlayLayout";
 import { AnimatePresence, motion } from "framer-motion";
-import Canvas, {
+import Canvas from "@/components/Canvas/Canvas";
+import {
   CanvasElement,
   ClickableCanvasElement,
-} from "@/components/Canvas/Canvas";
+} from "@/types/canvas";
 import {
   Tooltip,
   TooltipContent,

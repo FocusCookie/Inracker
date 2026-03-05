@@ -1,3 +1,4 @@
+import React, { memo } from "react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -6,7 +7,7 @@ import {
 } from "@/components/ui/context-menu";
 import { CheckIcon, ExternalLinkIcon } from "@radix-ui/react-icons";
 import { useTranslation } from "react-i18next";
-import { ClickableCanvasElement } from "./Canvas";
+import { CanvasElementWithId } from "./types";
 import { Button } from "../ui/button";
 import { cn, getModifierKey } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -19,7 +20,7 @@ import {
 import { Kbd } from "../ui/kbd";
 
 type Props = {
-  element: ClickableCanvasElement & { id: any };
+  element: CanvasElementWithId;
   isSelected: boolean;
   onEdit: () => void;
   onClick: () => void;
@@ -31,7 +32,7 @@ type Props = {
   onSelect: () => void;
 };
 
-export function CanvasElementNode({
+function CanvasElementNode({
   element,
   isSelected,
   onEdit,
@@ -316,3 +317,5 @@ export function CanvasElementNode({
     </ContextMenu>
   );
 }
+
+export default memo(CanvasElementNode);

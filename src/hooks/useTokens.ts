@@ -4,7 +4,7 @@ import { useMutationWithErrorToast } from "./useMutationWithErrorToast";
 import { Token } from "@/types/tokens";
 import { Chapter } from "@/types/chapters";
 import { Encounter } from "@/types/encounter";
-import { CanvasElement } from "@/components/Canvas/Canvas";
+import { CanvasElement } from "@/types/canvas";
 
 export function useUpdateToken(database = defaultDb) {
   const queryClient = useQueryClient();

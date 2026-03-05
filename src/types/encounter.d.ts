@@ -4,7 +4,7 @@ import { DBImmunity } from "./immunitiy";
 import { DBResistance, Resistance } from "./resistances";
 import { Skills } from "./skills";
 import { Prettify } from "./utils";
-import { CanvasElement } from "../components/Canvas/Canvas";
+import { CanvasElement } from "./canvas";
 
 export type EncounterType = "fight" | "roll" | "note";
 export type EncounterDifficulty = { value: number; description: string };

@@ -1,5 +1,5 @@
 import { DBToken, Token, TokenCoordinates } from "@/types/tokens";
-import { CanvasElement } from "@/components/Canvas/Canvas";
+import { CanvasElement } from "@/types/canvas";
 import { Chapter } from "@/types/chapters";
 import { Encounter } from "@/types/encounter";
 import { EncounterOpponent } from "@/types/opponents";
