@@ -86,7 +86,6 @@ import {
 import {
   useCreateWeakness,
   useUpdateWeakness,
-  useDeleteWeakness,
 } from "@/hooks/useWeaknesses";
 import { useUpdateEffect, useCreateEffect } from "@/hooks/useEffects";
 import {
@@ -253,7 +252,6 @@ function Play({
   const editImmunity = useUpdateImmunity(database);
   const editResistance = useUpdateResistance(database);
   const editWeakness = useUpdateWeakness(database);
-  const deleteWeakness = useDeleteWeakness(database);
   const editEffect = useUpdateEffect(database);
   const editPlayer = useUpdatePlayer(database);
   const addEffectToPlayerMutation = useAddEffectToPlayer(database);
