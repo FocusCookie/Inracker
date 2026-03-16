@@ -1,36 +1,31 @@
-import db from "@/lib/database";
-import { cn } from "@/lib/utils";
-import { useEncounterStore } from "@/stores/useEncounterStore";
-import { Player } from "@/types/player";
-import { Token } from "@/types/tokens";
-import { useEffect, useRef, useMemo } from "react";
-import { useShallow } from "zustand/shallow";
-import { useTranslation } from "react-i18next";
-import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
-import CanvasElementNode from "./CanvasElementNode";
-import { MusicPlayer } from "@/components/MusicPlayer/MusicPlayer";
-import { InrackerCanvasElement } from "@/types/canvas";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Tldraw, createShapeId, type Editor } from "tldraw";
+import "tldraw/tldraw.css";
 
+import type { InrackerCanvasElement } from "@/types/canvas";
+import type { Player } from "@/types/player";
+import type { Token } from "@/types/tokens";
+import type { EncounterOpponent } from "@/types/opponents";
+import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
+import { BackgroundShapeUtil } from "./tldraw/BackgroundShapeUtil";
+import { EncounterShapeUtil } from "./tldraw/EncounterShapeUtil";
+import {
+  EncounterTool,
+  setEncounterCreateHandler,
+} from "./tldraw/EncounterTool";
+import { TokenShapeUtil } from "./tldraw/TokenShapeUtil";
+import { useTldrawSync } from "./tldraw/useTldrawSync";
+import { CanvasTldrawProvider } from "./tldraw/CanvasTldrawContext";
+import type { CanvasElementWithId } from "./types";
 import TokenPanels from "./TokenPanels";
 import CanvasToolbar from "./CanvasToolbar";
-import { TemporaryElement } from "./TemporaryElement";
-import { PlayerToken } from "./PlayerToken";
-import { OpponentToken } from "./OpponentToken";
-import { useCanvasReducer, ViewBox } from "@/hooks/useCanvasReducer";
-import { usePanInteraction } from "./usePanInteraction";
-import { useZoomInteraction } from "./useZoomInteraction";
-import { useDrawInteraction } from "./useDrawInteraction";
-import { useTokenDrag } from "./useTokenDrag";
-import { useElementDrag } from "./useElementDrag";
-import { useElementResize } from "./useElementResize";
-import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
+import { BACKGROUND_TYPE } from "./tldraw/shapes";
 
-import SvgDefs from "./SvgDefs";
-
-import { CanvasElementWithId } from "./types";
+const shapeUtils = [BackgroundShapeUtil, EncounterShapeUtil, TokenShapeUtil];
+const tools = [EncounterTool];
 
 type Props = {
-  database: typeof db;
+  database: typeof import("@/lib/database").default;
   background?: string;
   elements: CanvasElementWithId[];
   temporaryElement?: InrackerCanvasElement;
@@ -64,7 +59,7 @@ type Props = {
   onStartFight?: (encounterId: number) => void;
 };
 
-function Canvas({
+export default function Canvas({
   database,
   background,
   elements,
@@ -72,9 +67,9 @@ function Canvas({
   players,
   selectedToken,
   tokens,
-  onTokenMove,
   onTokenSelect,
   onDrawed,
+  onTokenMove,
   onElementMove,
   onRemoveFromInitiative,
   onAddToInitiative,
@@ -84,212 +79,85 @@ function Canvas({
   onDamagePlayer,
   onHealOpponent,
   onDamageOpponent,
-  onToggleAside,
-  onOpenSessionLog,
-  onStartFight,
+  onToggleAside: _onToggleAside,
+  onOpenSessionLog: _onOpenSessionLog,
+  onStartFight: _onStartFight,
 }: Props) {
-  useTranslation("ComponentCanvas");
-  const svgRef = useRef<SVGSVGElement>(null);
-  const backgroundImage = useRef<HTMLImageElement | null>(null);
+  const [editor, setEditor] = useState<Editor | null>(null);
+  const pendingElementCountRef = useRef<number | null>(null);
+  const [tokenVisibility, setTokenVisibilityState] = useState<
+    Record<string, boolean>
+  >({});
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [isPlayersPanelOpen, setIsPlayersPanelOpen] = useState(true);
+  const [isOpponentsPanelOpen, setIsOpponentsPanelOpen] = useState(true);
+  const isSelectionSyncingRef = useRef(false);
+  const backgroundShapeId = useMemo(() => createShapeId("background"), []);
+  const elementsCount = elements.length;
 
-  const {
-    state,
-    dispatch,
-    setInteractionMode,
-    setViewBox,
-    initializeViewBox,
-    applyZoom,
-    resetZoom,
-    selectElement,
-    togglePlayersPanel,
-    toggleOpponentsPanel,
-    setTokenVisibility,
-    setTempResizedElement,
-    clearTempResizedIfSynced,
-  } = useCanvasReducer();
+  const hasMatchingPersistedElement = useMemo(() => {
+    const draft = temporaryElement;
+    if (!draft) return false;
 
-  const {
-    viewBox,
-    zoom,
-    interactionMode,
-    selectedElementId: resizingElementId,
-    isPlayersPanelOpen,
-    isOpponentsPanelOpen,
-    tokenVisibility,
-    tempResizedElement,
-  } = state;
+    return elements.some((element) => {
+      const tolerance = 60;
+      const draftCenterX = draft.x + draft.width / 2;
+      const draftCenterY = draft.y + draft.height / 2;
+      const elementCenterX = element.x + element.width / 2;
+      const elementCenterY = element.y + element.height / 2;
+      return (
+        Math.abs(elementCenterX - draftCenterX) <= tolerance &&
+        Math.abs(elementCenterY - draftCenterY) <= tolerance &&
+        Math.abs(element.width - draft.width) <= tolerance &&
+        Math.abs(element.height - draft.height) <= tolerance
+      );
+    });
+  }, [elements, temporaryElement]);
 
-  const isPanning = interactionMode === "panning";
-  const isDrawing = interactionMode === "drawing";
-
-  const { currentColor, currentIcon, currentTitle, resetCount } =
-    useEncounterStore(
-      useShallow((state) => ({
-        currentIcon: state.currentIcon,
-        currentColor: state.currentColor,
-        currentTitle: state.currentTitle,
-        resetCount: state.resetCount,
-      })),
-    );
+  const effectiveTemporaryElement = hasMatchingPersistedElement
+    ? undefined
+    : temporaryElement;
 
   const encounterOpponents = useQueryWithToast({
     queryKey: ["encounter-opponents"],
     queryFn: () => database.encounterOpponents.getAllDetailed(),
   });
 
-  const currentViewBoxRef = useRef<ViewBox>(viewBox);
-  const zoomRef = useRef<number>(zoom);
-
-  // Sync refs with state
-  useEffect(() => {
-    currentViewBoxRef.current = viewBox;
-  }, [viewBox]);
-
-  useEffect(() => {
-    zoomRef.current = zoom;
-  }, [zoom]);
-
-  // Interaction hooks
-  const { startPan } = usePanInteraction(
-    svgRef,
-    currentViewBoxRef,
-    setViewBox,
-  );
-
-  useZoomInteraction(
-    svgRef,
-    currentViewBoxRef,
-    zoomRef,
-    applyZoom,
-    setViewBox,
-  );
-
-  const { startDraw } = useDrawInteraction(
-    svgRef,
-    currentColor,
-    setInteractionMode,
-    onDrawed,
-  );
-
-  const { handleTokenDragStart, isDragging } = useTokenDrag(
-    svgRef,
-    onTokenMove,
-    selectedToken,
-  );
-
-  const {
-    handleElementDragStart,
-    handleTempElementDragStart,
-    isDragging: isElementDragging,
-  } = useElementDrag(svgRef, onElementMove, temporaryElement);
-
-  const { handleResizeStart } = useElementResize(
-    svgRef,
-    onElementMove,
-    setTempResizedElement,
-  );
-
-  useKeyboardShortcuts({
-    interactionMode,
-    resizingElementId,
-    elements,
-    applyZoom,
-    resetZoom,
-    setInteractionMode,
-    onToggleAside,
-    onOpenSessionLog,
-    onStartFight,
-    onTokenSelect,
-    currentViewBoxRef,
-    zoomRef,
-    setViewBox,
-    svgRef,
-  });
-
-  useEffect(() => {
-    if (background && background !== "") {
-      const tmp = new Image();
-      tmp.onload = () => {
-        backgroundImage.current = tmp;
-
-        const newViewBox = {
-          x: -tmp.naturalWidth / 2,
-          y: -tmp.naturalHeight / 2,
-          width: tmp.naturalWidth,
-          height: tmp.naturalHeight,
-        };
-
-        currentViewBoxRef.current = newViewBox;
-        initializeViewBox(newViewBox);
-      };
-      tmp.src = background;
-    }
-  }, [background, initializeViewBox]);
-
-  const handleMouseDown = (event: React.MouseEvent<SVGSVGElement>) => {
-    if (event.button !== 0) return;
-
-    const target = event.target as Element;
-    const isElement = target.closest("[data-element-id]");
-
-    if (!isElement && resizingElementId !== null) {
-      selectElement(null);
-    }
-
-    if (isPanning) {
-      startPan(event);
-    } else if (isDrawing) {
-      startDraw(event);
-    }
-  };
-
-  const playerMap = useMemo(
-    () => new Map(players.map((p) => [p.id, p])),
+  const playersById = useMemo(
+    () => new Map(players.map((player) => [player.id, player])),
     [players],
   );
 
-  const opponentMap = useMemo(
+  const elementsByShapeId = useMemo(
     () =>
       new Map(
-        (encounterOpponents.data ?? []).map((o) => [o.id, o]),
+        elements.map((element) => [
+          createShapeId(`encounter-${element.id}`),
+          element,
+        ]),
       ),
+    [elements],
+  );
+
+  const opponentsById = useMemo(
+    () => new Map((encounterOpponents.data ?? []).map((o) => [o.id, o])),
     [encounterOpponents.data],
   );
 
-  useEffect(() => {
-    clearTempResizedIfSynced(elements);
-  }, [elements, tempResizedElement, clearTempResizedIfSynced]);
+  const tokensById = useMemo(
+    () => new Map(tokens.map((token) => [token.id, token])),
+    [tokens],
+  );
 
-  function handleElementClick(
-    elementOnClick: () => void | undefined,
-    elementId: any,
-  ) {
-    if (isDragging.current || isElementDragging.current) {
-      isDragging.current = false;
-      isElementDragging.current = false;
-      return;
-    }
-
-    selectElement(elementId);
-
-    if (elementOnClick) elementOnClick();
-  }
-
-  function handleTokenClick(token: Token) {
-    if (isDragging.current) {
-      isDragging.current = false;
-      return;
-    }
-
-    if (selectedToken && selectedToken.id === token.id) {
-      onTokenSelect(null);
-    } else {
-      onTokenSelect(token);
-    }
-  }
+  const setTokenVisibility = (tokenId: number, isVisible: boolean) => {
+    setTokenVisibilityState((prev) => ({
+      ...prev,
+      [tokenId.toString()]: isVisible,
+    }));
+  };
 
   useEffect(() => {
-    const tokensToHide: (string | number)[] = [];
+    const tokensToHide: number[] = [];
     elements.forEach((element) => {
       if (element.completed && element.opponents) {
         const opponentIds = new Set(element.opponents);
@@ -304,191 +172,304 @@ function Canvas({
     });
 
     if (tokensToHide.length > 0) {
-      dispatch({
-        type: "HIDE_COMPLETED_ENCOUNTER_OPPONENT_TOKENS",
-        tokenIds: tokensToHide,
+      setTokenVisibilityState((prev) => {
+        const next = { ...prev };
+        tokensToHide.forEach((id) => {
+          next[id.toString()] = false;
+        });
+        return next;
       });
     }
-  }, [elements, tokens, tokenVisibility, dispatch]);
+  }, [elements, tokens, tokenVisibility]);
 
-  function toggleToken(token: Token) {
-    const newVisibility = !(tokenVisibility[token.id.toString()] ?? true);
-    setTokenVisibility(token.id, newVisibility);
+  useTldrawSync({
+    editor,
+    elements,
+    temporaryElement: effectiveTemporaryElement,
+    tokens,
+    onElementMove,
+    onTokenMove,
+    backgroundShapeId,
+  });
 
-    if (!newVisibility && selectedToken && token.id === selectedToken.id) {
-      onTokenSelect(null);
+  useEffect(() => {
+    if (!editor) return;
+
+    const container = editor.getContainer();
+    if (!container) return;
+
+    const handleContextMenu = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+
+      const isToken = target.closest("[data-token-group-id]");
+      const isElement = target.closest("[data-element-id]");
+
+      if (isToken || isElement) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    container.addEventListener("contextmenu", handleContextMenu, {
+      capture: true,
+    });
+
+    return () => {
+      container.removeEventListener("contextmenu", handleContextMenu, {
+        capture: true,
+      });
+    };
+  }, [editor]);
+
+  useEffect(() => {
+    if (hasMatchingPersistedElement) {
+      pendingElementCountRef.current = null;
     }
-  }
+  }, [hasMatchingPersistedElement]);
 
-  function zoomIn() {
-    setInteractionMode("idle");
-    applyZoom(1.2);
-  }
+  useEffect(() => {
+    setEncounterCreateHandler((currentEditor, shape) => {
+      const encounterShape = shape as any;
+      const bounds = currentEditor.getShapePageBounds(encounterShape);
+      const width = bounds?.w ?? encounterShape.props.w;
+      const height = bounds?.h ?? encounterShape.props.h;
+      const minSize = 40;
 
-  function zoomOut() {
-    setInteractionMode("idle");
-    applyZoom(0.8);
-  }
+      if (width < minSize || height < minSize) {
+        currentEditor.deleteShapes([encounterShape.id]);
+        setIsDrawing(false);
+        return;
+      }
+
+      const draftElement = {
+        x: bounds?.x ?? encounterShape.x,
+        y: bounds?.y ?? encounterShape.y,
+        width,
+        height,
+        color: encounterShape.props.color,
+        icon: encounterShape.props.icon,
+        name: encounterShape.props.name,
+        completed: encounterShape.props.completed ?? false,
+        isCombatActive: encounterShape.props.isCombatActive ?? false,
+      };
+
+      pendingElementCountRef.current = elementsCount;
+      onDrawed(draftElement);
+
+      currentEditor.deleteShapes([encounterShape.id]);
+      setIsDrawing(false);
+    });
+
+    return () => {
+      setEncounterCreateHandler(null);
+    };
+  }, [onDrawed, elementsCount]);
+
+  useEffect(() => {
+    if (!editor) return;
+    editor.setCurrentTool(isDrawing ? "encounter" : "select");
+  }, [editor, isDrawing]);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    isSelectionSyncingRef.current = true;
+    if (selectedToken) {
+      const shapeId = createShapeId(`token-${selectedToken.id}`);
+      editor.select(shapeId);
+    } else {
+      editor.selectNone();
+    }
+
+    setTimeout(() => {
+      isSelectionSyncingRef.current = false;
+    }, 0);
+  }, [editor, selectedToken]);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const unsubscribe = editor.store.listen(() => {
+      if (isSelectionSyncingRef.current) return;
+
+      const selectedIds = editor.getSelectedShapeIds();
+      if (selectedIds.length !== 1) {
+        if (selectedToken) {
+          onTokenSelect(null);
+        }
+        return;
+      }
+
+      const shape = editor.getShape(selectedIds[0]);
+      if (!shape || shape.type !== "token") {
+        if (selectedToken) {
+          onTokenSelect(null);
+        }
+        return;
+      }
+
+      const tokenId = (shape as any).props?.tokenId as number | undefined;
+      if (!tokenId) {
+        return;
+      }
+
+      const token = tokensById.get(tokenId);
+      if (token && token.id !== selectedToken?.id) {
+        onTokenSelect(token);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [editor, onTokenSelect, selectedToken, tokensById]);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const isInputTarget = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLElement)) return false;
+      const tag = target.tagName;
+      return tag === "INPUT" || tag === "TEXTAREA" || target.isContentEditable;
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (isInputTarget(event.target)) return;
+
+      if (event.key === " ") {
+        event.preventDefault();
+        editor.setCurrentTool("hand");
+      }
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        editor.setCurrentTool("select");
+        onTokenSelect(null);
+      }
+    };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (isInputTarget(event.target)) return;
+
+      if (event.key === " ") {
+        event.preventDefault();
+        editor.setCurrentTool(isDrawing ? "encounter" : "select");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [editor, isDrawing, onTokenSelect]);
+
+  useEffect(() => {
+    if (!editor || !background) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const shape = editor.getShape(backgroundShapeId);
+      const next = {
+        id: backgroundShapeId,
+        type: BACKGROUND_TYPE,
+        x: -img.naturalWidth / 2,
+        y: -img.naturalHeight / 2,
+        props: {
+          w: img.naturalWidth,
+          h: img.naturalHeight,
+          url: background,
+        },
+        isLocked: true,
+      } as any;
+
+      if (shape) {
+        editor.updateShapes([next]);
+      } else {
+        editor.createShapes([next]);
+      }
+
+      editor.sendToBack([backgroundShapeId]);
+    };
+    img.src = background;
+  }, [editor, background, backgroundShapeId]);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const unsubscribe = editor.store.listen(() => {
+      const shape = editor.getShape(backgroundShapeId);
+      if (shape) {
+        editor.sendToBack([backgroundShapeId]);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [editor, backgroundShapeId]);
 
   return (
-    <div className="relative h-full w-full" key={resetCount}>
-      <svg
-        ref={svgRef}
-        viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
-        className={cn(
-          "h-full w-full overflow-hidden transition-all duration-300 ease-in-out",
-          isPanning && "cursor-grab active:cursor-grabbing",
-          isDrawing && "cursor-crosshair",
-        )}
-        onMouseDown={handleMouseDown}
-      >
-        <SvgDefs
-          backgroundWidth={backgroundImage.current?.naturalWidth}
-          backgroundHeight={backgroundImage.current?.naturalHeight}
+    <CanvasTldrawProvider
+      value={{
+        database,
+        playersById,
+        opponentsById: opponentsById as Map<number, EncounterOpponent>,
+        elementsByShapeId,
+        tokensById,
+        selectedToken,
+        tokenVisibility,
+        setTokenVisibility,
+        onTokenSelect,
+        onOpenEffectsCatalog,
+        onHealPlayer,
+        onDamagePlayer,
+        onHealOpponent,
+        onDamageOpponent,
+        onRemoveFromInitiative,
+        onAddToInitiative,
+        initiativeEntityIds,
+      }}
+    >
+      <div className="relative h-full w-full">
+        <Tldraw
+          shapeUtils={shapeUtils}
+          tools={tools}
+          hideUi
+          components={{ ContextMenu: null }}
+          onMount={(nextEditor) => {
+            setEditor(nextEditor);
+          }}
         />
-
-        {backgroundImage.current && (
-          <image
-            href={backgroundImage.current.src}
-            width={backgroundImage.current.naturalWidth}
-            height={backgroundImage.current.naturalHeight}
-            x={-backgroundImage.current.naturalWidth / 2}
-            y={-backgroundImage.current.naturalHeight / 2}
-            preserveAspectRatio="xMidYMid"
-            clipPath="url(#roundedImageClip)"
-            pointerEvents="none"
-            style={{ imageRendering: zoom >= 2 ? "pixelated" : "auto" }}
-          />
-        )}
-
-        {elements.map((elementData) => {
-          const element =
-            tempResizedElement && tempResizedElement.id === elementData.id
-              ? tempResizedElement
-              : elementData;
-          return (
-            <CanvasElementNode
-              key={"element-" + element.id}
-              element={element}
-              isSelected={resizingElementId === element.id}
-              onEdit={() => element.onEdit?.(element)}
-              onClick={() =>
-                handleElementClick(() => element.onClick?.(element), element.id)
-              }
-              onSelect={() =>
-                selectElement(resizingElementId === element.id ? null : element.id)
-              }
-              onDragStart={(e: React.MouseEvent<SVGGElement>) => handleElementDragStart(e, element)}
-              onResizeStart={(e: React.MouseEvent<SVGRectElement>, handle: "nw" | "ne" | "sw" | "se") =>
-                handleResizeStart(e, element, handle)
-              }
-            />
-          );
-        })}
-
-        {temporaryElement && (
-          <TemporaryElement
-            element={temporaryElement}
-            currentColor={currentColor}
-            currentIcon={currentIcon}
-            currentTitle={currentTitle}
-            onDragStart={handleTempElementDragStart}
-          />
-        )}
-
-        {selectedToken && (
-          <circle
-            id="selection-ring"
-            cx={selectedToken.coordinates.x + 50}
-            cy={selectedToken.coordinates.y + 50}
-            r={64}
-            stroke="white"
-            strokeWidth={10}
-            className="animate-pulse"
-          />
-        )}
-
-        {tokens.map((token) => {
-          if (token.type === "player") {
-            const player = playerMap.get(token.entity);
-            if (!player) return null;
-            return (
-              <PlayerToken
-                key={"player-" + token.id}
-                token={token}
-                player={player}
-                isVisible={tokenVisibility[token.id.toString()] ?? true}
-                isSelected={selectedToken?.id === token.id}
-                isInteractive={!isDrawing && !isPanning}
-                onDragStart={handleTokenDragStart}
-                onClick={handleTokenClick}
-                onTokenSelect={onTokenSelect}
-                onToggleVisibility={toggleToken}
-                onOpenEffectsCatalog={onOpenEffectsCatalog}
-                onHealPlayer={onHealPlayer}
-                onDamagePlayer={onDamagePlayer}
-                onRemoveFromInitiative={onRemoveFromInitiative}
-                onAddToInitiative={onAddToInitiative}
-                initiativeEntityIds={initiativeEntityIds}
-                database={database}
-              />
-            );
+        <TokenPanels
+          players={players}
+          opponents={encounterOpponents.data ?? []}
+          tokens={tokens}
+          tokenVisibility={tokenVisibility}
+          isPlayersPanelOpen={isPlayersPanelOpen}
+          isOpponentsPanelOpen={isOpponentsPanelOpen}
+          onTogglePlayersPanel={() => setIsPlayersPanelOpen((prev) => !prev)}
+          onToggleOpponentsPanel={() =>
+            setIsOpponentsPanelOpen((prev) => !prev)
           }
-
-          if (token.type === "opponent") {
-            const opponent = opponentMap.get(token.entity);
-            if (!opponent) return null;
-            return (
-              <OpponentToken
-                key={"opponent-" + token.id}
-                token={token}
-                opponent={opponent}
-                isVisible={tokenVisibility[token.id.toString()] ?? true}
-                isSelected={selectedToken?.id === token.id}
-                isInteractive={!isDrawing && !isPanning}
-                onDragStart={handleTokenDragStart}
-                onClick={handleTokenClick}
-                onTokenSelect={onTokenSelect}
-                onToggleVisibility={toggleToken}
-                onOpenEffectsCatalog={onOpenEffectsCatalog}
-                onHealOpponent={onHealOpponent}
-                onDamageOpponent={onDamageOpponent}
-                onRemoveFromInitiative={onRemoveFromInitiative}
-                onAddToInitiative={onAddToInitiative}
-                initiativeEntityIds={initiativeEntityIds}
-                database={database}
-              />
+          onToggleToken={(token) => {
+            setTokenVisibility(
+              token.id,
+              !(tokenVisibility[token.id.toString()] ?? true),
             );
-          }
-
-          return null;
-        })}
-      </svg>
-
-      <TokenPanels
-        players={players}
-        opponents={encounterOpponents.data ?? []}
-        tokens={tokens}
-        tokenVisibility={tokenVisibility}
-        isPlayersPanelOpen={isPlayersPanelOpen}
-        isOpponentsPanelOpen={isOpponentsPanelOpen}
-        onTogglePlayersPanel={togglePlayersPanel}
-        onToggleOpponentsPanel={toggleOpponentsPanel}
-        onToggleToken={toggleToken}
-      />
-
-      <CanvasToolbar
-        isDrawing={isDrawing}
-        onZoomIn={zoomIn}
-        onZoomOut={zoomOut}
-        onResetZoom={resetZoom}
-        onToggleDrawing={() => {
-          setInteractionMode(interactionMode === "drawing" ? "idle" : "drawing");
-        }}
-      />
-      <MusicPlayer />
-    </div>
+          }}
+        />
+        <CanvasToolbar
+          isDrawing={isDrawing}
+          onZoomIn={() => editor?.zoomIn()}
+          onZoomOut={() => editor?.zoomOut()}
+          onResetZoom={() => editor?.resetZoom()}
+          onToggleDrawing={() => setIsDrawing((prev) => !prev)}
+        />
+      </div>
+    </CanvasTldrawProvider>
   );
 }
-
-export default Canvas;

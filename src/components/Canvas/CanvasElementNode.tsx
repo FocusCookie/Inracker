@@ -68,6 +68,9 @@ function CanvasElementNode({
               onSelect();
             }
           }}
+          onContextMenu={(e) => {
+            e.preventDefault();
+          }}
         >
           {element.isCombatActive && (
             <motion.rect
@@ -179,7 +182,7 @@ function CanvasElementNode({
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-10 w-10 bg-black text-white hover:bg-black/80 hover:text-white pointer-events-auto"
+                        className="pointer-events-auto h-10 w-10 bg-black text-white hover:bg-black/80 hover:text-white"
                         onClick={(e) => {
                           e.stopPropagation();
                           onClick();
@@ -188,7 +191,10 @@ function CanvasElementNode({
                         <ExternalLinkIcon className="h-6 w-6" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent className="flex items-center gap-2" side="right">
+                    <TooltipContent
+                      className="flex items-center gap-2"
+                      side="right"
+                    >
                       <p>{t("select")}</p>
                       <div className="flex gap-0.5">
                         <Kbd>{getModifierKey()}</Kbd>

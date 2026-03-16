@@ -1,20 +1,19 @@
 import React, { memo } from "react";
-import { cn } from "@/lib/utils";
-import { Token } from "@/types/tokens";
-import { TokenEntity } from "./types";
 import { CoffeeIcon, BedSingleIcon, ClockIcon, Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
+
+import { Badge } from "@/components/ui/badge";
+import { ContextMenu, ContextMenuTrigger } from "@/components/ui/context-menu";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useTranslation } from "react-i18next";
 import { formatDuration } from "@/lib/time";
-import {
-  ContextMenu,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { Token } from "@/types/tokens";
+
+import { TokenEntity } from "./types";
 
 type TokenNodeProps = {
   token: Token;
@@ -35,7 +34,7 @@ const TokenNode: React.FC<TokenNodeProps> = ({
   isVisible,
   isSelected,
   isInteractive,
-  onDragStart,
+  onDragStart: _onDragStart,
   onClick,
   contextMenuContent,
 }) => {
@@ -79,15 +78,13 @@ const TokenNode: React.FC<TokenNodeProps> = ({
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
-        <g
+        <div
           data-token-group-id={token.id}
           className={cn(
-            "group outline-4 focus:outline-none focus-visible:outline-none",
+            "group relative h-full w-full outline-4 focus:outline-none focus-visible:outline-none",
             isVisible ? "visible" : "hidden",
             isSelected && "ring-4 ring-blue-500 ring-offset-2",
           )}
-          tabIndex={0}
-          role="button"
           aria-label={`Token of ${entity.name}`}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
@@ -95,64 +92,67 @@ const TokenNode: React.FC<TokenNodeProps> = ({
               onClick(token);
             }
           }}
+          onContextMenu={(event) => {
+            event.preventDefault();
+          }}
+          onClick={() => onClick(token)}
         >
-          <circle
-            cx={token.coordinates.x + 50}
-            cy={token.coordinates.y + 50}
-            r={40}
-            fill="white"
-            stroke={borderColor}
-            strokeWidth={4}
-            className="pointer-events-none"
-          />
+          <svg width={100} height={100} viewBox="0 0 100 100">
+            <circle
+              cx={50}
+              cy={50}
+              r={40}
+              fill="white"
+              stroke={borderColor}
+              strokeWidth={4}
+              className="pointer-events-none"
+            />
+            {entity.image && (
+              <image
+                className="hover:cursor-pointer"
+                data-token-id={token.id}
+                href={entity.image}
+                width={100}
+                height={100}
+                x={0}
+                y={0}
+                preserveAspectRatio="xMidYMid"
+                style={{
+                  cursor: isInteractive ? "move" : "default",
+                  clipPath: "circle(40%)",
+                }}
+              />
+            )}
+            <g>
+              <text
+                className="pointer-events-none text-4xl select-none"
+                x={0}
+                y={32}
+              >
+                {entity.icon}
+              </text>
+            </g>
+            {!entity.image && (
+              <text
+                x={50}
+                y={50}
+                textAnchor="middle"
+                dominantBaseline="central"
+                className="pointer-events-none fill-black text-2xl font-bold select-none"
+              >
+                {entity.name.slice(0, 2).toUpperCase()}
+              </text>
+            )}
+          </svg>
 
-          <image
-            className="hover:cursor-pointer"
-            data-token-id={token.id}
-            href={entity.image || undefined}
-            width={100}
-            height={100}
-            x={token.coordinates.x}
-            y={token.coordinates.y}
-            preserveAspectRatio="xMidYMid"
-            style={{
-              cursor: isInteractive ? "move" : "default",
-              clipPath: "circle(40%)",
-            }}
-            onMouseDown={(e) => onDragStart(e, token)}
-            onClick={() => onClick(token)}
-          />
-          <g>
-            <text
-              className="pointer-events-none text-4xl select-none"
-              x={token.coordinates.x}
-              y={token.coordinates.y + 32}
-            >
-              {entity.icon}
-            </text>
-          </g>
-          {!entity.image && (
-            <text
-              x={token.coordinates.x + 50}
-              y={token.coordinates.y + 50}
-              textAnchor="middle"
-              dominantBaseline="central"
-              className="pointer-events-none fill-black text-2xl font-bold select-none"
-            >
-              {entity.name.slice(0, 2).toUpperCase()}
-            </text>
-          )}
           {entity.effects && entity.effects.length > 0 && (
-            <foreignObject
-              x={token.coordinates.x + 60}
-              y={token.coordinates.y + 10}
-              width={24}
-              height={24}
-              className="pointer-events-auto"
-            >
+            <div className="pointer-events-auto absolute top-2 right-4">
               <Popover>
                 <PopoverTrigger asChild>
-                  <button className="flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-sm hover:cursor-pointer hover:bg-black hover:text-white">
+                  <button
+                    type="button"
+                    className="flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-sm hover:cursor-pointer hover:bg-black hover:text-white"
+                  >
                     <Sparkles className="h-4 w-4" />
                   </button>
                 </PopoverTrigger>
@@ -165,9 +165,9 @@ const TokenNode: React.FC<TokenNodeProps> = ({
                   </div>
                 </PopoverContent>
               </Popover>
-            </foreignObject>
+            </div>
           )}
-        </g>
+        </div>
       </ContextMenuTrigger>
       {contextMenuContent}
     </ContextMenu>
