@@ -136,6 +136,41 @@ Key tables for context (see `src-tauri/src/lib.rs` for full migrations):
 - Use `cross-env VITE_ENV=dev` for local development (uses `dev.db`).
 - Use `cross-env VITE_ENV=inracker` for production builds (uses `prod.db`).
 
-## 7. Git Rule
+## 7. tldraw Canvas Integration
+
+The canvas uses **tldraw v4** with custom shape utils (Encounter, Token, Background) and a sync hook (`useTldrawSync`) that keeps tldraw shapes in sync with app/DB state.
+
+### Critical: Shape Deletion Must Bypass Undo Stack
+
+When deleting shapes from the sync hook, **always use `editor.store.mergeRemoteChanges()` with `editor.store.remove()`** instead of `editor.deleteShapes()`.
+
+```ts
+// WRONG - tldraw's undo history can resurrect the shape
+editor.deleteShapes(idsToRemove);
+
+// CORRECT - bypasses undo stack entirely
+editor.store.mergeRemoteChanges(() => {
+  editor.store.remove(idsToRemove);
+});
+```
+
+**Why:** `editor.deleteShapes()` records the deletion in tldraw's undo history. The drawing tool's internal state machine uses history marks (`markHistoryStoppingPoint`) during shape creation, and when it cleans up after the creation flow, it bails back to a mark — which **reverts** any deletions that were recorded after that mark. This causes deleted shapes to silently reappear ~500ms later.
+
+**When this applies:** Any shape managed by external app state (encounters, tokens, temporary elements) — these are "remote" changes from tldraw's perspective. Creating and updating shapes via `editor.createShapes()` / `editor.updateShapes()` is fine; only deletions need the bypass.
+
+### BaseBoxShapeTool Lifecycle
+
+`BaseBoxShapeTool` only has one lifecycle hook: `onCreate(shape)`. It fires when the user releases the mouse after drawing. There is **no `onComplete` method** — any code placed in an `onComplete` override will silently never execute.
+
+### Key Files
+
+- `src/components/Canvas/Canvas.tsx` — mounts tldraw, manages draw mode state
+- `src/components/Canvas/tldraw/useTldrawSync.ts` — syncs app state to tldraw shapes
+- `src/components/Canvas/tldraw/EncounterTool.ts` — custom drawing tool
+- `src/components/Canvas/tldraw/EncounterShapeUtil.tsx` — encounter shape renderer
+- `src/components/Canvas/tldraw/TokenShapeUtil.tsx` — token shape renderer
+- `src/components/Canvas/tldraw/BackgroundShapeUtil.tsx` — battlemap background
+
+## 8. Git Rule
 
 Do not self-commit changes. The user will handle all git commits.

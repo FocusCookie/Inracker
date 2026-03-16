@@ -9,10 +9,7 @@ import type { EncounterOpponent } from "@/types/opponents";
 import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import { BackgroundShapeUtil } from "./tldraw/BackgroundShapeUtil";
 import { EncounterShapeUtil } from "./tldraw/EncounterShapeUtil";
-import {
-  EncounterTool,
-  setEncounterCreateHandler,
-} from "./tldraw/EncounterTool";
+import { EncounterTool } from "./tldraw/EncounterTool";
 import { TokenShapeUtil } from "./tldraw/TokenShapeUtil";
 import { useTldrawSync } from "./tldraw/useTldrawSync";
 import { CanvasTldrawProvider } from "./tldraw/CanvasTldrawContext";
@@ -84,7 +81,6 @@ export default function Canvas({
   onStartFight: _onStartFight,
 }: Props) {
   const [editor, setEditor] = useState<Editor | null>(null);
-  const pendingElementCountRef = useRef<number | null>(null);
   const [tokenVisibility, setTokenVisibilityState] = useState<
     Record<string, boolean>
   >({});
@@ -93,7 +89,6 @@ export default function Canvas({
   const [isOpponentsPanelOpen, setIsOpponentsPanelOpen] = useState(true);
   const isSelectionSyncingRef = useRef(false);
   const backgroundShapeId = useMemo(() => createShapeId("background"), []);
-  const elementsCount = elements.length;
 
   const hasMatchingPersistedElement = useMemo(() => {
     const draft = temporaryElement;
@@ -115,8 +110,8 @@ export default function Canvas({
   }, [elements, temporaryElement]);
 
   const effectiveTemporaryElement = hasMatchingPersistedElement
-    ? undefined
-    : temporaryElement;
+    ? null
+    : (temporaryElement ?? null);
 
   const encounterOpponents = useQueryWithToast({
     queryKey: ["encounter-opponents"],
@@ -192,6 +187,16 @@ export default function Canvas({
     backgroundShapeId,
   });
 
+  // When temporary element is cleared (cancel/complete), force tldraw back to clean select state
+  const prevTemporaryElementRef = useRef(temporaryElement);
+  useEffect(() => {
+    if (prevTemporaryElementRef.current && !temporaryElement && editor) {
+      setIsDrawing(false);
+      editor.cancel();
+    }
+    prevTemporaryElementRef.current = temporaryElement;
+  }, [temporaryElement, editor]);
+
   useEffect(() => {
     if (!editor) return;
 
@@ -223,52 +228,23 @@ export default function Canvas({
   }, [editor]);
 
   useEffect(() => {
-    if (hasMatchingPersistedElement) {
-      pendingElementCountRef.current = null;
-    }
-  }, [hasMatchingPersistedElement]);
-
-  useEffect(() => {
-    setEncounterCreateHandler((currentEditor, shape) => {
-      const encounterShape = shape as any;
-      const bounds = currentEditor.getShapePageBounds(encounterShape);
-      const width = bounds?.w ?? encounterShape.props.w;
-      const height = bounds?.h ?? encounterShape.props.h;
-      const minSize = 40;
-
-      if (width < minSize || height < minSize) {
-        currentEditor.deleteShapes([encounterShape.id]);
-        setIsDrawing(false);
-        return;
-      }
-
-      const draftElement = {
-        x: bounds?.x ?? encounterShape.x,
-        y: bounds?.y ?? encounterShape.y,
-        width,
-        height,
-        color: encounterShape.props.color,
-        icon: encounterShape.props.icon,
-        name: encounterShape.props.name,
-        completed: encounterShape.props.completed ?? false,
-        isCombatActive: encounterShape.props.isCombatActive ?? false,
-      };
-
-      pendingElementCountRef.current = elementsCount;
+    (window as any)._onDrawedEncounter = (draftElement: any) => {
       onDrawed(draftElement);
-
-      currentEditor.deleteShapes([encounterShape.id]);
       setIsDrawing(false);
-    });
+    };
 
     return () => {
-      setEncounterCreateHandler(null);
+      delete (window as any)._onDrawedEncounter;
     };
-  }, [onDrawed, elementsCount]);
+  }, [onDrawed]);
 
   useEffect(() => {
     if (!editor) return;
-    editor.setCurrentTool(isDrawing ? "encounter" : "select");
+    if (isDrawing) {
+      editor.setCurrentTool("encounter");
+    } else {
+      editor.setCurrentTool("select");
+    }
   }, [editor, isDrawing]);
 
   useEffect(() => {
@@ -346,6 +322,11 @@ export default function Canvas({
         event.preventDefault();
         editor.setCurrentTool("select");
         onTokenSelect(null);
+      }
+
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "d") {
+        event.preventDefault();
+        setIsDrawing((prev) => !prev);
       }
     };
 

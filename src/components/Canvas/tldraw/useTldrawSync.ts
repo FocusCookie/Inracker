@@ -4,7 +4,11 @@ import { createShapeId, type Editor, type TLShapeId } from "tldraw";
 import type { InrackerCanvasElement } from "@/types/canvas";
 import type { CanvasElementWithId } from "../types";
 import type { Token } from "@/types/tokens";
-import { ENCOUNTER_TYPE, TOKEN_TYPE } from "./shapes";
+import {
+  BACKGROUND_TYPE,
+  ENCOUNTER_TYPE,
+  TOKEN_TYPE,
+} from "./shapes";
 
 type ShapeState = {
   x: number;
@@ -16,7 +20,7 @@ type ShapeState = {
 type Params = {
   editor: Editor | null;
   elements: CanvasElementWithId[];
-  temporaryElement?: InrackerCanvasElement;
+  temporaryElement: InrackerCanvasElement | null;
   tokens: Token[];
   onTokenMove: (token: Token) => void;
   onElementMove: (element: CanvasElementWithId) => void;
@@ -168,24 +172,23 @@ export function useTldrawSync({
       }
     }
 
+    // Collect IDs to remove
+    const idsToKeep = new Set<TLShapeId>();
+    nextElementMap.forEach((_, id) => idsToKeep.add(id));
+    nextTokenMap.forEach((_, id) => idsToKeep.add(id));
+    if (temporaryElement) idsToKeep.add(temporaryShapeId);
+    if (backgroundShapeId) idsToKeep.add(backgroundShapeId);
+
     const idsToRemove = editor
       .getCurrentPageShapes()
       .filter(
         (shape) =>
-          (shape.type === ENCOUNTER_TYPE || shape.type === TOKEN_TYPE) &&
-          !nextElementMap.has(shape.id) &&
-          !nextTokenMap.has(shape.id) &&
-          shape.id !== temporaryShapeId,
+          (shape.type === ENCOUNTER_TYPE ||
+            shape.type === TOKEN_TYPE ||
+            shape.type === BACKGROUND_TYPE) &&
+          !idsToKeep.has(shape.id),
       )
       .map((shape) => shape.id);
-
-    if (!temporaryElement && editor.getShape(temporaryShapeId)) {
-      idsToRemove.push(temporaryShapeId);
-    }
-
-    if (idsToRemove.length > 0) {
-      editor.deleteShapes(idsToRemove);
-    }
 
     if (shapesToCreate.length > 0) {
       editor.createShapes(shapesToCreate);
@@ -193,6 +196,14 @@ export function useTldrawSync({
 
     if (shapesToUpdate.length > 0) {
       editor.updateShapes(shapesToUpdate);
+    }
+
+    // Use mergeRemoteChanges for deletions to bypass tldraw's undo stack —
+    // prevents the undo history from resurrecting deleted temporary shapes
+    if (idsToRemove.length > 0) {
+      editor.store.mergeRemoteChanges(() => {
+        editor.store.remove(idsToRemove);
+      });
     }
 
     elementByShapeIdRef.current = nextElementMap;

@@ -1,16 +1,5 @@
-import { BaseBoxShapeTool, type Editor } from "tldraw";
-import { useEncounterStore } from "@/stores/useEncounterStore";
+import { BaseBoxShapeTool } from "tldraw";
 import { ENCOUNTER_TYPE } from "./shapes";
-
-type EncounterCreateHandler = (editor: Editor, shape: any) => void;
-
-let encounterCreateHandler: EncounterCreateHandler | null = null;
-
-export function setEncounterCreateHandler(
-  handler: EncounterCreateHandler | null,
-) {
-  encounterCreateHandler = handler;
-}
 
 export class EncounterTool extends BaseBoxShapeTool {
   static override id = "encounter";
@@ -20,25 +9,29 @@ export class EncounterTool extends BaseBoxShapeTool {
   override onCreate(shape: any) {
     if (!shape) return;
 
-    const { currentColor, currentIcon, currentTitle } =
-      useEncounterStore.getState();
+    const bounds = this.editor.getShapePageBounds(shape.id);
+    const draftElement = {
+      x: bounds?.x ?? shape.x,
+      y: bounds?.y ?? shape.y,
+      width: bounds?.w ?? shape.props.w,
+      height: bounds?.h ?? shape.props.h,
+      color: "#ffffff",
+      icon: "",
+      name: "",
+      completed: false,
+      isCombatActive: false,
+    };
 
-    this.editor.updateShape({
-      id: shape.id,
-      type: ENCOUNTER_TYPE,
-      props: {
-        ...shape.props,
-        color: currentColor,
-        icon: currentIcon,
-        name: currentTitle ?? "",
-      },
+    // Delete the tldraw shape — we manage the temporary element ourselves
+    this.editor.deleteShapes([shape.id]);
+
+    requestAnimationFrame(() => {
+      // Dispatch cancel to properly exit the stuck select.resizing state
+      this.editor.cancel();
+
+      if ((window as any)._onDrawedEncounter) {
+        (window as any)._onDrawedEncounter(draftElement);
+      }
     });
-
-    const updatedShape = this.editor.getShape(shape.id) ?? shape;
-    encounterCreateHandler?.(this.editor, updatedShape);
-
-    if (!this.editor.getInstanceState().isToolLocked) {
-      this.editor.setCurrentTool("select");
-    }
   }
 }
