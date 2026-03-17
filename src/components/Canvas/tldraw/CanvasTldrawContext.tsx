@@ -41,9 +41,6 @@ const CanvasTldrawContext = createContext<CanvasTldrawContextValue | null>(
 
 export function useCanvasTldrawContext() {
   const context = useContext(CanvasTldrawContext);
-  if (!context) {
-    throw new Error("CanvasTldrawContext is missing");
-  }
   return context;
 }
 

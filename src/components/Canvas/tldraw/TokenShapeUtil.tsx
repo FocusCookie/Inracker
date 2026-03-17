@@ -18,6 +18,9 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
   }
 
   override component(shape: TokenShape) {
+    const context = useCanvasTldrawContext();
+    if (!context) return null;
+
     const {
       database,
       playersById,
@@ -35,7 +38,7 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
       onRemoveFromInitiative,
       onAddToInitiative,
       initiativeEntityIds,
-    } = useCanvasTldrawContext();
+    } = context;
 
     const token = tokensById.get(shape.props.tokenId);
     if (!token) {

@@ -24,13 +24,14 @@ import { EncounterShape } from "./shapes";
 
 function EncounterShapeView({ shape }: { shape: EncounterShape }) {
   const { t } = useTranslation("ComponentCanvas");
-  const { elementsByShapeId } = useCanvasTldrawContext();
+  const context = useCanvasTldrawContext();
+  const elementsByShapeId = context?.elementsByShapeId;
   
   // Try to get element by exact shape ID, or by the encounterId prop if it exists
-  let element = elementsByShapeId.get(shape.id as any);
+  let element = elementsByShapeId?.get(shape.id as any);
   
   // Fallback: if not found by shape.id, try to find an element in the map whose ID matches shape.props.encounterId
-  if (!element && shape.props.encounterId) {
+  if (!element && shape.props.encounterId && elementsByShapeId) {
     const encId = shape.props.encounterId;
     for (const val of elementsByShapeId.values()) {
       if (val.id === encId) {
@@ -41,7 +42,7 @@ function EncounterShapeView({ shape }: { shape: EncounterShape }) {
   }
   
   // Final fallback: if still not found, try to match by searching the map for an element whose string-converted shape.id matches
-  if (!element) {
+  if (!element && elementsByShapeId) {
     const shapeIdStr = String(shape.id);
     for (const [key, val] of elementsByShapeId.entries()) {
       if (String(key) === shapeIdStr) {

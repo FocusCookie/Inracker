@@ -395,7 +395,8 @@ export default function Canvas({
 
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "p") {
         event.preventDefault();
-        onOpenSessionLog?.();
+        event.stopImmediatePropagation();
+        _onOpenSessionLog?.();
       }
     };
 
@@ -414,14 +415,14 @@ export default function Canvas({
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown, { capture: true });
     window.addEventListener("keyup", handleKeyUp);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown, { capture: true });
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [editor, drawingMode, onTokenSelect, elementsByShapeId]);
+  }, [editor, drawingMode, onTokenSelect, elementsByShapeId, _onOpenSessionLog]);
 
   useEffect(() => {
     if (!editor || !background) return;
