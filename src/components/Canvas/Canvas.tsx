@@ -327,6 +327,20 @@ export default function Canvas({
         event.preventDefault();
         setIsDrawing((prev) => !prev);
       }
+
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "o") {
+        event.preventDefault();
+        const selectedIds = editor.getSelectedShapeIds();
+        if (selectedIds.length === 1) {
+          const shape = editor.getShape(selectedIds[0]);
+          if (shape && shape.type === "encounter") {
+            const element = elementsByShapeId.get(shape.id);
+            if (element?.onClick) {
+              element.onClick(element);
+            }
+          }
+        }
+      }
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
