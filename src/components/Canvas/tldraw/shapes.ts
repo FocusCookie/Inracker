@@ -12,6 +12,7 @@ declare module "@tldraw/tlschema" {
       color: string;
       icon: string;
       name: string;
+      encounterId?: string | number;
       completed?: boolean;
       isCombatActive?: boolean;
     };

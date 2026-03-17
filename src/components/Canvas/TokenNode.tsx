@@ -92,9 +92,6 @@ const TokenNode: React.FC<TokenNodeProps> = ({
               onClick(token);
             }
           }}
-          onContextMenu={(event) => {
-            event.preventDefault();
-          }}
           onClick={() => onClick(token)}
         >
           <svg width={100} height={100} viewBox="0 0 100 100">

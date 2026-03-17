@@ -212,7 +212,6 @@ export default function Canvas({
 
       if (isToken || isElement) {
         event.preventDefault();
-        event.stopPropagation();
       }
     };
 
