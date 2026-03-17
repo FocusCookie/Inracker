@@ -105,8 +105,8 @@ export default function Canvas({
   >({});
   const [drawingMode, setDrawingMode] = useState<DrawingMode>("none");
   const [selectedShapeIds, setSelectedShapeIds] = useState<string[]>([]);
-  const [isPlayersPanelOpen, setIsPlayersPanelOpen] = useState(true);
-  const [isOpponentsPanelOpen, setIsOpponentsPanelOpen] = useState(true);
+  const [isPlayersPanelOpen, setIsPlayersPanelOpen] = useState(false);
+  const [isOpponentsPanelOpen, setIsOpponentsPanelOpen] = useState(false);
   const isSelectionSyncingRef = useRef(false);
   const backgroundShapeId = useMemo(() => createShapeId("background"), []);
 
