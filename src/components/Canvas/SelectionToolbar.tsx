@@ -63,10 +63,16 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
     else editor.distributeShapes(selectedIds, "vertical");
   };
 
+  const showMarkupActions = isSingleMarkup && markup;
+  const showAlignActions = selectedIds.length >= 2;
+  const showDistributeActions = selectedIds.length >= 3;
+
+  if (!showMarkupActions && !showAlignActions) return null;
+
   return (
     <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm z-50">
       <TooltipProvider>
-        {isSingleMarkup && markup && (
+        {showMarkupActions && (
           <>
             <div className="flex items-center gap-1 px-2 border-r border-white/40">
               {COMMON_COLORS.map((c) => (
@@ -114,9 +120,9 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
           </>
         )}
 
-        {selectedIds.length >= 2 && (
+        {showAlignActions && (
           <>
-            <div className="flex items-center gap-1 px-1 border-r border-white/40">
+            <div className={cn("flex items-center gap-1 px-1", showMarkupActions && "border-l border-white/40")}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button onClick={() => handleAlign("left")} className="flex h-8 w-8 items-center justify-center rounded-full bg-white hover:bg-slate-100"><AlignLeftIcon /></button>
@@ -136,7 +142,7 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
                 <TooltipContent>Align Right</TooltipContent>
               </Tooltip>
             </div>
-            <div className="flex items-center gap-1 px-1">
+            <div className="flex items-center gap-1 px-1 border-l border-white/40">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button onClick={() => handleAlign("top")} className="flex h-8 w-8 items-center justify-center rounded-full bg-white hover:bg-slate-100"><AlignTopIcon /></button>
@@ -159,7 +165,7 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
           </>
         )}
 
-        {selectedIds.length >= 3 && (
+        {showDistributeActions && (
           <div className="flex items-center gap-1 px-1 border-l border-white/40">
             <Tooltip>
               <TooltipTrigger asChild>
