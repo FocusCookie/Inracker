@@ -1,6 +1,6 @@
 import { CheckIcon, ExternalLinkIcon } from "@radix-ui/react-icons";
 import { motion } from "framer-motion";
-import { BaseBoxShapeUtil, HTMLContainer } from "tldraw";
+import { BaseBoxShapeUtil, HTMLContainer, useEditor, useValue } from "tldraw";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -24,12 +24,75 @@ import { EncounterShape } from "./shapes";
 
 function EncounterShapeView({ shape }: { shape: EncounterShape }) {
   const { t } = useTranslation("ComponentCanvas");
+  const editor = useEditor();
   const context = useCanvasTldrawContext();
   const elementsByShapeId = context?.elementsByShapeId;
-  
+
+  const isLowDetail = useValue(
+    "isLowDetail",
+    () => editor.getEfficientZoomLevel() < 0.25,
+    [editor],
+  );
+
+  const { w, h, color, icon, name, completed, isCombatActive } = shape.props;
+  const title = name || "Encounter";
+
+  if (isLowDetail) {
+    return (
+      <div className="pointer-events-none h-full w-full">
+        <svg
+          width={w}
+          height={h}
+          viewBox={`0 0 ${w} ${h}`}
+          style={{ overflow: "visible" }}
+        >
+          <g style={{ opacity: completed ? 0.5 : 1 }}>
+            <rect
+              x={0}
+              y={0}
+              width={w}
+              height={h}
+              fill={color}
+              fillOpacity={0.25}
+              stroke={color}
+              strokeWidth={4}
+              rx={4}
+              ry={4}
+            />
+            <rect
+              x={0}
+              y={0}
+              width={w}
+              height={60}
+              fill={color}
+              fillOpacity={0.8}
+              stroke={color}
+              strokeWidth={4}
+              rx={4}
+              ry={4}
+            />
+            <text x={10} y={35} className="text-4xl select-none">
+              {icon}
+            </text>
+          </g>
+          {completed && (
+            <rect
+              x={w / 2 - 20}
+              y={h / 2 - 20}
+              width={40}
+              height={40}
+              rx={20}
+              fill="#064e3b"
+            />
+          )}
+        </svg>
+      </div>
+    );
+  }
+
   // Try to get element by exact shape ID, or by the encounterId prop if it exists
   let element = elementsByShapeId?.get(shape.id as any);
-  
+
   // Fallback: if not found by shape.id, try to find an element in the map whose ID matches shape.props.encounterId
   if (!element && shape.props.encounterId && elementsByShapeId) {
     const encId = shape.props.encounterId;
@@ -40,7 +103,7 @@ function EncounterShapeView({ shape }: { shape: EncounterShape }) {
       }
     }
   }
-  
+
   // Final fallback: if still not found, try to match by searching the map for an element whose string-converted shape.id matches
   if (!element && elementsByShapeId) {
     const shapeIdStr = String(shape.id);
@@ -51,9 +114,6 @@ function EncounterShapeView({ shape }: { shape: EncounterShape }) {
       }
     }
   }
-
-  const { w, h, color, icon, name, completed, isCombatActive } = shape.props;
-  const title = name || "Encounter";
 
   const handleOpen = () => {
     element?.onClick?.(element);
@@ -74,7 +134,7 @@ function EncounterShapeView({ shape }: { shape: EncounterShape }) {
             role="button"
             tabIndex={0}
             data-element-id={element?.id ?? "temporary"}
-            className="relative h-full w-full border-0 bg-transparent p-0 text-left cursor-default outline-none"
+            className="relative h-full w-full cursor-default border-0 bg-transparent p-0 text-left outline-none"
           >
             <svg
               width={w}
@@ -133,8 +193,8 @@ function EncounterShapeView({ shape }: { shape: EncounterShape }) {
                 </text>
                 <text
                   x={60}
-                  y={40}
-                  className="text-lg text-white font-bold select-none"
+                  y={30}
+                  className="text-lg font-bold text-white select-none"
                   dominantBaseline="middle"
                 >
                   {name}
@@ -164,7 +224,7 @@ function EncounterShapeView({ shape }: { shape: EncounterShape }) {
                         type="button"
                         size="icon"
                         variant="ghost"
-                        className="h-10 w-10 bg-black/50 text-white hover:bg-black/80 hover:text-white backdrop-blur-sm border border-white/20 pointer-events-auto"
+                        className="pointer-events-auto h-10 w-10 border border-white/20 bg-black/50 text-white backdrop-blur-sm hover:bg-black/80 hover:text-white"
                         onPointerDown={(event) => {
                           event.stopPropagation();
                         }}
