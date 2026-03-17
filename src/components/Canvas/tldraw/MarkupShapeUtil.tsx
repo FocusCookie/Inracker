@@ -17,17 +17,27 @@ export class MarkupShapeUtil extends BaseBoxShapeUtil<MarkupShape> {
     const { w, h, color } = shape.props;
 
     return (
-      <HTMLContainer
-        style={{
-          width: w,
-          height: h,
-          backgroundColor: color,
-          opacity: 0.4,
-          border: `2px solid ${color}`,
-          borderRadius: "4px",
-          pointerEvents: "none",
-        }}
-      />
+      <div className="h-full w-full pointer-events-none">
+        <svg
+          width={w}
+          height={h}
+          viewBox={`0 0 ${w} ${h}`}
+          style={{ overflow: "visible" }}
+        >
+          <rect
+            x={0}
+            y={0}
+            width={w}
+            height={h}
+            fill={color}
+            fillOpacity={0.4}
+            stroke={color}
+            strokeWidth={2}
+            rx={4}
+            ry={4}
+          />
+        </svg>
+      </div>
     );
   }
 

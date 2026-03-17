@@ -1,4 +1,4 @@
-import { BaseBoxShapeUtil, HTMLContainer } from "tldraw";
+import { BaseBoxShapeUtil, HTMLContainer, useEditor, useValue } from "tldraw";
 import { TokenShape } from "./shapes";
 import { useCanvasTldrawContext } from "./CanvasTldrawContext";
 import { PlayerToken } from "../PlayerToken";
@@ -18,8 +18,15 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
   }
 
   override component(shape: TokenShape) {
+    const editor = useEditor();
     const context = useCanvasTldrawContext();
     if (!context) return null;
+
+    const isLowDetail = useValue(
+      "isLowDetail",
+      () => editor.getEfficientZoomLevel() < 0.25,
+      [editor],
+    );
 
     const {
       database,
@@ -45,12 +52,55 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
       return null;
     }
 
+    const player = playersById.get(shape.props.entityId);
+    const opponent = opponentsById.get(shape.props.entityId);
+
+    if (shape.props.tokenType === "player" && !player) {
+      return null;
+    }
+
+    if (shape.props.tokenType === "opponent" && !opponent) {
+      return null;
+    }
+
+    const entity = (shape.props.tokenType === "player" ? player : opponent)!;
+    const isVisible = tokenVisibility[token.id.toString()] ?? true;
+
+    if (isLowDetail) {
+      return (
+        <div className="h-full w-full pointer-events-none flex items-center justify-center">
+          <svg width={shape.props.w} height={shape.props.h} viewBox="0 0 100 100">
+            <circle
+              cx={50}
+              cy={50}
+              r={45}
+              fill={shape.props.tokenType === "player" ? "#3b82f6" : "#ef4444"}
+              stroke="white"
+              strokeWidth={4}
+              opacity={isVisible ? 0.8 : 0.3}
+            />
+            <text
+              x={50}
+              y={55}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="white"
+              fontSize={40}
+              fontWeight="bold"
+              style={{ userSelect: "none" }}
+            >
+              {entity.icon || entity.name.charAt(0).toUpperCase()}
+            </text>
+          </svg>
+        </div>
+      );
+    }
+
     const tokenWithLocalCoords = {
       ...token,
       coordinates: { x: 0, y: 0 },
     };
 
-    const isVisible = tokenVisibility[token.id.toString()] ?? true;
     const isSelected = selectedToken?.id === token.id;
 
     const handleToggleVisibility = () => {
@@ -64,17 +114,6 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
         onTokenSelect(token);
       }
     };
-
-    const player = playersById.get(shape.props.entityId);
-    const opponent = opponentsById.get(shape.props.entityId);
-
-    if (shape.props.tokenType === "player" && !player) {
-      return null;
-    }
-
-    if (shape.props.tokenType === "opponent" && !opponent) {
-      return null;
-    }
 
     return (
       <HTMLContainer
