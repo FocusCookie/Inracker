@@ -314,6 +314,22 @@ pub fn run() {
             ",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 26,
+            description: "create markup table",
+            sql: "CREATE TABLE IF NOT EXISTS markup (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                chapter INTEGER NOT NULL,
+                x REAL NOT NULL,
+                y REAL NOT NULL,
+                width REAL NOT NULL,
+                height REAL NOT NULL,
+                rotation REAL DEFAULT 0,
+                color TEXT NOT NULL,
+                FOREIGN KEY(chapter) REFERENCES chapters(id) ON DELETE CASCADE
+            )",
+            kind: MigrationKind::Up,
+        },
     ];
 
 tauri::Builder::default()

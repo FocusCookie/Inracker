@@ -9,6 +9,7 @@ import { chapters } from "./db/chapters";
 import { encounters } from "./db/encounters";
 import { opponents, encounterOpponents } from "./db/opponents";
 import { tokens } from "./db/tokens";
+import { markup } from "./db/markup";
 import { settings } from "./db/settings";
 import { combat } from "./db/combat";
 import { shortRest, longRest } from "./db/rests";
@@ -28,6 +29,7 @@ const database = {
   chapters,
   encounters,
   tokens,
+  markup,
   encounterOpponents,
   combat,
   settings,

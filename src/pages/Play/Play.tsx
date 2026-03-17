@@ -95,9 +95,16 @@ import {
 } from "@/hooks/useEncounters";
 import { useUpdateToken, useCreateTokensForEncounter } from "@/hooks/useTokens";
 import {
+  useMarkupQuery,
+  useCreateMarkup,
+  useUpdateMarkup,
+  useDeleteMarkup,
+} from "@/hooks/useMarkup";
+import {
   useAddEncounterToChapter,
   useUpdateChapterProperty,
 } from "@/hooks/useChapters";
+import { MarkupElement } from "@/types/markup";
 
 type Props = {
   partyId: Party["id"];
@@ -270,6 +277,11 @@ function Play({
 
   const updateEncounterMutation = useUpdateEncounter(database);
   const updateTokenMutation = useUpdateToken(database);
+
+  const markupQuery = useMarkupQuery(chapter.id, database);
+  const createMarkupMutation = useCreateMarkup(database);
+  const updateMarkupMutation = useUpdateMarkup(database);
+  const deleteMarkupMutation = useDeleteMarkup(database);
 
   const createEncounterMutation = useCreateEncounterMutation(database);
   const addEncounterToChapterMutation = useAddEncounterToChapter(database);
@@ -794,12 +806,39 @@ function Play({
     const encounter = encounters.find((e) => e.id === element.id);
 
     if (encounter) {
-      const { id, name, onClick, ...elementData } = element;
+      const { id, name, onClick, onEdit, ...elementData } = element;
       const updatedEncounter = {
         ...encounter,
         element: { ...encounter.element, ...elementData },
       };
       await updateEncounterMutation.mutateAsync(updatedEncounter);
+    }
+  }
+
+  function handleMarkupDrawed(markup: Omit<MarkupElement, "id">) {
+    createMarkupMutation.mutate({
+      ...markup,
+      chapter: chapter.id,
+    });
+  }
+
+  function handleMarkupMove(markup: MarkupElement) {
+    updateMarkupMutation.mutate(markup);
+  }
+
+  function handleMarkupDelete(markupId: number) {
+    deleteMarkupMutation.mutate(markupId);
+  }
+
+  function handleMarkupDuplicate(markupId: number) {
+    const original = markupQuery.data?.find((m) => m.id === markupId);
+    if (original) {
+      const { id, ...rest } = original;
+      createMarkupMutation.mutate({
+        ...rest,
+        x: rest.x + 20,
+        y: rest.y + 20,
+      });
     }
   }
 
@@ -1345,14 +1384,19 @@ function Play({
               type: enc.type,
             })) || []
           }
+          markup={markupQuery.data || []}
           temporaryElement={tempElement}
           tokens={tokens}
           players={players}
           selectedToken={selectedToken}
           onTokenSelect={handleTokenSelect}
           onDrawed={handeOpenCreateElementDrawer}
+          onMarkupDrawed={handleMarkupDrawed}
           onTokenMove={updateTokenMutation.mutate}
           onElementMove={handleElementMove}
+          onMarkupMove={handleMarkupMove}
+          onMarkupDelete={handleMarkupDelete}
+          onMarkupDuplicate={handleMarkupDuplicate}
           onRemoveFromInitiative={handleRemoveFromInitiative}
           onAddToInitiative={handleAddToInitiative}
           onOpenEffectsCatalog={handleOpenEffectsCatalog}

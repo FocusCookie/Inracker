@@ -3,6 +3,7 @@ export type InrackerCanvasElement = {
   y: number;
   width: number;
   height: number;
+  rotation?: number;
   color: string;
   icon: string;
   name?: string;

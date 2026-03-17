@@ -7,25 +7,27 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  Cross2Icon,
+  BoxIcon,
   PaddingIcon,
   ZoomInIcon,
   ZoomOutIcon,
 } from "@radix-ui/react-icons";
 import { MinimizeIcon } from "lucide-react";
 import { Kbd } from "@/components/ui/kbd";
-import { getModifierKey } from "@/lib/utils";
+import { cn, getModifierKey } from "@/lib/utils";
+
+export type DrawingMode = "none" | "encounter" | "markup";
 
 type CanvasToolbarProps = {
-  isDrawing: boolean;
+  drawingMode: DrawingMode;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onResetZoom: () => void;
-  onToggleDrawing: () => void;
+  onToggleDrawing: (mode: DrawingMode) => void;
 };
 
 const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
-  isDrawing,
+  drawingMode,
   onZoomIn,
   onZoomOut,
   onResetZoom,
@@ -93,14 +95,19 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <button
-              onClick={onToggleDrawing}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
-            >
-              {isDrawing ? (
-                <Cross2Icon className="h-4 w-4" />
-              ) : (
-                <PaddingIcon className="h-4 w-4" />
+              onClick={() =>
+                onToggleDrawing(
+                  drawingMode === "encounter" ? "none" : "encounter",
+                )
+              }
+              className={cn(
+                "flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 hover:cursor-pointer hover:shadow-xs",
+                drawingMode === "encounter"
+                  ? "bg-slate-800 text-white"
+                  : "bg-white text-slate-700 hover:bg-slate-100",
               )}
+            >
+              <PaddingIcon className="h-4 w-4" />
             </button>
           </TooltipTrigger>
           <TooltipContent className="flex items-center gap-2">
@@ -108,6 +115,31 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             <div className="flex gap-0.5">
               <Kbd>{getModifierKey()}</Kbd>
               <Kbd>D</Kbd>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() =>
+                onToggleDrawing(drawingMode === "markup" ? "none" : "markup")
+              }
+              className={cn(
+                "flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 hover:cursor-pointer hover:shadow-xs",
+                drawingMode === "markup"
+                  ? "bg-slate-800 text-white"
+                  : "bg-white text-slate-700 hover:bg-slate-100",
+              )}
+            >
+              <BoxIcon className="h-4 w-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent className="flex items-center gap-2">
+            <p>{t("drawMarkup")}</p>
+            <div className="flex gap-0.5">
+              <Kbd>{getModifierKey()}</Kbd>
+              <Kbd>M</Kbd>
             </div>
           </TooltipContent>
         </Tooltip>

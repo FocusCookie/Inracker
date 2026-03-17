@@ -10,16 +10,25 @@ import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
 import { BackgroundShapeUtil } from "./tldraw/BackgroundShapeUtil";
 import { EncounterShapeUtil } from "./tldraw/EncounterShapeUtil";
 import { EncounterTool } from "./tldraw/EncounterTool";
+import { MarkupShapeUtil } from "./tldraw/MarkupShapeUtil";
+import { MarkupTool } from "./tldraw/MarkupTool";
 import { TokenShapeUtil } from "./tldraw/TokenShapeUtil";
 import { useTldrawSync } from "./tldraw/useTldrawSync";
 import { CanvasTldrawProvider } from "./tldraw/CanvasTldrawContext";
 import type { CanvasElementWithId } from "./types";
 import TokenPanels from "./TokenPanels";
-import CanvasToolbar from "./CanvasToolbar";
-import { BACKGROUND_TYPE } from "./tldraw/shapes";
+import CanvasToolbar, { DrawingMode } from "./CanvasToolbar";
+import SelectionToolbar from "./SelectionToolbar";
+import { BACKGROUND_TYPE, ENCOUNTER_TYPE, TOKEN_TYPE, MARKUP_TYPE } from "./tldraw/shapes";
+import { MarkupElement } from "@/types/markup";
 
-const shapeUtils = [BackgroundShapeUtil, EncounterShapeUtil, TokenShapeUtil];
-const tools = [EncounterTool];
+const shapeUtils = [
+  BackgroundShapeUtil,
+  EncounterShapeUtil,
+  TokenShapeUtil,
+  MarkupShapeUtil,
+];
+const tools = [EncounterTool, MarkupTool];
 
 type Props = {
   database: typeof import("@/lib/database").default;
@@ -29,10 +38,15 @@ type Props = {
   players: Player[];
   selectedToken: Token | null;
   tokens: Token[];
+  markup: MarkupElement[];
   onTokenSelect: (token: Token | null) => void;
   onDrawed: (element: Omit<InrackerCanvasElement, "id">) => void;
+  onMarkupDrawed: (markup: Omit<MarkupElement, "id">) => void;
   onTokenMove: (token: Token) => void;
   onElementMove: (element: CanvasElementWithId) => void;
+  onMarkupMove: (markup: MarkupElement) => void;
+  onMarkupDelete: (markupId: number) => void;
+  onMarkupDuplicate: (markupId: number) => void;
   onRemoveFromInitiative?: (
     entityId: number,
     type: "player" | "opponent",
@@ -64,10 +78,15 @@ export default function Canvas({
   players,
   selectedToken,
   tokens,
+  markup,
   onTokenSelect,
   onDrawed,
+  onMarkupDrawed,
   onTokenMove,
   onElementMove,
+  onMarkupMove,
+  onMarkupDelete,
+  onMarkupDuplicate,
   onRemoveFromInitiative,
   onAddToInitiative,
   onOpenEffectsCatalog,
@@ -84,7 +103,8 @@ export default function Canvas({
   const [tokenVisibility, setTokenVisibilityState] = useState<
     Record<string, boolean>
   >({});
-  const [isDrawing, setIsDrawing] = useState(false);
+  const [drawingMode, setDrawingMode] = useState<DrawingMode>("none");
+  const [selectedShapeIds, setSelectedShapeIds] = useState<string[]>([]);
   const [isPlayersPanelOpen, setIsPlayersPanelOpen] = useState(true);
   const [isOpponentsPanelOpen, setIsOpponentsPanelOpen] = useState(true);
   const isSelectionSyncingRef = useRef(false);
@@ -144,6 +164,14 @@ export default function Canvas({
     [tokens],
   );
 
+  const markupByShapeId = useMemo(
+    () =>
+      new Map(
+        markup.map((m) => [createShapeId(`markup-${m.id}`), m]),
+      ),
+    [markup],
+  );
+
   const setTokenVisibility = (tokenId: number, isVisible: boolean) => {
     setTokenVisibilityState((prev) => ({
       ...prev,
@@ -182,8 +210,10 @@ export default function Canvas({
     elements,
     temporaryElement: effectiveTemporaryElement,
     tokens,
+    markup,
     onElementMove,
     onTokenMove,
+    onMarkupMove,
     backgroundShapeId,
   });
 
@@ -191,7 +221,7 @@ export default function Canvas({
   const prevTemporaryElementRef = useRef(temporaryElement);
   useEffect(() => {
     if (prevTemporaryElementRef.current && !temporaryElement && editor) {
-      setIsDrawing(false);
+      setDrawingMode("none");
       editor.cancel();
     }
     prevTemporaryElementRef.current = temporaryElement;
@@ -229,7 +259,7 @@ export default function Canvas({
   useEffect(() => {
     (window as any)._onDrawedEncounter = (draftElement: any) => {
       onDrawed(draftElement);
-      setIsDrawing(false);
+      setDrawingMode("none");
     };
 
     return () => {
@@ -238,13 +268,26 @@ export default function Canvas({
   }, [onDrawed]);
 
   useEffect(() => {
+    (window as any)._onDrawedMarkup = (draftMarkup: any) => {
+      onMarkupDrawed(draftMarkup);
+      setDrawingMode("none");
+    };
+
+    return () => {
+      delete (window as any)._onDrawedMarkup;
+    };
+  }, [onMarkupDrawed]);
+
+  useEffect(() => {
     if (!editor) return;
-    if (isDrawing) {
+    if (drawingMode === "encounter") {
       editor.setCurrentTool("encounter");
+    } else if (drawingMode === "markup") {
+      editor.setCurrentTool("markup");
     } else {
       editor.setCurrentTool("select");
     }
-  }, [editor, isDrawing]);
+  }, [editor, drawingMode]);
 
   useEffect(() => {
     if (!editor) return;
@@ -269,6 +312,8 @@ export default function Canvas({
       if (isSelectionSyncingRef.current) return;
 
       const selectedIds = editor.getSelectedShapeIds();
+      setSelectedShapeIds(selectedIds.map((id) => String(id)));
+
       if (selectedIds.length !== 1) {
         if (selectedToken) {
           onTokenSelect(null);
@@ -321,11 +366,17 @@ export default function Canvas({
         event.preventDefault();
         editor.setCurrentTool("select");
         onTokenSelect(null);
+        setDrawingMode("none");
       }
 
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "d") {
         event.preventDefault();
-        setIsDrawing((prev) => !prev);
+        setDrawingMode((prev) => (prev === "encounter" ? "none" : "encounter"));
+      }
+
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "m") {
+        event.preventDefault();
+        setDrawingMode((prev) => (prev === "markup" ? "none" : "markup"));
       }
 
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "o") {
@@ -341,6 +392,11 @@ export default function Canvas({
           }
         }
       }
+
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "p") {
+        event.preventDefault();
+        onOpenSessionLog?.();
+      }
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
@@ -348,7 +404,13 @@ export default function Canvas({
 
       if (event.key === " ") {
         event.preventDefault();
-        editor.setCurrentTool(isDrawing ? "encounter" : "select");
+        if (drawingMode === "encounter") {
+          editor.setCurrentTool("encounter");
+        } else if (drawingMode === "markup") {
+          editor.setCurrentTool("markup");
+        } else {
+          editor.setCurrentTool("select");
+        }
       }
     };
 
@@ -359,7 +421,7 @@ export default function Canvas({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [editor, isDrawing, onTokenSelect]);
+  }, [editor, drawingMode, onTokenSelect, elementsByShapeId]);
 
   useEffect(() => {
     if (!editor || !background) return;
@@ -457,11 +519,22 @@ export default function Canvas({
           }}
         />
         <CanvasToolbar
-          isDrawing={isDrawing}
+          drawingMode={drawingMode}
           onZoomIn={() => editor?.zoomIn()}
           onZoomOut={() => editor?.zoomOut()}
           onResetZoom={() => editor?.resetZoom()}
-          onToggleDrawing={() => setIsDrawing((prev) => !prev)}
+          onToggleDrawing={(mode) => setDrawingMode(mode)}
+        />
+        <SelectionToolbar
+          editor={editor}
+          selectedIds={selectedShapeIds}
+          markupByShapeId={markupByShapeId}
+          onMarkupDelete={onMarkupDelete}
+          onMarkupDuplicate={onMarkupDuplicate}
+          onMarkupColorChange={(markupId, color) => {
+            const m = markup.find((item) => item.id === markupId);
+            if (m) onMarkupMove({ ...m, color });
+          }}
         />
       </div>
     </CanvasTldrawProvider>
