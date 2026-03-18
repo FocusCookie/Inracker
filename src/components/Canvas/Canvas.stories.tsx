@@ -66,10 +66,15 @@ const meta = {
         type: "player",
       },
     ],
+    markup: [],
     onDrawed: fn(),
     onElementMove: fn(),
     onTokenSelect: fn(),
     onTokenMove: fn(),
+    onMarkupDrawed: fn(),
+    onMarkupMove: fn(),
+    onMarkupDelete: fn(),
+    onMarkupDuplicate: fn(),
   },
 } satisfies Meta<typeof Canvas>;
 
@@ -78,7 +83,6 @@ type Story = StoryObj<typeof meta>;
 
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 export const Primary: Story = {
-  // args: {},
 };
 
 export const WithBackground: Story = {

@@ -1,4 +1,4 @@
-import { BaseBoxShapeUtil, HTMLContainer } from "tldraw";
+import { BaseBoxShapeUtil } from "tldraw";
 import { MarkupShape } from "./shapes";
 
 export class MarkupShapeUtil extends BaseBoxShapeUtil<MarkupShape> {

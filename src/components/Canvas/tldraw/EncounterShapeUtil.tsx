@@ -17,7 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn, getModifierKey } from "@/lib/utils";
+import { getModifierKey } from "@/lib/utils";
 
 import { useCanvasTldrawContext } from "./CanvasTldrawContext";
 import { EncounterShape } from "./shapes";

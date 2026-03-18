@@ -26,7 +26,7 @@ type PlayerTokenProps = {
   database: typeof db;
 };
 
-export const PlayerToken: React.FC<PlayerTokenProps> = ({
+export const PlayerToken = React.memo<PlayerTokenProps>(({
   token,
   player,
   isVisible,
@@ -73,38 +73,55 @@ export const PlayerToken: React.FC<PlayerTokenProps> = ({
     (e) => e.id === player.id && e.type === "player"
   ) ?? false;
 
+  const entity = React.useMemo(() => ({
+    id: player.id,
+    name: player.name,
+    icon: player.icon,
+    image: player.image,
+    effects: player.effects,
+  }), [player.id, player.name, player.icon, player.image, player.effects]);
+
+  const contextMenuContent = React.useMemo(() => (
+    <TokenContextMenu
+      entityName={player.name}
+      entityId={player.id}
+      entityType="player"
+      isInInitiative={isInInitiative}
+      isVisible={isVisible}
+      onSelect={() => onTokenSelect(token)}
+      onToggleVisibility={() => onToggleVisibility(token)}
+      onEdit={handleEdit}
+      onAddEffect={onOpenEffectsCatalog}
+      onHeal={onHealPlayer}
+      onDamage={onDamagePlayer}
+      onToggleInitiative={handleToggleInitiative}
+    />
+  ), [
+    player.name, 
+    player.id, 
+    isInInitiative, 
+    isVisible, 
+    token, 
+    onTokenSelect, 
+    onToggleVisibility, 
+    handleEdit, 
+    onOpenEffectsCatalog, 
+    onHealPlayer, 
+    onDamagePlayer, 
+    handleToggleInitiative
+  ]);
+
   return (
     <TokenNode
       token={token}
-      entity={{
-        id: player.id,
-        name: player.name,
-        icon: player.icon,
-        image: player.image,
-        effects: player.effects,
-      }}
+      entity={entity}
       borderColor="#10b981"
       isVisible={isVisible}
       isSelected={isSelected}
       isInteractive={isInteractive}
       onDragStart={onDragStart}
       onClick={onClick}
-      contextMenuContent={
-        <TokenContextMenu
-          entityName={player.name}
-          entityId={player.id}
-          entityType="player"
-          isInInitiative={isInInitiative}
-          isVisible={isVisible}
-          onSelect={() => onTokenSelect(token)}
-          onToggleVisibility={() => onToggleVisibility(token)}
-          onEdit={handleEdit}
-          onAddEffect={onOpenEffectsCatalog}
-          onHeal={onHealPlayer}
-          onDamage={onDamagePlayer}
-          onToggleInitiative={handleToggleInitiative}
-        />
-      }
+      contextMenuContent={contextMenuContent}
     />
   );
-};
+});

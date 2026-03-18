@@ -1,7 +1,8 @@
-import { Effect } from "@/types/effect";
 import { DBImmunity } from "@/types/immunitiy";
 import { Player, TCreatePlayer } from "@/types/player";
 import { DBResistance } from "@/types/resistances";
+import { Effect } from "@/types/effect";
+import { MarkupElement } from "@/types/markup";
 
 const players: Player[] = [
   {
@@ -642,6 +643,32 @@ export const db = {
     update: async (log: any) => {
       console.log("STORYBOOK MOCK: update log", log);
       return Promise.resolve(log);
+    },
+  },
+  markup: {
+    getAll: async (): Promise<MarkupElement[]> => {
+      console.log("STORYBOOK MOCK: getAll markup");
+      return Promise.resolve([]);
+    },
+    getById: async (id: number): Promise<MarkupElement> => {
+      console.log("STORYBOOK MOCK: getById markup", id);
+      return Promise.resolve({ id, x: 0, y: 0, width: 100, height: 100, rotation: 0, color: "#ff0000", chapter: 1 });
+    },
+    getByChapter: async (chapterId: number): Promise<MarkupElement[]> => {
+      console.log("STORYBOOK MOCK: getByChapter markup", chapterId);
+      return Promise.resolve([]);
+    },
+    create: async (markup: Omit<MarkupElement, "id">): Promise<MarkupElement> => {
+      console.log("STORYBOOK MOCK: create markup", markup);
+      return Promise.resolve({ ...markup, id: Math.random() });
+    },
+    update: async (markup: MarkupElement): Promise<MarkupElement> => {
+      console.log("STORYBOOK MOCK: update markup", markup);
+      return Promise.resolve(markup);
+    },
+    delete: async (id: number): Promise<any> => {
+      console.log("STORYBOOK MOCK: delete markup", id);
+      return Promise.resolve({ id } as any);
     },
   },
   backup: {

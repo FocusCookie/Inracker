@@ -58,6 +58,7 @@ export function useTldrawSync({
     Map<TLShapeId, { state: ShapeState; timestamp: number }>
   >(new Map());
 
+  // Handle updates FROM React TO Tldraw
   useEffect(() => {
     if (!editor) return;
 
@@ -70,12 +71,13 @@ export function useTldrawSync({
     const shapesToCreate: any[] = [];
     const shapesToUpdate: any[] = [];
 
+    const now = Date.now();
+
     for (const element of elements) {
       const shapeId = createShapeId(`encounter-${element.id}`);
       nextElementMap.set(shapeId, element);
 
       const recentMove = recentLocalMovesRef.current.get(shapeId);
-      const now = Date.now();
       const recentState =
         recentMove && now - recentMove.timestamp < 800
           ? recentMove.state
@@ -93,28 +95,44 @@ export function useTldrawSync({
         recentLocalMovesRef.current.delete(shapeId);
       }
 
-      const shape = {
-        id: shapeId,
-        type: ENCOUNTER_TYPE,
-        x: recentState ? recentState.x : element.x,
-        y: recentState ? recentState.y : element.y,
-        rotation: recentState ? recentState.rotation : (element.rotation ?? 0),
-        props: {
-          w: recentState ? recentState.w : element.width,
-          h: recentState ? recentState.h : element.height,
-          color: element.color,
-          icon: element.icon,
-          name: element.name ?? "",
-          encounterId: element.id,
-          completed: element.completed ?? false,
-          isCombatActive: element.isCombatActive ?? false,
-        },
-      };
+      const x = recentState ? recentState.x : element.x;
+      const y = recentState ? recentState.y : element.y;
+      const w = recentState ? recentState.w : element.width;
+      const h = recentState ? recentState.h : element.height;
+      const rotation = recentState ? recentState.rotation : (element.rotation ?? 0);
 
-      if (editor.getShape(shapeId)) {
-        shapesToUpdate.push(shape);
-      } else {
-        shapesToCreate.push(shape);
+      const existingShape = editor.getShape(shapeId) as any;
+      const isDifferent = !existingShape || 
+          existingShape.x !== x || 
+          existingShape.y !== y || 
+          existingShape.rotation !== rotation ||
+          existingShape.props.w !== w ||
+          existingShape.props.h !== h ||
+          existingShape.props.color !== element.color ||
+          existingShape.props.name !== (element.name ?? "") ||
+          existingShape.props.completed !== (element.completed ?? false) ||
+          existingShape.props.isCombatActive !== (element.isCombatActive ?? false);
+
+      if (isDifferent) {
+        const shape = {
+          id: shapeId,
+          type: ENCOUNTER_TYPE,
+          x,
+          y,
+          rotation,
+          props: {
+            w,
+            h,
+            color: element.color,
+            icon: element.icon,
+            name: element.name ?? "",
+            encounterId: element.id,
+            completed: element.completed ?? false,
+            isCombatActive: element.isCombatActive ?? false,
+          },
+        };
+        if (existingShape) shapesToUpdate.push(shape);
+        else shapesToCreate.push(shape);
       }
     }
 
@@ -123,7 +141,6 @@ export function useTldrawSync({
       nextTokenMap.set(shapeId, token);
 
       const recentMove = recentLocalMovesRef.current.get(shapeId);
-      const now = Date.now();
       const recentState =
         recentMove && now - recentMove.timestamp < 800
           ? recentMove.state
@@ -139,27 +156,38 @@ export function useTldrawSync({
         recentLocalMovesRef.current.delete(shapeId);
       }
 
-      const shape = {
-        id: shapeId,
-        type: TOKEN_TYPE,
-        x: recentState ? recentState.x : token.coordinates.x,
-        y: recentState ? recentState.y : token.coordinates.y,
-        rotation: recentState
+      const x = recentState ? recentState.x : token.coordinates.x;
+      const y = recentState ? recentState.y : token.coordinates.y;
+      const rotation = recentState
           ? recentState.rotation
-          : (token.coordinates.rotation ?? 0),
-        props: {
-          w: 100,
-          h: 100,
-          tokenId: token.id,
-          entityId: token.entity,
-          tokenType: token.type,
-        },
-      };
+          : (token.coordinates.rotation ?? 0);
 
-      if (editor.getShape(shapeId)) {
-        shapesToUpdate.push(shape);
-      } else {
-        shapesToCreate.push(shape);
+      const existingShape = editor.getShape(shapeId) as any;
+      const isDifferent = !existingShape || 
+          existingShape.x !== x || 
+          existingShape.y !== y || 
+          existingShape.rotation !== rotation ||
+          existingShape.props.tokenId !== token.id ||
+          existingShape.props.entityId !== token.entity ||
+          existingShape.props.tokenType !== token.type;
+
+      if (isDifferent) {
+        const shape = {
+          id: shapeId,
+          type: TOKEN_TYPE,
+          x,
+          y,
+          rotation,
+          props: {
+            w: 100,
+            h: 100,
+            tokenId: token.id,
+            entityId: token.entity,
+            tokenType: token.type,
+          },
+        };
+        if (existingShape) shapesToUpdate.push(shape);
+        else shapesToCreate.push(shape);
       }
     }
 
@@ -168,7 +196,6 @@ export function useTldrawSync({
       nextMarkupMap.set(shapeId, m);
 
       const recentMove = recentLocalMovesRef.current.get(shapeId);
-      const now = Date.now();
       const recentState =
         recentMove && now - recentMove.timestamp < 800
           ? recentMove.state
@@ -186,52 +213,72 @@ export function useTldrawSync({
         recentLocalMovesRef.current.delete(shapeId);
       }
 
-      const shape = {
-        id: shapeId,
-        type: MARKUP_TYPE,
-        x: recentState ? recentState.x : m.x,
-        y: recentState ? recentState.y : m.y,
-        rotation: recentState ? recentState.rotation : m.rotation,
-        props: {
-          w: recentState ? recentState.w : m.width,
-          h: recentState ? recentState.h : m.height,
-          color: m.color,
-          markupId: m.id,
-        },
-      };
+      const x = recentState ? recentState.x : m.x;
+      const y = recentState ? recentState.y : m.y;
+      const w = recentState ? recentState.w : m.width;
+      const h = recentState ? recentState.h : m.height;
+      const rotation = recentState ? recentState.rotation : m.rotation;
 
-      if (editor.getShape(shapeId)) {
-        shapesToUpdate.push(shape);
-      } else {
-        shapesToCreate.push(shape);
+      const existingShape = editor.getShape(shapeId) as any;
+      const isDifferent = !existingShape || 
+          existingShape.x !== x || 
+          existingShape.y !== y || 
+          existingShape.rotation !== rotation ||
+          existingShape.props.w !== w ||
+          existingShape.props.h !== h ||
+          existingShape.props.color !== m.color;
+
+      if (isDifferent) {
+        const shape = {
+          id: shapeId,
+          type: MARKUP_TYPE,
+          x,
+          y,
+          rotation,
+          props: {
+            w,
+            h,
+            color: m.color,
+            markupId: m.id,
+          },
+        };
+        if (existingShape) shapesToUpdate.push(shape);
+        else shapesToCreate.push(shape);
       }
     }
 
     const temporaryShapeId = createShapeId("encounter-temporary");
     if (temporaryElement) {
-      const temporaryShape = {
-        id: temporaryShapeId,
-        type: ENCOUNTER_TYPE,
-        x: temporaryElement.x,
-        y: temporaryElement.y,
-        rotation: temporaryElement.rotation ?? 0,
-        props: {
-          w: temporaryElement.width,
-          h: temporaryElement.height,
-          color: temporaryElement.color,
-          icon: temporaryElement.icon,
-          name: temporaryElement.name ?? "",
-          encounterId: "temporary",
-          completed: temporaryElement.completed ?? false,
-          isCombatActive: temporaryElement.isCombatActive ?? false,
-        },
-        isLocked: true,
-      };
+      const existingShape = editor.getShape(temporaryShapeId) as any;
+      const isDifferent = !existingShape || 
+          existingShape.x !== temporaryElement.x || 
+          existingShape.y !== temporaryElement.y || 
+          existingShape.rotation !== (temporaryElement.rotation ?? 0) ||
+          existingShape.props.w !== temporaryElement.width ||
+          existingShape.props.h !== temporaryElement.height ||
+          existingShape.props.color !== temporaryElement.color;
 
-      if (editor.getShape(temporaryShapeId)) {
-        shapesToUpdate.push(temporaryShape);
-      } else {
-        shapesToCreate.push(temporaryShape);
+      if (isDifferent) {
+        const temporaryShape = {
+          id: temporaryShapeId,
+          type: ENCOUNTER_TYPE,
+          x: temporaryElement.x,
+          y: temporaryElement.y,
+          rotation: temporaryElement.rotation ?? 0,
+          props: {
+            w: temporaryElement.width,
+            h: temporaryElement.height,
+            color: temporaryElement.color,
+            icon: temporaryElement.icon,
+            name: temporaryElement.name ?? "",
+            encounterId: "temporary",
+            completed: temporaryElement.completed ?? false,
+            isCombatActive: temporaryElement.isCombatActive ?? false,
+          },
+          isLocked: true,
+        };
+        if (existingShape) shapesToUpdate.push(temporaryShape);
+        else shapesToCreate.push(temporaryShape);
       }
     }
 
@@ -263,7 +310,6 @@ export function useTldrawSync({
       editor.updateShapes(shapesToUpdate);
     }
 
-    // Use mergeRemoteChanges for deletions to bypass tldraw's undo stack
     if (idsToRemove.length > 0) {
       editor.store.mergeRemoteChanges(() => {
         editor.store.remove(idsToRemove);
@@ -306,9 +352,7 @@ export function useTldrawSync({
     }
     shapeStateRef.current = seededState;
 
-    setTimeout(() => {
-      isSyncingRef.current = false;
-    }, 0);
+    isSyncingRef.current = false;
   }, [
     editor,
     elements,
@@ -318,18 +362,35 @@ export function useTldrawSync({
     backgroundShapeId,
   ]);
 
+  // Handle updates FROM Tldraw TO React
   useEffect(() => {
     if (!editor) return;
 
-    const unsubscribe = editor.store.listen(() => {
+    const unsubscribe = editor.store.listen((event) => {
       if (isSyncingRef.current) return;
 
-      const nextState = new Map<TLShapeId, ShapeState>();
-      const shapes = editor.getCurrentPageShapes();
+      const { updated, added, removed } = event.changes;
+
+      // Skip if no relevant shapes were affected (e.g. only camera changed)
+      const hasShapeChanges =
+        Object.values(added).some((s) => s.typeName === "shape") ||
+        Object.values(removed).some((s) => s.typeName === "shape") ||
+        Object.values(updated).some(([_from, to]) => to.typeName === "shape");
+
+      if (!hasShapeChanges) return;
 
       const isDragging = editor.inputs.getIsDragging();
 
-      for (const shape of shapes) {
+      // Only process changed shapes for better performance
+      const changedShapeIds = new Set<TLShapeId>([
+        ...Object.keys(added),
+        ...Object.keys(updated),
+      ] as TLShapeId[]);
+
+      for (const id of changedShapeIds) {
+        const shape = editor.getShape(id);
+        if (!shape) continue;
+
         if (shape.type === ENCOUNTER_TYPE) {
           const castShape = shape as any;
           const prev = shapeStateRef.current.get(shape.id);
@@ -340,7 +401,6 @@ export function useTldrawSync({
             h: castShape.props.h,
             rotation: castShape.rotation,
           };
-          nextState.set(shape.id, current);
 
           if (
             !prev ||
@@ -350,6 +410,7 @@ export function useTldrawSync({
             prev.h !== current.h ||
             prev.rotation !== current.rotation
           ) {
+            shapeStateRef.current.set(shape.id, current);
             if (isDragging) {
               pendingElementMovesRef.current.set(shape.id, current);
             } else {
@@ -366,9 +427,7 @@ export function useTldrawSync({
               }
             }
           }
-        }
-
-        if (shape.type === TOKEN_TYPE) {
+        } else if (shape.type === TOKEN_TYPE) {
           const castShape = shape as any;
           const prev = shapeStateRef.current.get(shape.id);
           const current = {
@@ -378,7 +437,6 @@ export function useTldrawSync({
             h: castShape.props.h,
             rotation: castShape.rotation,
           };
-          nextState.set(shape.id, current);
 
           if (
             !prev ||
@@ -386,6 +444,7 @@ export function useTldrawSync({
             prev.y !== current.y ||
             prev.rotation !== current.rotation
           ) {
+            shapeStateRef.current.set(shape.id, current);
             if (isDragging) {
               pendingTokenMovesRef.current.set(shape.id, current);
             } else {
@@ -402,9 +461,7 @@ export function useTldrawSync({
               }
             }
           }
-        }
-
-        if (shape.type === MARKUP_TYPE) {
+        } else if (shape.type === MARKUP_TYPE) {
           const castShape = shape as any;
           const prev = shapeStateRef.current.get(shape.id);
           const current = {
@@ -414,7 +471,6 @@ export function useTldrawSync({
             h: castShape.props.h,
             rotation: castShape.rotation,
           };
-          nextState.set(shape.id, current);
 
           if (
             !prev ||
@@ -424,6 +480,7 @@ export function useTldrawSync({
             prev.h !== current.h ||
             prev.rotation !== current.rotation
           ) {
+            shapeStateRef.current.set(shape.id, current);
             if (isDragging) {
               pendingMarkupMovesRef.current.set(shape.id, current);
             } else {
@@ -441,6 +498,11 @@ export function useTldrawSync({
             }
           }
         }
+      }
+
+      // Handle deletions
+      for (const id of Object.keys(removed) as TLShapeId[]) {
+        shapeStateRef.current.delete(id);
       }
 
       if (!isDragging && wasDraggingRef.current) {
@@ -503,24 +565,10 @@ export function useTldrawSync({
       }
 
       wasDraggingRef.current = isDragging;
-
-      shapeStateRef.current = nextState;
-
-      if (backgroundShapeId) {
-        editor.sendToBack([backgroundShapeId]);
-        const foregroundIds = [
-          ...elementByShapeIdRef.current.keys(),
-          ...tokenByShapeIdRef.current.keys(),
-          ...markupByShapeIdRef.current.keys(),
-        ];
-        if (foregroundIds.length > 0) {
-          editor.bringToFront(foregroundIds);
-        }
-      }
     });
 
     return () => {
       unsubscribe();
     };
-  }, [editor, onElementMove, onTokenMove, onMarkupMove, backgroundShapeId]);
+  }, [editor, onElementMove, onTokenMove, onMarkupMove]);
 }

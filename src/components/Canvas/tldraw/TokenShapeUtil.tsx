@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { BaseBoxShapeUtil, HTMLContainer, useEditor, useValue } from "tldraw";
 import { TokenShape } from "./shapes";
 import { useCanvasTldrawContext } from "./CanvasTldrawContext";
@@ -24,7 +25,7 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
 
     const isLowDetail = useValue(
       "isLowDetail",
-      () => editor.getEfficientZoomLevel() < 0.25,
+      () => editor.getEfficientZoomLevel() < 0.4, // Increased threshold for better performance
       [editor],
     );
 
@@ -65,8 +66,10 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
 
     const entity = (shape.props.tokenType === "player" ? player : opponent)!;
     const isVisible = tokenVisibility[token.id.toString()] ?? true;
+    const isSelected = selectedToken?.id === token.id;
 
-    if (isLowDetail) {
+    // Fast path for low detail or non-selected tokens when zoomed out a bit
+    if (isLowDetail && !isSelected) {
       return (
         <div className="h-full w-full pointer-events-none flex items-center justify-center">
           <svg width={shape.props.w} height={shape.props.h} viewBox="0 0 100 100">
@@ -74,34 +77,54 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
               cx={50}
               cy={50}
               r={45}
-              fill={shape.props.tokenType === "player" ? "#3b82f6" : "#ef4444"}
+              fill={shape.props.tokenType === "player" ? "#10b981" : "#ef4444"}
               stroke="white"
               strokeWidth={4}
               opacity={isVisible ? 0.8 : 0.3}
             />
-            <text
-              x={50}
-              y={55}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fill="white"
-              fontSize={40}
-              fontWeight="bold"
-              style={{ userSelect: "none" }}
-            >
-              {entity.icon || entity.name.charAt(0).toUpperCase()}
-            </text>
+            {entity.image ? (
+               <defs>
+                 <clipPath id={`clip-${shape.id}`}>
+                   <circle cx="50" cy="50" r="40" />
+                 </clipPath>
+               </defs>
+            ) : null}
+            {entity.image ? (
+              <image
+                href={entity.image}
+                width="80"
+                height="80"
+                x="10"
+                y="10"
+                clipPath={`url(#clip-${shape.id})`}
+                opacity={isVisible ? 1 : 0.4}
+              />
+            ) : (
+              <text
+                x={50}
+                y={55}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill="white"
+                fontSize={40}
+                fontWeight="bold"
+                style={{ userSelect: "none" }}
+              >
+                {entity.icon || entity.name.charAt(0).toUpperCase()}
+              </text>
+            )}
           </svg>
         </div>
       );
     }
 
-    const tokenWithLocalCoords = {
-      ...token,
-      coordinates: { x: 0, y: 0 },
-    };
-
-    const isSelected = selectedToken?.id === token.id;
+    const tokenWithLocalCoords = useMemo(
+      () => ({
+        ...token,
+        coordinates: { x: 0, y: 0 },
+      }),
+      [token],
+    );
 
     const handleToggleVisibility = () => {
       setTokenVisibility(token.id, !isVisible);

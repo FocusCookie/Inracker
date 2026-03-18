@@ -177,17 +177,19 @@ export default function Canvas({
   };
 
   useEffect(() => {
-    const tokensToHide: number[] = [];
+    const hiddenOpponentIds = new Set<number>();
     elements.forEach((element) => {
       if (element.completed && element.opponents) {
-        const opponentIds = new Set(element.opponents);
-        tokens.forEach((token) => {
-          if (token.type === "opponent" && opponentIds.has(token.entity)) {
-            if (tokenVisibility[token.id.toString()] !== false) {
-              tokensToHide.push(token.id);
-            }
-          }
-        });
+        element.opponents.forEach((id) => hiddenOpponentIds.add(id));
+      }
+    });
+
+    const tokensToHide: number[] = [];
+    tokens.forEach((token) => {
+      if (token.type === "opponent" && hiddenOpponentIds.has(token.entity)) {
+        if (tokenVisibility[token.id.toString()] !== false) {
+          tokensToHide.push(token.id);
+        }
       }
     });
 
@@ -484,28 +486,48 @@ export default function Canvas({
     };
   }, [editor, backgroundShapeId]);
 
+  const contextValue = useMemo(
+    () => ({
+      database,
+      playersById,
+      opponentsById: opponentsById as Map<number, EncounterOpponent>,
+      elementsByShapeId,
+      tokensById,
+      selectedToken,
+      tokenVisibility,
+      setTokenVisibility,
+      onTokenSelect,
+      onOpenEffectsCatalog,
+      onHealPlayer,
+      onDamagePlayer,
+      onHealOpponent,
+      onDamageOpponent,
+      onRemoveFromInitiative,
+      onAddToInitiative,
+      initiativeEntityIds,
+    }),
+    [
+      database,
+      playersById,
+      opponentsById,
+      elementsByShapeId,
+      tokensById,
+      selectedToken,
+      tokenVisibility,
+      onTokenSelect,
+      onOpenEffectsCatalog,
+      onHealPlayer,
+      onDamagePlayer,
+      onHealOpponent,
+      onDamageOpponent,
+      onRemoveFromInitiative,
+      onAddToInitiative,
+      initiativeEntityIds,
+    ],
+  );
+
   return (
-    <CanvasTldrawProvider
-      value={{
-        database,
-        playersById,
-        opponentsById: opponentsById as Map<number, EncounterOpponent>,
-        elementsByShapeId,
-        tokensById,
-        selectedToken,
-        tokenVisibility,
-        setTokenVisibility,
-        onTokenSelect,
-        onOpenEffectsCatalog,
-        onHealPlayer,
-        onDamagePlayer,
-        onHealOpponent,
-        onDamageOpponent,
-        onRemoveFromInitiative,
-        onAddToInitiative,
-        initiativeEntityIds,
-      }}
-    >
+    <CanvasTldrawProvider value={contextValue}>
       <div className="relative h-full w-full">
         <Tldraw
           shapeUtils={shapeUtils}

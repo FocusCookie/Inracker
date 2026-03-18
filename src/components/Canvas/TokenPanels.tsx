@@ -37,6 +37,22 @@ const TokenPanels: React.FC<TokenPanelsProps> = ({
 }) => {
   const { t } = useTranslation("ComponentCanvas");
 
+  const playerTokens = React.useMemo(() => {
+    const map = new Map<number, Token>();
+    tokens.forEach((t) => {
+      if (t.type === "player") map.set(t.entity, t);
+    });
+    return map;
+  }, [tokens]);
+
+  const opponentTokens = React.useMemo(() => {
+    const map = new Map<number, Token>();
+    tokens.forEach((t) => {
+      if (t.type === "opponent") map.set(t.entity, t);
+    });
+    return map;
+  }, [tokens]);
+
   return (
     <div className="absolute top-4 right-4 flex flex-col gap-4">
       {players.length > 0 && (
@@ -62,12 +78,12 @@ const TokenPanels: React.FC<TokenPanelsProps> = ({
           {isPlayersPanelOpen && (
             <div className="flex flex-col gap-2">
               {players.map((player) => {
-                const token = tokens.find(
-                  (t) => t.type === "player" && t.entity === player.id,
-                );
+                const token = playerTokens.get(player.id);
                 if (!token) return null;
                 return (
-                  <TooltipProvider key={`player-${player.id}-token-state-provider`}>
+                  <TooltipProvider
+                    key={`player-${player.id}-token-state-provider`}
+                  >
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
@@ -127,13 +143,12 @@ const TokenPanels: React.FC<TokenPanelsProps> = ({
             {isOpponentsPanelOpen && (
               <div className="flex flex-col gap-2">
                 {opponents.map((opponent) => {
-                  const token = tokens.find(
-                    (t) =>
-                      t.type === "opponent" && t.entity === opponent.id,
-                  );
+                  const token = opponentTokens.get(opponent.id);
                   if (!token) return null;
                   return (
-                    <TooltipProvider key={`opponent-${opponent.id}-token-state-provider`}>
+                    <TooltipProvider
+                      key={`opponent-${opponent.id}-token-state-provider`}
+                    >
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button
