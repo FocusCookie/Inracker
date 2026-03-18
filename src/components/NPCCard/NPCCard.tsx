@@ -27,12 +27,6 @@ import { useTranslation } from "react-i18next";
 import { DBEffect, Effect } from "@/types/effect";
 import EffectCard from "../EffectCard/EffectCard";
 import { EncounterNPC } from "@/types/npcs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
 
 type Props = {
   npc: EncounterNPC;
@@ -81,10 +75,10 @@ function NPCCard({
   const { t } = useTranslation("ComponentNPCCard");
 
   const positiveEffects = npc.effects.filter(
-    (effect) => effect.type === "positive",
+    (effect: any) => effect.type === "positive",
   );
   const negativeEffects = npc.effects.filter(
-    (effect) => effect.type === "negative",
+    (effect: any) => effect.type === "negative",
   );
 
   function handleRemoveNPC() {
@@ -227,7 +221,7 @@ function NPCCard({
                 {/* Row 2: Labels */}
                 <div className="mt-1 flex w-full max-w-full min-w-0 items-center gap-4 overflow-hidden">
                   <div className="flex flex-wrap gap-1 overflow-hidden">
-                    {npc.labels.map((label) => (
+                    {npc.labels.map((label: any) => (
                       <Badge key={label} variant="outline" className="text-xs">
                         {label}
                       </Badge>
@@ -253,7 +247,7 @@ function NPCCard({
                 }
               >
                 <div className="flex w-full flex-col gap-4">
-                  {npc.immunities.map((immunity) => (
+                  {npc.immunities.map((immunity: any) => (
                     <ImmunityCard
                       key={`npc-${npc.id}-immunity-${immunity.id}`}
                       immunity={immunity}
@@ -280,7 +274,7 @@ function NPCCard({
                 }
               >
                 <div className="flex w-full flex-col gap-4">
-                  {npc.resistances.map((resistance) => (
+                  {npc.resistances.map((resistance: any) => (
                     <ResistanceCard
                       key={`npc-${npc.id}-resistances-${resistance.id}`}
                       resistance={resistance}
@@ -307,7 +301,7 @@ function NPCCard({
                 }
               >
                 <div className="flex w-full flex-col gap-4">
-                  {npc.weaknesses.map((weakness) => (
+                  {npc.weaknesses.map((weakness: any) => (
                     <WeaknessCard
                       key={`npc-${npc.id}-weakness-${weakness.id}`}
                       weakness={weakness}

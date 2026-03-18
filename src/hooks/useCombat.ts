@@ -53,7 +53,7 @@ export function useCombatActions(chapterId: number) {
         name: string;
         initiative: number;
         entityId: number;
-        type: "player" | "opponent";
+        type: "player" | "opponent" | "npc";
       }[];
     }) =>
       Database.combat.create(
@@ -81,7 +81,7 @@ export function useCombatActions(chapterId: number) {
       name: string;
       initiative: number;
       entityId?: number;
-      entityType?: "player" | "opponent";
+      entityType?: "player" | "opponent" | "npc";
     }) => Database.combat.addParticipant(data),
     onSuccess: invalidate,
   });

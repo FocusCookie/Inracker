@@ -49,18 +49,18 @@ type Props = {
   onMarkupDuplicate: (markupId: number) => void;
   onRemoveFromInitiative?: (
     entityId: number,
-    type: "player" | "opponent",
+    type: "player" | "opponent" | "npc",
   ) => void;
   onAddToInitiative?: (
     entityId: number,
-    type: "player" | "opponent",
+    type: "player" | "opponent" | "npc",
     name: string,
   ) => void;
   onOpenEffectsCatalog?: (
     entityId: number,
-    type: "player" | "opponent",
+    type: "player" | "opponent" | "npc",
   ) => void;
-  initiativeEntityIds?: { id: number; type: "player" | "opponent" }[];
+  initiativeEntityIds?: { id: number; type: "player" | "opponent" | "npc" }[];
   onHealPlayer?: (playerId: number) => void;
   onDamagePlayer?: (playerId: number) => void;
   onHealOpponent?: (opponentId: number) => void;
@@ -323,20 +323,10 @@ export default function Canvas({
   useEffect(() => {
     if (!editor) return;
 
-    const unsubscribe = editor.store.listen((event) => {
+    const unsubscribe = editor.store.listen((_event) => {
       if (isSelectionSyncingRef.current) return;
 
-      // Only update selection state if selection actually changed
-      const selectionChanged =
-        Object.values(event.changes.added).some(
-          (record) => record.typeName === "instance_presence",
-        ) ||
-        Object.values(event.changes.updated).some(
-          ([_from, to]) => to.typeName === "instance",
-        );
-
-      // tldraw uses 'instance' records for selection among other things.
-      // A more direct way is to check if selected ids changed.
+      // Check if selection actually changed
       const currentSelectedIds = editor.getSelectedShapeIds();
       const hasSelectionChange =
         currentSelectedIds.length !== selectedShapeIds.length ||
@@ -507,12 +497,12 @@ export default function Canvas({
   useEffect(() => {
     if (!editor) return;
 
-    const unsubscribe = editor.store.listen((event) => {
+    const unsubscribe = editor.store.listen((_event) => {
       // Only process if shapes actually changed
       const hasShapeChanges =
-        Object.values(event.changes.added).some((s) => s.typeName === "shape") ||
-        Object.values(event.changes.removed).some((s) => s.typeName === "shape") ||
-        Object.values(event.changes.updated).some(([_from, to]) => to.typeName === "shape");
+        Object.values(_event.changes.added).some((s) => s.typeName === "shape") ||
+        Object.values(_event.changes.removed).some((s) => s.typeName === "shape") ||
+        Object.values(_event.changes.updated).some(([_from, to]) => to.typeName === "shape");
 
       if (!hasShapeChanges) return;
 

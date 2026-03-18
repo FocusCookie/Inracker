@@ -34,7 +34,6 @@ export const PlayerToken = React.memo<PlayerTokenProps>(({
   isInteractive,
   onDragStart,
   onClick,
-  onTokenSelect,
   onToggleVisibility,
   onOpenEffectsCatalog,
   onHealPlayer,

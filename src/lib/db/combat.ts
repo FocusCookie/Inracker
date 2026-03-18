@@ -18,7 +18,7 @@ export const createCombat = async (
     name: string;
     initiative: number;
     entityId?: number;
-    type?: "player" | "opponent";
+    type?: "player" | "opponent" | "npc";
   }[],
   encounterId?: number,
 ): Promise<string> => {
@@ -151,7 +151,11 @@ export const nextTurn = async (combatId: string) => {
 
         if (totalChange !== 0) {
           const table =
-            p.entity_type === "player" ? "players" : "encounter_opponents";
+            p.entity_type === "player"
+              ? "players"
+              : p.entity_type === "opponent"
+                ? "encounter_opponents"
+                : "encounter_npcs";
 
           const entityRes = await select<
             { health: number; max_health: number; name: string }[]
@@ -219,7 +223,11 @@ export const nextTurn = async (combatId: string) => {
 
         for (const expired of expiredEffects) {
           const table =
-            expired.entity_type === "player" ? "players" : "encounter_opponents";
+            expired.entity_type === "player"
+              ? "players"
+              : expired.entity_type === "opponent"
+                ? "encounter_opponents"
+                : "encounter_npcs";
 
           const entityRes = await select<{ effects: string }[]>(
             `SELECT effects FROM ${table} WHERE id = $1`,
@@ -394,7 +402,7 @@ export const addParticipant = async (data: {
   name: string;
   initiative: number;
   entityId?: number;
-  entityType?: "player" | "opponent";
+  entityType?: "player" | "opponent" | "npc";
 }) => {
   await execute(
     `INSERT INTO combat_participants 

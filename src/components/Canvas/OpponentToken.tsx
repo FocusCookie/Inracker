@@ -34,7 +34,6 @@ export const OpponentToken = React.memo<OpponentTokenProps>(({
   isInteractive,
   onDragStart,
   onClick,
-  onTokenSelect,
   onToggleVisibility,
   onOpenEffectsCatalog,
   onHealOpponent,

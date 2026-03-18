@@ -499,6 +499,36 @@ export const db = {
       return Promise.resolve({} as any);
     },
   },
+  encounterNPCs: {
+    getAllDetailed: async () => {
+      console.log("STORYBOOK MOCK: getAllDetailed encounterNPCs");
+      return Promise.resolve([]);
+    },
+    update: async (npc: any) => {
+      console.log("STORYBOOK MOCK: update encounterNPC", npc);
+      return Promise.resolve(npc);
+    },
+    delete: async (id: number) => {
+      console.log("STORYBOOK MOCK: delete encounterNPC", id);
+      return Promise.resolve({ id } as any);
+    },
+    create: async (npc: any) => {
+      console.log("STORYBOOK MOCK: create encounterNPC", npc);
+      return Promise.resolve({ ...npc, id: Math.random() });
+    },
+    createWithToken: async (npc: any, chapterId: number) => {
+      console.log("STORYBOOK MOCK: createWithToken encounterNPC", npc, chapterId);
+      return Promise.resolve({ ...npc, id: Math.random() });
+    },
+    addEffect: async (npcId: number, effectId: number) => {
+      console.log("STORYBOOK MOCK: addEffect to encounterNPC", npcId, effectId);
+      return Promise.resolve({} as any);
+    },
+    removeEffect: async (npcId: number, effectId: number) => {
+      console.log("STORYBOOK MOCK: removeEffect from encounterNPC", npcId, effectId);
+      return Promise.resolve({} as any);
+    },
+  },
   parties: {
     getAll: async () => {
       console.log("STORYBOOK MOCK: getAll parties");
@@ -560,6 +590,28 @@ export const db = {
     },
     delete: async (id: number) => {
       console.log("STORYBOOK MOCK: delete opponent", id);
+      return Promise.resolve({ id } as any);
+    },
+  },
+  npcs: {
+    getAll: async () => {
+      console.log("STORYBOOK MOCK: getAll npcs");
+      return Promise.resolve([]);
+    },
+    getAllDetailed: async () => {
+      console.log("STORYBOOK MOCK: getAllDetailed npcs");
+      return Promise.resolve([]);
+    },
+    create: async (npc: any) => {
+      console.log("STORYBOOK MOCK: create npc", npc);
+      return Promise.resolve({ ...npc, id: Math.random() });
+    },
+    update: async (npc: any) => {
+      console.log("STORYBOOK MOCK: update npc", npc);
+      return Promise.resolve(npc);
+    },
+    delete: async (id: number) => {
+      console.log("STORYBOOK MOCK: delete npc", id);
       return Promise.resolve({ id } as any);
     },
   },

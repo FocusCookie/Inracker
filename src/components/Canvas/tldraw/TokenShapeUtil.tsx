@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { BaseBoxShapeUtil, HTMLContainer, useEditor, useValue } from "tldraw";
+import { BaseBoxShapeUtil, HTMLContainer, useEditor } from "tldraw";
 import { TokenShape } from "./shapes";
 import { useCanvasTldrawContext } from "./CanvasTldrawContext";
 import { PlayerToken } from "../PlayerToken";
@@ -138,7 +138,7 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
     const opponent = opponentsById?.get(shape.props.entityId);
     const npc = npcsById?.get(shape.props.entityId);
 
-    const tokenType = shape.props.tokenType;
+    const tokenType = shape.props.tokenType as string;
     if (tokenType === "player" && !player) return null;
     if (tokenType === "opponent" && !opponent) return null;
     if (tokenType === "npc" && !npc) return null;

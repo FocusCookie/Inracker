@@ -75,7 +75,6 @@ import {
   useAddEffectToNPC,
   useRemoveEffectFromNPC,
 } from "@/hooks/useEncounterNPCs";
-import { useNPCs, useUpdateNPC } from "@/hooks/useNPCs";
 import { useRests } from "@/hooks/useRests";
 import { useCreateLog } from "@/hooks/useLogs";
 import {
@@ -185,7 +184,6 @@ function Play({
   const deleteEncounterNPCMutation = useDeleteEncounterNPC(database);
   const addEffectToNPCMutation = useAddEffectToNPC(database);
   const removeEffectFromNPCMutation = useRemoveEffectFromNPC(database);
-  const updateNPCMutation = useUpdateNPC(database);
 
   const playersRef = useRef(players);
   playersRef.current = players;
@@ -618,12 +616,12 @@ function Play({
 
   function handleOpenEffectsCatalog(
     entityId: number,
-    type: "player" | "opponent",
+    type: "player" | "opponent" | "npc",
   ) {
     if (type === "player") {
       const player = players.find((p) => p.id === entityId);
       if (player) handleEffectsCatalog(player);
-    } else {
+    } else if (type === "opponent") {
       const opponent = encounterOpponents.data?.find((o) => o.id === entityId);
       if (!opponent) return;
 
@@ -640,6 +638,28 @@ function Play({
 
           toast({
             title: `Added ${effect.icon} ${effect.name} to ${opponent.name}`,
+          });
+        },
+        onCancel: (reason) => {
+          console.log("Effect Catalog cancelled:", reason);
+        },
+      });
+    } else if (type === "npc") {
+      const npc = encounterNPCs.data?.find((n) => n.id === entityId);
+      if (!npc) return;
+
+      openOverlay("effect.catalog", {
+        database,
+        onSelect: async (effect) => {
+          await addEffectToNPCMutation.mutateAsync({
+            npcId: entityId,
+            effectId: effect.id,
+          });
+
+          queryClient.invalidateQueries({ queryKey: ["encounter-npcs"] });
+
+          toast({
+            title: `Added ${effect.icon} ${effect.name} to ${npc.name}`,
           });
         },
         onCancel: (reason) => {
@@ -794,7 +814,7 @@ function Play({
 
   function handleRemoveFromInitiative(
     entityId: number,
-    type: "player" | "opponent",
+    type: "player" | "opponent" | "npc",
   ) {
     if (!combatState) return;
     const participant = combatState.participants.find(
@@ -807,7 +827,7 @@ function Play({
 
   function handleAddToInitiative(
     entityId: number,
-    type: "player" | "opponent",
+    type: "player" | "opponent" | "npc",
     name: string,
   ) {
     if (!combatState) return;
@@ -826,9 +846,7 @@ function Play({
       .filter((p) => p.entityId !== null && p.entityType !== null)
       .map((p) => ({
         id: p.entityId as number,
-        type: (p.entityType === "player" ? "player" : "opponent") as
-          | "player"
-          | "opponent",
+        type: p.entityType as "player" | "opponent" | "npc",
       }));
   }, [combatState]);
 
@@ -1222,9 +1240,10 @@ function Play({
   function handleOpenEditNPC(npc: EncounterNPC) {
     openOverlay("encounter-npc.edit", {
       npc,
-      onEdit: (updatedNpc) =>
-        updateEncounterNPCMutation.mutateAsync(updatedNpc),
-      onDelete: (id) => deleteEncounterNPCMutation.mutateAsync(id),
+      onEdit: (updatedNpc) => updateEncounterNPCMutation.mutateAsync(updatedNpc),
+      onDelete: async (id) => {
+        await deleteEncounterNPCMutation.mutateAsync(id);
+      },
       onComplete: () => {
         queryClient.invalidateQueries({ queryKey: ["encounter-npcs"] });
         queryClient.invalidateQueries({ queryKey: ["tokens"] });

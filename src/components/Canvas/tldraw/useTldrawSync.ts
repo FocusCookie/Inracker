@@ -74,8 +74,7 @@ export function useTldrawSync({
     const now = Date.now();
 
     const isActuallyDragging = editor.inputs.getIsDragging();
-    const isSelectionDragging = editor.getInstanceState().isChangingStyle || 
-                               editor.getInstanceState().isDragging;
+    const isSelectionDragging = editor.getInstanceState().isChangingStyle;
 
     for (const element of elements) {
       const shapeId = createShapeId(`encounter-${element.id}`);
@@ -401,8 +400,7 @@ export function useTldrawSync({
 
       // Use a more specific check for drag operations
       const isActuallyDragging = editor.inputs.getIsDragging();
-      const isSelectionDragging = editor.getInstanceState().isChangingStyle || 
-                                 editor.getInstanceState().isDragging;
+      const isSelectionDragging = editor.getInstanceState().isChangingStyle;
 
       // Only process changed shapes for better performance
       const changedShapeIds = new Set<TLShapeId>([

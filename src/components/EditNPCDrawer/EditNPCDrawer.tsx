@@ -54,9 +54,9 @@ function EditNPCDrawer({
         icon: npc.icon,
         image: npc.image || "",
         labels: npc.labels,
-        immunities: npc.immunities.map((i) => i.id),
-        resistances: npc.resistances.map((r) => r.id),
-        weaknesses: npc.weaknesses.map((w) => w.id),
+        immunities: npc.immunities.map((i: any) => i.id),
+        resistances: npc.resistances.map((r: any) => r.id),
+        weaknesses: npc.weaknesses.map((w: any) => w.id),
       });
     }
   }, [npc, form]);

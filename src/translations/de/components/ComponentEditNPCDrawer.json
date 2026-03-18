@@ -3,6 +3,8 @@
   "descriptionText": "Bearbeite eine vorhandene NPC-Vorlage.",
   "cancel": "Abbrechen",
   "update": "Aktualisieren",
+  "create": "Erstellen",
+  "catalog": "Katalog",
   "minName": "Name muss mindestens 2 Zeichen lang sein.",
   "icon": "Symbol",
   "name": "Name",

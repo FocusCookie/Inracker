@@ -3,6 +3,7 @@
   "descriptionText": "Create a new NPC blueprint.",
   "cancel": "Cancel",
   "create": "Create",
+  "catalog": "Catalog",
   "name": "Name",
   "icon": "Icon",
   "level": "Level",

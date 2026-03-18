@@ -117,7 +117,7 @@ export const NPCToken: React.FC<Props> = memo(({
       isVisible={isVisible}
       isSelected={isSelected}
       isInteractive={isInteractive}
-      onDragStart={onDragStart}
+      onDragStart={(_e, t) => onDragStart(t)}
       onClick={onClick}
       contextMenuContent={contextMenuContent}
     />
