@@ -329,7 +329,7 @@ export const mergeAllData = async (data: any) => {
       "parties", "players", "effects", "immunities", "resistances",
       "chapters", "encounters", "opponents", "tokens",
       "encounter_opponents", "combats", "combat_participants",
-      "combat_effects", "active_effects", "settings", "logs"
+      "combat_effects", "active_effects", "settings", "logs", "weaknesses"
     ];
 
   // Helper to insert rows

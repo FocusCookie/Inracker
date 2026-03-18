@@ -40,6 +40,8 @@
   "itemsSelected": "{{count}} Einträge ausgewählt",
   "searchPlaceholder": "Suchen...",
   "cancel": "Abbruch",
-  "backupFolderNotice": "Wichtig: Der Export erstellt einen Ordner namens '{{folderName}}'. Beim Import muss dieser Ordner im ausgewählten Verzeichnis vorhanden sein, damit die Daten erkannt werden.",
-  "folderNotFound": "Der erforderliche Ordner '{{folderName}}' wurde im ausgewählten Verzeichnis nicht gefunden."
+  "backupFolderNotice": "Wichtig: Der Export erstellt die Ordner 'data', 'images' und 'audio' direkt im ausgewählten Verzeichnis. Diese müssen beim Import vorhanden sein.",
+  "folderNotFound": "Der erforderliche Ordner '{{folderName}}' wurde im ausgewählten Verzeichnis nicht gefunden.",
+  "noDataFound": "Keine Backup-Daten im ausgewählten Ordner gefunden.",
+  "invalidBackup": "Der ausgewählte Ordner scheint kein gültiges Backup-Verzeichnis zu sein."
 }
