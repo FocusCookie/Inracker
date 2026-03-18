@@ -15,6 +15,7 @@ export const createOpponentSchema = z.object({
   resistances: z.array(z.coerce.number()),
   immunities: z.array(z.coerce.number()),
   weaknesses: z.array(z.coerce.number()),
+  effects: z.array(z.coerce.number()),
 });
 
 export type TCreateOpponent = z.infer<typeof createOpponentSchema>;

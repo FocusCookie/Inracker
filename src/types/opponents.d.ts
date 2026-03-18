@@ -5,7 +5,7 @@ import { DBResistance, Resistance } from "./resistances";
 import { DBWeakness, Weakness } from "./weakness";
 import { Skills } from "./skills";
 import { Prettify } from "./utils";
-import { CanvasElement } from "../components/Canvas/Canvas";
+import { CanvasElement } from "./canvas";
 
 export type DBOpponent = {
   readonly id: number;

@@ -1,3 +1,4 @@
+import React, { memo } from "react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -6,7 +7,7 @@ import {
 } from "@/components/ui/context-menu";
 import { CheckIcon, ExternalLinkIcon } from "@radix-ui/react-icons";
 import { useTranslation } from "react-i18next";
-import { ClickableCanvasElement } from "./Canvas";
+import { CanvasElementWithId } from "./types";
 import { Button } from "../ui/button";
 import { cn, getModifierKey } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -19,7 +20,7 @@ import {
 import { Kbd } from "../ui/kbd";
 
 type Props = {
-  element: ClickableCanvasElement & { id: any };
+  element: CanvasElementWithId;
   isSelected: boolean;
   onEdit: () => void;
   onClick: () => void;
@@ -31,7 +32,7 @@ type Props = {
   onSelect: () => void;
 };
 
-export function CanvasElementNode({
+function CanvasElementNode({
   element,
   isSelected,
   onEdit,
@@ -66,6 +67,9 @@ export function CanvasElementNode({
               e.preventDefault();
               onSelect();
             }
+          }}
+          onContextMenu={(e) => {
+            e.preventDefault();
           }}
         >
           {element.isCombatActive && (
@@ -178,7 +182,7 @@ export function CanvasElementNode({
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-10 w-10 bg-black text-white hover:bg-black/80 hover:text-white pointer-events-auto"
+                        className="pointer-events-auto h-10 w-10 bg-black text-white hover:bg-black/80 hover:text-white"
                         onClick={(e) => {
                           e.stopPropagation();
                           onClick();
@@ -187,7 +191,10 @@ export function CanvasElementNode({
                         <ExternalLinkIcon className="h-6 w-6" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent className="flex items-center gap-2" side="right">
+                    <TooltipContent
+                      className="flex items-center gap-2"
+                      side="right"
+                    >
                       <p>{t("select")}</p>
                       <div className="flex gap-0.5">
                         <Kbd>{getModifierKey()}</Kbd>
@@ -316,3 +323,5 @@ export function CanvasElementNode({
     </ContextMenu>
   );
 }
+
+export default memo(CanvasElementNode);

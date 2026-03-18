@@ -657,6 +657,14 @@ export const db = {
       console.log("STORYBOOK MOCK: mergeAll");
       return Promise.resolve({});
     },
+    exportCategory: async (category: string, ids?: (number | string)[]) => {
+      console.log("STORYBOOK MOCK: exportCategory", category, ids);
+      return Promise.resolve({});
+    },
+    importCategory: async (data: any, mode: "restore" | "merge") => {
+      console.log("STORYBOOK MOCK: importCategory", data, mode);
+      return Promise.resolve({});
+    },
   },
   rests: {
     short: async () => {

@@ -109,7 +109,7 @@ const PlayLayout: PlayLayoutCompound = ({
 
           <div className="absolute top-4 right-18">{restChild}</div>
 
-          <div className="absolute bottom-4 left-48">{sessionLogChild}</div>
+          <div className="absolute bottom-4 left-56">{sessionLogChild}</div>
 
           <div className="absolute top-4 left-1/2 -translate-x-1/2 transform">
             {initiativeChild}
@@ -129,7 +129,7 @@ const PlayLayout: PlayLayoutCompound = ({
         <motion.aside
           key="aside"
           className={cn(
-            "absolute top-0 bottom-0 left-0 w-24 rounded-md bg-white p-4 pr-0 overflow-hidden",
+            "absolute top-0 bottom-0 left-0 w-24 overflow-hidden rounded-md bg-white p-4 pr-0",
             isAsideFloating && "shadow-2xl",
           )}
           animate={{
@@ -138,10 +138,10 @@ const PlayLayout: PlayLayoutCompound = ({
             display: isEncounterOpen ? "none" : "block",
           }}
         >
-          <div className="flex h-full w-full flex-col min-w-0 max-w-full overflow-hidden">
-            <div className="grow w-full gap-4 overflow-hidden min-w-0 max-w-full">
+          <div className="flex h-full w-full max-w-full min-w-0 flex-col overflow-hidden">
+            <div className="w-full max-w-full min-w-0 grow gap-4 overflow-hidden">
               <ScrollArea className="h-full w-full">
-                <div className="flex h-full w-full flex-col gap-4 pt-0.5 pr-4 pl-0.5 min-w-0 max-w-full overflow-hidden">
+                <div className="flex h-full w-full max-w-full min-w-0 flex-col gap-4 overflow-hidden pt-0.5 pr-4 pl-0.5">
                   {playersChild}
                 </div>
               </ScrollArea>
@@ -208,3 +208,4 @@ PlayLayout.SessionLog = ({ children }) => {
 PlayLayout.SessionLog.displayName = "PlayLayout.SessionLog";
 
 export default PlayLayout;
+

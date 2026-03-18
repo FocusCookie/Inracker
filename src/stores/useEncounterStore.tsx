@@ -1,4 +1,4 @@
-import { CanvasElement } from "@/components/Canvas/Canvas";
+import { CanvasElement } from "@/types/canvas";
 import { Encounter } from "@/types/encounter";
 import { create } from "zustand";
 

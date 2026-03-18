@@ -1,72 +1,52 @@
-import db from "@/lib/database";
-import { cn, getModifierKey } from "@/lib/utils";
-import { useEncounterStore } from "@/stores/useEncounterStore";
-import { Player } from "@/types/player";
-import { Token } from "@/types/tokens";
-import {
-  Cross2Icon,
-  EyeNoneIcon,
-  PaddingIcon,
-  ZoomInIcon,
-  ZoomOutIcon,
-} from "@radix-ui/react-icons";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useShallow } from "zustand/shallow";
-import { useOverlayStore } from "@/stores/useOverlayStore";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuLabel,
-  ContextMenuTrigger,
-  ContextMenuSeparator,
-  ContextMenuGroup,
-} from "@/components/ui/context-menu";
-import {
-  CircleX,
-  Sword,
-  UsersRound,
-  Sparkles,
-  CoffeeIcon,
-  BedSingleIcon,
-  ClockIcon,
-  MinimizeIcon,
-} from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
-import { useQueryClient } from "@tanstack/react-query";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
-import { formatDuration } from "@/lib/time";
-import { CanvasElementNode } from "./CanvasElementNode";
-import { MusicPlayer } from "@/components/MusicPlayer/MusicPlayer";
-import { Kbd } from "../ui/kbd";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Tldraw, createShapeId, type Editor } from "tldraw";
+import "tldraw/tldraw.css";
 
-const MIN_ZOOM = 0.1;
-const MAX_ZOOM = 5;
+import type { InrackerCanvasElement } from "@/types/canvas";
+import type { Player } from "@/types/player";
+import type { Token } from "@/types/tokens";
+import type { EncounterOpponent } from "@/types/opponents";
+import { useQueryWithToast } from "@/hooks/useQueryWithErrorToast";
+import { BackgroundShapeUtil } from "./tldraw/BackgroundShapeUtil";
+import { EncounterShapeUtil } from "./tldraw/EncounterShapeUtil";
+import { EncounterTool } from "./tldraw/EncounterTool";
+import { MarkupShapeUtil } from "./tldraw/MarkupShapeUtil";
+import { MarkupTool } from "./tldraw/MarkupTool";
+import { TokenShapeUtil } from "./tldraw/TokenShapeUtil";
+import { useTldrawSync } from "./tldraw/useTldrawSync";
+import { CanvasTldrawProvider } from "./tldraw/CanvasTldrawContext";
+import type { CanvasElementWithId } from "./types";
+import TokenPanels from "./TokenPanels";
+import CanvasToolbar, { DrawingMode } from "./CanvasToolbar";
+import SelectionToolbar from "./SelectionToolbar";
+import { BACKGROUND_TYPE, ENCOUNTER_TYPE, TOKEN_TYPE, MARKUP_TYPE } from "./tldraw/shapes";
+import { MarkupElement } from "@/types/markup";
+
+const shapeUtils = [
+  BackgroundShapeUtil,
+  EncounterShapeUtil,
+  TokenShapeUtil,
+  MarkupShapeUtil,
+];
+const tools = [EncounterTool, MarkupTool];
 
 type Props = {
-  database: typeof db;
+  database: typeof import("@/lib/database").default;
   background?: string;
-  elements: (ClickableCanvasElement & { id: any })[];
-  temporaryElement?: CanvasElement;
+  elements: CanvasElementWithId[];
+  temporaryElement?: InrackerCanvasElement;
   players: Player[];
   selectedToken: Token | null;
   tokens: Token[];
+  markup: MarkupElement[];
   onTokenSelect: (token: Token | null) => void;
-  onDrawed: (element: Omit<CanvasElement, "id">) => void;
+  onDrawed: (element: Omit<InrackerCanvasElement, "id">) => void;
+  onMarkupDrawed: (markup: Omit<MarkupElement, "id">) => void;
   onTokenMove: (token: Token) => void;
-  onElementMove: (element: ClickableCanvasElement & { id: any }) => void;
+  onElementMove: (element: CanvasElementWithId) => void;
+  onMarkupMove: (markup: MarkupElement) => void;
+  onMarkupDelete: (markupId: number) => void;
+  onMarkupDuplicate: (markupId: number) => void;
   onRemoveFromInitiative?: (
     entityId: number,
     type: "player" | "opponent",
@@ -90,26 +70,7 @@ type Props = {
   onStartFight?: (encounterId: number) => void;
 };
 
-export type CanvasElement = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  color: string;
-  icon: string;
-  name?: string;
-  completed?: boolean;
-  opponents?: number[];
-  isCombatActive?: boolean;
-  type?: string;
-};
-
-export type ClickableCanvasElement = CanvasElement & {
-  onClick?: (element: CanvasElement) => void;
-  onEdit?: (element: CanvasElement) => void;
-};
-
-function Canvas({
+export default function Canvas({
   database,
   background,
   elements,
@@ -117,10 +78,15 @@ function Canvas({
   players,
   selectedToken,
   tokens,
-  onTokenMove,
+  markup,
   onTokenSelect,
   onDrawed,
+  onMarkupDrawed,
+  onTokenMove,
   onElementMove,
+  onMarkupMove,
+  onMarkupDelete,
+  onMarkupDuplicate,
   onRemoveFromInitiative,
   onAddToInitiative,
   onOpenEffectsCatalog,
@@ -129,433 +95,297 @@ function Canvas({
   onDamagePlayer,
   onHealOpponent,
   onDamageOpponent,
-  onToggleAside,
-  onOpenSessionLog,
-  onStartFight,
+  onToggleAside: _onToggleAside,
+  onOpenSessionLog: _onOpenSessionLog,
+  onStartFight: _onStartFight,
 }: Props) {
-  const { t } = useTranslation("ComponentCanvas");
-  const queryClient = useQueryClient();
-  const svgRef = useRef<SVGSVGElement>(null);
-  const backgroundImage = useRef<HTMLImageElement | null>(null);
-  const [isPlayersPanelOpen, setIsPlayersPanelOpen] = useState<boolean>(false);
-  const [isOpponentsPanelOpen, setIsOpponentsPanelOpen] =
-    useState<boolean>(false);
-  const [resizingElementId, setResizingElementId] = useState<number | null>(
-    null,
-  );
-
-  const [tokenVisibility, setTokenVisibility] = useState<
+  const [editor, setEditor] = useState<Editor | null>(null);
+  const [tokenVisibility, setTokenVisibilityState] = useState<
     Record<string, boolean>
   >({});
+  const [drawingMode, setDrawingMode] = useState<DrawingMode>("none");
+  const [selectedShapeIds, setSelectedShapeIds] = useState<string[]>([]);
+  const [isPlayersPanelOpen, setIsPlayersPanelOpen] = useState(false);
+  const [isOpponentsPanelOpen, setIsOpponentsPanelOpen] = useState(false);
+  const isSelectionSyncingRef = useRef(false);
+  const backgroundShapeId = useMemo(() => createShapeId("background"), []);
 
-  const { currentColor, currentIcon, currentTitle, resetCount } =
-    useEncounterStore(
-      useShallow((state) => ({
-        currentIcon: state.currentIcon,
-        currentColor: state.currentColor,
-        currentTitle: state.currentTitle,
-        resetCount: state.resetCount,
-      })),
-    );
+  const hasMatchingPersistedElement = useMemo(() => {
+    const draft = temporaryElement;
+    if (!draft) return false;
+
+    return elements.some((element) => {
+      const tolerance = 60;
+      const draftCenterX = draft.x + draft.width / 2;
+      const draftCenterY = draft.y + draft.height / 2;
+      const elementCenterX = element.x + element.width / 2;
+      const elementCenterY = element.y + element.height / 2;
+      return (
+        Math.abs(elementCenterX - draftCenterX) <= tolerance &&
+        Math.abs(elementCenterY - draftCenterY) <= tolerance &&
+        Math.abs(element.width - draft.width) <= tolerance &&
+        Math.abs(element.height - draft.height) <= tolerance
+      );
+    });
+  }, [elements, temporaryElement]);
+
+  const effectiveTemporaryElement = hasMatchingPersistedElement
+    ? null
+    : (temporaryElement ?? null);
 
   const encounterOpponents = useQueryWithToast({
     queryKey: ["encounter-opponents"],
     queryFn: () => database.encounterOpponents.getAllDetailed(),
   });
 
-  const currentViewBoxRef = useRef<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  }>({
-    x: 0,
-    y: 0,
-    width: 1000,
-    height: 1000,
-  });
-
-  const initialViewBoxRef = useRef<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  }>({
-    x: 0,
-    y: 0,
-    width: 1000,
-    height: 1000,
-  });
-
-  const [viewBox, setViewBox] = useState<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  }>({
-    x: 0,
-    y: 0,
-    width: 1000,
-    height: 1000,
-  });
-
-  const [zoom, setZoom] = useState<number>(1);
-  const zoomRef = useRef<number>(1);
-  const [isPanning, setIsPanning] = useState<boolean>(false);
-  const [isDrawing, setIsDrawing] = useState<boolean>(false);
-  const panStartPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const initialCTM = useRef<DOMMatrix | null>(null);
-  // Coalesce pan updates to one rAF callback
-  const panRafId = useRef<number | null>(null);
-  const panNextViewBox = useRef<{ x: number; y: number } | null>(null);
-  const tempRectRef = useRef<SVGRectElement | null>(null);
-  const drawStartPos = useRef<{ x: number; y: number } | null>(null);
-  const isDragging = useRef<boolean>(false);
-  const dragTokenStartPos = useRef<{ x: number; y: number } | null>(null);
-  const dragTempElementStartPos = useRef<{ x: number; y: number } | null>(null);
-  const draggedToken = useRef<Token | null>(null);
-  const temporaryTokenPosition = useRef<{ x: number; y: number } | null>(null);
-  const temporaryTempElementPosition = useRef<{ x: number; y: number } | null>(
-    null,
-  );
-  const viewBoxStartOnPanStart = useRef<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
-  });
-
-  const draggedElement = useRef<(ClickableCanvasElement & { id: any }) | null>(
-    null,
-  );
-  const dragElementsInitialCoords = useRef<
-    {
-      element: Element;
-      attrX: string;
-      attrY: string;
-      initialX: number;
-      initialY: number;
-    }[]
-  >([]);
-  const dragElementStartPos = useRef<{ x: number; y: number } | null>(null);
-  const temporaryElementPosition = useRef<{ x: number; y: number } | null>(
-    null,
+  const playersById = useMemo(
+    () => new Map(players.map((player) => [player.id, player])),
+    [players],
   );
 
-  const resizeStartPos = useRef<{ x: number; y: number } | null>(null);
-  const resizingElementStartDim = useRef<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
-  const resizingHandle = useRef<"nw" | "ne" | "sw" | "se" | null>(null);
-  const resizingElementRef = useRef<
-    (ClickableCanvasElement & { id: any }) | null
-  >(null);
-  const tempResizedElementRef = useRef<
-    (ClickableCanvasElement & { id: any }) | null
-  >(null);
-  const [tempResizedElement, setTempResizedElement] = useState<
-    (ClickableCanvasElement & { id: any }) | null
-  >(null);
-
-  useEffect(() => {
-    if (background && background !== "") {
-      const tmp = new Image();
-      tmp.onload = () => {
-        backgroundImage.current = tmp;
-
-        const newViewBox = {
-          x: -tmp.naturalWidth / 2,
-          y: -tmp.naturalHeight / 2,
-          width: tmp.naturalWidth,
-          height: tmp.naturalHeight,
-        };
-
-        currentViewBoxRef.current = newViewBox;
-        setViewBox(newViewBox);
-        initialViewBoxRef.current = newViewBox;
-      };
-      tmp.src = background;
-    }
-  }, [background]);
-
-  useEffect(() => {
-    const handleBlur = () => setIsPanning(false);
-
-    window.addEventListener("keydown", showPaneCursor);
-    window.addEventListener("keyup", hidePaneCursor);
-    window.addEventListener("keydown", unselectSelectedToken);
-    window.addEventListener("blur", handleBlur);
-
-    return () => {
-      window.removeEventListener("keydown", showPaneCursor);
-      window.removeEventListener("keyup", hidePaneCursor);
-      window.removeEventListener("keydown", unselectSelectedToken);
-      window.removeEventListener("blur", handleBlur);
-    };
-  }, [isPanning]); // Re-bind if showPaneCursor/hidePaneCursor change or depend on isPanning
-
-  const transformScreenCoordsToSvgCoords = (
-    event:
-      | MouseEvent
-      | WheelEvent
-      | React.MouseEvent<SVGSVGElement>
-      | React.MouseEvent<SVGImageElement>
-      | React.MouseEvent<SVGGElement>
-      | React.MouseEvent<SVGRectElement>,
-  ) => {
-    if (!svgRef.current) return { x: 0, y: 0 };
-
-    const svg = svgRef.current;
-    const CTM = initialCTM.current || svg.getScreenCTM();
-    if (!CTM) return { x: 0, y: 0 };
-
-    const point = svg.createSVGPoint();
-    point.x = event.clientX;
-    point.y = event.clientY;
-
-    const transformedPoint = point.matrixTransform(CTM.inverse());
-
-    return {
-      x: transformedPoint.x,
-      y: transformedPoint.y,
-    };
-  };
-
-  const handleMouseDown = (
-    event: React.MouseEvent<SVGSVGElement, MouseEvent>,
-  ) => {
-    // Only react to left mouse button (0)
-    if (event.button !== 0) return;
-
-    const target = event.target as Element;
-    const isElement = target.closest("[data-element-id]");
-
-    if (!isElement && resizingElementId !== null) {
-      setResizingElementId(null);
-    }
-
-    if (isPanning && svgRef.current) {
-      const svg = svgRef.current;
-
-      const CTM = svg.getScreenCTM();
-      if (!CTM) return;
-      initialCTM.current = CTM;
-
-      const coords = transformScreenCoordsToSvgCoords(event);
-      panStartPosition.current = coords;
-
-      viewBoxStartOnPanStart.current = {
-        x: currentViewBoxRef.current.x,
-        y: currentViewBoxRef.current.y,
-      };
-
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-      window.addEventListener("keyup", hidePaneCursor);
-      return;
-    }
-
-    if (isDrawing && svgRef.current) {
-      const svg = svgRef.current;
-      const CTM = svg.getScreenCTM();
-      if (!CTM) return;
-      initialCTM.current = CTM;
-
-      const coords = transformScreenCoordsToSvgCoords(event);
-      drawStartPos.current = coords;
-
-      const rect = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "rect",
-      );
-      rect.setAttribute("x", coords.x.toString());
-      rect.setAttribute("y", coords.y.toString());
-      rect.setAttribute("width", "0");
-      rect.setAttribute("height", "0");
-      rect.setAttribute("rx", "4");
-      rect.setAttribute("ry", "4");
-      rect.setAttribute("fill", currentColor);
-      rect.setAttribute("opacity", "0.5");
-      rect.setAttribute("stroke", currentColor);
-      rect.setAttribute("stroke-width", "2");
-      rect.setAttribute("filter", "url(#subtleDropShadow)");
-
-      svg.appendChild(rect);
-      tempRectRef.current = rect;
-
-      window.addEventListener("mousemove", handleDrawMove);
-      window.addEventListener("mouseup", handleDrawEnd);
-    }
-  };
-
-  const handleMouseMove = (event: MouseEvent) => {
-    if (!svgRef.current) return;
-
-    const currentPoint = transformScreenCoordsToSvgCoords(event);
-    const dx = currentPoint.x - panStartPosition.current.x;
-    const dy = currentPoint.y - panStartPosition.current.y;
-
-    const newX = viewBoxStartOnPanStart.current.x - dx;
-    const newY = viewBoxStartOnPanStart.current.y - dy;
-
-    // Track latest viewBox target and coalesce updates into a single rAF
-    currentViewBoxRef.current = {
-      x: newX,
-      y: newY,
-      width: currentViewBoxRef.current.width,
-      height: currentViewBoxRef.current.height,
-    };
-
-    panNextViewBox.current = { x: newX, y: newY };
-    if (panRafId.current == null) {
-      panRafId.current = requestAnimationFrame(() => {
-        panRafId.current = null;
-        if (!svgRef.current || !panNextViewBox.current) return;
-        const { x, y } = panNextViewBox.current;
-        svgRef.current.setAttribute(
-          "viewBox",
-          `${x} ${y} ${currentViewBoxRef.current.width} ${currentViewBoxRef.current.height}`,
-        );
-      });
-    }
-  };
-
-  const handleMouseUp = () => {
-    setViewBox(currentViewBoxRef.current);
-    panNextViewBox.current = null;
-
-    window.removeEventListener("mousemove", handleMouseMove);
-    window.removeEventListener("mouseup", handleMouseUp);
-  };
-
-  const applyZoom = useCallback(
-    (scaleFactor: number, anchor?: { x: number; y: number }) => {
-      const currentZoom = zoomRef.current;
-      let newZoom = currentZoom * scaleFactor;
-
-      // Clamp zoom
-      newZoom = Math.max(MIN_ZOOM, Math.min(newZoom, MAX_ZOOM));
-
-      // Actual scale factor used (after clamping)
-      const actualFactor = newZoom / currentZoom;
-      if (Math.abs(actualFactor - 1) < 0.0001) return; // No change
-
-      const { x, y, width, height } = currentViewBoxRef.current;
-
-      // Default to center if no anchor provided
-      const px = anchor ? anchor.x : x + width / 2;
-      const py = anchor ? anchor.y : y + height / 2;
-
-      const newWidth = width / actualFactor;
-      const newHeight = height / actualFactor;
-      const newX = px - (px - x) / actualFactor;
-      const newY = py - (py - y) / actualFactor;
-
-      const newViewBox = {
-        x: newX,
-        y: newY,
-        width: newWidth,
-        height: newHeight,
-      };
-
-      currentViewBoxRef.current = newViewBox;
-      setViewBox(newViewBox);
-      setZoom(newZoom);
-      zoomRef.current = newZoom;
-    },
-    [],
+  const elementsByShapeId = useMemo(
+    () =>
+      new Map(
+        elements.map((element) => [
+          createShapeId(`encounter-${element.id}`),
+          element,
+        ]),
+      ),
+    [elements],
   );
 
-  useEffect(() => {
-    const handleWheel = (event: WheelEvent) => {
-      // Pinch-to-zoom is ctrlKey: true on trackpads.
-      // Meta (Cmd/Win) + scroll is also used for zoom.
-      if (event.ctrlKey || event.metaKey) {
-        event.preventDefault();
+  const opponentsById = useMemo(
+    () => new Map((encounterOpponents.data ?? []).map((o) => [o.id, o])),
+    [encounterOpponents.data],
+  );
 
-        // Calculate a granular scale factor.
-        const delta = -event.deltaY;
-        const scaleFactor = Math.pow(1.005, delta);
+  const tokensById = useMemo(
+    () => new Map(tokens.map((token) => [token.id, token])),
+    [tokens],
+  );
 
-        const anchor = transformScreenCoordsToSvgCoords(event);
-        applyZoom(scaleFactor, anchor);
-      } else {
-        // Panning movement (two fingers or mouse wheel)
-        event.preventDefault();
+  const markupByShapeId = useMemo(
+    () =>
+      new Map(
+        markup.map((m) => [createShapeId(`markup-${m.id}`), m]),
+      ),
+    [markup],
+  );
 
-        const currentZoom = zoomRef.current;
-        // Adjust delta by zoom level so panning speed feels consistent
-        const dx = event.deltaX / currentZoom;
-        const dy = event.deltaY / currentZoom;
-
-        const newX = currentViewBoxRef.current.x + dx;
-        const newY = currentViewBoxRef.current.y + dy;
-
-        currentViewBoxRef.current = {
-          ...currentViewBoxRef.current,
-          x: newX,
-          y: newY,
-        };
-
-        if (panRafId.current == null) {
-          panRafId.current = requestAnimationFrame(() => {
-            panRafId.current = null;
-            if (!svgRef.current) return;
-            const { x, y, width, height } = currentViewBoxRef.current;
-            svgRef.current.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
-            setViewBox(currentViewBoxRef.current);
-          });
-        }
-      }
-    };
-
-    const svg = svgRef.current;
-    if (svg) {
-      svg.addEventListener("wheel", handleWheel, { passive: false });
-    }
-
-    return () => {
-      if (svg) {
-        svg.removeEventListener("wheel", handleWheel);
-      }
-    };
-  }, [applyZoom, transformScreenCoordsToSvgCoords]);
+  const setTokenVisibility = (tokenId: number, isVisible: boolean) => {
+    setTokenVisibilityState((prev) => ({
+      ...prev,
+      [tokenId.toString()]: isVisible,
+    }));
+  };
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey) {
-        if (event.key === "+" || event.key === "=") {
-          event.preventDefault();
-          applyZoom(1.2);
-        } else if (event.key === "-" || event.key === "_") {
-          event.preventDefault();
-          applyZoom(0.8);
-        } else if (event.key === "0") {
-          event.preventDefault();
-          resetZoom();
-        } else if (event.key === "s") {
-          event.preventDefault();
-          onToggleAside?.();
-        } else if (event.key.toLowerCase() === "d") {
-          event.preventDefault();
-          setIsPanning(false);
-          setIsDrawing((prev) => !prev);
-        } else if (event.key.toLowerCase() === "p") {
-          event.preventDefault();
-          onOpenSessionLog?.();
-        } else if (event.key.toLowerCase() === "f") {
-          event.preventDefault();
-          if (resizingElementId !== null) {
-            const element = elements.find((e) => e.id === resizingElementId);
-            if (element?.type === "fight") {
-              onStartFight?.(resizingElementId);
+    const tokensToHide: number[] = [];
+    elements.forEach((element) => {
+      if (element.completed && element.opponents) {
+        const opponentIds = new Set(element.opponents);
+        tokens.forEach((token) => {
+          if (token.type === "opponent" && opponentIds.has(token.entity)) {
+            if (tokenVisibility[token.id.toString()] !== false) {
+              tokensToHide.push(token.id);
             }
           }
-        } else if (event.key.toLowerCase() === "o") {
-          event.preventDefault();
-          if (resizingElementId !== null) {
-            const element = elements.find((e) => e.id === resizingElementId);
+        });
+      }
+    });
+
+    if (tokensToHide.length > 0) {
+      setTokenVisibilityState((prev) => {
+        const next = { ...prev };
+        tokensToHide.forEach((id) => {
+          next[id.toString()] = false;
+        });
+        return next;
+      });
+    }
+  }, [elements, tokens, tokenVisibility]);
+
+  useTldrawSync({
+    editor,
+    elements,
+    temporaryElement: effectiveTemporaryElement,
+    tokens,
+    markup,
+    onElementMove,
+    onTokenMove,
+    onMarkupMove,
+    backgroundShapeId,
+  });
+
+  // When temporary element is cleared (cancel/complete), force tldraw back to clean select state
+  const prevTemporaryElementRef = useRef(temporaryElement);
+  useEffect(() => {
+    if (prevTemporaryElementRef.current && !temporaryElement && editor) {
+      setDrawingMode("none");
+      editor.cancel();
+    }
+    prevTemporaryElementRef.current = temporaryElement;
+  }, [temporaryElement, editor]);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const container = editor.getContainer();
+    if (!container) return;
+
+    const handleContextMenu = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+
+      const isToken = target.closest("[data-token-group-id]");
+      const isElement = target.closest("[data-element-id]");
+
+      if (isToken || isElement) {
+        event.preventDefault();
+      }
+    };
+
+    container.addEventListener("contextmenu", handleContextMenu, {
+      capture: true,
+    });
+
+    return () => {
+      container.removeEventListener("contextmenu", handleContextMenu, {
+        capture: true,
+      });
+    };
+  }, [editor]);
+
+  useEffect(() => {
+    (window as any)._onDrawedEncounter = (draftElement: any) => {
+      onDrawed(draftElement);
+      setDrawingMode("none");
+    };
+
+    return () => {
+      delete (window as any)._onDrawedEncounter;
+    };
+  }, [onDrawed]);
+
+  useEffect(() => {
+    (window as any)._onDrawedMarkup = (draftMarkup: any) => {
+      onMarkupDrawed(draftMarkup);
+      setDrawingMode("none");
+    };
+
+    return () => {
+      delete (window as any)._onDrawedMarkup;
+    };
+  }, [onMarkupDrawed]);
+
+  useEffect(() => {
+    if (!editor) return;
+    if (drawingMode === "encounter") {
+      editor.setCurrentTool("encounter");
+    } else if (drawingMode === "markup") {
+      editor.setCurrentTool("markup");
+    } else {
+      editor.setCurrentTool("select");
+    }
+  }, [editor, drawingMode]);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    isSelectionSyncingRef.current = true;
+    if (selectedToken) {
+      const shapeId = createShapeId(`token-${selectedToken.id}`);
+      editor.select(shapeId);
+    } else {
+      editor.selectNone();
+    }
+
+    setTimeout(() => {
+      isSelectionSyncingRef.current = false;
+    }, 0);
+  }, [editor, selectedToken]);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const unsubscribe = editor.store.listen(() => {
+      if (isSelectionSyncingRef.current) return;
+
+      const selectedIds = editor.getSelectedShapeIds();
+      setSelectedShapeIds(selectedIds.map((id) => String(id)));
+
+      if (selectedIds.length !== 1) {
+        if (selectedToken) {
+          onTokenSelect(null);
+        }
+        return;
+      }
+
+      const shape = editor.getShape(selectedIds[0]);
+      if (!shape || shape.type !== "token") {
+        if (selectedToken) {
+          onTokenSelect(null);
+        }
+        return;
+      }
+
+      const tokenId = (shape as any).props?.tokenId as number | undefined;
+      if (!tokenId) {
+        return;
+      }
+
+      const token = tokensById.get(tokenId);
+      if (token && token.id !== selectedToken?.id) {
+        onTokenSelect(token);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [editor, onTokenSelect, selectedToken, tokensById]);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const isInputTarget = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLElement)) return false;
+      const tag = target.tagName;
+      return tag === "INPUT" || tag === "TEXTAREA" || target.isContentEditable;
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (isInputTarget(event.target)) return;
+
+      if (event.key === " ") {
+        event.preventDefault();
+        editor.setCurrentTool("hand");
+      }
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        editor.setCurrentTool("select");
+        onTokenSelect(null);
+        setDrawingMode("none");
+      }
+
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "d") {
+        event.preventDefault();
+        setDrawingMode((prev) => (prev === "encounter" ? "none" : "encounter"));
+      }
+
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "m") {
+        event.preventDefault();
+        setDrawingMode((prev) => (prev === "markup" ? "none" : "markup"));
+      }
+
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "o") {
+        event.preventDefault();
+        const selectedIds = editor.getSelectedShapeIds();
+        if (selectedIds.length === 1) {
+          const shape = editor.getShape(selectedIds[0]);
+          if (shape && shape.type === "encounter") {
+            const element = elementsByShapeId.get(shape.id);
             if (element?.onClick) {
               element.onClick(element);
             }
@@ -563,1470 +393,151 @@ function Canvas({
         }
       }
 
-      if (isPanning) {
-        if (event.key.startsWith("Arrow")) {
-          event.preventDefault();
-          const step = 20 / zoomRef.current;
-          let dx = 0;
-          let dy = 0;
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "p") {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        _onOpenSessionLog?.();
+      }
+    };
 
-          if (event.key === "ArrowUp") dy = -step;
-          if (event.key === "ArrowDown") dy = step;
-          if (event.key === "ArrowLeft") dx = -step;
-          if (event.key === "ArrowRight") dx = step;
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (isInputTarget(event.target)) return;
 
-          currentViewBoxRef.current = {
-            ...currentViewBoxRef.current,
-            x: currentViewBoxRef.current.x + dx,
-            y: currentViewBoxRef.current.y + dy,
-          };
-
-          if (panRafId.current == null) {
-            panRafId.current = requestAnimationFrame(() => {
-              panRafId.current = null;
-              if (!svgRef.current) return;
-              const { x, y, width, height } = currentViewBoxRef.current;
-              svgRef.current.setAttribute(
-                "viewBox",
-                `${x} ${y} ${width} ${height}`,
-              );
-              setViewBox(currentViewBoxRef.current);
-            });
-          }
+      if (event.key === " ") {
+        event.preventDefault();
+        if (drawingMode === "encounter") {
+          editor.setCurrentTool("encounter");
+        } else if (drawingMode === "markup") {
+          editor.setCurrentTool("markup");
+        } else {
+          editor.setCurrentTool("select");
         }
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown, { capture: true });
+    window.addEventListener("keyup", handleKeyUp);
+
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown, { capture: true });
+      window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [
-    applyZoom,
-    onToggleAside,
-    isPanning,
-    elements,
-    resizingElementId,
-    onOpenSessionLog,
-    onStartFight,
-  ]);
-
-  function zoomIn() {
-    setIsPanning(false);
-    applyZoom(1.2);
-  }
-
-  function zoomOut() {
-    setIsPanning(false);
-    applyZoom(0.8);
-  }
-
-  function resetZoom() {
-    setIsPanning(false);
-    const defaultViewBox = initialViewBoxRef.current;
-    currentViewBoxRef.current = defaultViewBox;
-    setViewBox(defaultViewBox);
-    setZoom(1);
-    zoomRef.current = 1;
-  }
-
-  function showPaneCursor(event: KeyboardEvent) {
-    if (event.repeat) return;
-
-    if (!isPanning && event.code === "Space") {
-      setIsPanning(true);
-      setIsDrawing(false);
-    }
-  }
-
-  function hidePaneCursor(event: KeyboardEvent) {
-    if (isPanning && event.code === "Space") {
-      setIsPanning(false);
-    }
-  }
-
-  const handleDrawMove = (event: MouseEvent) => {
-    if (!tempRectRef.current || !drawStartPos.current || !isDrawing) return;
-
-    const currentPos = transformScreenCoordsToSvgCoords(event);
-
-    const width = currentPos.x - drawStartPos.current.x;
-    const height = currentPos.y - drawStartPos.current.y;
-
-    if (width < 0) {
-      tempRectRef.current.setAttribute("x", currentPos.x.toString());
-      tempRectRef.current.setAttribute("width", (-width).toString());
-    } else {
-      tempRectRef.current.setAttribute("width", width.toString());
-    }
-
-    if (height < 0) {
-      tempRectRef.current.setAttribute("y", currentPos.y.toString());
-      tempRectRef.current.setAttribute("height", (-height).toString());
-    } else {
-      tempRectRef.current.setAttribute("height", height.toString());
-    }
-  };
-
-  const handleDrawEnd = (event: MouseEvent) => {
-    if (tempRectRef.current && drawStartPos.current) {
-      const currentPos = transformScreenCoordsToSvgCoords(event);
-
-      const width = Math.abs(currentPos.x - drawStartPos.current.x);
-      const height = Math.abs(currentPos.y - drawStartPos.current.y);
-
-      const x = Math.min(currentPos.x, drawStartPos.current.x);
-      const y = Math.min(currentPos.y, drawStartPos.current.y);
-
-      if (width > 5 && height > 5) {
-        onDrawed({
-          x: parseInt(x.toFixed(0)),
-          y: parseInt(y.toFixed(0)),
-          width: parseInt(width.toFixed(0)),
-          height: parseInt(height.toFixed(0)),
-          color: currentColor,
-          icon: "📝",
-        });
-      }
-
-      tempRectRef.current.remove();
-      tempRectRef.current = null;
-      drawStartPos.current = null;
-      setIsDrawing(false);
-    }
-
-    window.removeEventListener("mousemove", handleDrawMove);
-    window.removeEventListener("mouseup", handleDrawEnd);
-  };
-
-  const handleTokenDragStart = (
-    event: React.MouseEvent<SVGImageElement>,
-    token: Token,
-  ) => {
-    // Only start drag on left button
-    if (event.button !== 0) return;
-    if (isDrawing || isPanning) return;
-
-    const svg = svgRef.current;
-    if (!svg) return;
-
-    const CTM = svg.getScreenCTM();
-    if (!CTM) return;
-    initialCTM.current = CTM;
-
-    isDragging.current = false;
-
-    const coords = transformScreenCoordsToSvgCoords(event);
-
-    dragTokenStartPos.current = {
-      x: coords.x - token.coordinates.x,
-      y: coords.y - token.coordinates.y,
-    };
-    draggedToken.current = token;
-
-    dragElementsInitialCoords.current = [];
-    const group = svg.querySelector(`g[data-token-group-id="${token.id}"]`);
-    if (group) {
-      const children = group.querySelectorAll(
-        "circle, image, text, foreignObject",
-      );
-      children.forEach((child) => {
-        const xAttr = child.tagName === "circle" ? "cx" : "x";
-        const yAttr = child.tagName === "circle" ? "cy" : "y";
-        const initialX = parseFloat(child.getAttribute(xAttr) || "0");
-        const initialY = parseFloat(child.getAttribute(yAttr) || "0");
-        dragElementsInitialCoords.current.push({
-          element: child,
-          attrX: xAttr,
-          attrY: yAttr,
-          initialX,
-          initialY,
-        });
-      });
-    }
-
-    if (selectedToken && selectedToken.id === token.id) {
-      const ring = svg.querySelector("#selection-ring");
-      if (ring) {
-        const initialX = parseFloat(ring.getAttribute("cx") || "0");
-        const initialY = parseFloat(ring.getAttribute("cy") || "0");
-        dragElementsInitialCoords.current.push({
-          element: ring,
-          attrX: "cx",
-          attrY: "cy",
-          initialX,
-          initialY,
-        });
-      }
-    }
-
-    window.addEventListener("mousemove", handleTokenDragMove);
-    window.addEventListener("mouseup", handleTokenDragEnd);
-  };
-
-  const handleTokenDragMove = (event: MouseEvent) => {
-    if (
-      !draggedToken.current ||
-      !dragTokenStartPos.current ||
-      !initialCTM.current ||
-      !svgRef.current
-    )
-      return;
-
-    isDragging.current = true;
-    const currentPos = transformScreenCoordsToSvgCoords(event);
-
-    const newPosition = {
-      x: currentPos.x - dragTokenStartPos.current.x,
-      y: currentPos.y - dragTokenStartPos.current.y,
-    };
-
-    temporaryTokenPosition.current = newPosition;
-
-    const deltaX = newPosition.x - draggedToken.current.coordinates.x;
-    const deltaY = newPosition.y - draggedToken.current.coordinates.y;
-
-    dragElementsInitialCoords.current.forEach(
-      ({ element, attrX, attrY, initialX, initialY }) => {
-        element.setAttribute(attrX, (initialX + deltaX).toString());
-        element.setAttribute(attrY, (initialY + deltaY).toString());
-      },
-    );
-  };
-
-  const handleTokenDragEnd = () => {
-    if (draggedToken.current && temporaryTokenPosition.current) {
-      const updatedToken = {
-        ...draggedToken.current,
-        coordinates: temporaryTokenPosition.current,
-      };
-      onTokenMove(updatedToken);
-    }
-
-    draggedToken.current = null;
-    dragTokenStartPos.current = null;
-    temporaryTokenPosition.current = null;
-    dragElementsInitialCoords.current = [];
-
-    window.removeEventListener("mousemove", handleTokenDragMove);
-    window.removeEventListener("mouseup", handleTokenDragEnd);
-  };
-
-  const handleTempElementDragStart = (
-    event: React.MouseEvent<SVGRectElement>,
-  ) => {
-    // Only start drag on left button
-    if (event.button !== 0) return;
-    if (isDrawing || isPanning || !temporaryElement) return;
-
-    const svg = svgRef.current;
-    if (!svg) return;
-
-    const CTM = svg.getScreenCTM();
-    if (!CTM) return;
-    initialCTM.current = CTM;
-
-    isDragging.current = false;
-
-    const coords = transformScreenCoordsToSvgCoords(event);
-
-    dragTempElementStartPos.current = {
-      x: coords.x - temporaryElement.x,
-      y: coords.y - temporaryElement.y,
-    };
-
-    window.addEventListener("mousemove", handleTempElementDragMove);
-    window.addEventListener("mouseup", handleTempElementDragEnd);
-  };
-
-  const handleTempElementDragMove = (event: MouseEvent) => {
-    if (
-      !temporaryElement ||
-      !dragTempElementStartPos.current ||
-      !initialCTM.current ||
-      !svgRef.current
-    )
-      return;
-
-    isDragging.current = true;
-    const currentPos = transformScreenCoordsToSvgCoords(event);
-
-    const newPosition = {
-      x: currentPos.x - dragTempElementStartPos.current.x,
-      y: currentPos.y - dragTempElementStartPos.current.y,
-    };
-
-    temporaryTempElementPosition.current = Object.assign({}, newPosition);
-
-    const element = svgRef.current.querySelector("#temp-element");
-    const icon = svgRef.current.querySelector("#temp-element-icon");
-    const header = svgRef.current.querySelector("#temp-element-header");
-    const name = svgRef.current.querySelector("#temp-element-name");
-
-    if (element && icon) {
-      element.setAttribute("x", newPosition.x.toString());
-      element.setAttribute("y", newPosition.y.toString());
-
-      icon.setAttribute(
-        "transform",
-        `translate(${newPosition.x + 6}, ${newPosition.y + 30})`,
-      );
-
-      if (header) {
-        header.setAttribute("x", newPosition.x.toString());
-        header.setAttribute("y", newPosition.y.toString());
-      }
-
-      if (name) {
-        name.setAttribute(
-          "transform",
-          `translate(${newPosition.x + 60}, ${newPosition.y + 30})`,
-        );
-      }
-    }
-  };
-
-  const handleTempElementDragEnd = () => {
-    if (temporaryElement && temporaryTempElementPosition.current) {
-      const update: CanvasElement = {
-        ...temporaryElement,
-        x: temporaryTempElementPosition.current.x,
-        y: temporaryTempElementPosition.current.y,
-      };
-
-      onDrawed(update);
-    }
-
-    dragTempElementStartPos.current = null;
-
-    window.removeEventListener("mousemove", handleTempElementDragMove);
-    window.removeEventListener("mouseup", handleTempElementDragEnd);
-  };
-
-  const handleElementDragStart = (
-    event: React.MouseEvent<SVGGElement>,
-    element: ClickableCanvasElement & { id: any },
-  ) => {
-    // Only start drag on left button
-    if (event.button !== 0) return;
-    if (isDrawing || isPanning) return;
-
-    const svg = svgRef.current;
-    if (!svg) return;
-
-    const CTM = svg.getScreenCTM();
-    if (!CTM) return;
-    initialCTM.current = CTM;
-
-    isDragging.current = false;
-
-    const coords = transformScreenCoordsToSvgCoords(event);
-
-    dragElementStartPos.current = {
-      x: coords.x - element.x,
-      y: coords.y - element.y,
-    };
-    draggedElement.current = element;
-
-    window.addEventListener("mousemove", handleElementDragMove);
-    window.addEventListener("mouseup", handleElementDragEnd);
-  };
-
-  const handleElementDragMove = (event: MouseEvent) => {
-    if (
-      !draggedElement.current ||
-      !dragElementStartPos.current ||
-      !initialCTM.current ||
-      !svgRef.current
-    )
-      return;
-
-    isDragging.current = true;
-    const currentPos = transformScreenCoordsToSvgCoords(event);
-
-    const newPosition = {
-      x: currentPos.x - dragElementStartPos.current.x,
-      y: currentPos.y - dragElementStartPos.current.y,
-    };
-
-    temporaryElementPosition.current = newPosition;
-
-    const elementG = svgRef.current.querySelector(
-      `[data-element-id="${draggedElement.current.id}"]`,
-    );
-
-    if (elementG) {
-      elementG.setAttribute(
-        "transform",
-        `translate(${newPosition.x}, ${newPosition.y})`,
-      );
-    }
-  };
-
-  const handleElementDragEnd = () => {
-    if (draggedElement.current && temporaryElementPosition.current) {
-      const updatedElement = {
-        ...draggedElement.current,
-        x: temporaryElementPosition.current.x,
-        y: temporaryElementPosition.current.y,
-      };
-      onElementMove(updatedElement);
-    }
-
-    draggedElement.current = null;
-    dragElementStartPos.current = null;
-    temporaryElementPosition.current = null;
-
-    window.removeEventListener("mousemove", handleElementDragMove);
-    window.removeEventListener("mouseup", handleElementDragEnd);
-  };
-
-  const handleResizeStart = (
-    event: React.MouseEvent<SVGRectElement>,
-    element: ClickableCanvasElement & { id: any },
-    handle: "nw" | "ne" | "sw" | "se",
-  ) => {
-    if (event.button !== 0) return;
-    event.stopPropagation();
-
-    const svg = svgRef.current;
-    if (!svg) return;
-
-    const CTM = svg.getScreenCTM();
-    if (!CTM) return;
-    initialCTM.current = CTM;
-
-    const coords = transformScreenCoordsToSvgCoords(event);
-    resizeStartPos.current = coords;
-    resizingElementStartDim.current = {
-      x: element.x,
-      y: element.y,
-      width: element.width,
-      height: element.height,
-    };
-    resizingHandle.current = handle;
-    resizingElementRef.current = element;
-
-    window.addEventListener("mousemove", handleResizeMove);
-    window.addEventListener("mouseup", handleResizeEnd);
-  };
-
-  const handleResizeMove = (event: MouseEvent) => {
-    if (
-      !resizingElementRef.current ||
-      !resizeStartPos.current ||
-      !resizingElementStartDim.current ||
-      !resizingHandle.current ||
-      !svgRef.current
-    )
-      return;
-
-    const currentPos = transformScreenCoordsToSvgCoords(event);
-    const dx = currentPos.x - resizeStartPos.current.x;
-    const dy = currentPos.y - resizeStartPos.current.y;
-
-    const start = resizingElementStartDim.current;
-    let newX = start.x;
-    let newY = start.y;
-    let newWidth = start.width;
-    let newHeight = start.height;
-
-    switch (resizingHandle.current) {
-      case "se":
-        newWidth = Math.max(50, start.width + dx);
-        newHeight = Math.max(50, start.height + dy);
-        break;
-      case "sw":
-        newWidth = Math.max(50, start.width - dx);
-        newHeight = Math.max(50, start.height + dy);
-        newX = start.x + (start.width - newWidth);
-        break;
-      case "ne":
-        newWidth = Math.max(50, start.width + dx);
-        newHeight = Math.max(50, start.height - dy);
-        newY = start.y + (start.height - newHeight);
-        break;
-      case "nw":
-        newWidth = Math.max(50, start.width - dx);
-        newHeight = Math.max(50, start.height - dy);
-        newX = start.x + (start.width - newWidth);
-        newY = start.y + (start.height - newHeight);
-        break;
-    }
-
-    const updatedElement = {
-      ...resizingElementRef.current,
-      x: newX,
-      y: newY,
-      width: newWidth,
-      height: newHeight,
-    };
-
-    tempResizedElementRef.current = updatedElement;
-    setTempResizedElement(updatedElement);
-  };
-
-  const handleResizeEnd = () => {
-    if (tempResizedElementRef.current) {
-      onElementMove(tempResizedElementRef.current);
-      console.log("Resized Element:", tempResizedElementRef.current);
-    }
-    // setTempResizedElement(null); // Keep the temp element until prop updates to avoid flicker
-    tempResizedElementRef.current = null;
-    resizingElementRef.current = null;
-    resizeStartPos.current = null;
-    resizingElementStartDim.current = null;
-    resizingHandle.current = null;
-
-    window.removeEventListener("mousemove", handleResizeMove);
-    window.removeEventListener("mouseup", handleResizeEnd);
-  };
+  }, [editor, drawingMode, onTokenSelect, elementsByShapeId, _onOpenSessionLog]);
 
   useEffect(() => {
-    if (tempResizedElement) {
-      const match = elements.find((e) => e.id === tempResizedElement.id);
-      if (
-        match &&
-        match.x === tempResizedElement.x &&
-        match.y === tempResizedElement.y &&
-        match.width === tempResizedElement.width &&
-        match.height === tempResizedElement.height
-      ) {
-        setTempResizedElement(null);
+    if (!editor || !background) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const shape = editor.getShape(backgroundShapeId);
+      const next = {
+        id: backgroundShapeId,
+        type: BACKGROUND_TYPE,
+        x: -img.naturalWidth / 2,
+        y: -img.naturalHeight / 2,
+        props: {
+          w: img.naturalWidth,
+          h: img.naturalHeight,
+          url: background,
+        },
+        isLocked: true,
+      } as any;
+
+      if (shape) {
+        editor.updateShapes([next]);
+      } else {
+        editor.createShapes([next]);
       }
-    }
-  }, [elements, tempResizedElement]);
 
-  function handleElementClick(
-    elementOnClick: () => void | undefined,
-    elementId: any,
-  ) {
-    if (isDragging.current) {
-      isDragging.current = false;
-      return;
-    }
-
-    setResizingElementId(elementId);
-
-    if (elementOnClick) elementOnClick();
-  }
-
-  function handleTokenClick(token: Token) {
-    if (isDragging.current) {
-      isDragging.current = false;
-      return;
-    }
-
-    if (selectedToken && selectedToken.id === token.id) {
-      onTokenSelect(null);
-    } else {
-      onTokenSelect(token);
-    }
-  }
-
-  function unselectSelectedToken(event: KeyboardEvent) {
-    if (event.key === "Escape") {
-      onTokenSelect(null);
-      setIsDrawing(false);
-      setIsPanning(false);
-    }
-  }
+      editor.sendToBack([backgroundShapeId]);
+    };
+    img.src = background;
+  }, [editor, background, backgroundShapeId]);
 
   useEffect(() => {
-    if (temporaryElement && tempRectRef.current) {
-      tempRectRef.current.setAttribute("x", temporaryElement.x.toString());
-      tempRectRef.current.setAttribute("y", temporaryElement.y.toString());
-      tempRectRef.current.setAttribute(
-        "width",
-        temporaryElement.width.toString(),
-      );
-      tempRectRef.current.setAttribute(
-        "height",
-        temporaryElement.height.toString(),
-      );
-      tempRectRef.current.setAttribute("fill", temporaryElement.color);
-      tempRectRef.current.setAttribute("stroke", temporaryElement.color);
-    }
-  }, [temporaryElement]);
+    if (!editor) return;
 
-  useEffect(() => {
-    const tokensToHide = new Set<number>();
-    elements.forEach((element) => {
-      if (element.completed && element.opponents) {
-        const opponentIds = new Set(element.opponents);
-        tokens.forEach((token) => {
-          if (token.type === "opponent" && opponentIds.has(token.entity)) {
-            tokensToHide.add(token.id);
-          }
-        });
+    const unsubscribe = editor.store.listen(() => {
+      const shape = editor.getShape(backgroundShapeId);
+      if (shape) {
+        editor.sendToBack([backgroundShapeId]);
       }
     });
 
-    if (tokensToHide.size > 0) {
-      setTokenVisibility((prev) => {
-        let hasChanges = false;
-        const next = { ...prev };
-        tokensToHide.forEach((id) => {
-          if (next[id] !== false) {
-            next[id] = false;
-            hasChanges = true;
-          }
-        });
-        return hasChanges ? next : prev;
-      });
-    }
-  }, [elements, tokens]);
-
-  function toggleToken(token: Token) {
-    const newVisibility = !(tokenVisibility[token.id] ?? true);
-    setTokenVisibility((prev) => ({ ...prev, [token.id]: newVisibility }));
-
-    if (!newVisibility && selectedToken && token.id === selectedToken.id) {
-      onTokenSelect(null);
-    }
-  }
-
-  function handlePlayersPanel() {
-    setIsPlayersPanelOpen((c) => !c);
-  }
-
-  function handleOpponentsPanel() {
-    setIsOpponentsPanelOpen((c) => !c);
-  }
-
-  const renderEffectsList = (effects: any[]) => (
-    <ul className="flex flex-col gap-1.5">
-      {effects.map((effect) => (
-        <li key={effect.id}>
-          <div className="flex items-center justify-between gap-2 rounded p-1 transition-colors hover:bg-slate-50">
-            <div className="flex items-center gap-2 overflow-hidden">
-              <span className="text-sm">{effect.icon}</span>
-              <span className="truncate text-xs font-medium">
-                {effect.name}
-              </span>
-            </div>
-            <Badge
-              variant={effect.type === "positive" ? "secondary" : "destructive"}
-              className="h-5 gap-1 px-1.5 text-[10px]"
-            >
-              {effect.durationType === "short" ? (
-                <CoffeeIcon className="h-2.5 w-2.5" />
-              ) : effect.durationType === "long" ? (
-                <BedSingleIcon className="h-2.5 w-2.5" />
-              ) : (
-                <ClockIcon className="h-2.5 w-2.5" />
-              )}
-              {effect.durationType === "time"
-                ? formatDuration(effect.duration)
-                : effect.durationType === "short" ||
-                    effect.durationType === "long"
-                  ? ""
-                  : effect.duration}
-            </Badge>
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
+    return () => {
+      unsubscribe();
+    };
+  }, [editor, backgroundShapeId]);
 
   return (
-    <div className="relative h-full w-full" key={resetCount}>
-      <svg
-        ref={svgRef}
-        viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
-        className={cn(
-          "h-full w-full rounded-md border-2 border-neutral-50 bg-neutral-50 bg-contain bg-center bg-no-repeat shadow-md",
-          isPanning && "cursor-grab",
-          isDrawing && "cursor-copy",
-        )}
-        onMouseDownCapture={handleMouseDown}
-      >
-        <filter id="subtleDropShadow">
-          <feDropShadow
-            dx="2"
-            dy="2"
-            stdDeviation="4"
-            floodColor="rgba(0,0,0,0.6)"
-          />
-        </filter>
-
-        {backgroundImage.current && (
-          <defs>
-            <clipPath id="roundedImageClip">
-              <rect
-                x={-backgroundImage.current.naturalWidth / 2}
-                y={-backgroundImage.current.naturalHeight / 2}
-                width={backgroundImage.current.naturalWidth}
-                height={backgroundImage.current.naturalHeight}
-                rx={8}
-                ry={8}
-              />
-            </clipPath>
-          </defs>
-        )}
-
-        {backgroundImage.current && (
-          <image
-            href={backgroundImage.current.src}
-            width={backgroundImage.current.naturalWidth}
-            height={backgroundImage.current.naturalHeight}
-            x={-backgroundImage.current.naturalWidth / 2}
-            y={-backgroundImage.current.naturalHeight / 2}
-            preserveAspectRatio="xMidYMid"
-            clipPath="url(#roundedImageClip)"
-            pointerEvents="none"
-            style={{ imageRendering: zoom >= 2 ? "pixelated" : "auto" }}
-          />
-        )}
-
-        {elements.map((elementData) => {
-          const element =
-            tempResizedElement && tempResizedElement.id === elementData.id
-              ? tempResizedElement
-              : elementData;
-          return (
-            <CanvasElementNode
-              key={"element-" + element.id}
-              element={element}
-              isSelected={resizingElementId === element.id}
-              onEdit={() => element.onEdit?.(element)}
-              onClick={() =>
-                handleElementClick(() => element.onClick?.(element), element.id)
-              }
-              onSelect={() =>
-                setResizingElementId((prev) =>
-                  prev === element.id ? null : element.id,
-                )
-              }
-              onDragStart={(e) => handleElementDragStart(e, element)}
-              onResizeStart={(e, handle) =>
-                handleResizeStart(e, element, handle)
-              }
-            />
-          );
-        })}
-
-        {temporaryElement && (
-          <g className="hover:cursor-move">
-            {/* Main rectangle */}
-            <rect
-              onMouseDown={handleTempElementDragStart}
-              id="temp-element"
-              x={temporaryElement.x}
-              y={temporaryElement.y}
-              width={temporaryElement.width}
-              height={temporaryElement.height}
-              fill={currentColor}
-              fillOpacity={0.25}
-              stroke={currentColor}
-              strokeWidth={4}
-              rx={4}
-              ry={4}
-              filter="url(#subtleDropShadow)"
-            />
-
-            {/* Header rectangle */}
-            <rect
-              id="temp-element-header"
-              x={temporaryElement.x}
-              y={temporaryElement.y}
-              width={temporaryElement.width}
-              height={60}
-              fill={currentColor}
-              fillOpacity={0.8}
-              stroke={currentColor}
-              strokeWidth={4}
-              rx={4}
-              ry={4}
-              onMouseDown={handleTempElementDragStart}
-            />
-
-            {/* Icon */}
-            <g
-              id="temp-element-icon"
-              transform={`translate(${temporaryElement.x + 6}, ${temporaryElement.y + 34})`}
-            >
-              <text
-                className="font-sans text-4xl font-bold shadow-sm select-none"
-                dominantBaseline="middle"
-              >
-                {currentIcon}
-              </text>
-            </g>
-
-            {/* Title */}
-            <g
-              id="temp-element-name"
-              transform={`translate(${temporaryElement.x + 60}, ${temporaryElement.y + 30})`}
-            >
-              <text
-                className="font-sans text-lg font-medium text-white select-none"
-                dominantBaseline="middle"
-              >
-                {currentTitle}
-              </text>
-            </g>
-          </g>
-        )}
-
-        {selectedToken && (
-          <circle
-            id="selection-ring"
-            cx={selectedToken.coordinates.x + 50}
-            cy={selectedToken.coordinates.y + 50}
-            r={64}
-            stroke="white"
-            strokeWidth={10}
-            className="animate-pulse"
-          />
-        )}
-
-        {tokens.map((token) => {
-          const player = players.find(
-            (player) => token.type === "player" && player.id === token.entity,
-          );
-          const opponent = encounterOpponents.data
-            ? encounterOpponents.data.find(
-                (opponent) =>
-                  token.type === "opponent" && opponent.id === token.entity,
-              )
-            : undefined;
-
-          if (player) {
-            return (
-              <ContextMenu key={"player-" + token.id}>
-                <ContextMenuTrigger asChild>
-                  <g
-                    data-token-group-id={token.id}
-                    className={cn(
-                      "group focus:outline-none focus-visible:outline-none",
-                      (tokenVisibility[token.id] ?? true)
-                        ? "visible"
-                        : "hidden",
-                    )}
-                    tabIndex={0}
-                    role="button"
-                    aria-label={`Token of player ${player.name}`}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        handleTokenClick(token);
-                      }
-                    }}
-                  >
-                    <circle
-                      cx={token.coordinates.x + 50}
-                      cy={token.coordinates.y + 50}
-                      r={40}
-                      fill="white"
-                      stroke="#10b981"
-                      strokeWidth={4}
-                      className="pointer-events-none"
-                    />
-
-                    <image
-                      className="hover:cursor-pointer"
-                      data-token-id={token.id}
-                      href={!player.image ? undefined : player.image}
-                      width={100}
-                      height={100}
-                      x={token.coordinates.x}
-                      y={token.coordinates.y}
-                      preserveAspectRatio="xMidYMid"
-                      style={{
-                        cursor: isDrawing || isPanning ? "default" : "move",
-                        clipPath: "circle(40%)",
-                      }}
-                      onMouseDown={(e) => handleTokenDragStart(e, token)}
-                      onClick={() => handleTokenClick(token)}
-                    />
-                    <g>
-                      <text
-                        className="pointer-events-none text-4xl select-none"
-                        x={token.coordinates.x}
-                        y={token.coordinates.y + 32}
-                      >
-                        {player.icon}
-                      </text>
-                    </g>
-                    {!player.image && (
-                      <text
-                        x={token.coordinates.x + 50}
-                        y={token.coordinates.y + 50}
-                        textAnchor="middle"
-                        dominantBaseline="central"
-                        className="pointer-events-none select-none text-2xl font-bold fill-black"
-                      >
-                        {player.name.slice(0, 2).toUpperCase()}
-                      </text>
-                    )}
-                    {player.effects && player.effects.length > 0 && (
-                      <foreignObject
-                        x={token.coordinates.x + 60}
-                        y={token.coordinates.y + 10}
-                        width={24}
-                        height={24}
-                        className="pointer-events-auto"
-                      >
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <button className="flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-sm hover:cursor-pointer hover:bg-black hover:text-white">
-                              <Sparkles className="h-4 w-4" />
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-64 p-2">
-                            <div className="flex flex-col gap-2">
-                              <h4 className="text-sm leading-none font-semibold">
-                                {t("activeEffects")}
-                              </h4>
-                              {renderEffectsList(player.effects)}
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      </foreignObject>
-                    )}
-                  </g>
-                </ContextMenuTrigger>
-                <ContextMenuContent className="w-56">
-                  <ContextMenuLabel>{player.name}</ContextMenuLabel>
-                  <ContextMenuSeparator />
-                  <ContextMenuItem onClick={() => onTokenSelect(token)}>
-                    {t("select")}
-                  </ContextMenuItem>
-                  <ContextMenuSeparator />
-                  <ContextMenuGroup>
-                    {onOpenEffectsCatalog && (
-                      <ContextMenuItem
-                        onClick={() =>
-                          onOpenEffectsCatalog(player.id, "player")
-                        }
-                      >
-                        {t("addEffect")}
-                      </ContextMenuItem>
-                    )}
-                  </ContextMenuGroup>
-
-                  {(onHealPlayer || onDamagePlayer) && (
-                    <>
-                      <ContextMenuSeparator />
-                      <ContextMenuGroup>
-                        {onHealPlayer && (
-                          <ContextMenuItem
-                            onClick={() => onHealPlayer(player.id)}
-                          >
-                            {t("addHealth")}
-                          </ContextMenuItem>
-                        )}
-                        {onDamagePlayer && (
-                          <ContextMenuItem
-                            onClick={() => onDamagePlayer(player.id)}
-                          >
-                            {t("removeHealth")}
-                          </ContextMenuItem>
-                        )}
-                      </ContextMenuGroup>
-                    </>
-                  )}
-
-                  <ContextMenuSeparator />
-
-                  <ContextMenuGroup>
-                    <ContextMenuItem
-                      onClick={() =>
-                        useOverlayStore.getState().open("player.edit", {
-                          player: player,
-                          onEdit: async (updatedPlayer) => {
-                            const result =
-                              await database.players.update(updatedPlayer);
-                            return result;
-                          },
-                          onComplete: () => {
-                            queryClient.invalidateQueries({
-                              queryKey: ["players"],
-                            });
-                            queryClient.invalidateQueries({
-                              queryKey: ["party"],
-                            });
-                            queryClient.invalidateQueries({
-                              queryKey: ["parties"],
-                            });
-                          },
-                        })
-                      }
-                    >
-                      {t("edit")}
-                    </ContextMenuItem>
-                    <ContextMenuItem onClick={() => toggleToken(token)}>
-                      {(tokenVisibility[token.id] ?? true)
-                        ? t("hide")
-                        : t("show")}
-                    </ContextMenuItem>
-                  </ContextMenuGroup>
-
-                  {onRemoveFromInitiative &&
-                    onAddToInitiative &&
-                    initiativeEntityIds &&
-                    initiativeEntityIds.length > 0 && (
-                      <>
-                        <ContextMenuSeparator />
-                        <ContextMenuItem
-                          onClick={() => {
-                            const isInInitiative = initiativeEntityIds.some(
-                              (e) => e.id === player.id && e.type === "player",
-                            );
-                            if (isInInitiative) {
-                              onRemoveFromInitiative(player.id, "player");
-                            } else {
-                              onAddToInitiative(
-                                player.id,
-                                "player",
-                                player.name,
-                              );
-                            }
-                          }}
-                        >
-                          {initiativeEntityIds.some(
-                            (e) => e.id === player.id && e.type === "player",
-                          )
-                            ? t("removeFromInitiative")
-                            : t("addToInitiative")}
-                        </ContextMenuItem>
-                      </>
-                    )}
-                </ContextMenuContent>
-              </ContextMenu>
-            );
+    <CanvasTldrawProvider
+      value={{
+        database,
+        playersById,
+        opponentsById: opponentsById as Map<number, EncounterOpponent>,
+        elementsByShapeId,
+        tokensById,
+        selectedToken,
+        tokenVisibility,
+        setTokenVisibility,
+        onTokenSelect,
+        onOpenEffectsCatalog,
+        onHealPlayer,
+        onDamagePlayer,
+        onHealOpponent,
+        onDamageOpponent,
+        onRemoveFromInitiative,
+        onAddToInitiative,
+        initiativeEntityIds,
+      }}
+    >
+      <div className="relative h-full w-full">
+        <Tldraw
+          shapeUtils={shapeUtils}
+          tools={tools}
+          hideUi
+          components={{ ContextMenu: null }}
+          onMount={(nextEditor) => {
+            setEditor(nextEditor);
+          }}
+        />
+        <TokenPanels
+          players={players}
+          opponents={encounterOpponents.data ?? []}
+          tokens={tokens}
+          tokenVisibility={tokenVisibility}
+          isPlayersPanelOpen={isPlayersPanelOpen}
+          isOpponentsPanelOpen={isOpponentsPanelOpen}
+          onTogglePlayersPanel={() => setIsPlayersPanelOpen((prev) => !prev)}
+          onToggleOpponentsPanel={() =>
+            setIsOpponentsPanelOpen((prev) => !prev)
           }
-
-          if (opponent) {
-            return (
-              <ContextMenu key={"opponent-" + token.id}>
-                <ContextMenuTrigger asChild>
-                  <g
-                    data-token-group-id={token.id}
-                    className={cn(
-                      "group outline-4 focus:outline-none focus-visible:outline-none",
-                      (tokenVisibility[token.id] ?? true)
-                        ? "visible"
-                        : "hidden",
-                    )}
-                    tabIndex={0}
-                    role="button"
-                    aria-label={`Token of opponent ${opponent.name}`}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        handleTokenClick(token);
-                      }
-                    }}
-                  >
-                    <circle
-                      cx={token.coordinates.x + 50}
-                      cy={token.coordinates.y + 50}
-                      r={40}
-                      fill="white"
-                      stroke="#ef4444"
-                      strokeWidth={4}
-                      className="pointer-events-none"
-                    />
-
-                    <image
-                      className="hover:cursor-pointer"
-                      data-token-id={token.id}
-                      href={opponent.image === "" ? undefined : opponent.image}
-                      width={100}
-                      height={100}
-                      x={token.coordinates.x}
-                      y={token.coordinates.y}
-                      preserveAspectRatio="xMidYMid"
-                      style={{
-                        cursor: isDrawing || isPanning ? "default" : "move",
-                        clipPath: "circle(40%)",
-                      }}
-                      onMouseDown={(e) => handleTokenDragStart(e, token)}
-                      onClick={() => handleTokenClick(token)}
-                    />
-                    <g>
-                      <text
-                        className="pointer-events-none text-4xl select-none"
-                        x={token.coordinates.x}
-                        y={token.coordinates.y + 32}
-                      >
-                        {opponent.icon}
-                      </text>
-                    </g>
-                    {!opponent.image && (
-                      <text
-                        x={token.coordinates.x + 50}
-                        y={token.coordinates.y + 50}
-                        textAnchor="middle"
-                        dominantBaseline="central"
-                        className="pointer-events-none select-none text-2xl font-bold fill-black"
-                      >
-                        {opponent.name.slice(0, 2).toUpperCase()}
-                      </text>
-                    )}
-                    {opponent.effects && opponent.effects.length > 0 && (
-                      <foreignObject
-                        x={token.coordinates.x + 60}
-                        y={token.coordinates.y + 10}
-                        width={24}
-                        height={24}
-                        className="pointer-events-auto"
-                      >
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <button className="flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-sm hover:cursor-pointer hover:bg-black hover:text-white">
-                              <Sparkles className="h-4 w-4" />
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-64 p-2">
-                            <div className="flex flex-col gap-2">
-                              <h4 className="text-sm leading-none font-semibold">
-                                {t("activeEffects")}
-                              </h4>
-                              {renderEffectsList(opponent.effects)}
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      </foreignObject>
-                    )}
-                  </g>
-                </ContextMenuTrigger>
-                <ContextMenuContent className="w-56">
-                  <ContextMenuLabel>{opponent.name}</ContextMenuLabel>
-                  <ContextMenuSeparator />
-                  <ContextMenuItem onClick={() => onTokenSelect(token)}>
-                    {t("select")}
-                  </ContextMenuItem>
-                  <ContextMenuSeparator />
-                  <ContextMenuGroup>
-                    {onOpenEffectsCatalog && (
-                      <ContextMenuItem
-                        onClick={() =>
-                          onOpenEffectsCatalog(opponent.id, "opponent")
-                        }
-                      >
-                        {t("addEffect")}
-                      </ContextMenuItem>
-                    )}
-                  </ContextMenuGroup>
-
-                  {(onHealOpponent || onDamageOpponent) && (
-                    <>
-                      <ContextMenuSeparator />
-                      <ContextMenuGroup>
-                        {onHealOpponent && (
-                          <ContextMenuItem
-                            onClick={() => onHealOpponent(opponent.id)}
-                          >
-                            {t("addHealth")}
-                          </ContextMenuItem>
-                        )}
-                        {onDamageOpponent && (
-                          <ContextMenuItem
-                            onClick={() => onDamageOpponent(opponent.id)}
-                          >
-                            {t("removeHealth")}
-                          </ContextMenuItem>
-                        )}
-                      </ContextMenuGroup>
-                    </>
-                  )}
-
-                  <ContextMenuSeparator />
-
-                  <ContextMenuGroup>
-                    <ContextMenuItem
-                      onClick={() =>
-                        useOverlayStore
-                          .getState()
-                          .open("encounter-opponent.edit", {
-                            opponent: opponent,
-                            onEdit: async (opp) => {
-                              const result =
-                                await database.encounterOpponents.update(opp);
-                              return result;
-                            },
-                            onDelete: async (id) => {
-                              await database.encounterOpponents.delete(id);
-                            },
-                            onComplete: () => {
-                              queryClient.invalidateQueries({
-                                queryKey: ["encounter-opponents"],
-                              });
-                            },
-                          })
-                      }
-                    >
-                      {t("edit")}
-                    </ContextMenuItem>
-                    <ContextMenuItem onClick={() => toggleToken(token)}>
-                      {(tokenVisibility[token.id] ?? true)
-                        ? t("hide")
-                        : t("show")}
-                    </ContextMenuItem>
-                  </ContextMenuGroup>
-
-                  {onRemoveFromInitiative &&
-                    onAddToInitiative &&
-                    initiativeEntityIds &&
-                    initiativeEntityIds.length > 0 && (
-                      <>
-                        <ContextMenuSeparator />
-                        <ContextMenuItem
-                          onClick={() => {
-                            const isInInitiative = initiativeEntityIds.some(
-                              (e) =>
-                                e.id === opponent.id && e.type === "opponent",
-                            );
-                            if (isInInitiative) {
-                              onRemoveFromInitiative(opponent.id, "opponent");
-                            } else {
-                              onAddToInitiative(
-                                opponent.id,
-                                "opponent",
-                                opponent.name,
-                              );
-                            }
-                          }}
-                        >
-                          {initiativeEntityIds.some(
-                            (e) =>
-                              e.id === opponent.id && e.type === "opponent",
-                          )
-                            ? t("removeFromInitiative")
-                            : t("addToInitiative")}
-                        </ContextMenuItem>
-                      </>
-                    )}
-                </ContextMenuContent>
-              </ContextMenu>
+          onToggleToken={(token) => {
+            setTokenVisibility(
+              token.id,
+              !(tokenVisibility[token.id.toString()] ?? true),
             );
-          }
-
-          return null;
-        })}
-      </svg>
-
-      {players.length > 0 && (
-        <div className="absolute top-4 right-4 flex flex-col gap-4">
-          <div className="flex flex-col gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={handlePlayersPanel}
-                    className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:bg-slate-100 hover:shadow-xs"
-                  >
-                    {isPlayersPanelOpen ? (
-                      <CircleX className="h-4 w-4" />
-                    ) : (
-                      <UsersRound className="h-4 w-4" />
-                    )}
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>{t("playerTokens")}</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            {isPlayersPanelOpen && (
-              <div className="flex flex-col gap-2">
-                {players.map((player) => {
-                  const token = tokens.find(
-                    (t) => t.type === "player" && t.entity === player.id,
-                  );
-                  if (!token) return null;
-                  return (
-                    <Tooltip key={`player-${player.id}-token-state`}>
-                      <TooltipTrigger asChild>
-                        <button
-                          onClick={() => toggleToken(token)}
-                          className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
-                        >
-                          <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
-                            {player.image && player.image !== "" ? (
-                              <img
-                                className="col-start-1 col-end-1 row-start-1 row-end-2"
-                                src={player.image}
-                                alt={`Picture of Player ${player.name}`}
-                              />
-                            ) : (
-                              <span className="col-start-1 col-end-1 row-start-1 row-end-2">
-                                {player.icon}
-                              </span>
-                            )}
-
-                            {!(tokenVisibility[token.id] ?? true) && (
-                              <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
-                                <EyeNoneIcon className="h-4 w-4 text-white" />
-                              </div>
-                            )}
-                          </div>
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>{player.name}</TooltipContent>
-                    </Tooltip>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {encounterOpponents.data && encounterOpponents.data.length > 0 && (
-            <div className="flex flex-col gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={handleOpponentsPanel}
-                      className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
-                    >
-                      {isOpponentsPanelOpen ? (
-                        <CircleX className="h-4 w-4" />
-                      ) : (
-                        <Sword className="h-4 w-4" />
-                      )}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>{t("opponentTokens")}</TooltipContent>
-                </Tooltip>
-
-                {isOpponentsPanelOpen && (
-                  <div className="flex flex-col gap-2">
-                    {encounterOpponents.data &&
-                      encounterOpponents.data.map((opponent) => {
-                        const token = tokens.find(
-                          (t) =>
-                            t.type === "opponent" && t.entity === opponent.id,
-                        );
-                        if (!token) return null;
-                        return (
-                          <Tooltip key={`opponent-${opponent.id}-token-state`}>
-                            <TooltipTrigger asChild>
-                              <button
-                                onClick={() => toggleToken(token)}
-                                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
-                              >
-                                <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
-                                  {opponent.image && opponent.image !== "" ? (
-                                    <img
-                                      className="col-start-1 col-end-1 row-start-1 row-end-2 rounded-full"
-                                      src={opponent.image}
-                                      alt={`Picture of Opponent ${opponent.name}`}
-                                    />
-                                  ) : (
-                                    <span className="col-start-1 col-end-1 row-start-1 row-end-2">
-                                      {opponent.icon}
-                                    </span>
-                                  )}
-
-                                  {!(tokenVisibility[token.id] ?? true) && (
-                                    <div className="col-start-1 col-end-1 row-start-1 row-end-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
-                                      <EyeNoneIcon className="h-4 w-4 text-white" />
-                                    </div>
-                                  )}
-                                </div>
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>{opponent.name}</TooltipContent>
-                          </Tooltip>
-                        );
-                      })}
-                  </div>
-                )}
-              </TooltipProvider>
-            </div>
-          )}
-        </div>
-      )}
-
-      <MusicPlayer />
-
-      <div className="absolute bottom-4 left-4 flex gap-2 rounded-full border border-white/80 bg-white/20 p-1 shadow-md backdrop-blur-sm">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={zoomOut}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
-              >
-                <ZoomOutIcon className="h-4 w-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent className="flex items-center gap-2">
-              <p>{t("zoomOut")}</p>
-              <div className="flex gap-0.5">
-                <Kbd>{getModifierKey()}</Kbd>
-                <Kbd>-</Kbd>
-              </div>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={zoomIn}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
-              >
-                <ZoomInIcon className="h-4 w-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent className="flex items-center gap-2">
-              <p>{t("zoomIn")}</p>
-              <div className="flex gap-0.5">
-                <Kbd>{getModifierKey()}</Kbd>
-                <Kbd>+</Kbd>
-              </div>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={resetZoom}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
-              >
-                <MinimizeIcon className="h-4 w-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent className="flex items-center gap-2">
-              <p>{t("resetZoom")}</p>
-              <div className="flex gap-0.5">
-                <Kbd>{getModifierKey()}</Kbd>
-                <Kbd>0</Kbd>
-              </div>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => {
-                  setIsPanning(false);
-                  setIsDrawing((c) => !c);
-                }}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-white hover:cursor-pointer hover:bg-slate-100 hover:shadow-xs"
-              >
-                {isDrawing ? (
-                  <Cross2Icon className="h-4 w-4" />
-                ) : (
-                  <PaddingIcon className="h-4 w-4" />
-                )}
-              </button>
-            </TooltipTrigger>
-            <TooltipContent className="flex items-center gap-2">
-              <p>{t("drawEncounter")}</p>
-              <div className="flex gap-0.5">
-                <Kbd>{getModifierKey()}</Kbd>
-                <Kbd>D</Kbd>
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+          }}
+        />
+        <CanvasToolbar
+          drawingMode={drawingMode}
+          onZoomIn={() => editor?.zoomIn()}
+          onZoomOut={() => editor?.zoomOut()}
+          onResetZoom={() => editor?.resetZoom()}
+          onToggleDrawing={(mode) => setDrawingMode(mode)}
+        />
+        <SelectionToolbar
+          editor={editor}
+          selectedIds={selectedShapeIds}
+          markupByShapeId={markupByShapeId}
+          onMarkupDelete={onMarkupDelete}
+          onMarkupDuplicate={onMarkupDuplicate}
+          onMarkupColorChange={(markupId, color) => {
+            const m = markup.find((item) => item.id === markupId);
+            if (m) onMarkupMove({ ...m, color });
+          }}
+        />
       </div>
-    </div>
+    </CanvasTldrawProvider>
   );
 }
-
-export default Canvas;

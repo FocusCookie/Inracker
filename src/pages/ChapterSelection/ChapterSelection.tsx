@@ -66,7 +66,6 @@ import {
 import {
   useCreateWeakness,
   useUpdateWeakness,
-  useDeleteWeakness,
 } from "@/hooks/useWeaknesses";
 import database from "@/lib/database";
 import { getModifierKey } from "@/lib/utils";

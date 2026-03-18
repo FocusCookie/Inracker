@@ -4,7 +4,7 @@ import {
   EncounterDifficulty,
   EncounterType,
 } from "@/types/encounter";
-import { CanvasElement } from "@/components/Canvas/Canvas";
+import { CanvasElement } from "@/types/canvas";
 import { Chapter } from "@/types/chapters";
 import { execute, select, createDatabaseError } from "./core"; // Updated import
 import { getDetailedChapterById } from "./chapters";
