@@ -19,7 +19,7 @@ import type { CanvasElementWithId } from "./types";
 import TokenPanels from "./TokenPanels";
 import CanvasToolbar, { DrawingMode } from "./CanvasToolbar";
 import SelectionToolbar from "./SelectionToolbar";
-import { BACKGROUND_TYPE, ENCOUNTER_TYPE, TOKEN_TYPE, MARKUP_TYPE } from "./tldraw/shapes";
+import { BACKGROUND_TYPE } from "./tldraw/shapes";
 import { MarkupElement } from "@/types/markup";
 
 const shapeUtils = [
@@ -165,10 +165,7 @@ export default function Canvas({
   );
 
   const markupByShapeId = useMemo(
-    () =>
-      new Map(
-        markup.map((m) => [createShapeId(`markup-${m.id}`), m]),
-      ),
+    () => new Map(markup.map((m) => [createShapeId(`markup-${m.id}`), m])),
     [markup],
   );
 
@@ -422,7 +419,25 @@ export default function Canvas({
       window.removeEventListener("keydown", handleKeyDown, { capture: true });
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [editor, drawingMode, onTokenSelect, elementsByShapeId, _onOpenSessionLog]);
+  }, [
+    editor,
+    drawingMode,
+    onTokenSelect,
+    elementsByShapeId,
+    _onOpenSessionLog,
+  ]);
+
+  useEffect(() => {
+    if (!editor) return;
+    const watermark = document.querySelector<HTMLElement>(
+      ".tl-watermark_SEE-LICENSE",
+    );
+    if (watermark) {
+      watermark.style.zIndex = "1";
+      watermark.style.bottom = "16px";
+      watermark.style.right = "48px";
+    }
+  }, [editor]);
 
   useEffect(() => {
     if (!editor || !background) return;
