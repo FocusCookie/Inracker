@@ -22,8 +22,8 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
   override component(shape: TokenShape) {
     const editor = useEditor();
     const context = useCanvasTldrawContext();
-    if (!context) return null;
 
+    // All hooks must be at the very top to follow the Rules of Hooks.
     const {
       tokensById,
       tokenVisibility,
@@ -31,18 +31,32 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
       playersById,
       opponentsById,
       npcsById,
-    } = context;
+      database,
+      setTokenVisibility,
+      onTokenSelect,
+      onOpenEffectsCatalog,
+      onHealPlayer,
+      onDamagePlayer,
+      onHealOpponent,
+      onDamageOpponent,
+      onHealNPC,
+      onDamageNPC,
+      onRemoveFromInitiative,
+      onAddToInitiative,
+      initiativeEntityIds,
+    } = context || {};
 
-    // Use getZoomLevel directly. BaseBoxShapeUtil components re-render on camera changes
-    // if we access reactive state or if tldraw decides they are visible.
+    const token = tokensById?.get(shape.props.tokenId);
+
+    const tokenWithLocalCoords = useMemo(
+      () => (token ? { ...token, coordinates: { x: 0, y: 0 } } : null),
+      [token],
+    );
+
+    if (!context || !token || !tokenWithLocalCoords) return null;
+
     const zoomLevel = editor.getZoomLevel();
     const isLowDetail = zoomLevel < 0.4;
-
-    const tokenId = shape.props.tokenId;
-    const token = tokensById?.get(tokenId);
-    if (!token) {
-      return null;
-    }
 
     const isVisible = tokenVisibility?.[token.id.toString()] ?? true;
     const isSelected = selectedToken?.id === token.id;
@@ -120,22 +134,6 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
       );
     }
 
-    const {
-      database,
-      setTokenVisibility,
-      onTokenSelect,
-      onOpenEffectsCatalog,
-      onHealPlayer,
-      onDamagePlayer,
-      onHealOpponent,
-      onDamageOpponent,
-      onHealNPC,
-      onDamageNPC,
-      onRemoveFromInitiative,
-      onAddToInitiative,
-      initiativeEntityIds,
-    } = context;
-
     const player = playersById?.get(shape.props.entityId);
     const opponent = opponentsById?.get(shape.props.entityId);
     const npc = npcsById?.get(shape.props.entityId);
@@ -145,20 +143,18 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
     if (tokenType === "opponent" && !opponent) return null;
     if (tokenType === "npc" && !npc) return null;
 
-    const tokenWithLocalCoords = {
-      ...token,
-      coordinates: { x: 0, y: 0 },
-    };
-
     const handleToggleVisibility = () => {
       setTokenVisibility?.(token.id, !isVisible);
     };
 
     const handleSelect = () => {
+      const currentToken = tokensById?.get(shape.props.tokenId);
+      if (!currentToken) return;
+      
       if (isSelected) {
         onTokenSelect?.(null);
       } else {
-        onTokenSelect?.(token);
+        onTokenSelect?.(currentToken);
       }
     };
 
@@ -176,7 +172,7 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
             isInteractive={true}
             onDragStart={() => {}}
             onClick={() => handleSelect()}
-            onTokenSelect={onTokenSelect}
+            onTokenSelect={onTokenSelect || (() => {})}
             onToggleVisibility={() => handleToggleVisibility()}
             onOpenEffectsCatalog={onOpenEffectsCatalog}
             onHealPlayer={onHealPlayer}
@@ -184,7 +180,7 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
             onRemoveFromInitiative={onRemoveFromInitiative}
             onAddToInitiative={onAddToInitiative}
             initiativeEntityIds={initiativeEntityIds}
-            database={database}
+            database={database!}
           />
         ) : tokenType === "opponent" && opponent ? (
           <OpponentToken
@@ -195,7 +191,7 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
             isInteractive={true}
             onDragStart={() => {}}
             onClick={() => handleSelect()}
-            onTokenSelect={onTokenSelect}
+            onTokenSelect={onTokenSelect || (() => {})}
             onToggleVisibility={() => handleToggleVisibility()}
             onOpenEffectsCatalog={onOpenEffectsCatalog}
             onHealOpponent={onHealOpponent}
@@ -203,7 +199,7 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
             onRemoveFromInitiative={onRemoveFromInitiative}
             onAddToInitiative={onAddToInitiative}
             initiativeEntityIds={initiativeEntityIds}
-            database={database}
+            database={database!}
           />
         ) : tokenType === "npc" && npc ? (
           <NPCToken
@@ -214,7 +210,7 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
             isInteractive={true}
             onDragStart={() => {}}
             onClick={() => handleSelect()}
-            onTokenSelect={onTokenSelect}
+            onTokenSelect={onTokenSelect || (() => {})}
             onToggleVisibility={() => handleToggleVisibility()}
             onOpenEffectsCatalog={onOpenEffectsCatalog}
             onHealNPC={onHealNPC}
@@ -222,7 +218,7 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
             onRemoveFromInitiative={onRemoveFromInitiative}
             onAddToInitiative={onAddToInitiative}
             initiativeEntityIds={initiativeEntityIds}
-            database={database}
+            database={database!}
           />
         ) : null}
       </HTMLContainer>

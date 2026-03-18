@@ -17,12 +17,12 @@ type PlayerTokenProps = {
   onClick: (token: Token) => void;
   onTokenSelect: (token: Token | null) => void;
   onToggleVisibility: (token: Token) => void;
-  onOpenEffectsCatalog?: (entityId: number, type: "player" | "opponent") => void;
+  onOpenEffectsCatalog?: (entityId: number, type: "player" | "opponent" | "npc") => void;
   onHealPlayer?: (playerId: number) => void;
   onDamagePlayer?: (playerId: number) => void;
-  onRemoveFromInitiative?: (entityId: number, type: "player" | "opponent") => void;
-  onAddToInitiative?: (entityId: number, type: "player" | "opponent", name: string) => void;
-  initiativeEntityIds?: { id: number; type: "player" | "opponent" }[];
+  onRemoveFromInitiative?: (entityId: number, type: "player" | "opponent" | "npc") => void;
+  onAddToInitiative?: (entityId: number, type: "player" | "opponent" | "npc", name: string) => void;
+  initiativeEntityIds?: { id: number; type: "player" | "opponent" | "npc" }[];
   database: typeof db;
 };
 
@@ -61,7 +61,7 @@ export const PlayerToken = React.memo<PlayerTokenProps>(({
     });
   };
 
-  const handleToggleInitiative = (id: number, type: "player" | "opponent", name: string, active: boolean) => {
+  const handleToggleInitiative = (id: number, type: "player" | "opponent" | "npc", name: string, active: boolean) => {
     if (active) {
       onRemoveFromInitiative?.(id, type);
     } else {
@@ -95,6 +95,7 @@ export const PlayerToken = React.memo<PlayerTokenProps>(({
       onHeal={onHealPlayer}
       onDamage={onDamagePlayer}
       onToggleInitiative={handleToggleInitiative}
+      mode="dropdown"
     />
   ), [
     player.name, 

@@ -106,6 +106,7 @@ export const NPCToken: React.FC<Props> = memo(({
       onHeal={onHealNPC}
       onDamage={onDamageNPC}
       onToggleInitiative={handleToggleInitiative}
+      mode="dropdown"
     />
   );
 

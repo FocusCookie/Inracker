@@ -73,9 +73,18 @@ export function useTldrawSync({
 
     const now = Date.now();
 
+    const isActuallyDragging = editor.inputs.getIsDragging();
+    const isSelectionDragging = editor.getInstanceState().isChangingStyle || 
+                               editor.getInstanceState().isDragging;
+
     for (const element of elements) {
       const shapeId = createShapeId(`encounter-${element.id}`);
       nextElementMap.set(shapeId, element);
+
+      // 1. If we are currently dragging this shape, IGNORE the incoming prop update
+      if ((isActuallyDragging || isSelectionDragging) && editor.getSelectedShapeIds().includes(shapeId)) {
+        continue;
+      }
 
       const recentMove = recentLocalMovesRef.current.get(shapeId);
       const recentState =
@@ -140,9 +149,15 @@ export function useTldrawSync({
       const shapeId = createShapeId(`token-${token.id}`);
       nextTokenMap.set(shapeId, token);
 
+      // 1. If we are currently dragging this shape, IGNORE the incoming prop update
+      // This is the most robust way to prevent "jumping back" during interaction.
+      if ((isActuallyDragging || isSelectionDragging) && editor.getSelectedShapeIds().includes(shapeId)) {
+        continue;
+      }
+
       const recentMove = recentLocalMovesRef.current.get(shapeId);
       const recentState =
-        recentMove && now - recentMove.timestamp < 800
+        recentMove && now - recentMove.timestamp < 1000
           ? recentMove.state
           : null;
 
@@ -194,6 +209,11 @@ export function useTldrawSync({
     for (const m of markup) {
       const shapeId = createShapeId(`markup-${m.id}`);
       nextMarkupMap.set(shapeId, m);
+
+      // 1. If we are currently dragging this shape, IGNORE the incoming prop update
+      if ((isActuallyDragging || isSelectionDragging) && editor.getSelectedShapeIds().includes(shapeId)) {
+        continue;
+      }
 
       const recentMove = recentLocalMovesRef.current.get(shapeId);
       const recentState =
@@ -379,7 +399,10 @@ export function useTldrawSync({
 
       if (!hasShapeChanges) return;
 
-      const isDragging = editor.inputs.getIsDragging();
+      // Use a more specific check for drag operations
+      const isActuallyDragging = editor.inputs.getIsDragging();
+      const isSelectionDragging = editor.getInstanceState().isChangingStyle || 
+                                 editor.getInstanceState().isDragging;
 
       // Only process changed shapes for better performance
       const changedShapeIds = new Set<TLShapeId>([
@@ -411,7 +434,7 @@ export function useTldrawSync({
             prev.rotation !== current.rotation
           ) {
             shapeStateRef.current.set(shape.id, current);
-            if (isDragging) {
+            if (isActuallyDragging || isSelectionDragging) {
               pendingElementMovesRef.current.set(shape.id, current);
             } else {
               const element = elementByShapeIdRef.current.get(shape.id);
@@ -445,7 +468,7 @@ export function useTldrawSync({
             prev.rotation !== current.rotation
           ) {
             shapeStateRef.current.set(shape.id, current);
-            if (isDragging) {
+            if (isActuallyDragging || isSelectionDragging) {
               pendingTokenMovesRef.current.set(shape.id, current);
             } else {
               const token = tokenByShapeIdRef.current.get(shape.id);
@@ -481,7 +504,7 @@ export function useTldrawSync({
             prev.rotation !== current.rotation
           ) {
             shapeStateRef.current.set(shape.id, current);
-            if (isDragging) {
+            if (isActuallyDragging || isSelectionDragging) {
               pendingMarkupMovesRef.current.set(shape.id, current);
             } else {
               const m = markupByShapeIdRef.current.get(shape.id);
@@ -505,7 +528,7 @@ export function useTldrawSync({
         shapeStateRef.current.delete(id);
       }
 
-      if (!isDragging && wasDraggingRef.current) {
+      if (!(isActuallyDragging || isSelectionDragging) && wasDraggingRef.current) {
         pendingElementMovesRef.current.forEach((state, shapeId) => {
           const element = elementByShapeIdRef.current.get(shapeId);
           if (element) {
@@ -517,6 +540,7 @@ export function useTldrawSync({
               height: state.h,
               rotation: state.rotation,
             });
+            // Protect this shape for a while after move
             recentLocalMovesRef.current.set(shapeId, {
               state,
               timestamp: Date.now(),
@@ -536,6 +560,7 @@ export function useTldrawSync({
                 rotation: state.rotation,
               },
             });
+            // Protect this shape for a while after move
             recentLocalMovesRef.current.set(shapeId, {
               state,
               timestamp: Date.now(),
@@ -555,6 +580,7 @@ export function useTldrawSync({
               height: state.h,
               rotation: state.rotation,
             });
+            // Protect this shape for a while after move
             recentLocalMovesRef.current.set(shapeId, {
               state,
               timestamp: Date.now(),
@@ -564,7 +590,7 @@ export function useTldrawSync({
         pendingMarkupMovesRef.current.clear();
       }
 
-      wasDraggingRef.current = isDragging;
+      wasDraggingRef.current = !!(isActuallyDragging || isSelectionDragging);
     });
 
     return () => {
