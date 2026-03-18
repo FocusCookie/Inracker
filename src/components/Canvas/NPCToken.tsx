@@ -99,7 +99,6 @@ export const NPCToken: React.FC<Props> = memo(({
       entityType="npc"
       isInInitiative={isInInitiative}
       isVisible={isVisible}
-      onSelect={() => onTokenSelect(token)}
       onToggleVisibility={() => onToggleVisibility(token)}
       onEdit={handleEdit}
       onAddEffect={onOpenEffectsCatalog}

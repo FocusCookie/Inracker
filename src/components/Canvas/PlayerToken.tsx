@@ -88,7 +88,6 @@ export const PlayerToken = React.memo<PlayerTokenProps>(({
       entityType="player"
       isInInitiative={isInInitiative}
       isVisible={isVisible}
-      onSelect={() => onTokenSelect(token)}
       onToggleVisibility={() => onToggleVisibility(token)}
       onEdit={handleEdit}
       onAddEffect={onOpenEffectsCatalog}
@@ -103,7 +102,6 @@ export const PlayerToken = React.memo<PlayerTokenProps>(({
     isInInitiative, 
     isVisible, 
     token, 
-    onTokenSelect, 
     onToggleVisibility, 
     handleEdit, 
     onOpenEffectsCatalog, 

@@ -91,7 +91,6 @@ export const OpponentToken = React.memo<OpponentTokenProps>(({
       entityType="opponent"
       isInInitiative={isInInitiative}
       isVisible={isVisible}
-      onSelect={() => onTokenSelect(token)}
       onToggleVisibility={() => onToggleVisibility(token)}
       onEdit={handleEdit}
       onAddEffect={onOpenEffectsCatalog}
@@ -106,7 +105,6 @@ export const OpponentToken = React.memo<OpponentTokenProps>(({
     isInInitiative, 
     isVisible, 
     token, 
-    onTokenSelect, 
     onToggleVisibility, 
     handleEdit, 
     onOpenEffectsCatalog, 

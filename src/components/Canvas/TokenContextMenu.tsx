@@ -14,7 +14,6 @@ type TokenContextMenuProps = {
   entityType: "player" | "opponent" | "npc";
   isInInitiative: boolean;
   isVisible: boolean;
-  onSelect: () => void;
   onToggleVisibility: () => void;
   onEdit: () => void;
   onAddEffect?: (entityId: number, type: "player" | "opponent" | "npc") => void;
@@ -30,7 +29,6 @@ export const TokenContextMenu: React.FC<TokenContextMenuProps> = ({
   entityType,
   isInInitiative,
   isVisible,
-  onSelect,
   onToggleVisibility,
   onEdit,
   onAddEffect,
@@ -47,10 +45,6 @@ export const TokenContextMenu: React.FC<TokenContextMenuProps> = ({
       onMouseDown={(e) => e.stopPropagation()}
     >
       <DropdownMenuLabel>{entityName}</DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem onSelect={onSelect}>
-        {t("select")}
-      </DropdownMenuItem>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
         {onAddEffect && (
