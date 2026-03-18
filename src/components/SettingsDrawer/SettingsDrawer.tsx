@@ -15,6 +15,7 @@ import SettingsCategoryImmunities from "../SettingsCategoryImmunities/SettingsCa
 import SettingsCategoryResistances from "../SettingsCategoryResistances/SettingsCategoryResistances";
 import SettingsCategoryWeaknesses from "../SettingsCategoryWeaknesses/SettingsCategoryWeaknesses";
 import SettingsCategoryOpponents from "../SettingsCategoryOpponents/SettingsCategoryOpponents";
+import SettingsCategoryNPCs from "../SettingsCategoryNPCs/SettingsCategoryNPCs";
 import SettingsCategoryAudio from "../SettingsCategoryAudio/SettingsCategoryAudio";
 import SettingsCategoryBackup from "../SettingsCategoryBackup/SettingsCategoryBackup";
 import { SquareX } from "lucide-react";
@@ -137,7 +138,10 @@ function SettingsDrawer({
 
       case "opponents":
         return <SettingsCategoryOpponents database={database} />;
-        
+
+      case "npcs":
+        return <SettingsCategoryNPCs database={database} />;
+
       case "backup":
         return <SettingsCategoryBackup />;
 

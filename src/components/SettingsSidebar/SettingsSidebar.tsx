@@ -34,12 +34,14 @@ import {
   CollapsibleTrigger,
 } from "@radix-ui/react-collapsible";
 import { useTranslation } from "react-i18next";
+import { RiUserAddFill } from "react-icons/ri";
 
 export type SettingsCategory =
   | "general"
   | "images"
   | "audio"
   | "players"
+  | "npcs"
   | "effects"
   | "immunities"
   | "opponents"
@@ -120,11 +122,22 @@ function SettingsSidebar({ activeItem, onClose, onSelect }: Props) {
 
               <SidebarMenuItem>
                 <SidebarMenuButton
+                  tooltip={t("npcs")}
+                  isActive={activeItem === "npcs"}
+                  onClick={() => onSelect("npcs")}
+                >
+                  <PersonStanding />
+                  <span>{t("npcs")}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
                   tooltip={t("players")}
                   isActive={activeItem === "players"}
                   onClick={() => onSelect("players")}
                 >
-                  <PersonStanding />
+                  <RiUserAddFill />
                   <span>{t("players")}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>

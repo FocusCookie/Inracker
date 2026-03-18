@@ -1,0 +1,7 @@
+{
+  "npcs": "NPCs",
+  "createNPC": "Create NPC",
+  "noNPCs": "No NPCs found",
+  "noNPCsDescription": "You haven't created any NPC blueprints yet.",
+  "searchPlaceholder": "Search NPCs..."
+}

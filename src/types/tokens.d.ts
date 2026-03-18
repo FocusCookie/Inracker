@@ -1,7 +1,7 @@
 import { Prettify } from "./utils";
 
 export type TokenCoordinates = { x: number; y: number; rotation?: number };
-type TokenType = "player" | "opponent";
+type TokenType = "player" | "opponent" | "npc";
 
 export type DBToken = {
   coordinates: string;

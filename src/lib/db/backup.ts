@@ -10,8 +10,10 @@ export const exportAllData = async () => {
     chapters: await select("SELECT * FROM chapters"),
     encounters: await select("SELECT * FROM encounters"),
     opponents: await select("SELECT * FROM opponents"),
+    npcs: await select("SELECT * FROM npcs"),
     tokens: await select("SELECT * FROM tokens"),
     encounter_opponents: await select("SELECT * FROM encounter_opponents"),
+    encounter_npcs: await select("SELECT * FROM encounter_npcs"),
     combats: await select("SELECT * FROM combats"),
     combat_participants: await select("SELECT * FROM combat_participants"),
     combat_effects: await select("SELECT * FROM combat_effects"),
@@ -36,8 +38,10 @@ export const importAllData = async (data: any) => {
       "chapters",
       "encounters",
       "opponents",
+      "npcs",
       "tokens",
       "encounter_opponents",
+      "encounter_npcs",
       "combats",
       "combat_participants",
       "combat_effects",
@@ -82,8 +86,10 @@ export const importAllData = async (data: any) => {
     if (data.chapters) await insertRows("chapters", data.chapters);
     if (data.encounters) await insertRows("encounters", data.encounters);
     if (data.opponents) await insertRows("opponents", data.opponents);
+    if (data.npcs) await insertRows("npcs", data.npcs);
     if (data.tokens) await insertRows("tokens", data.tokens);
     if (data.encounter_opponents) await insertRows("encounter_opponents", data.encounter_opponents);
+    if (data.encounter_npcs) await insertRows("encounter_npcs", data.encounter_npcs);
     if (data.combats) await insertRows("combats", data.combats);
     if (data.combat_participants) await insertRows("combat_participants", data.combat_participants);
     if (data.combat_effects) await insertRows("combat_effects", data.combat_effects);
@@ -167,6 +173,10 @@ export const exportCategoryData = async (category: string, ids?: (number | strin
       data.opponents = await select(`SELECT * FROM opponents${idFilter("opponents")}`);
       await getDependencies(data.opponents);
       break;
+    case "npcs":
+      data.npcs = await select(`SELECT * FROM npcs${idFilter("npcs")}`);
+      await getDependencies(data.npcs);
+      break;
     case "effects":
       data.effects = await select(`SELECT * FROM effects${idFilter("effects")}`);
       break;
@@ -244,6 +254,34 @@ export const exportCategoryData = async (category: string, ids?: (number | strin
                     await getDependencies(allEntities);
                 } else {
                     await getDependencies(encounterOpponents);
+                }
+            }
+
+            const encounterNpcIds = new Set<number>();
+            tokens.forEach(t => {
+                if (t.type === 'npc') {
+                    encounterNpcIds.add(t.entity);
+                }
+            });
+
+            if (encounterNpcIds.size > 0) {
+                const encNpcIdList = Array.from(encounterNpcIds).join(", ");
+                const encounterNpcs = await select<any[]>(`SELECT * FROM encounter_npcs WHERE id IN (${encNpcIdList})`);
+                data.encounter_npcs = encounterNpcs;
+
+                const blueprintIds = new Set<number>();
+                encounterNpcs.forEach(en => {
+                    if (en.blueprint) blueprintIds.add(en.blueprint);
+                });
+
+                if (blueprintIds.size > 0) {
+                    const blueprintIdList = Array.from(blueprintIds).join(", ");
+                    data.npcs = await select(`SELECT * FROM npcs WHERE id IN (${blueprintIdList})`);
+                    
+                    const allEntities = [...encounterNpcs, ...(data.npcs || [])];
+                    await getDependencies(allEntities);
+                } else {
+                    await getDependencies(encounterNpcs);
                 }
             }
         }
@@ -327,8 +365,8 @@ export const mergeAllData = async (data: any) => {
   
   const tables = [
       "parties", "players", "effects", "immunities", "resistances",
-      "chapters", "encounters", "opponents", "tokens",
-      "encounter_opponents", "combats", "combat_participants",
+      "chapters", "encounters", "opponents", "npcs", "tokens",
+      "encounter_opponents", "encounter_npcs", "combats", "combat_participants",
       "combat_effects", "active_effects", "settings", "logs", "weaknesses"
     ];
 

@@ -257,7 +257,7 @@ pub fn run() {
                 id TEXT PRIMARY KEY,
                 effect_id INTEGER NOT NULL,
                 entity_id INTEGER NOT NULL,
-                entity_type TEXT NOT NULL, -- 'player' or 'opponent'
+                entity_type TEXT NOT NULL, -- 'player', 'opponent' or 'npc'
                 remaining_duration INTEGER NOT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY(effect_id) REFERENCES effects(id) ON DELETE CASCADE
@@ -328,6 +328,43 @@ pub fn run() {
                 color TEXT NOT NULL,
                 FOREIGN KEY(chapter) REFERENCES chapters(id) ON DELETE CASCADE
             )",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 27,
+            description: "create npcs and encounter_npcs tables",
+            sql: "CREATE TABLE IF NOT EXISTS npcs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                details TEXT,
+                health INTEGER NOT NULL,
+                max_health INTEGER NOT NULL,
+                image TEXT,
+                icon TEXT NOT NULL,
+                labels TEXT, -- JSON ARRAY of strings
+                level INTEGER NOT NULL,
+                resistances TEXT, --JSON array ids
+                immunities TEXT, -- JSON array ids
+                effects TEXT, -- JSON array ids
+                weaknesses TEXT -- JSON array ids
+            );
+            CREATE TABLE IF NOT EXISTS encounter_npcs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                details TEXT,
+                health INTEGER NOT NULL,
+                max_health INTEGER NOT NULL,
+                image TEXT,
+                icon TEXT NOT NULL,
+                labels TEXT, -- JSON ARRAY of strings
+                level INTEGER NOT NULL,
+                resistances TEXT, --JSON array ids
+                immunities TEXT, -- JSON array ids
+                effects TEXT, -- JSON array ids,
+                weaknesses TEXT, -- JSON array ids
+                blueprint INTEGER NOT NULL
+            );
+            ",
             kind: MigrationKind::Up,
         },
     ];

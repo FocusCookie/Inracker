@@ -11,16 +11,16 @@ import {
 type TokenContextMenuProps = {
   entityName: string;
   entityId: number;
-  entityType: "player" | "opponent";
+  entityType: "player" | "opponent" | "npc";
   isInInitiative: boolean;
   isVisible: boolean;
   onSelect: () => void;
   onToggleVisibility: () => void;
   onEdit: () => void;
-  onAddEffect?: (entityId: number, type: "player" | "opponent") => void;
+  onAddEffect?: (entityId: number, type: "player" | "opponent" | "npc") => void;
   onHeal?: (entityId: number) => void;
   onDamage?: (entityId: number) => void;
-  onToggleInitiative?: (entityId: number, type: "player" | "opponent", name: string, active: boolean) => void;
+  onToggleInitiative?: (entityId: number, type: "player" | "opponent" | "npc", name: string, active: boolean) => void;
 };
 
 export const TokenContextMenu: React.FC<TokenContextMenuProps> = ({

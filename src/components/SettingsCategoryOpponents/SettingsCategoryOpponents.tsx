@@ -128,4 +128,3 @@ function SettingsCategoryOpponents({ database }: Props) {
 }
 
 export default SettingsCategoryOpponents;
-

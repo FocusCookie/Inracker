@@ -65,6 +65,8 @@ type Props = {
   onDamagePlayer?: (playerId: number) => void;
   onHealOpponent?: (opponentId: number) => void;
   onDamageOpponent?: (opponentId: number) => void;
+  onHealNPC?: (npcId: number) => void;
+  onDamageNPC?: (npcId: number) => void;
   onToggleAside?: () => void;
   onOpenSessionLog?: () => void;
   onStartFight?: (encounterId: number) => void;
@@ -95,6 +97,8 @@ export default function Canvas({
   onDamagePlayer,
   onHealOpponent,
   onDamageOpponent,
+  onHealNPC,
+  onDamageNPC,
   onToggleAside: _onToggleAside,
   onOpenSessionLog: _onOpenSessionLog,
   onStartFight: _onStartFight,
@@ -138,6 +142,11 @@ export default function Canvas({
     queryFn: () => database.encounterOpponents.getAllDetailed(),
   });
 
+  const encounterNPCs = useQueryWithToast({
+    queryKey: ["encounter-npcs"],
+    queryFn: () => database.encounterNPCs.getAllDetailed(),
+  });
+
   const playersById = useMemo(
     () => new Map(players.map((player) => [player.id, player])),
     [players],
@@ -155,9 +164,15 @@ export default function Canvas({
   );
 
   const opponentsById = useMemo(
-    () => new Map((encounterOpponents.data ?? []).map((o) => [o.id, o])),
+    () => new Map((encounterOpponents.data || []).map((op) => [op.id, op])),
     [encounterOpponents.data],
   );
+
+  const npcsById = useMemo(
+    () => new Map((encounterNPCs.data || []).map((npc) => [npc.id, npc])),
+    [encounterNPCs.data],
+  );
+
 
   const tokensById = useMemo(
     () => new Map(tokens.map((token) => [token.id, token])),
@@ -240,7 +255,8 @@ export default function Canvas({
       const isElement = target.closest("[data-element-id]");
 
       if (isToken || isElement) {
-        event.preventDefault();
+        // We don't prevent default here anymore to allow Radix ContextMenu to work.
+        // Radix will handle preventing the browser context menu.
       }
     };
 
@@ -307,42 +323,59 @@ export default function Canvas({
   useEffect(() => {
     if (!editor) return;
 
-    const unsubscribe = editor.store.listen(() => {
+    const unsubscribe = editor.store.listen((event) => {
       if (isSelectionSyncingRef.current) return;
 
-      const selectedIds = editor.getSelectedShapeIds();
-      setSelectedShapeIds(selectedIds.map((id) => String(id)));
+      // Only update selection state if selection actually changed
+      const selectionChanged =
+        Object.values(event.changes.added).some(
+          (record) => record.typeName === "instance_presence",
+        ) ||
+        Object.values(event.changes.updated).some(
+          ([_from, to]) => to.typeName === "instance",
+        );
 
-      if (selectedIds.length !== 1) {
-        if (selectedToken) {
-          onTokenSelect(null);
+      // tldraw uses 'instance' records for selection among other things.
+      // A more direct way is to check if selected ids changed.
+      const currentSelectedIds = editor.getSelectedShapeIds();
+      const hasSelectionChange =
+        currentSelectedIds.length !== selectedShapeIds.length ||
+        currentSelectedIds.some((id, i) => String(id) !== selectedShapeIds[i]);
+
+      if (hasSelectionChange) {
+        setSelectedShapeIds(currentSelectedIds.map((id) => String(id)));
+
+        if (currentSelectedIds.length !== 1) {
+          if (selectedToken) {
+            onTokenSelect(null);
+          }
+          return;
         }
-        return;
-      }
 
-      const shape = editor.getShape(selectedIds[0]);
-      if (!shape || shape.type !== "token") {
-        if (selectedToken) {
-          onTokenSelect(null);
+        const shape = editor.getShape(currentSelectedIds[0]);
+        if (!shape || shape.type !== "token") {
+          if (selectedToken) {
+            onTokenSelect(null);
+          }
+          return;
         }
-        return;
-      }
 
-      const tokenId = (shape as any).props?.tokenId as number | undefined;
-      if (!tokenId) {
-        return;
-      }
+        const tokenId = (shape as any).props?.tokenId as number | undefined;
+        if (!tokenId) {
+          return;
+        }
 
-      const token = tokensById.get(tokenId);
-      if (token && token.id !== selectedToken?.id) {
-        onTokenSelect(token);
+        const token = tokensById.get(tokenId);
+        if (token && token.id !== selectedToken?.id) {
+          onTokenSelect(token);
+        }
       }
     });
 
     return () => {
       unsubscribe();
     };
-  }, [editor, onTokenSelect, selectedToken, tokensById]);
+  }, [editor, onTokenSelect, selectedToken, tokensById, selectedShapeIds]);
 
   useEffect(() => {
     if (!editor) return;
@@ -474,7 +507,15 @@ export default function Canvas({
   useEffect(() => {
     if (!editor) return;
 
-    const unsubscribe = editor.store.listen(() => {
+    const unsubscribe = editor.store.listen((event) => {
+      // Only process if shapes actually changed
+      const hasShapeChanges =
+        Object.values(event.changes.added).some((s) => s.typeName === "shape") ||
+        Object.values(event.changes.removed).some((s) => s.typeName === "shape") ||
+        Object.values(event.changes.updated).some(([_from, to]) => to.typeName === "shape");
+
+      if (!hasShapeChanges) return;
+
       const shape = editor.getShape(backgroundShapeId);
       if (shape) {
         editor.sendToBack([backgroundShapeId]);
@@ -491,6 +532,7 @@ export default function Canvas({
       database,
       playersById,
       opponentsById: opponentsById as Map<number, EncounterOpponent>,
+      npcsById,
       elementsByShapeId,
       tokensById,
       selectedToken,
@@ -502,6 +544,8 @@ export default function Canvas({
       onDamagePlayer,
       onHealOpponent,
       onDamageOpponent,
+      onHealNPC,
+      onDamageNPC,
       onRemoveFromInitiative,
       onAddToInitiative,
       initiativeEntityIds,
@@ -510,6 +554,7 @@ export default function Canvas({
       database,
       playersById,
       opponentsById,
+      npcsById,
       elementsByShapeId,
       tokensById,
       selectedToken,
@@ -520,6 +565,8 @@ export default function Canvas({
       onDamagePlayer,
       onHealOpponent,
       onDamageOpponent,
+      onHealNPC,
+      onDamageNPC,
       onRemoveFromInitiative,
       onAddToInitiative,
       initiativeEntityIds,

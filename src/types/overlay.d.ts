@@ -8,6 +8,7 @@ import { DBEffect, Effect } from "./effect";
 import { Chapter, DBChapter } from "./chapters";
 import { Encounter } from "./encounter";
 import { EncounterOpponent, Opponent, TCreateOpponent } from "./opponents";
+import { EncounterNPC, NPC } from "./npcs";
 
 export type CancelReason = "cancel" | "dismissed" | "closed";
 
@@ -20,6 +21,10 @@ export type OverlaySuccessMap = {
   "encounter.create": Encounter;
   "encounter.edit": Encounter;
   "encounter-opponent.edit": EncounterOpponent;
+  "encounter-npc.edit": EncounterNPC;
+  "npc.create": NPC;
+  "npc.edit": NPC;
+  "npc.catalog": NPC;
   "opponent.create": Opponent;
   "opponent.edit": Opponent;
   "opponent.catalog": Opponent;
@@ -98,6 +103,29 @@ export type OverlayMap = {
     onEdit: (opponent: EncounterOpponent) => Promise<EncounterOpponent>;
     onComplete: (result: OverlaySuccessMap["encounter-opponent.edit"]) => void;
     onDelete: (opponentId: number) => Promise<void>;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "encounter-npc.edit": {
+    npc: EncounterNPC;
+    onEdit: (npc: EncounterNPC) => Promise<EncounterNPC>;
+    onComplete: (result: OverlaySuccessMap["encounter-npc.edit"]) => void;
+    onDelete: (npcId: number) => Promise<void>;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "npc.create": {
+    onCreate: (npc: Omit<NPC, "id">) => Promise<NPC>;
+    onComplete: (result: OverlaySuccessMap["npc.create"]) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "npc.edit": {
+    npc: NPC;
+    onEdit: (npc: NPC) => Promise<NPC>;
+    onComplete: (result: OverlaySuccessMap["npc.edit"]) => void;
+    onCancel?: (reason: CancelReason) => void;
+  };
+  "npc.catalog": {
+    database: typeof db;
+    onSelect: (npc: NPC) => void;
     onCancel?: (reason: CancelReason) => void;
   };
   "opponent.create": {
