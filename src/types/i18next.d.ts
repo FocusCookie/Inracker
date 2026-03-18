@@ -22,6 +22,13 @@ import ComponentEditPlayerDrawer from "@/translations/en/components/EditPlayerDr
 import ComponentSettingsOpponentCard from "@/translations/en/components/SettingsOpponentCard.json";
 import ComponentEditOpponentDrawer from "@/translations/en/components/EditOpponentDrawer.json";
 import ComponentEncounterOpponentEditDrawer from "@/translations/en/components/EncounterOpponentEditDrawer.json";
+import ComponentCreateNPCDrawer from "@/translations/en/components/ComponentCreateNPCDrawer.json";
+import ComponentEditNPCDrawer from "@/translations/en/components/ComponentEditNPCDrawer.json";
+import ComponentNPCCatalog from "@/translations/en/components/ComponentNPCCatalog.json";
+import ComponentNPCCard from "@/translations/en/components/ComponentNPCCard.json";
+import ComponentSettingsCategoryNPCs from "@/translations/en/components/ComponentSettingsCategoryNPCs.json";
+import ComponentSettingsNPCCard from "@/translations/en/components/ComponentSettingsNPCCard.json";
+import ComponentEncounterNPCEditDrawer from "@/translations/en/components/ComponentEncounterNPCEditDrawer.json";
 import ComponentEncounterSelection from "@/translations/en/components/EncounterSelection.json";
 import ComponentCanvas from "@/translations/en/components/Canvas.json";
 import PagePlay from "@/translations/en/pages/Play.json";
@@ -94,6 +101,13 @@ declare module "i18next" {
       ComponentSettingsOpponentCard: typeof ComponentSettingsOpponentCard;
       ComponentEditOpponentDrawer: typeof ComponentEditOpponentDrawer;
       ComponentEncounterOpponentEditDrawer: typeof ComponentEncounterOpponentEditDrawer;
+      ComponentCreateNPCDrawer: typeof ComponentCreateNPCDrawer;
+      ComponentEditNPCDrawer: typeof ComponentEditNPCDrawer;
+      ComponentNPCCatalog: typeof ComponentNPCCatalog;
+      ComponentNPCCard: typeof ComponentNPCCard;
+      ComponentSettingsCategoryNPCs: typeof ComponentSettingsCategoryNPCs;
+      ComponentSettingsNPCCard: typeof ComponentSettingsNPCCard;
+      ComponentEncounterNPCEditDrawer: typeof ComponentEncounterNPCEditDrawer;
       ComponentEncounterSelection: typeof ComponentEncounterSelection;
       ComponentCanvas: typeof ComponentCanvas;
       ComponentEditEncounterDrawer: typeof ComponentEditEncounterDrawer;

@@ -1,0 +1,18 @@
+{
+  "title": "Create NPC",
+  "descriptionText": "Create a new NPC blueprint.",
+  "cancel": "Cancel",
+  "create": "Create",
+  "name": "Name",
+  "icon": "Icon",
+  "level": "Level",
+  "maxHealth": "Max Health",
+  "npcPicture": "NPC Picture",
+  "profilePictureAlt": "NPC profile picture",
+  "picturePlaceholder": "Select an image",
+  "details": "Details",
+  "detailsDescription": "Additional information about the NPC.",
+  "immunities": "Immunities",
+  "resistances": "Resistances",
+  "weaknesses": "Weaknesses"
+}

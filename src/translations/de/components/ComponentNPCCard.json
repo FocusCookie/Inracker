@@ -1,0 +1,18 @@
+{
+  "selectToken": "Token auswählen",
+  "addEffect": "Effekt hinzufügen",
+  "addImmunity": "Immunität hinzufügen",
+  "addResistance": "Widerstand hinzufügen",
+  "addWeakness": "Schwäche hinzufügen",
+  "addHealth": "Heilen",
+  "removeHealth": "Schaden",
+  "removeFromChapter": "Aus Kapitel entfernen",
+  "editNPC": "NPC bearbeiten",
+  "level": "Stufe",
+  "details": "Details",
+  "immunities": "Immunitäten",
+  "resistances": "Resistenzen",
+  "weaknesses": "Schwächen",
+  "positiveEffects": "Positive Effekte",
+  "negativeEffects": "Negative Effekte"
+}

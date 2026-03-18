@@ -44,6 +44,17 @@ export const getEncounterOpponentToken = async (
   return result[0];
 };
 
+export const getEncounterNPCToken = async (
+  encounterNPCId: number,
+): Promise<DBToken> => {
+  const result = await select<DBToken[]>(
+    "SELECT * FROM tokens WHERE entity = $1 AND type = $2",
+    [encounterNPCId, "npc"],
+  );
+
+  return result[0];
+};
+
 export const getDetailedTokenById = async (
   id: Token["id"],
 ): Promise<Token> => {

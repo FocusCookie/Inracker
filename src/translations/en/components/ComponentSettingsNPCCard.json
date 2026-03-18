@@ -1,0 +1,6 @@
+{
+  "delete": "Delete",
+  "edit": "Edit",
+  "deleteNPC": "Delete NPC",
+  "deletionWarning": "Are you sure you want to delete this NPC blueprint? This action cannot be undone."
+}

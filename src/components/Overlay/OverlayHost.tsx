@@ -27,6 +27,10 @@ import EncounterSelection from "../EncounterSelection/EncounterSelection";
 import OpponentsCatalog from "../OpponentsCatalog/OpponentsCatalog";
 import EditOpponentDrawer from "../EditOpponentDrawer/EditOpponentDrawer";
 import EditEncounterOpponentDrawer from "../EditEncounterOpponentDrawer/EditEncounterOpponentDrawer";
+import CreateNPCDrawer from "../CreateNPCDrawer/CreateNPCDrawer";
+import EditNPCDrawer from "../EditNPCDrawer/EditNPCDrawer";
+import EditEncounterNPCDrawer from "../EditEncounterNPCDrawer/EditEncounterNPCDrawer";
+import NPCCatalog from "../NPCCatalog/NPCCatalog";
 import HealthDialog from "../HealthDialog/HealthDialog";
 import MoneyDialog from "../MoneyDialog/MoneyDialog";
 import SessionLogDrawer from "../SessionLogDrawer/SessionLogDrawer";
@@ -51,11 +55,15 @@ const registry: Record<OverlayKind, OverlayComponent<any>> = {
   "encounter.edit": EditEncounterDrawer,
   "encounter.selection": EncounterSelection,
   "encounter-opponent.edit": EditEncounterOpponentDrawer,
+  "encounter-npc.edit": EditEncounterNPCDrawer,
   "immunity.edit": EditImmunityDrawer,
   "immunity.create": CreateImmunityDrawer,
   "immunity.catalog": ImmunitiesCatalog,
   "health.dialog": HealthDialog,
   "money.dialog": MoneyDialog,
+  "npc.create": CreateNPCDrawer,
+  "npc.edit": EditNPCDrawer,
+  "npc.catalog": NPCCatalog,
   "opponent.create": CreateOpponentDrawer,
   "opponent.edit": EditOpponentDrawer,
   "opponent.catalog": OpponentsCatalog,

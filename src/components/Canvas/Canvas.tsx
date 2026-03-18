@@ -19,7 +19,7 @@ import type { CanvasElementWithId } from "./types";
 import TokenPanels from "./TokenPanels";
 import CanvasToolbar, { DrawingMode } from "./CanvasToolbar";
 import SelectionToolbar from "./SelectionToolbar";
-import { BACKGROUND_TYPE, ENCOUNTER_TYPE, TOKEN_TYPE, MARKUP_TYPE } from "./tldraw/shapes";
+import { BACKGROUND_TYPE } from "./tldraw/shapes";
 import { MarkupElement } from "@/types/markup";
 
 const shapeUtils = [
@@ -65,6 +65,8 @@ type Props = {
   onDamagePlayer?: (playerId: number) => void;
   onHealOpponent?: (opponentId: number) => void;
   onDamageOpponent?: (opponentId: number) => void;
+  onHealNPC?: (npcId: number) => void;
+  onDamageNPC?: (npcId: number) => void;
   onToggleAside?: () => void;
   onOpenSessionLog?: () => void;
   onStartFight?: (encounterId: number) => void;
@@ -95,6 +97,8 @@ export default function Canvas({
   onDamagePlayer,
   onHealOpponent,
   onDamageOpponent,
+  onHealNPC,
+  onDamageNPC,
   onToggleAside: _onToggleAside,
   onOpenSessionLog: _onOpenSessionLog,
   onStartFight: _onStartFight,
@@ -138,6 +142,11 @@ export default function Canvas({
     queryFn: () => database.encounterOpponents.getAllDetailed(),
   });
 
+  const encounterNPCs = useQueryWithToast({
+    queryKey: ["encounter-npcs"],
+    queryFn: () => database.encounterNPCs.getAllDetailed(),
+  });
+
   const playersById = useMemo(
     () => new Map(players.map((player) => [player.id, player])),
     [players],
@@ -155,9 +164,15 @@ export default function Canvas({
   );
 
   const opponentsById = useMemo(
-    () => new Map((encounterOpponents.data ?? []).map((o) => [o.id, o])),
+    () => new Map((encounterOpponents.data || []).map((op) => [op.id, op])),
     [encounterOpponents.data],
   );
+
+  const npcsById = useMemo(
+    () => new Map((encounterNPCs.data || []).map((npc) => [npc.id, npc])),
+    [encounterNPCs.data],
+  );
+
 
   const tokensById = useMemo(
     () => new Map(tokens.map((token) => [token.id, token])),
@@ -165,10 +180,7 @@ export default function Canvas({
   );
 
   const markupByShapeId = useMemo(
-    () =>
-      new Map(
-        markup.map((m) => [createShapeId(`markup-${m.id}`), m]),
-      ),
+    () => new Map(markup.map((m) => [createShapeId(`markup-${m.id}`), m])),
     [markup],
   );
 
@@ -180,17 +192,19 @@ export default function Canvas({
   };
 
   useEffect(() => {
-    const tokensToHide: number[] = [];
+    const hiddenOpponentIds = new Set<number>();
     elements.forEach((element) => {
       if (element.completed && element.opponents) {
-        const opponentIds = new Set(element.opponents);
-        tokens.forEach((token) => {
-          if (token.type === "opponent" && opponentIds.has(token.entity)) {
-            if (tokenVisibility[token.id.toString()] !== false) {
-              tokensToHide.push(token.id);
-            }
-          }
-        });
+        element.opponents.forEach((id) => hiddenOpponentIds.add(id));
+      }
+    });
+
+    const tokensToHide: number[] = [];
+    tokens.forEach((token) => {
+      if (token.type === "opponent" && hiddenOpponentIds.has(token.entity)) {
+        if (tokenVisibility[token.id.toString()] !== false) {
+          tokensToHide.push(token.id);
+        }
       }
     });
 
@@ -241,7 +255,8 @@ export default function Canvas({
       const isElement = target.closest("[data-element-id]");
 
       if (isToken || isElement) {
-        event.preventDefault();
+        // We don't prevent default here anymore to allow Radix ContextMenu to work.
+        // Radix will handle preventing the browser context menu.
       }
     };
 
@@ -308,42 +323,59 @@ export default function Canvas({
   useEffect(() => {
     if (!editor) return;
 
-    const unsubscribe = editor.store.listen(() => {
+    const unsubscribe = editor.store.listen((event) => {
       if (isSelectionSyncingRef.current) return;
 
-      const selectedIds = editor.getSelectedShapeIds();
-      setSelectedShapeIds(selectedIds.map((id) => String(id)));
+      // Only update selection state if selection actually changed
+      const selectionChanged =
+        Object.values(event.changes.added).some(
+          (record) => record.typeName === "instance_presence",
+        ) ||
+        Object.values(event.changes.updated).some(
+          ([_from, to]) => to.typeName === "instance",
+        );
 
-      if (selectedIds.length !== 1) {
-        if (selectedToken) {
-          onTokenSelect(null);
+      // tldraw uses 'instance' records for selection among other things.
+      // A more direct way is to check if selected ids changed.
+      const currentSelectedIds = editor.getSelectedShapeIds();
+      const hasSelectionChange =
+        currentSelectedIds.length !== selectedShapeIds.length ||
+        currentSelectedIds.some((id, i) => String(id) !== selectedShapeIds[i]);
+
+      if (hasSelectionChange) {
+        setSelectedShapeIds(currentSelectedIds.map((id) => String(id)));
+
+        if (currentSelectedIds.length !== 1) {
+          if (selectedToken) {
+            onTokenSelect(null);
+          }
+          return;
         }
-        return;
-      }
 
-      const shape = editor.getShape(selectedIds[0]);
-      if (!shape || shape.type !== "token") {
-        if (selectedToken) {
-          onTokenSelect(null);
+        const shape = editor.getShape(currentSelectedIds[0]);
+        if (!shape || shape.type !== "token") {
+          if (selectedToken) {
+            onTokenSelect(null);
+          }
+          return;
         }
-        return;
-      }
 
-      const tokenId = (shape as any).props?.tokenId as number | undefined;
-      if (!tokenId) {
-        return;
-      }
+        const tokenId = (shape as any).props?.tokenId as number | undefined;
+        if (!tokenId) {
+          return;
+        }
 
-      const token = tokensById.get(tokenId);
-      if (token && token.id !== selectedToken?.id) {
-        onTokenSelect(token);
+        const token = tokensById.get(tokenId);
+        if (token && token.id !== selectedToken?.id) {
+          onTokenSelect(token);
+        }
       }
     });
 
     return () => {
       unsubscribe();
     };
-  }, [editor, onTokenSelect, selectedToken, tokensById]);
+  }, [editor, onTokenSelect, selectedToken, tokensById, selectedShapeIds]);
 
   useEffect(() => {
     if (!editor) return;
@@ -422,7 +454,25 @@ export default function Canvas({
       window.removeEventListener("keydown", handleKeyDown, { capture: true });
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [editor, drawingMode, onTokenSelect, elementsByShapeId, _onOpenSessionLog]);
+  }, [
+    editor,
+    drawingMode,
+    onTokenSelect,
+    elementsByShapeId,
+    _onOpenSessionLog,
+  ]);
+
+  useEffect(() => {
+    if (!editor) return;
+    const watermark = document.querySelector<HTMLElement>(
+      ".tl-watermark_SEE-LICENSE",
+    );
+    if (watermark) {
+      watermark.style.zIndex = "1";
+      watermark.style.bottom = "16px";
+      watermark.style.right = "48px";
+    }
+  }, [editor]);
 
   useEffect(() => {
     if (!editor || !background) return;
@@ -457,7 +507,15 @@ export default function Canvas({
   useEffect(() => {
     if (!editor) return;
 
-    const unsubscribe = editor.store.listen(() => {
+    const unsubscribe = editor.store.listen((event) => {
+      // Only process if shapes actually changed
+      const hasShapeChanges =
+        Object.values(event.changes.added).some((s) => s.typeName === "shape") ||
+        Object.values(event.changes.removed).some((s) => s.typeName === "shape") ||
+        Object.values(event.changes.updated).some(([_from, to]) => to.typeName === "shape");
+
+      if (!hasShapeChanges) return;
+
       const shape = editor.getShape(backgroundShapeId);
       if (shape) {
         editor.sendToBack([backgroundShapeId]);
@@ -469,28 +527,54 @@ export default function Canvas({
     };
   }, [editor, backgroundShapeId]);
 
+  const contextValue = useMemo(
+    () => ({
+      database,
+      playersById,
+      opponentsById: opponentsById as Map<number, EncounterOpponent>,
+      npcsById,
+      elementsByShapeId,
+      tokensById,
+      selectedToken,
+      tokenVisibility,
+      setTokenVisibility,
+      onTokenSelect,
+      onOpenEffectsCatalog,
+      onHealPlayer,
+      onDamagePlayer,
+      onHealOpponent,
+      onDamageOpponent,
+      onHealNPC,
+      onDamageNPC,
+      onRemoveFromInitiative,
+      onAddToInitiative,
+      initiativeEntityIds,
+    }),
+    [
+      database,
+      playersById,
+      opponentsById,
+      npcsById,
+      elementsByShapeId,
+      tokensById,
+      selectedToken,
+      tokenVisibility,
+      onTokenSelect,
+      onOpenEffectsCatalog,
+      onHealPlayer,
+      onDamagePlayer,
+      onHealOpponent,
+      onDamageOpponent,
+      onHealNPC,
+      onDamageNPC,
+      onRemoveFromInitiative,
+      onAddToInitiative,
+      initiativeEntityIds,
+    ],
+  );
+
   return (
-    <CanvasTldrawProvider
-      value={{
-        database,
-        playersById,
-        opponentsById: opponentsById as Map<number, EncounterOpponent>,
-        elementsByShapeId,
-        tokensById,
-        selectedToken,
-        tokenVisibility,
-        setTokenVisibility,
-        onTokenSelect,
-        onOpenEffectsCatalog,
-        onHealPlayer,
-        onDamagePlayer,
-        onHealOpponent,
-        onDamageOpponent,
-        onRemoveFromInitiative,
-        onAddToInitiative,
-        initiativeEntityIds,
-      }}
-    >
+    <CanvasTldrawProvider value={contextValue}>
       <div className="relative h-full w-full">
         <Tldraw
           shapeUtils={shapeUtils}

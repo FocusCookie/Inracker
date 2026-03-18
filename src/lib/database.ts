@@ -8,6 +8,7 @@ import { parties } from "./db/parties";
 import { chapters } from "./db/chapters";
 import { encounters } from "./db/encounters";
 import { opponents, encounterOpponents } from "./db/opponents";
+import { npcs, encounterNPCs } from "./db/npcs";
 import { tokens } from "./db/tokens";
 import { markup } from "./db/markup";
 import { settings } from "./db/settings";
@@ -21,6 +22,7 @@ const database = {
   disconnect,
   parties,
   opponents,
+  npcs,
   effects,
   immunities,
   resistances,
@@ -31,6 +33,7 @@ const database = {
   tokens,
   markup,
   encounterOpponents,
+  encounterNPCs,
   combat,
   settings,
   logs,

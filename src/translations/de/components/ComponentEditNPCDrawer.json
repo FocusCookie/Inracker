@@ -1,0 +1,19 @@
+{
+  "title": "NPC bearbeiten",
+  "descriptionText": "Bearbeite eine vorhandene NPC-Vorlage.",
+  "cancel": "Abbrechen",
+  "update": "Aktualisieren",
+  "minName": "Name muss mindestens 2 Zeichen lang sein.",
+  "icon": "Symbol",
+  "name": "Name",
+  "level": "Stufe",
+  "maxHealth": "Max. Trefferpunkte",
+  "npcPicture": "NPC-Bild",
+  "profilePictureAlt": "NPC Profilbild",
+  "picturePlaceholder": "Bild auswählen",
+  "details": "Details",
+  "detailsDescription": "Zusätzliche Informationen über den NPC.",
+  "immunities": "Immunitäten",
+  "resistances": "Resistenzen",
+  "weaknesses": "Schwächen"
+}

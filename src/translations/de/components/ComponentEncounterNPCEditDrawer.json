@@ -1,0 +1,14 @@
+{
+  "title": "Encounter NPC bearbeiten",
+  "descriptionText": "Bearbeite diese Instanz des NPCs.",
+  "cancel": "Abbrechen",
+  "save": "Speichern",
+  "delete": "Löschen",
+  "confirmDelete": "Bist du sicher, dass du diesen NPC aus dem Kapitel entfernen möchtest?",
+  "immunities": "Immunitäten",
+  "resistances": "Resistenzen",
+  "weaknesses": "Schwächen",
+  "effects": "Effekte",
+  "create": "Erstellen",
+  "catalog": "Katalog"
+}

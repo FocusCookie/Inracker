@@ -1,0 +1,14 @@
+{
+  "title": "Edit Encounter NPC",
+  "descriptionText": "Edit this instance of the NPC.",
+  "cancel": "Cancel",
+  "save": "Save",
+  "delete": "Delete",
+  "confirmDelete": "Are you sure you want to remove this NPC from the chapter?",
+  "immunities": "Immunities",
+  "resistances": "Resistances",
+  "weaknesses": "Weaknesses",
+  "effects": "Effects",
+  "create": "Create",
+  "catalog": "Catalog"
+}

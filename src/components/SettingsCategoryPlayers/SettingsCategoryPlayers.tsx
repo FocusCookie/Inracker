@@ -107,7 +107,7 @@ function SettingsCategoryPlayers({ database = defaultDb }: Props) {
             onChange={handlePlayerSearchTerm}
           />
 
-          <div className="scrollable-y overflow-y-scroll p-0.5">
+          <div className="scrollable-y h-full overflow-y-scroll p-0.5">
             <div className="flex h-full max-h-96 flex-col gap-4">
               {players.data
                 .filter((player) =>

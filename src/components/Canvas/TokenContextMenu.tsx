@@ -1,26 +1,26 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import {
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuLabel,
-  ContextMenuSeparator,
-  ContextMenuGroup,
-} from "@/components/ui/context-menu";
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuGroup,
+} from "@/components/ui/dropdown-menu";
 
 type TokenContextMenuProps = {
   entityName: string;
   entityId: number;
-  entityType: "player" | "opponent";
+  entityType: "player" | "opponent" | "npc";
   isInInitiative: boolean;
   isVisible: boolean;
-  onSelect: () => void;
   onToggleVisibility: () => void;
   onEdit: () => void;
-  onAddEffect?: (entityId: number, type: "player" | "opponent") => void;
+  onAddEffect?: (entityId: number, type: "player" | "opponent" | "npc") => void;
   onHeal?: (entityId: number) => void;
   onDamage?: (entityId: number) => void;
-  onToggleInitiative?: (entityId: number, type: "player" | "opponent", name: string, active: boolean) => void;
+  onToggleInitiative?: (entityId: number, type: "player" | "opponent" | "npc", name: string, active: boolean) => void;
+  mode?: "context" | "dropdown"; // Deprecated but kept for compatibility
 };
 
 export const TokenContextMenu: React.FC<TokenContextMenuProps> = ({
@@ -29,7 +29,6 @@ export const TokenContextMenu: React.FC<TokenContextMenuProps> = ({
   entityType,
   isInInitiative,
   isVisible,
-  onSelect,
   onToggleVisibility,
   onEdit,
   onAddEffect,
@@ -40,68 +39,68 @@ export const TokenContextMenu: React.FC<TokenContextMenuProps> = ({
   const { t } = useTranslation("ComponentCanvas");
 
   return (
-    <ContextMenuContent className="w-56">
-      <ContextMenuLabel>{entityName}</ContextMenuLabel>
-      <ContextMenuSeparator />
-      <ContextMenuItem onClick={onSelect}>
-        {t("select")}
-      </ContextMenuItem>
-      <ContextMenuSeparator />
-      <ContextMenuGroup>
+    <DropdownMenuContent 
+      className="w-56 z-50"
+      onPointerDown={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+      <DropdownMenuLabel>{entityName}</DropdownMenuLabel>
+      <DropdownMenuSeparator />
+      <DropdownMenuGroup>
         {onAddEffect && (
-          <ContextMenuItem
-            onClick={() => onAddEffect(entityId, entityType)}
+          <DropdownMenuItem
+            onSelect={() => onAddEffect(entityId, entityType)}
           >
             {t("addEffect")}
-          </ContextMenuItem>
+          </DropdownMenuItem>
         )}
-      </ContextMenuGroup>
+      </DropdownMenuGroup>
 
       {(onHeal || onDamage) && (
         <>
-          <ContextMenuSeparator />
-          <ContextMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
             {onHeal && (
-              <ContextMenuItem
-                onClick={() => onHeal(entityId)}
+              <DropdownMenuItem
+                onSelect={() => onHeal(entityId)}
               >
                 {t("addHealth")}
-              </ContextMenuItem>
+              </DropdownMenuItem>
             )}
             {onDamage && (
-              <ContextMenuItem
-                onClick={() => onDamage(entityId)}
+              <DropdownMenuItem
+                onSelect={() => onDamage(entityId)}
               >
                 {t("removeHealth")}
-              </ContextMenuItem>
+              </DropdownMenuItem>
             )}
-          </ContextMenuGroup>
+          </DropdownMenuGroup>
         </>
       )}
 
-      <ContextMenuSeparator />
+      <DropdownMenuSeparator />
 
-      <ContextMenuGroup>
-        <ContextMenuItem onClick={onEdit}>
+      <DropdownMenuGroup>
+        <DropdownMenuItem onSelect={onEdit}>
           {t("edit")}
-        </ContextMenuItem>
-        <ContextMenuItem onClick={onToggleVisibility}>
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={onToggleVisibility}>
           {isVisible ? t("hide") : t("show")}
-        </ContextMenuItem>
-      </ContextMenuGroup>
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
 
       {onToggleInitiative && (
         <>
-          <ContextMenuSeparator />
-          <ContextMenuItem
-            onClick={() => onToggleInitiative(entityId, entityType, entityName, isInInitiative)}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onSelect={() => onToggleInitiative(entityId, entityType, entityName, isInInitiative)}
           >
             {isInInitiative
               ? t("removeFromInitiative")
               : t("addToInitiative")}
-          </ContextMenuItem>
+          </DropdownMenuItem>
         </>
       )}
-    </ContextMenuContent>
+    </DropdownMenuContent>
   );
 };

@@ -1,12 +1,10 @@
 import db from "@/lib/database";
-import { getModifierKey } from "@/lib/utils";
+import { cn, getModifierKey } from "@/lib/utils";
 import PlayLayout from "@/components/PlayLayout/PlayLayout";
 import { AnimatePresence, motion } from "framer-motion";
 import Canvas from "@/components/Canvas/Canvas";
-import {
-  CanvasElement,
-  ClickableCanvasElement,
-} from "@/types/canvas";
+import { CanvasElement, ClickableCanvasElement } from "@/types/canvas";
+import { EncounterNPC, NPC } from "@/types/npcs";
 import {
   Tooltip,
   TooltipContent,
@@ -44,6 +42,7 @@ import { RiArrowLeftBoxLine, RiUserAddFill } from "react-icons/ri";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Party } from "@/types/party";
 import PlayerCard from "@/components/PlayerCard/PlayerCard";
+import NPCCard from "@/components/NPCCard/NPCCard";
 import CombatControls from "@/components/CombatControls/CombatControls";
 import InitiativeMenue from "@/components/InitiativeMenue/InitiativeMenue";
 import ActiveEffectsMenue from "@/components/ActiveEffectsMenue/ActiveEffectsMenue";
@@ -53,7 +52,12 @@ import {
   EncounterOpponentEntity,
 } from "@/components/InitiativeCard/InitiativeCard";
 import { InitiativeMenuEntity } from "@/types/initiative";
-import { BedSingleIcon, CoffeeIcon, NotebookText } from "lucide-react";
+import {
+  BedSingleIcon,
+  CoffeeIcon,
+  NotebookText,
+  PersonStanding,
+} from "lucide-react";
 import { Kbd } from "@/components/ui/kbd";
 
 // Hooks
@@ -63,6 +67,15 @@ import {
   useAddEffectToEncounterOpponent,
   useUpdateEncounterOpponent,
 } from "@/hooks/useEncounterOpponents";
+import {
+  useEncounterNPCs,
+  useCreateEncounterNPC,
+  useUpdateEncounterNPC,
+  useDeleteEncounterNPC,
+  useAddEffectToNPC,
+  useRemoveEffectFromNPC,
+} from "@/hooks/useEncounterNPCs";
+import { useNPCs, useUpdateNPC } from "@/hooks/useNPCs";
 import { useRests } from "@/hooks/useRests";
 import { useCreateLog } from "@/hooks/useLogs";
 import {
@@ -83,10 +96,7 @@ import {
   useUpdateResistance,
   useCreateResistance,
 } from "@/hooks/useResistances";
-import {
-  useCreateWeakness,
-  useUpdateWeakness,
-} from "@/hooks/useWeaknesses";
+import { useCreateWeakness, useUpdateWeakness } from "@/hooks/useWeaknesses";
 import { useUpdateEffect, useCreateEffect } from "@/hooks/useEffects";
 import {
   useUpdateEncounter,
@@ -166,6 +176,17 @@ function Play({
   const encounterOpponentsRef = useRef(encounterOpponents);
   encounterOpponentsRef.current = encounterOpponents;
 
+  const encounterNPCs = useEncounterNPCs(database);
+  const encounterNPCsRef = useRef(encounterNPCs);
+  encounterNPCsRef.current = encounterNPCs;
+
+  const createEncounterNPCMutation = useCreateEncounterNPC(database);
+  const updateEncounterNPCMutation = useUpdateEncounterNPC(database);
+  const deleteEncounterNPCMutation = useDeleteEncounterNPC(database);
+  const addEffectToNPCMutation = useAddEffectToNPC(database);
+  const removeEffectFromNPCMutation = useRemoveEffectFromNPC(database);
+  const updateNPCMutation = useUpdateNPC(database);
+
   const playersRef = useRef(players);
   playersRef.current = players;
 
@@ -200,6 +221,17 @@ function Play({
           };
           return entity;
         }
+      } else if (p.entityType === "npc") {
+        const npc = encounterNPCs.data?.find((n: any) => n.id === p.entityId);
+        if (npc) {
+          const entity: InitiativeMenuEntity = {
+            type: "encounterNPC" as any,
+            properties: npc as any,
+            initiative: p.initiative,
+            effects: participantEffects,
+          };
+          return entity;
+        }
       }
       return null;
     });
@@ -207,7 +239,7 @@ function Play({
     return entities
       .filter((e): e is InitiativeMenuEntity => e !== null)
       .sort((a, b) => b.initiative - a.initiative);
-  }, [combatState, players, encounterOpponents.data]);
+  }, [combatState, players, encounterOpponents.data, encounterNPCs.data]);
 
   const { data: secondsPerRound } = useQuery({
     queryKey: ["settings", "secondsPerRound"],
@@ -1102,6 +1134,116 @@ function Play({
     });
   }
 
+  function handleNPCsCatalog() {
+    openOverlay("npc.catalog", {
+      database,
+      onSelect: async (npc) => {
+        await createEncounterNPCMutation.mutateAsync({
+          npc: {
+            ...npc,
+            blueprint: npc.id,
+          },
+          chapterId: chapter.id,
+        });
+      },
+    });
+  }
+
+  function handleOpenCreateNPC() {
+    openOverlay("npc.create", {
+      onCreate: (npc: Omit<NPC, "id">) => database.npcs.create(npc),
+      onComplete: async (npc) => {
+        await createEncounterNPCMutation.mutateAsync({
+          npc: {
+            ...npc,
+            blueprint: npc.id,
+          },
+          chapterId: chapter.id,
+        });
+        queryClient.invalidateQueries({ queryKey: ["npcs"] });
+      },
+    });
+  }
+
+  function handleHealNPC(npcId: number) {
+    const npc = encounterNPCs.data?.find((n) => n.id === npcId);
+    if (!npc) return;
+
+    openOverlay("health.dialog", {
+      currentHealth: npc.health,
+      maxHealth: npc.max_health,
+      entityName: npc.name,
+      type: "heal",
+      onConfirm: async (amount, note) => {
+        const newHealth = Math.min(npc.health + amount, npc.max_health);
+        await updateEncounterNPCMutation.mutateAsync({
+          ...npc,
+          health: newHealth,
+        });
+
+        await createLogMutation.mutateAsync({
+          chapterId: chapter.id,
+          title: t("healedEntity", { name: npc.name, amount }),
+          description: note,
+          icon: "💚",
+          type: "heal",
+        });
+      },
+    });
+  }
+
+  function handleDamageNPC(npcId: number) {
+    const npc = encounterNPCs.data?.find((n) => n.id === npcId);
+    if (!npc) return;
+
+    openOverlay("health.dialog", {
+      currentHealth: npc.health,
+      maxHealth: npc.max_health,
+      entityName: npc.name,
+      type: "damage",
+      onConfirm: async (amount, note) => {
+        const newHealth = npc.health - amount;
+        await updateEncounterNPCMutation.mutateAsync({
+          ...npc,
+          health: newHealth,
+        });
+
+        await createLogMutation.mutateAsync({
+          chapterId: chapter.id,
+          title: t("damagedEntity", { name: npc.name, amount }),
+          description: note,
+          icon: "💔",
+          type: "damage",
+        });
+      },
+    });
+  }
+
+  function handleOpenEditNPC(npc: EncounterNPC) {
+    openOverlay("encounter-npc.edit", {
+      npc,
+      onEdit: (updatedNpc) =>
+        updateEncounterNPCMutation.mutateAsync(updatedNpc),
+      onDelete: (id) => deleteEncounterNPCMutation.mutateAsync(id),
+      onComplete: () => {
+        queryClient.invalidateQueries({ queryKey: ["encounter-npcs"] });
+        queryClient.invalidateQueries({ queryKey: ["tokens"] });
+      },
+    });
+  }
+
+  function handleNPCEffectsCatalog(npc: EncounterNPC) {
+    openOverlay("effect.catalog", {
+      database,
+      onSelect: async (effect) => {
+        await addEffectToNPCMutation.mutateAsync({
+          npcId: npc.id,
+          effectId: effect.id,
+        });
+      },
+    });
+  }
+
   return (
     <PlayLayout isAsideOpen={isAsideOpen} isEncounterOpen={false}>
       {combatState && (
@@ -1198,56 +1340,83 @@ function Play({
       </PlayLayout.Rest>
 
       <PlayLayout.Players>
-        {players.map((player) => (
-          <PlayerCard
-            key={player.id}
-            player={player}
-            expanded={isAsideOpen}
-            onEditImmunity={handleOpenEditImmunity}
-            onEditResistance={handleOpenEditResistance}
-            onEditWeakness={handleOpenEditWeakness}
-            onEditEffect={handleOpenEditEffect}
-            onRemove={(playerId) => {
-              removePlayerFromPartyMutation.mutate({
-                partyId,
-                playerId,
-              });
-            }}
-            onEdit={handleOpenEditPlayer}
-            onRemoveImmunity={(playerId, immunityId) => {
-              removeImmunityFromPlayerMutation.mutate({
-                playerId,
-                immunityId,
-              });
-            }}
-            onRemoveResistance={(playerId, resistanceId) => {
-              removeResistanceFromPlayerMutation.mutate({
-                playerId,
-                resistanceId,
-              });
-            }}
-            onRemoveWeakness={(playerId, weaknessId) => {
-              removeWeaknessFromPlayerMutation.mutate({
-                playerId,
-                weaknessId,
-              });
-            }}
-            onRemoveEffect={(playerId, effectId) => {
-              removeEffectFromPlayerMutation.mutate({
-                playerId,
-                effectId,
-              });
-            }}
-            onOpenEffectsCatalog={() => handleEffectsCatalog(player)}
-            onOpenResistancesCatalog={() => handleResistancesCatalog(player)}
-            onOpenWeaknessesCatalog={() => handleWeaknessesCatalog(player)}
-            onOpenImmunitiesCatalog={() => handleImmunitiesCatalog(player)}
-            onHeal={handleHealPlayer}
-            onDamage={handleDamagePlayer}
-            onEditMoney={handleEditMoney}
-            onToggleHeroPoint={handleToggleHeroPoint}
-          />
-        ))}
+        <div className="flex flex-col gap-4">
+          {players.map((player) => (
+            <PlayerCard
+              key={player.id}
+              player={player}
+              expanded={isAsideOpen}
+              onEditImmunity={handleOpenEditImmunity}
+              onEditResistance={handleOpenEditResistance}
+              onEditWeakness={handleOpenEditWeakness}
+              onEditEffect={handleOpenEditEffect}
+              onRemove={(playerId) => {
+                removePlayerFromPartyMutation.mutate({
+                  partyId,
+                  playerId,
+                });
+              }}
+              onEdit={handleOpenEditPlayer}
+              onRemoveImmunity={(playerId, immunityId) => {
+                removeImmunityFromPlayerMutation.mutate({
+                  playerId,
+                  immunityId,
+                });
+              }}
+              onRemoveResistance={(playerId, resistanceId) => {
+                removeResistanceFromPlayerMutation.mutate({
+                  playerId,
+                  resistanceId,
+                });
+              }}
+              onRemoveWeakness={(playerId, weaknessId) => {
+                removeWeaknessFromPlayerMutation.mutate({
+                  playerId,
+                  weaknessId,
+                });
+              }}
+              onRemoveEffect={(playerId, effectId) => {
+                removeEffectFromPlayerMutation.mutate({
+                  playerId,
+                  effectId,
+                });
+              }}
+              onOpenEffectsCatalog={() => handleEffectsCatalog(player)}
+              onOpenResistancesCatalog={() => handleResistancesCatalog(player)}
+              onOpenWeaknessesCatalog={() => handleWeaknessesCatalog(player)}
+              onOpenImmunitiesCatalog={() => handleImmunitiesCatalog(player)}
+              onHeal={handleHealPlayer}
+              onDamage={handleDamagePlayer}
+              onEditMoney={handleEditMoney}
+              onToggleHeroPoint={handleToggleHeroPoint}
+            />
+          ))}
+
+          {encounterNPCs.data && encounterNPCs.data.length > 0 && (
+            <div className="flex flex-col gap-4 border-t pt-4">
+              <h3
+                className={cn("text-lg font-bold", !isAsideOpen && "sr-only")}
+              >
+                {t("npcs")}
+              </h3>
+              {encounterNPCs.data.map((npc: EncounterNPC) => (
+                <NPCCard
+                  key={`npc-${npc.id}`}
+                  npc={npc}
+                  expanded={isAsideOpen}
+                  onEdit={handleOpenEditNPC}
+                  onRemove={(id) => deleteEncounterNPCMutation.mutate(id)}
+                  onHeal={handleHealNPC}
+                  onDamage={handleDamageNPC}
+                  onOpenEffectsCatalog={() => handleNPCEffectsCatalog(npc)}
+                  onRemoveEffect={(npcId, effectId) =>
+                    removeEffectFromNPCMutation.mutate({ npcId, effectId })
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </PlayLayout.Players>
 
       <PlayLayout.Settings>
@@ -1302,6 +1471,34 @@ function Play({
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="icon" variant="ghost">
+                          <PersonStanding />
+                        </Button>
+                      </DropdownMenuTrigger>
+
+                      <DropdownMenuContent className="w-56">
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem onClick={handleNPCsCatalog}>
+                            {t("addNPCFromCatalog")}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={handleOpenCreateNPC}>
+                            {t("createNewNPC")}
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>{t("npcs")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
               <TooltipProvider>
                 <Tooltip>

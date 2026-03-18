@@ -40,6 +40,20 @@ import ComponentEditOpponentDrawerEN from "@/translations/en/components/EditOppo
 import ComponentEditOpponentDrawerDE from "@/translations/de/components/EditOpponentDrawer.json";
 import ComponentEncounterOpponentEditDrawerEN from "@/translations/en/components/EncounterOpponentEditDrawer.json";
 import ComponentEncounterOpponentEditDrawerDE from "@/translations/de/components/EncounterOpponentEditDrawer.json";
+import ComponentCreateNPCDrawerEN from "@/translations/en/components/ComponentCreateNPCDrawer.json";
+import ComponentEditNPCDrawerEN from "@/translations/en/components/ComponentEditNPCDrawer.json";
+import ComponentNPCCatalogEN from "@/translations/en/components/ComponentNPCCatalog.json";
+import ComponentNPCCardEN from "@/translations/en/components/ComponentNPCCard.json";
+import ComponentSettingsCategoryNPCsEN from "@/translations/en/components/ComponentSettingsCategoryNPCs.json";
+import ComponentSettingsNPCCardEN from "@/translations/en/components/ComponentSettingsNPCCard.json";
+import ComponentEncounterNPCEditDrawerEN from "@/translations/en/components/ComponentEncounterNPCEditDrawer.json";
+import ComponentCreateNPCDrawerDE from "@/translations/de/components/ComponentCreateNPCDrawer.json";
+import ComponentEditNPCDrawerDE from "@/translations/de/components/ComponentEditNPCDrawer.json";
+import ComponentNPCCatalogDE from "@/translations/de/components/ComponentNPCCatalog.json";
+import ComponentNPCCardDE from "@/translations/de/components/ComponentNPCCard.json";
+import ComponentSettingsCategoryNPCsDE from "@/translations/de/components/ComponentSettingsCategoryNPCs.json";
+import ComponentSettingsNPCCardDE from "@/translations/de/components/ComponentSettingsNPCCard.json";
+import ComponentEncounterNPCEditDrawerDE from "@/translations/de/components/ComponentEncounterNPCEditDrawer.json";
 import ComponentEncounterSelectionEN from "@/translations/en/components/EncounterSelection.json";
 import ComponentEncounterSelectionDE from "@/translations/de/components/EncounterSelection.json";
 import ComponentCanvasEN from "@/translations/en/components/Canvas.json";
@@ -164,6 +178,13 @@ const resources = {
     ComponentEditOpponentDrawer: ComponentEditOpponentDrawerEN,
     ComponentEncounterOpponentEditDrawer:
       ComponentEncounterOpponentEditDrawerEN,
+    ComponentCreateNPCDrawer: ComponentCreateNPCDrawerEN,
+    ComponentEditNPCDrawer: ComponentEditNPCDrawerEN,
+    ComponentNPCCatalog: ComponentNPCCatalogEN,
+    ComponentNPCCard: ComponentNPCCardEN,
+    ComponentSettingsCategoryNPCs: ComponentSettingsCategoryNPCsEN,
+    ComponentSettingsNPCCard: ComponentSettingsNPCCardEN,
+    ComponentEncounterNPCEditDrawer: ComponentEncounterNPCEditDrawerEN,
     ComponentEncounterSelection: ComponentEncounterSelectionEN,
     ComponentCanvas: ComponentCanvasEN,
     ComponentEditEncounterDrawer: ComponentEditEncounterDrawerEN,
@@ -242,6 +263,13 @@ const resources = {
     ComponentEditOpponentDrawer: ComponentEditOpponentDrawerDE,
     ComponentEncounterOpponentEditDrawer:
       ComponentEncounterOpponentEditDrawerDE,
+    ComponentCreateNPCDrawer: ComponentCreateNPCDrawerDE,
+    ComponentEditNPCDrawer: ComponentEditNPCDrawerDE,
+    ComponentNPCCatalog: ComponentNPCCatalogDE,
+    ComponentNPCCard: ComponentNPCCardDE,
+    ComponentSettingsCategoryNPCs: ComponentSettingsCategoryNPCsDE,
+    ComponentSettingsNPCCard: ComponentSettingsNPCCardDE,
+    ComponentEncounterNPCEditDrawer: ComponentEncounterNPCEditDrawerDE,
     ComponentEncounterSelection: ComponentEncounterSelectionDE,
     ComponentCanvas: ComponentCanvasDE,
     ComponentEditEncounterDrawer: ComponentEditEncounterDrawerDE,

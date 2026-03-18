@@ -41,6 +41,26 @@ export const useSettingsBackup = () => {
     }
   };
 
+  const findBackupInfo = async (selected: string) => {
+    // Case 1: selected/data/*.json (The new standard)
+    const dataDir = await join(selected, "data");
+    if (await exists(dataDir)) {
+      const playersPath = await join(dataDir, "players.json");
+      if (await exists(playersPath)) {
+        return { root: selected, data: dataDir };
+      }
+    }
+
+    // Case 2: selected/*.json (Older format or user selected the 'data' folder directly)
+    const playersPath = await join(selected, "players.json");
+    const chaptersPath = await join(selected, "chapters.json");
+    if ((await exists(playersPath)) || (await exists(chaptersPath))) {
+      return { root: selected, data: selected };
+    }
+
+    return null;
+  };
+
   const handleExport = async () => {
     try {
       const selected = await open({
@@ -53,9 +73,11 @@ export const useSettingsBackup = () => {
 
       setIsLoading(true);
 
+      const baseDir = selected as string;
+
       // 1. Export DB Data
       const fullData = await Database.backup.exportAll();
-      const dataDir = await join(selected as string, "inracker-backup");
+      const dataDir = await join(baseDir, "data");
       
       if (!(await exists(dataDir))) {
         await mkdir(dataDir, { recursive: true });
@@ -72,8 +94,8 @@ export const useSettingsBackup = () => {
       const sourceImages = await join(appData, "images");
       const sourceAudio = await join(appData, "audio");
       
-      const destImages = await join(selected as string, "images");
-      const destAudio = await join(selected as string, "audio");
+      const destImages = await join(baseDir, "images");
+      const destAudio = await join(baseDir, "audio");
 
       if (await exists(sourceImages)) {
         await copyFolder(sourceImages, destImages);
@@ -113,9 +135,9 @@ export const useSettingsBackup = () => {
       setConflicts(null);
 
       // 1. Import DB Data
-      const dataDir = await join(selected as string, "inracker-backup");
-      if (!(await exists(dataDir))) {
-        throw new Error(t("folderNotFound", { folderName: "inracker-backup" }));
+      const backupInfo = await findBackupInfo(selected as string);
+      if (!backupInfo) {
+        throw new Error(t("invalidBackup"));
       }
 
       const tables = [
@@ -128,11 +150,15 @@ export const useSettingsBackup = () => {
       const importData: Record<string, any> = {};
 
       for (const table of tables) {
-        const filePath = await join(dataDir, `${table}.json`);
+        const filePath = await join(backupInfo.data, `${table}.json`);
         if (await exists(filePath)) {
           const content = await readTextFile(filePath);
           importData[table] = JSON.parse(content);
         }
+      }
+
+      if (Object.keys(importData).length === 0) {
+          throw new Error(t("noDataFound"));
       }
 
       if (mode === "restore") {
@@ -149,8 +175,8 @@ export const useSettingsBackup = () => {
       const destImages = await join(appData, "images");
       const destAudio = await join(appData, "audio");
       
-      const sourceImages = await join(selected as string, "images");
-      const sourceAudio = await join(selected as string, "audio");
+      const sourceImages = await join(backupInfo.root, "images");
+      const sourceAudio = await join(backupInfo.root, "audio");
 
       if (await exists(sourceImages)) {
         await copyFolder(sourceImages, destImages);
@@ -199,9 +225,11 @@ export const useSettingsBackup = () => {
 
       setIsLoading(true);
 
+      const baseDir = selected as string;
+
       // 1. Export DB Data
       const categoryData = await Database.backup.exportCategory(category, ids);
-      const dataDir = await join(selected as string, "inracker-backup");
+      const dataDir = await join(baseDir, "data");
       
       if (!(await exists(dataDir))) {
         await mkdir(dataDir, { recursive: true });
@@ -214,8 +242,8 @@ export const useSettingsBackup = () => {
 
       // 2. Export Assets (if needed)
       const appData = await appDataDir();
-      const destImages = await join(selected as string, "images");
-      const destAudio = await join(selected as string, "audio");
+      const destImages = await join(baseDir, "images");
+      const destAudio = await join(baseDir, "audio");
 
       if (category === "images" || category === "all" || category === "chapters" || category === "players" || category === "opponents") {
           const sourceImages = await join(appData, "images");
@@ -261,9 +289,9 @@ export const useSettingsBackup = () => {
           setConflicts(null);
 
           // 1. Import DB Data
-          const dataDir = await join(selected as string, "inracker-backup");
-          if (!(await exists(dataDir))) {
-              throw new Error(t("folderNotFound", { folderName: "inracker-backup" }));
+          const backupInfo = await findBackupInfo(selected as string);
+          if (!backupInfo) {
+              throw new Error(t("invalidBackup"));
           }
 
           const tables = [
@@ -276,11 +304,15 @@ export const useSettingsBackup = () => {
           const importData: Record<string, any> = {};
 
           for (const table of tables) {
-              const filePath = await join(dataDir, `${table}.json`);
+              const filePath = await join(backupInfo.data, `${table}.json`);
               if (await exists(filePath)) {
                   const content = await readTextFile(filePath);
                   importData[table] = JSON.parse(content);
               }
+          }
+
+          if (Object.keys(importData).length === 0) {
+              throw new Error(t("noDataFound"));
           }
 
           const conflictData = await Database.backup.importCategory(importData, mode);
@@ -293,8 +325,8 @@ export const useSettingsBackup = () => {
           const destImages = await join(appData, "images");
           const destAudio = await join(appData, "audio");
           
-          const sourceImages = await join(selected as string, "images");
-          const sourceAudio = await join(selected as string, "audio");
+          const sourceImages = await join(backupInfo.root, "images");
+          const sourceAudio = await join(backupInfo.root, "audio");
 
           if (await exists(sourceImages)) {
               await copyFolder(sourceImages, destImages);

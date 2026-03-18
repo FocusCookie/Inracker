@@ -40,6 +40,8 @@
   "itemsSelected": "{{count}} items selected",
   "searchPlaceholder": "Search...",
   "cancel": "Cancel",
-  "backupFolderNotice": "Important: The export creates a folder named '{{folderName}}'. During import, this folder must be present in the selected directory for the data to be recognized.",
-  "folderNotFound": "The required folder '{{folderName}}' was not found in the selected directory."
+  "backupFolderNotice": "Important: The export creates 'data', 'images', and 'audio' folders in the selected directory. Ensure these are present when importing.",
+  "folderNotFound": "The required folder '{{folderName}}' was not found in the selected directory.",
+  "noDataFound": "No backup data found in the selected folder.",
+  "invalidBackup": "The selected folder does not appear to be a valid backup directory."
 }

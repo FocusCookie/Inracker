@@ -167,7 +167,7 @@ function SettingsCategoryBackup() {
         <CardContent className="flex items-center gap-3">
           <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
           <p className="text-sm text-amber-800 dark:text-amber-200">
-            {t("backupFolderNotice", { folderName: "inracker-backup" })}
+            {t("backupFolderNotice")}
           </p>
         </CardContent>
       </Card>

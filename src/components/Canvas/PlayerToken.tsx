@@ -17,16 +17,16 @@ type PlayerTokenProps = {
   onClick: (token: Token) => void;
   onTokenSelect: (token: Token | null) => void;
   onToggleVisibility: (token: Token) => void;
-  onOpenEffectsCatalog?: (entityId: number, type: "player" | "opponent") => void;
+  onOpenEffectsCatalog?: (entityId: number, type: "player" | "opponent" | "npc") => void;
   onHealPlayer?: (playerId: number) => void;
   onDamagePlayer?: (playerId: number) => void;
-  onRemoveFromInitiative?: (entityId: number, type: "player" | "opponent") => void;
-  onAddToInitiative?: (entityId: number, type: "player" | "opponent", name: string) => void;
-  initiativeEntityIds?: { id: number; type: "player" | "opponent" }[];
+  onRemoveFromInitiative?: (entityId: number, type: "player" | "opponent" | "npc") => void;
+  onAddToInitiative?: (entityId: number, type: "player" | "opponent" | "npc", name: string) => void;
+  initiativeEntityIds?: { id: number; type: "player" | "opponent" | "npc" }[];
   database: typeof db;
 };
 
-export const PlayerToken: React.FC<PlayerTokenProps> = ({
+export const PlayerToken = React.memo<PlayerTokenProps>(({
   token,
   player,
   isVisible,
@@ -61,7 +61,7 @@ export const PlayerToken: React.FC<PlayerTokenProps> = ({
     });
   };
 
-  const handleToggleInitiative = (id: number, type: "player" | "opponent", name: string, active: boolean) => {
+  const handleToggleInitiative = (id: number, type: "player" | "opponent" | "npc", name: string, active: boolean) => {
     if (active) {
       onRemoveFromInitiative?.(id, type);
     } else {
@@ -73,38 +73,54 @@ export const PlayerToken: React.FC<PlayerTokenProps> = ({
     (e) => e.id === player.id && e.type === "player"
   ) ?? false;
 
+  const entity = React.useMemo(() => ({
+    id: player.id,
+    name: player.name,
+    icon: player.icon,
+    image: player.image,
+    effects: player.effects,
+  }), [player.id, player.name, player.icon, player.image, player.effects]);
+
+  const contextMenuContent = React.useMemo(() => (
+    <TokenContextMenu
+      entityName={player.name}
+      entityId={player.id}
+      entityType="player"
+      isInInitiative={isInInitiative}
+      isVisible={isVisible}
+      onToggleVisibility={() => onToggleVisibility(token)}
+      onEdit={handleEdit}
+      onAddEffect={onOpenEffectsCatalog}
+      onHeal={onHealPlayer}
+      onDamage={onDamagePlayer}
+      onToggleInitiative={handleToggleInitiative}
+      mode="dropdown"
+    />
+  ), [
+    player.name, 
+    player.id, 
+    isInInitiative, 
+    isVisible, 
+    token, 
+    onToggleVisibility, 
+    handleEdit, 
+    onOpenEffectsCatalog, 
+    onHealPlayer, 
+    onDamagePlayer, 
+    handleToggleInitiative
+  ]);
+
   return (
     <TokenNode
       token={token}
-      entity={{
-        id: player.id,
-        name: player.name,
-        icon: player.icon,
-        image: player.image,
-        effects: player.effects,
-      }}
+      entity={entity}
       borderColor="#10b981"
       isVisible={isVisible}
       isSelected={isSelected}
       isInteractive={isInteractive}
       onDragStart={onDragStart}
       onClick={onClick}
-      contextMenuContent={
-        <TokenContextMenu
-          entityName={player.name}
-          entityId={player.id}
-          entityType="player"
-          isInInitiative={isInInitiative}
-          isVisible={isVisible}
-          onSelect={() => onTokenSelect(token)}
-          onToggleVisibility={() => onToggleVisibility(token)}
-          onEdit={handleEdit}
-          onAddEffect={onOpenEffectsCatalog}
-          onHeal={onHealPlayer}
-          onDamage={onDamagePlayer}
-          onToggleInitiative={handleToggleInitiative}
-        />
-      }
+      contextMenuContent={contextMenuContent}
     />
   );
-};
+});

@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { type Editor } from "tldraw";
+import { type Editor, type TLShapeId } from "tldraw";
 import {
   CopyIcon,
   TrashIcon,
@@ -41,26 +41,28 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
 }) => {
   if (!editor || selectedIds.length === 0) return null;
 
+  const ids = selectedIds as TLShapeId[];
+
   const isSingleMarkup =
     selectedIds.length === 1 && markupByShapeId.has(selectedIds[0]);
   const markup = isSingleMarkup ? markupByShapeId.get(selectedIds[0]) : null;
 
   const handleAlign = (type: "top" | "bottom" | "left" | "right" | "center-v" | "center-h") => {
-    if (selectedIds.length < 2) return;
+    if (ids.length < 2) return;
     switch (type) {
-      case "top": editor.alignShapes(selectedIds, "top"); break;
-      case "bottom": editor.alignShapes(selectedIds, "bottom"); break;
-      case "left": editor.alignShapes(selectedIds, "left"); break;
-      case "right": editor.alignShapes(selectedIds, "right"); break;
-      case "center-v": editor.alignShapes(selectedIds, "center-v"); break;
-      case "center-h": editor.alignShapes(selectedIds, "center-h"); break;
+      case "top": editor.alignShapes(ids, "top"); break;
+      case "bottom": editor.alignShapes(ids, "bottom"); break;
+      case "left": editor.alignShapes(ids, "left"); break;
+      case "right": editor.alignShapes(ids, "right"); break;
+      case "center-v": editor.alignShapes(ids, "center-vertical"); break;
+      case "center-h": editor.alignShapes(ids, "center-horizontal"); break;
     }
   };
 
   const handleDistribute = (type: "horizontal" | "vertical") => {
-    if (selectedIds.length < 3) return;
-    if (type === "horizontal") editor.distributeShapes(selectedIds, "horizontal");
-    else editor.distributeShapes(selectedIds, "vertical");
+    if (ids.length < 3) return;
+    if (type === "horizontal") editor.distributeShapes(ids, "horizontal");
+    else editor.distributeShapes(ids, "vertical");
   };
 
   const showMarkupActions = isSingleMarkup && markup;

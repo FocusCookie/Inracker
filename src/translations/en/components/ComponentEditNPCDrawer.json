@@ -1,0 +1,19 @@
+{
+  "title": "Edit NPC",
+  "descriptionText": "Edit an existing NPC blueprint.",
+  "cancel": "Cancel",
+  "update": "Update",
+  "minName": "Name must be at least 2 characters.",
+  "icon": "Icon",
+  "name": "Name",
+  "level": "Level",
+  "maxHealth": "Max Health",
+  "npcPicture": "NPC Picture",
+  "profilePictureAlt": "NPC profile picture",
+  "picturePlaceholder": "Select an image",
+  "details": "Details",
+  "detailsDescription": "Additional information about the NPC.",
+  "immunities": "Immunities",
+  "resistances": "Resistances",
+  "weaknesses": "Weaknesses"
+}
