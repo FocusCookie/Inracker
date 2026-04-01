@@ -1,4 +1,5 @@
 import React, { memo } from "react";
+import { useTranslation } from "react-i18next";
 import { type Editor, type TLShapeId, GeoShapeGeoStyle } from "tldraw";
 import {
   Copy,
@@ -51,6 +52,7 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
   onMarkupDuplicate,
   onMarkupColorChange,
 }) => {
+  const { t } = useTranslation("ComponentCanvas");
   if (!editor) return null;
 
   const showToolPalette = drawingMode === "markup";
@@ -96,15 +98,15 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
   const currentGeo = editor.getSharedStyles().get(GeoShapeGeoStyle);
 
   const tools = [
-    { id: "select", icon: <MousePointer2 className="w-4 h-4" />, label: "Select" },
-    { id: "draw", icon: <Pencil className="w-4 h-4" />, label: "Pencil" },
-    { id: "eraser", icon: <Eraser className="w-4 h-4" />, label: "Eraser" },
-    { id: "arrow", icon: <ArrowUpRight className="w-4 h-4" />, label: "Arrow" },
-    { id: "text", icon: <Type className="w-4 h-4" />, label: "Text" },
-    { id: "note", icon: <StickyNote className="w-4 h-4" />, label: "Note" },
-    { id: "geo-rect", icon: <Square className="w-4 h-4" />, label: "Rectangle", tool: "geo", geo: "rectangle", props: { "tldraw:geo": "rectangle" } },
-    { id: "geo-ellipse", icon: <Circle className="w-4 h-4" />, label: "Ellipse", tool: "geo", geo: "ellipse", props: { "tldraw:geo": "ellipse" } },
-    { id: "geo-triangle", icon: <Triangle className="w-4 h-4" />, label: "Triangle", tool: "geo", geo: "triangle", props: { "tldraw:geo": "triangle" } },
+    { id: "select", icon: <MousePointer2 className="w-4 h-4" />, label: t("select") },
+    { id: "draw", icon: <Pencil className="w-4 h-4" />, label: t("pencil") },
+    { id: "eraser", icon: <Eraser className="w-4 h-4" />, label: t("eraser") },
+    { id: "arrow", icon: <ArrowUpRight className="w-4 h-4" />, label: t("arrow") },
+    { id: "text", icon: <Type className="w-4 h-4" />, label: t("text") },
+    { id: "note", icon: <StickyNote className="w-4 h-4" />, label: t("note") },
+    { id: "geo-rect", icon: <Square className="w-4 h-4" />, label: t("rectangle"), tool: "geo", geo: "rectangle", props: { "tldraw:geo": "rectangle" } },
+    { id: "geo-ellipse", icon: <Circle className="w-4 h-4" />, label: t("ellipse"), tool: "geo", geo: "ellipse", props: { "tldraw:geo": "ellipse" } },
+    { id: "geo-triangle", icon: <Triangle className="w-4 h-4" />, label: t("triangle"), tool: "geo", geo: "triangle", props: { "tldraw:geo": "triangle" } },
   ];
 
   const showMarkupActions = selectedMarkups.length > 0;
@@ -183,7 +185,7 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
                       <Copy className="w-4 h-4" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent><p>Duplicate</p></TooltipContent>
+                  <TooltipContent><p>{t("duplicate")}</p></TooltipContent>
                 </Tooltip>
               )}
 
@@ -199,7 +201,7 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent><p>Delete {selectedMarkups.length > 1 ? "Selected" : ""}</p></TooltipContent>
+                <TooltipContent><p>{selectedMarkups.length > 1 ? t("deleteSelected") : t("delete")}</p></TooltipContent>
               </Tooltip>
             </>
           )}
@@ -211,19 +213,19 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
                   <TooltipTrigger asChild>
                     <button onClick={() => handleAlign("left")} className="flex h-8 w-8 items-center justify-center rounded-full bg-white hover:bg-slate-100"><AlignLeft className="w-4 h-4" /></button>
                   </TooltipTrigger>
-                  <TooltipContent>Align Left</TooltipContent>
+                  <TooltipContent>{t("alignLeft")}</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button onClick={() => handleAlign("center-h")} className="flex h-8 w-8 items-center justify-center rounded-full bg-white hover:bg-slate-100"><AlignCenterHorizontal className="w-4 h-4" /></button>
                   </TooltipTrigger>
-                  <TooltipContent>Align Horizontal Center</TooltipContent>
+                  <TooltipContent>{t("alignHorizontalCenter")}</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button onClick={() => handleAlign("right")} className="flex h-8 w-8 items-center justify-center rounded-full bg-white hover:bg-slate-100"><AlignRight className="w-4 h-4" /></button>
                   </TooltipTrigger>
-                  <TooltipContent>Align Right</TooltipContent>
+                  <TooltipContent>{t("alignRight")}</TooltipContent>
                 </Tooltip>
               </div>
               <div className="flex items-center gap-1 px-1 border-l border-white/40">
@@ -231,19 +233,19 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
                   <TooltipTrigger asChild>
                     <button onClick={() => handleAlign("top")} className="flex h-8 w-8 items-center justify-center rounded-full bg-white hover:bg-slate-100"><AlignStartVertical className="w-4 h-4" /></button>
                   </TooltipTrigger>
-                  <TooltipContent>Align Top</TooltipContent>
+                  <TooltipContent>{t("alignTop")}</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button onClick={() => handleAlign("center-v")} className="flex h-8 w-8 items-center justify-center rounded-full bg-white hover:bg-slate-100"><AlignCenterVertical className="w-4 h-4" /></button>
                   </TooltipTrigger>
-                  <TooltipContent>Align Vertical Center</TooltipContent>
+                  <TooltipContent>{t("alignVerticalCenter")}</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button onClick={() => handleAlign("bottom")} className="flex h-8 w-8 items-center justify-center rounded-full bg-white hover:bg-slate-100"><AlignEndVertical className="w-4 h-4" /></button>
                   </TooltipTrigger>
-                  <TooltipContent>Align Bottom</TooltipContent>
+                  <TooltipContent>{t("alignBottom")}</TooltipContent>
                 </Tooltip>
               </div>
             </div>
@@ -255,13 +257,13 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
                 <TooltipTrigger asChild>
                   <button onClick={() => handleDistribute("horizontal")} className="flex h-8 w-8 items-center justify-center rounded-full bg-white hover:bg-slate-100"><AlignHorizontalDistributeCenter className="w-4 h-4" /></button>
                 </TooltipTrigger>
-                <TooltipContent>Distribute Horizontal</TooltipContent>
+                <TooltipContent>{t("distributeHorizontal")}</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button onClick={() => handleDistribute("vertical")} className="flex h-8 w-8 items-center justify-center rounded-full bg-white hover:bg-slate-100"><AlignVerticalDistributeCenter className="w-4 h-4" /></button>
                 </TooltipTrigger>
-                <TooltipContent>Distribute Vertical</TooltipContent>
+                <TooltipContent>{t("distributeVertical")}</TooltipContent>
               </Tooltip>
             </div>
           )}
