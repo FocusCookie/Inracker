@@ -5,9 +5,10 @@ import { FaDiceD20 } from "react-icons/fa";
 type Props = {
   size?: "base" | "large";
   title?: string;
+  className?: string;
 };
 
-function Loader({ size = "base", title }: Props) {
+function Loader({ size = "base", title, className }: Props) {
   const sizes = {
     base: "text-base",
     large: "text-2xl",
@@ -15,7 +16,7 @@ function Loader({ size = "base", title }: Props) {
 
   return (
     <motion.div
-      className="flex flex-col items-center gap-2"
+      className={cn("flex flex-col items-center gap-2", className)}
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 10 }}
