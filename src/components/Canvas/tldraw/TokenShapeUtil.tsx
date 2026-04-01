@@ -234,4 +234,8 @@ export class TokenShapeUtil extends BaseBoxShapeUtil<TokenShape> {
       <rect width={shape.props.w} height={shape.props.h} rx={999} ry={999} />
     );
   }
+
+  canErase() {
+    return false;
+  }
 }
