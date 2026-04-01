@@ -295,4 +295,8 @@ export class EncounterShapeUtil extends BaseBoxShapeUtil<EncounterShape> {
   override indicator(shape: EncounterShape) {
     return <rect width={shape.props.w} height={shape.props.h} />;
   }
+
+  canErase() {
+    return false;
+  }
 }

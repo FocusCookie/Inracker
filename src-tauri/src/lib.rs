@@ -332,7 +332,7 @@ pub fn run() {
         },
         Migration {
             version: 27,
-            description: "create npcs and encounter_npcs tables",
+            description: "create npcs table",
             sql: "CREATE TABLE IF NOT EXISTS npcs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -347,8 +347,13 @@ pub fn run() {
                 immunities TEXT, -- JSON array ids
                 effects TEXT, -- JSON array ids
                 weaknesses TEXT -- JSON array ids
-            );
-            CREATE TABLE IF NOT EXISTS encounter_npcs (
+            );",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 28,
+            description: "create encounter_npcs table",
+            sql: "CREATE TABLE IF NOT EXISTS encounter_npcs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 details TEXT,
@@ -363,11 +368,35 @@ pub fn run() {
                 effects TEXT, -- JSON array ids,
                 weaknesses TEXT, -- JSON array ids
                 blueprint INTEGER NOT NULL
-            );
-            ",
+            );",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 29,
+            description: "add type column to markup table",
+            sql: "ALTER TABLE markup ADD COLUMN type TEXT DEFAULT 'markup';",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 30,
+            description: "add props column to markup table",
+            sql: "ALTER TABLE markup ADD COLUMN props TEXT DEFAULT '{}';",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 31,
+            description: "no-op placeholder",
+            sql: "SELECT 1;",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 32,
+            description: "no-op placeholder",
+            sql: "SELECT 1;",
             kind: MigrationKind::Up,
         },
     ];
+
 
 tauri::Builder::default()
         .plugin(tauri_plugin_updater::Builder::new().build())

@@ -7,4 +7,6 @@ export type MarkupElement = {
   height: number;
   rotation: number;
   color: string;
+  type: string;
+  props: string; // JSON string
 };

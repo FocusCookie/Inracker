@@ -29,11 +29,11 @@ export const getMarkupForChapter = async (
 export const createMarkup = async (
   markup: Omit<MarkupElement, "id">,
 ): Promise<MarkupElement> => {
-  const { chapter, x, y, width, height, rotation, color } = markup;
+  const { chapter, x, y, width, height, rotation, color, type, props } = markup;
 
   const result = await execute(
-    "INSERT INTO markup(chapter, x, y, width, height, rotation, color) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
-    [chapter, x, y, width, height, rotation || 0, color],
+    "INSERT INTO markup(chapter, x, y, width, height, rotation, color, type, props) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
+    [chapter, x, y, width, height, rotation || 0, color, type || "markup", props || "{}"],
   );
 
   const createdMarkup = await getMarkupById(result!.lastInsertId as number);
@@ -44,11 +44,11 @@ export const createMarkup = async (
 export const updateMarkup = async (
   markup: MarkupElement,
 ): Promise<MarkupElement> => {
-  const { id, x, y, width, height, rotation, color } = markup;
+  const { id, x, y, width, height, rotation, color, type, props } = markup;
 
   await execute(
-    "UPDATE markup SET x = $2, y = $3, width = $4, height = $5, rotation = $6, color = $7 WHERE id = $1",
-    [id, x, y, width, height, rotation, color],
+    "UPDATE markup SET x = $2, y = $3, width = $4, height = $5, rotation = $6, color = $7, type = $8, props = $9 WHERE id = $1",
+    [id, x, y, width, height, rotation, color, type, props],
   );
 
   return getMarkupById(id);
