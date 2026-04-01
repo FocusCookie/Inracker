@@ -2,5 +2,9 @@
   "availableTitle": "Update Available",
   "availableDescription": "A new version ({{version}}) is available.",
   "viewChangelog": "View changelog in repository",
-  "updateNow": "Update Now"
+  "updateNow": "Update Now",
+  "upToDateTitle": "Up to Date",
+  "upToDateDescription": "You are already using the latest version.",
+  "errorTitle": "Check Failed",
+  "errorDescription": "Failed to check for updates. Please try again later."
 }

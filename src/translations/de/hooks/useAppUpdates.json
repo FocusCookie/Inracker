@@ -1,6 +1,10 @@
 {
-  "availableTitle": "Update verfügbar",
+  "availableTitle": "Update Verfügbar",
   "availableDescription": "Eine neue Version ({{version}}) ist verfügbar.",
   "viewChangelog": "Changelog im Repository ansehen",
-  "updateNow": "Jetzt aktualisieren"
+  "updateNow": "Jetzt aktualisieren",
+  "upToDateTitle": "Auf dem neuesten Stand",
+  "upToDateDescription": "Sie verwenden bereits die neueste Version.",
+  "errorTitle": "Fehler beim Prüfen",
+  "errorDescription": "Prüfung auf Updates fehlgeschlagen. Bitte versuchen Sie es später erneut."
 }

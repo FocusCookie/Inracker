@@ -1,8 +1,11 @@
 {
-  "secondsPerRound": "Seconds per Round",
+  "general": "General",
   "language": "Language",
-  "en": "English (US)",
+  "secondsPerRound": "Seconds per Turn",
+  "en": "English",
   "de": "German",
-  "save": "Save",
-  "general": "General"
+  "save": "Save Settings",
+  "updates": "Updates",
+  "updatesDescription": "Check for new versions of Inracker.",
+  "checkForUpdates": "Check for Updates"
 }
