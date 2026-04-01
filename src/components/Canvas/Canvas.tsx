@@ -11,7 +11,6 @@ import { BackgroundShapeUtil } from "./tldraw/BackgroundShapeUtil";
 import { EncounterShapeUtil } from "./tldraw/EncounterShapeUtil";
 import { EncounterTool } from "./tldraw/EncounterTool";
 import { MarkupShapeUtil } from "./tldraw/MarkupShapeUtil";
-import { MarkupTool } from "./tldraw/MarkupTool";
 import { TokenShapeUtil } from "./tldraw/TokenShapeUtil";
 import { useTldrawSync } from "./tldraw/useTldrawSync";
 import { CanvasTldrawProvider } from "./tldraw/CanvasTldrawContext";
@@ -28,7 +27,7 @@ const shapeUtils = [
   TokenShapeUtil,
   MarkupShapeUtil,
 ];
-const tools = [EncounterTool, MarkupTool];
+const tools = [EncounterTool];
 
 type Props = {
   database: typeof import("@/lib/database").default;
@@ -228,6 +227,8 @@ export default function Canvas({
     onElementMove,
     onTokenMove,
     onMarkupMove,
+    onMarkupDelete,
+    onMarkupDrawed,
     backgroundShapeId,
   });
 
@@ -235,11 +236,12 @@ export default function Canvas({
   const prevTemporaryElementRef = useRef(temporaryElement);
   useEffect(() => {
     if (prevTemporaryElementRef.current && !temporaryElement && editor) {
-      setDrawingMode("none");
-      editor.cancel();
+      if (drawingMode === "none") {
+        editor.cancel();
+      }
     }
     prevTemporaryElementRef.current = temporaryElement;
-  }, [temporaryElement, editor]);
+  }, [temporaryElement, editor, drawingMode]);
 
   useEffect(() => {
     if (!editor) return;
@@ -285,7 +287,7 @@ export default function Canvas({
   useEffect(() => {
     (window as any)._onDrawedMarkup = (draftMarkup: any) => {
       onMarkupDrawed(draftMarkup);
-      setDrawingMode("none");
+      // We don't set drawingMode to "none" here anymore to allow continuous drawing
     };
 
     return () => {
@@ -298,7 +300,11 @@ export default function Canvas({
     if (drawingMode === "encounter") {
       editor.setCurrentTool("encounter");
     } else if (drawingMode === "markup") {
-      editor.setCurrentTool("markup");
+      // If we are in markup mode but the current tool is 'select', 
+      // it means we just entered the mode, so default to 'draw' (pencil)
+      if (editor.getCurrentToolId() === "select") {
+        editor.setCurrentTool("draw");
+      }
     } else {
       editor.setCurrentTool("select");
     }
@@ -430,7 +436,7 @@ export default function Canvas({
         if (drawingMode === "encounter") {
           editor.setCurrentTool("encounter");
         } else if (drawingMode === "markup") {
-          editor.setCurrentTool("markup");
+          editor.setCurrentTool("draw");
         } else {
           editor.setCurrentTool("select");
         }
@@ -602,13 +608,18 @@ export default function Canvas({
         />
         <SelectionToolbar
           editor={editor}
+          drawingMode={drawingMode}
           selectedIds={selectedShapeIds}
           markupByShapeId={markupByShapeId}
           onMarkupDelete={onMarkupDelete}
           onMarkupDuplicate={onMarkupDuplicate}
           onMarkupColorChange={(markupId, color) => {
             const m = markup.find((item) => item.id === markupId);
-            if (m) onMarkupMove({ ...m, color });
+            if (m) {
+              const props = JSON.parse(m.props || "{}");
+              props.color = color;
+              onMarkupMove({ ...m, color, props: JSON.stringify(props) });
+            }
           }}
         />
       </div>

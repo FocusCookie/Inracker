@@ -7,8 +7,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  BoxIcon,
   PaddingIcon,
+  Pencil1Icon,
   ZoomInIcon,
   ZoomOutIcon,
 } from "@radix-ui/react-icons";
@@ -122,9 +122,7 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <button
-              onClick={() =>
-                onToggleDrawing(drawingMode === "markup" ? "none" : "markup")
-              }
+              onClick={() => drawingMode !== "markup" ? onToggleDrawing("markup") : onToggleDrawing("none")}
               className={cn(
                 "flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 hover:cursor-pointer hover:shadow-xs",
                 drawingMode === "markup"
@@ -132,7 +130,7 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
                   : "bg-white text-slate-700 hover:bg-slate-100",
               )}
             >
-              <BoxIcon className="h-4 w-4" />
+              <Pencil1Icon className="h-4 w-4" />
             </button>
           </TooltipTrigger>
           <TooltipContent className="flex items-center gap-2">

@@ -9,7 +9,6 @@ import {
   BACKGROUND_TYPE,
   ENCOUNTER_TYPE,
   TOKEN_TYPE,
-  MARKUP_TYPE,
 } from "./shapes";
 
 type ShapeState = {
@@ -18,6 +17,7 @@ type ShapeState = {
   w: number;
   h: number;
   rotation: number;
+  props?: any;
 };
 
 type Params = {
@@ -29,7 +29,33 @@ type Params = {
   onTokenMove: (token: Token) => void;
   onElementMove: (element: CanvasElementWithId) => void;
   onMarkupMove: (markup: MarkupElement) => void;
+  onMarkupDelete: (markupId: number) => void;
+  onMarkupDrawed: (markup: Omit<MarkupElement, "id">) => void;
   backgroundShapeId?: TLShapeId;
+};
+
+const HEX_TO_TLDRAW_COLOR: Record<string, string> = {
+  "#ffffff": "white",
+  "#f44336": "red",
+  "#ff9800": "orange",
+  "#ffc107": "orange",
+  "#ffeb3b": "yellow",
+  "#cddc39": "light-green",
+  "#4caf50": "green",
+  "#10b981": "green",
+  "#009688": "blue",
+  "#00bcd4": "light-blue",
+  "#0ea5e9": "light-blue",
+  "#2196f3": "blue",
+  "#3f51b5": "blue",
+  "#8b5cf6": "violet",
+  "#9c27b0": "violet",
+  "#d946ef": "violet",
+  "#e91e63": "red",
+  "#f43f5e": "red",
+  "#64748b": "grey",
+  "#9e9e9e": "grey",
+  "#000000": "black",
 };
 
 export function useTldrawSync({
@@ -41,12 +67,12 @@ export function useTldrawSync({
   onTokenMove,
   onElementMove,
   onMarkupMove,
+  onMarkupDelete,
+  onMarkupDrawed,
   backgroundShapeId,
 }: Params) {
   const isSyncingRef = useRef(false);
-  const elementByShapeIdRef = useRef<Map<TLShapeId, CanvasElementWithId>>(
-    new Map(),
-  );
+  const elementByShapeIdRef = useRef<Map<TLShapeId, CanvasElementWithId>>(new Map());
   const tokenByShapeIdRef = useRef<Map<TLShapeId, Token>>(new Map());
   const markupByShapeIdRef = useRef<Map<TLShapeId, MarkupElement>>(new Map());
   const shapeStateRef = useRef<Map<TLShapeId, ShapeState>>(new Map());
@@ -54,9 +80,7 @@ export function useTldrawSync({
   const pendingTokenMovesRef = useRef<Map<TLShapeId, ShapeState>>(new Map());
   const pendingMarkupMovesRef = useRef<Map<TLShapeId, ShapeState>>(new Map());
   const wasDraggingRef = useRef(false);
-  const recentLocalMovesRef = useRef<
-    Map<TLShapeId, { state: ShapeState; timestamp: number }>
-  >(new Map());
+  const recentLocalMovesRef = useRef<Map<TLShapeId, { state: ShapeState; timestamp: number }>>(new Map());
 
   // Handle updates FROM React TO Tldraw
   useEffect(() => {
@@ -75,31 +99,25 @@ export function useTldrawSync({
 
     const isActuallyDragging = editor.inputs.getIsDragging();
     const isSelectionDragging = editor.getInstanceState().isChangingStyle;
+    const editingShapeId = editor.getEditingShapeId();
 
     for (const element of elements) {
       const shapeId = createShapeId(`encounter-${element.id}`);
       nextElementMap.set(shapeId, element);
 
-      // 1. If we are currently dragging this shape, IGNORE the incoming prop update
       if ((isActuallyDragging || isSelectionDragging) && editor.getSelectedShapeIds().includes(shapeId)) {
         continue;
       }
 
       const recentMove = recentLocalMovesRef.current.get(shapeId);
-      const recentState =
-        recentMove && now - recentMove.timestamp < 800
-          ? recentMove.state
-          : null;
+      const recentState = recentMove && now - recentMove.timestamp < 1000 ? recentMove.state : null;
 
-      if (
-        recentMove &&
-        recentState &&
-        element.x === recentState.x &&
-        element.y === recentState.y &&
-        element.width === recentState.w &&
-        element.height === recentState.h &&
-        (element.rotation ?? 0) === recentState.rotation
-      ) {
+      if (recentMove && recentState && 
+          element.x === recentState.x && 
+          element.y === recentState.y && 
+          element.width === recentState.w && 
+          element.height === recentState.h && 
+          (element.rotation ?? 0) === recentState.rotation) {
         recentLocalMovesRef.current.delete(shapeId);
       }
 
@@ -148,33 +166,23 @@ export function useTldrawSync({
       const shapeId = createShapeId(`token-${token.id}`);
       nextTokenMap.set(shapeId, token);
 
-      // 1. If we are currently dragging this shape, IGNORE the incoming prop update
-      // This is the most robust way to prevent "jumping back" during interaction.
       if ((isActuallyDragging || isSelectionDragging) && editor.getSelectedShapeIds().includes(shapeId)) {
         continue;
       }
 
       const recentMove = recentLocalMovesRef.current.get(shapeId);
-      const recentState =
-        recentMove && now - recentMove.timestamp < 1000
-          ? recentMove.state
-          : null;
+      const recentState = recentMove && now - recentMove.timestamp < 1000 ? recentMove.state : null;
 
-      if (
-        recentMove &&
-        recentState &&
-        token.coordinates.x === recentState.x &&
-        token.coordinates.y === recentState.y &&
-        (token.coordinates.rotation ?? 0) === recentState.rotation
-      ) {
+      if (recentMove && recentState && 
+          token.coordinates.x === recentState.x && 
+          token.coordinates.y === recentState.y && 
+          (token.coordinates.rotation ?? 0) === recentState.rotation) {
         recentLocalMovesRef.current.delete(shapeId);
       }
 
       const x = recentState ? recentState.x : token.coordinates.x;
       const y = recentState ? recentState.y : token.coordinates.y;
-      const rotation = recentState
-          ? recentState.rotation
-          : (token.coordinates.rotation ?? 0);
+      const rotation = recentState ? recentState.rotation : (token.coordinates.rotation ?? 0);
 
       const existingShape = editor.getShape(shapeId) as any;
       const isDifferent = !existingShape || 
@@ -209,57 +217,55 @@ export function useTldrawSync({
       const shapeId = createShapeId(`markup-${m.id}`);
       nextMarkupMap.set(shapeId, m);
 
-      // 1. If we are currently dragging this shape, IGNORE the incoming prop update
+      // CRITICAL: If the shape is being edited, DO NOT overwrite it from props.
+      // This prevents the "stops writing" issue.
+      if (editingShapeId === shapeId) {
+        continue;
+      }
+
       if ((isActuallyDragging || isSelectionDragging) && editor.getSelectedShapeIds().includes(shapeId)) {
         continue;
       }
 
       const recentMove = recentLocalMovesRef.current.get(shapeId);
-      const recentState =
-        recentMove && now - recentMove.timestamp < 800
-          ? recentMove.state
-          : null;
+      const recentState = recentMove && now - recentMove.timestamp < 1000 ? recentMove.state : null;
 
-      if (
-        recentMove &&
-        recentState &&
-        m.x === recentState.x &&
-        m.y === recentState.y &&
-        m.width === recentState.w &&
-        m.height === recentState.h &&
-        m.rotation === recentState.rotation
-      ) {
+      if (recentMove && recentState && 
+          m.x === recentState.x && 
+          m.y === recentState.y && 
+          m.width === recentState.w && 
+          m.height === recentState.h && 
+          m.rotation === recentState.rotation &&
+          JSON.stringify(JSON.parse(m.props || "{}")) === JSON.stringify(recentState.props)) {
         recentLocalMovesRef.current.delete(shapeId);
       }
 
       const x = recentState ? recentState.x : m.x;
       const y = recentState ? recentState.y : m.y;
-      const w = recentState ? recentState.w : m.width;
-      const h = recentState ? recentState.h : m.height;
       const rotation = recentState ? recentState.rotation : m.rotation;
+      const props = recentState && recentState.props ? recentState.props : JSON.parse(m.props || "{}");
+
+      // VALIDATION: tldraw native shapes expect specific color names
+      if (m.type !== "markup" && props.color && props.color.startsWith("#")) {
+        props.color = HEX_TO_TLDRAW_COLOR[props.color] || "black";
+      }
 
       const existingShape = editor.getShape(shapeId) as any;
       const isDifferent = !existingShape || 
           existingShape.x !== x || 
           existingShape.y !== y || 
           existingShape.rotation !== rotation ||
-          existingShape.props.w !== w ||
-          existingShape.props.h !== h ||
-          existingShape.props.color !== m.color;
+          JSON.stringify(existingShape.props) !== JSON.stringify(props) ||
+          existingShape.type !== (m.type || "geo");
 
       if (isDifferent) {
         const shape = {
           id: shapeId,
-          type: MARKUP_TYPE,
+          type: m.type || "geo",
           x,
           y,
           rotation,
-          props: {
-            w,
-            h,
-            color: m.color,
-            markupId: m.id,
-          },
+          props: props,
         };
         if (existingShape) shapesToUpdate.push(shape);
         else shapesToCreate.push(shape);
@@ -301,7 +307,6 @@ export function useTldrawSync({
       }
     }
 
-    // Collect IDs to remove
     const idsToKeep = new Set<TLShapeId>();
     nextElementMap.forEach((_, id) => idsToKeep.add(id));
     nextTokenMap.forEach((_, id) => idsToKeep.add(id));
@@ -316,19 +321,17 @@ export function useTldrawSync({
           (shape.type === ENCOUNTER_TYPE ||
             shape.type === TOKEN_TYPE ||
             shape.type === BACKGROUND_TYPE ||
-            shape.type === MARKUP_TYPE) &&
-          !idsToKeep.has(shape.id),
+            shape.id.includes(":markup-")) &&
+          !idsToKeep.has(shape.id)
       )
       .map((shape) => shape.id);
 
     if (shapesToCreate.length > 0) {
       editor.createShapes(shapesToCreate);
     }
-
     if (shapesToUpdate.length > 0) {
       editor.updateShapes(shapesToUpdate);
     }
-
     if (idsToRemove.length > 0) {
       editor.store.mergeRemoteChanges(() => {
         editor.store.remove(idsToRemove);
@@ -354,32 +357,20 @@ export function useTldrawSync({
 
     const seededState = new Map<TLShapeId, ShapeState>();
     for (const shape of editor.getCurrentPageShapes()) {
-      if (
-        shape.type === ENCOUNTER_TYPE ||
-        shape.type === TOKEN_TYPE ||
-        shape.type === MARKUP_TYPE
-      ) {
-        const castShape = shape as any;
-        seededState.set(shape.id, {
-          x: castShape.x,
-          y: castShape.y,
-          w: castShape.props.w,
-          h: castShape.props.h,
-          rotation: castShape.rotation,
-        });
-      }
+      const castShape = shape as any;
+      seededState.set(shape.id, {
+        x: castShape.x,
+        y: castShape.y,
+        w: castShape.props.w || 0,
+        h: castShape.props.h || 0,
+        rotation: castShape.rotation,
+        props: castShape.props,
+      });
     }
     shapeStateRef.current = seededState;
 
     isSyncingRef.current = false;
-  }, [
-    editor,
-    elements,
-    temporaryElement,
-    tokens,
-    markup,
-    backgroundShapeId,
-  ]);
+  }, [editor, elements, temporaryElement, tokens, markup, backgroundShapeId]);
 
   // Handle updates FROM Tldraw TO React
   useEffect(() => {
@@ -390,7 +381,6 @@ export function useTldrawSync({
 
       const { updated, added, removed } = event.changes;
 
-      // Skip if no relevant shapes were affected (e.g. only camera changed)
       const hasShapeChanges =
         Object.values(added).some((s) => s.typeName === "shape") ||
         Object.values(removed).some((s) => s.typeName === "shape") ||
@@ -398,11 +388,9 @@ export function useTldrawSync({
 
       if (!hasShapeChanges) return;
 
-      // Use a more specific check for drag operations
       const isActuallyDragging = editor.inputs.getIsDragging();
       const isSelectionDragging = editor.getInstanceState().isChangingStyle;
 
-      // Only process changed shapes for better performance
       const changedShapeIds = new Set<TLShapeId>([
         ...Object.keys(added),
         ...Object.keys(updated),
@@ -412,137 +400,74 @@ export function useTldrawSync({
         const shape = editor.getShape(id);
         if (!shape) continue;
 
-        if (shape.type === ENCOUNTER_TYPE) {
-          const castShape = shape as any;
-          const prev = shapeStateRef.current.get(shape.id);
-          const current = {
-            x: castShape.x,
-            y: castShape.y,
-            w: castShape.props.w,
-            h: castShape.props.h,
-            rotation: castShape.rotation,
-          };
+        const castShape = shape as any;
+        const current: ShapeState = {
+          x: castShape.x,
+          y: castShape.y,
+          w: castShape.props.w || 0,
+          h: castShape.props.h || 0,
+          rotation: castShape.rotation,
+          props: castShape.props,
+        };
 
-          if (
-            !prev ||
-            prev.x !== current.x ||
-            prev.y !== current.y ||
-            prev.w !== current.w ||
-            prev.h !== current.h ||
-            prev.rotation !== current.rotation
-          ) {
+        if (shape.type === ENCOUNTER_TYPE) {
+          const prev = shapeStateRef.current.get(shape.id);
+          if (!prev || prev.x !== current.x || prev.y !== current.y || prev.w !== current.w || prev.h !== current.h || prev.rotation !== current.rotation) {
             shapeStateRef.current.set(shape.id, current);
             if (isActuallyDragging || isSelectionDragging) {
               pendingElementMovesRef.current.set(shape.id, current);
             } else {
               const element = elementByShapeIdRef.current.get(shape.id);
               if (element) {
-                onElementMove({
-                  ...element,
-                  x: current.x,
-                  y: current.y,
-                  width: current.w,
-                  height: current.h,
-                  rotation: current.rotation,
-                });
+                onElementMove({ ...element, x: current.x, y: current.y, width: current.w, height: current.h, rotation: current.rotation });
               }
             }
           }
         } else if (shape.type === TOKEN_TYPE) {
-          const castShape = shape as any;
           const prev = shapeStateRef.current.get(shape.id);
-          const current = {
-            x: castShape.x,
-            y: castShape.y,
-            w: castShape.props.w,
-            h: castShape.props.h,
-            rotation: castShape.rotation,
-          };
-
-          if (
-            !prev ||
-            prev.x !== current.x ||
-            prev.y !== current.y ||
-            prev.rotation !== current.rotation
-          ) {
+          if (!prev || prev.x !== current.x || prev.y !== current.y || prev.rotation !== current.rotation) {
             shapeStateRef.current.set(shape.id, current);
             if (isActuallyDragging || isSelectionDragging) {
               pendingTokenMovesRef.current.set(shape.id, current);
             } else {
               const token = tokenByShapeIdRef.current.get(shape.id);
               if (token) {
-                onTokenMove({
-                  ...token,
-                  coordinates: {
-                    x: current.x,
-                    y: current.y,
-                    rotation: current.rotation,
-                  },
-                });
+                onTokenMove({ ...token, coordinates: { x: current.x, y: current.y, rotation: current.rotation } });
               }
             }
           }
-        } else if (shape.type === MARKUP_TYPE) {
-          const castShape = shape as any;
+        } else if (id.includes(":markup-")) {
           const prev = shapeStateRef.current.get(shape.id);
-          const current = {
-            x: castShape.x,
-            y: castShape.y,
-            w: castShape.props.w,
-            h: castShape.props.h,
-            rotation: castShape.rotation,
-          };
-
-          if (
-            !prev ||
-            prev.x !== current.x ||
-            prev.y !== current.y ||
-            prev.w !== current.w ||
-            prev.h !== current.h ||
-            prev.rotation !== current.rotation
-          ) {
+          if (!prev || prev.x !== current.x || prev.y !== current.y || prev.rotation !== current.rotation || JSON.stringify(prev.props) !== JSON.stringify(current.props)) {
             shapeStateRef.current.set(shape.id, current);
             if (isActuallyDragging || isSelectionDragging) {
               pendingMarkupMovesRef.current.set(shape.id, current);
             } else {
               const m = markupByShapeIdRef.current.get(shape.id);
               if (m) {
-                onMarkupMove({
-                  ...m,
-                  x: current.x,
-                  y: current.y,
-                  width: current.w,
-                  height: current.h,
-                  rotation: current.rotation,
-                });
+                onMarkupMove({ ...m, x: current.x, y: current.y, width: current.w, height: current.h, rotation: current.rotation, props: JSON.stringify(current.props) });
               }
             }
           }
         }
       }
 
-      // Handle deletions
       for (const id of Object.keys(removed) as TLShapeId[]) {
+        if (id.includes(":markup-")) {
+          const m = markupByShapeIdRef.current.get(id);
+          if (m) {
+            onMarkupDelete(m.id);
+          }
+        }
         shapeStateRef.current.delete(id);
       }
 
-      if (!(isActuallyDragging || isSelectionDragging) && wasDraggingRef.current) {
+      if (wasDraggingRef.current && !isActuallyDragging && !isSelectionDragging) {
         pendingElementMovesRef.current.forEach((state, shapeId) => {
           const element = elementByShapeIdRef.current.get(shapeId);
           if (element) {
-            onElementMove({
-              ...element,
-              x: state.x,
-              y: state.y,
-              width: state.w,
-              height: state.h,
-              rotation: state.rotation,
-            });
-            // Protect this shape for a while after move
-            recentLocalMovesRef.current.set(shapeId, {
-              state,
-              timestamp: Date.now(),
-            });
+            onElementMove({ ...element, x: state.x, y: state.y, width: state.w, height: state.h, rotation: state.rotation });
+            recentLocalMovesRef.current.set(shapeId, { state, timestamp: Date.now() });
           }
         });
         pendingElementMovesRef.current.clear();
@@ -550,19 +475,8 @@ export function useTldrawSync({
         pendingTokenMovesRef.current.forEach((state, shapeId) => {
           const token = tokenByShapeIdRef.current.get(shapeId);
           if (token) {
-            onTokenMove({
-              ...token,
-              coordinates: {
-                x: state.x,
-                y: state.y,
-                rotation: state.rotation,
-              },
-            });
-            // Protect this shape for a while after move
-            recentLocalMovesRef.current.set(shapeId, {
-              state,
-              timestamp: Date.now(),
-            });
+            onTokenMove({ ...token, coordinates: { x: state.x, y: state.y, rotation: state.rotation } });
+            recentLocalMovesRef.current.set(shapeId, { state, timestamp: Date.now() });
           }
         });
         pendingTokenMovesRef.current.clear();
@@ -570,29 +484,59 @@ export function useTldrawSync({
         pendingMarkupMovesRef.current.forEach((state, shapeId) => {
           const m = markupByShapeIdRef.current.get(shapeId);
           if (m) {
-            onMarkupMove({
-              ...m,
-              x: state.x,
-              y: state.y,
-              width: state.w,
-              height: state.h,
-              rotation: state.rotation,
-            });
-            // Protect this shape for a while after move
-            recentLocalMovesRef.current.set(shapeId, {
-              state,
-              timestamp: Date.now(),
-            });
+            onMarkupMove({ ...m, x: state.x, y: state.y, width: state.w, height: state.h, rotation: state.rotation, props: JSON.stringify(state.props) });
+            recentLocalMovesRef.current.set(shapeId, { state, timestamp: Date.now() });
           }
         });
         pendingMarkupMovesRef.current.clear();
       }
 
+      // Check for finished NEW shapes (native tldraw shapes)
+      if (!isActuallyDragging && !isSelectionDragging) {
+        const nativeShapes = editor.getCurrentPageShapes().filter(s =>
+          !s.id.includes(":markup-") &&
+          !s.id.includes(":token-") &&
+          !s.id.includes(":encounter-") &&
+          s.type !== BACKGROUND_TYPE
+        );
+
+        if (nativeShapes.length > 0) {
+          const isPointerDown = editor.inputs.isDragging || editor.inputs.isPointing;
+          const editingShapeId = editor.getEditingShapeId();
+          
+          if (!isPointerDown) {
+            nativeShapes.forEach(shape => {
+              // CRITICAL: If the shape is being edited (text/note), don't capture it yet.
+              if (editingShapeId === shape.id) {
+                return;
+              }
+
+              const castShape = shape as any;
+              
+              let color = castShape.props.color || "#000000";
+              const reverseColor = Object.entries(HEX_TO_TLDRAW_COLOR).find(([_, v]) => v === color);
+              if (reverseColor) color = reverseColor[0];
+
+              onMarkupDrawed({
+                chapter: 0,
+                x: castShape.x,
+                y: castShape.y,
+                width: castShape.props.w || 0,
+                height: castShape.props.h || 0,
+                rotation: castShape.rotation,
+                color: color,
+                type: castShape.type,
+                props: JSON.stringify(castShape.props),
+              });
+              editor.deleteShapes([shape.id]);
+            });
+          }
+        }
+      }
+
       wasDraggingRef.current = !!(isActuallyDragging || isSelectionDragging);
     });
 
-    return () => {
-      unsubscribe();
-    };
-  }, [editor, onElementMove, onTokenMove, onMarkupMove]);
+    return () => unsubscribe();
+  }, [editor, onElementMove, onTokenMove, onMarkupMove, onMarkupDelete, onMarkupDrawed]);
 }
