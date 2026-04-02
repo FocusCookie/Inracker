@@ -4,8 +4,5 @@
   "secondsPerRound": "Sekunden pro Zug",
   "en": "Englisch",
   "de": "Deutsch",
-  "save": "Einstellungen speichern",
-  "updates": "Updates",
-  "updatesDescription": "Suche nach neuen Versionen von Inracker.",
-  "checkForUpdates": "Nach Updates suchen"
+  "save": "Einstellungen speichern"
 }

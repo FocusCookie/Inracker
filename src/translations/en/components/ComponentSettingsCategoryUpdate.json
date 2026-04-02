@@ -1,0 +1,14 @@
+{
+  "title": "App Update",
+  "description": "Manage app versions and check for updates.",
+  "currentVersion": "Current Version",
+  "checkBtn": "Check for Updates",
+  "updateAvailable": "New Version Available!",
+  "downloading": "Downloading...",
+  "updateBtn": "Update Now",
+  "changelog": "What's New:",
+  "upToDate": "Inracker is up to date.",
+  "errorCheck": "Failed to check for updates.",
+  "errorUpdate": "Failed to download and install the update.",
+  "fullHistory": "View Full Release History on GitHub"
+}

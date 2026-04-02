@@ -1,13 +1,15 @@
 {
-  "availableTitle": "Update Verfügbar",
+  "availableTitle": "Update verfügbar",
   "availableDescription": "Eine neue Version ({{version}}) ist verfügbar.",
+  "availableDescriptionShort": "Eine neue Version (v{{version}}) ist verfügbar.",
   "viewChangelog": "Changelog im Repository ansehen",
+  "viewUpdate": "Update ansehen",
   "updateNow": "Jetzt aktualisieren",
   "upToDateTitle": "Auf dem neuesten Stand",
   "upToDateDescription": "Du verwendest bereits die neueste Version.",
-  "errorTitle": "Fehler beim Suchen nach Updates",
-  "errorDescription": "Prüfung auf Updates fehlgeschlagen. Bitte versuche es später erneut.",
+  "errorTitle": "Suche fehlgeschlagen",
+  "errorDescription": "Die Prüfung auf Updates ist fehlgeschlagen. Bitte versuche es später erneut.",
   "downloadingTitle": "Update wird heruntergeladen...",
-  "installingTitle": "Installation...",
+  "installingTitle": "Wird installiert...",
   "installingDescription": "Die App wird automatisch neu gestartet."
 }

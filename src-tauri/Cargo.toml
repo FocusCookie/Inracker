@@ -1,6 +1,6 @@
 [package]
 name = "inracker"
-version = "0.1.2"
+version = "0.2.0"
 description = "A dungeon master tool to create the best adventures possible."
 authors = ["Stephan Lüddemann"]
 edition = "2021"

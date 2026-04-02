@@ -4,8 +4,5 @@
   "secondsPerRound": "Seconds per Turn",
   "en": "English",
   "de": "German",
-  "save": "Save Settings",
-  "updates": "Updates",
-  "updatesDescription": "Check for new versions of Inracker.",
-  "checkForUpdates": "Check for Updates"
+  "save": "Save Settings"
 }

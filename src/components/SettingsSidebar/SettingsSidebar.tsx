@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   AppWindow,
+  ArrowUpCircle,
   ChevronRight,
   Gem,
   Image,
@@ -51,6 +52,7 @@ export type SettingsCategory =
   | "weaknesses"
   | "backup"
   | "logs"
+  | "update"
   | "developer";
 
 type Props = {
@@ -243,6 +245,16 @@ function SettingsSidebar({ activeItem, onClose, onSelect }: Props) {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip={t("update")}
+              isActive={activeItem === "update"}
+              onClick={() => onSelect("update")}
+            >
+              <ArrowUpCircle />
+              <span>{t("update")}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip={t("developer")}

@@ -1,0 +1,14 @@
+{
+  "title": "App-Update",
+  "description": "Verwalte deine App-Versionen und suche nach Updates.",
+  "currentVersion": "Aktuelle Version",
+  "checkBtn": "Nach Updates suchen",
+  "updateAvailable": "Neue Version verfügbar!",
+  "downloading": "Wird heruntergeladen...",
+  "updateBtn": "Jetzt aktualisieren",
+  "changelog": "Was ist neu:",
+  "upToDate": "Inracker ist auf dem neuesten Stand.",
+  "errorCheck": "Suche nach Updates fehlgeschlagen.",
+  "errorUpdate": "Herunterladen und Installieren des Updates fehlgeschlagen.",
+  "fullHistory": "Vollständige Versionshistorie auf GitHub anzeigen"
+}

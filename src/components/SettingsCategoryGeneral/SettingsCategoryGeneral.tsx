@@ -19,22 +19,11 @@ import {
 } from "@/components/ui/select";
 import Loader from "@/components/Loader/Loader";
 import { TypographyH1 } from "../ui/typographyH1";
-import { useAppUpdates } from "@/hooks/useAppUpdates";
 import { Separator } from "@/components/ui/separator";
-import { RefreshCw } from "lucide-react";
-import { useState } from "react";
 
 function SettingsCategoryGeneral() {
   const { t } = useTranslation("ComponentSettingsCategoryGeneral");
   const { form, mutation, isLoading } = useSettingsGeneral();
-  const { checkForUpdates } = useAppUpdates();
-  const [isChecking, setIsChecking] = useState(false);
-
-  async function handleCheckForUpdates() {
-    setIsChecking(true);
-    await checkForUpdates(true);
-    setIsChecking(false);
-  }
 
   function onSubmit(values: any) {
     mutation.mutate(values);
@@ -98,28 +87,6 @@ function SettingsCategoryGeneral() {
           </div>
         </form>
       </Form>
-
-      <Separator className="my-4" />
-
-      <div className="flex flex-col gap-2">
-        <h3 className="text-lg font-medium">{t("updates")}</h3>
-        <p className="text-sm text-muted-foreground">
-          {t("updatesDescription")}
-        </p>
-        <Button
-          variant="outline"
-          className="w-fit"
-          onClick={handleCheckForUpdates}
-          disabled={isChecking}
-        >
-          {isChecking ? (
-            <Loader className="mr-2 h-4 w-4" />
-          ) : (
-            <RefreshCw className="mr-2 h-4 w-4" />
-          )}
-          {t("checkForUpdates")}
-        </Button>
-      </div>
     </div>
   );
 }

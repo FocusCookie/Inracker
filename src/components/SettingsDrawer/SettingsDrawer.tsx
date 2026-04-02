@@ -19,6 +19,7 @@ import SettingsCategoryNPCs from "../SettingsCategoryNPCs/SettingsCategoryNPCs";
 import SettingsCategoryAudio from "../SettingsCategoryAudio/SettingsCategoryAudio";
 import SettingsCategoryBackup from "../SettingsCategoryBackup/SettingsCategoryBackup";
 import SettingsCategoryLogs from "../SettingsCategoryLogs/SettingsCategoryLogs";
+import SettingsCategoryUpdate from "../SettingsCategoryUpdate/SettingsCategoryUpdate";
 import SettingsCategoryDeveloper from "../SettingsCategoryDeveloper/SettingsCategoryDeveloper";
 import { SquareX } from "lucide-react";
 import { Button } from "../ui/button";
@@ -79,9 +80,18 @@ function SettingsDrawer({
   open,
   onOpenChange,
   onExitComplete,
+  ...props
 }: Props) {
-  const [activeCategory, setActiveCategory] =
-    useState<SettingsCategory>("general");
+  const [activeCategory, setActiveCategory] = useState<SettingsCategory>(
+    props.initialCategory || "general",
+  );
+
+  useEffect(() => {
+    if (open && props.initialCategory) {
+      setActiveCategory(props.initialCategory);
+    }
+  }, [open, props.initialCategory]);
+
   const [closingReason, setClosingReason] = useState<
     null | "success" | CancelReason
   >(null);
@@ -149,6 +159,9 @@ function SettingsDrawer({
 
       case "logs":
         return <SettingsCategoryLogs />;
+
+      case "update":
+        return <SettingsCategoryUpdate />;
 
       case "developer":
         return <SettingsCategoryDeveloper />;

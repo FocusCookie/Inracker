@@ -9,6 +9,7 @@ import { Chapter, DBChapter } from "./chapters";
 import { Encounter } from "./encounter";
 import { EncounterOpponent, Opponent, TCreateOpponent } from "./opponents";
 import { EncounterNPC, NPC } from "./npcs";
+import { SettingsCategory } from "@/components/SettingsSidebar/SettingsSidebar";
 
 export type CancelReason = "cancel" | "dismissed" | "closed";
 
@@ -45,7 +46,9 @@ export type OverlaySuccessMap = {
   "health.dialog": number;
   "money.dialog": { gold: number; silver: number; copper: number };
   "session.log": void;
-  settings: void;
+  settings: {
+    initialCategory?: SettingsCategory;
+  };
 };
 
 export type OverlayMap = {
@@ -239,7 +242,9 @@ export type OverlayMap = {
     onComplete?: (result: OverlaySuccessMap["resistance.edit"]) => void;
     onCancel?: (reason: CancelReason) => void;
   };
-  settings: void;
+  settings: {
+    initialCategory?: SettingsCategory;
+  };
 };
 
 export type OverlayKind = keyof OverlayMap;

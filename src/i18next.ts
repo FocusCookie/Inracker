@@ -153,6 +153,8 @@ import ComponentCreatePlayerDrawerEN from "@/translations/en/components/CreatePl
 import ComponentCreatePlayerDrawerDE from "@/translations/de/components/CreatePlayerDrawer.json";
 import ComponentSettingsCategoryLogsEN from "@/translations/en/components/ComponentSettingsCategoryLogs.json";
 import ComponentSettingsCategoryLogsDE from "@/translations/de/components/ComponentSettingsCategoryLogs.json";
+import ComponentSettingsCategoryUpdateEN from "@/translations/en/components/ComponentSettingsCategoryUpdate.json";
+import ComponentSettingsCategoryUpdateDE from "@/translations/de/components/ComponentSettingsCategoryUpdate.json";
 import ComponentSettingsCategoryDeveloperEN from "@/translations/en/components/ComponentSettingsCategoryDeveloper.json";
 import ComponentSettingsCategoryDeveloperDE from "@/translations/de/components/ComponentSettingsCategoryDeveloper.json";
 import HookUseMutationWithErrorTaostEN from "@/translations/en/hooks/useMutationWithErrorTaost.json";
@@ -234,6 +236,7 @@ const resources = {
     ComponentCreateImmunityDrawer: ComponentCreateImmunityDrawerEN,
     ComponentCreatePlayerDrawer: ComponentCreatePlayerDrawerEN,
     ComponentSettingsCategoryLogs: ComponentSettingsCategoryLogsEN,
+    ComponentSettingsCategoryUpdate: ComponentSettingsCategoryUpdateEN,
     ComponentSettingsCategoryDeveloper: ComponentSettingsCategoryDeveloperEN,
 
     // hygen-en-hooks - DO NOT DELETE THIS LINE
@@ -321,6 +324,7 @@ const resources = {
     ComponentCreateImmunityDrawer: ComponentCreateImmunityDrawerDE,
     ComponentCreatePlayerDrawer: ComponentCreatePlayerDrawerDE,
     ComponentSettingsCategoryLogs: ComponentSettingsCategoryLogsDE,
+    ComponentSettingsCategoryUpdate: ComponentSettingsCategoryUpdateDE,
     ComponentSettingsCategoryDeveloper: ComponentSettingsCategoryDeveloperDE,
 
     // hygen-de-hooks - DO NOT DELETE THIS LINE

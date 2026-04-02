@@ -1,7 +1,9 @@
 {
   "availableTitle": "Update Available",
   "availableDescription": "A new version ({{version}}) is available.",
+  "availableDescriptionShort": "A new version (v{{version}}) is available.",
   "viewChangelog": "View changelog in repository",
+  "viewUpdate": "View Update",
   "updateNow": "Update Now",
   "upToDateTitle": "Up to Date",
   "upToDateDescription": "You are already using the latest version.",
