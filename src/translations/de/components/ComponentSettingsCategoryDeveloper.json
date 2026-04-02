@@ -1,0 +1,7 @@
+{
+  "title": "Entwickler-Tools",
+  "description": "Benutze diese Buttons, um zu testen, ob das Fehler-Logging und die Toasts richtig funktionieren.",
+  "triggerMutationError": "Mutations-Fehler auslösen",
+  "triggerQueryError": "Query-Fehler auslösen",
+  "warning": "Diese Tools sind für Entwickler gedacht, um die Fehlerbehandlungssysteme der App zu überprüfen."
+}

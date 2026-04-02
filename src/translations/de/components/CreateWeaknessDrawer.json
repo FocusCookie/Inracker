@@ -1,5 +1,5 @@
 {
-  "descriptionText": "Erstellen Sie eine neue Schwäche. Schwächen sind Anfälligkeiten, die Einheiten gegen bestimmte Schadensarten oder Effekte haben.",
+  "descriptionText": "Erstelle eine neue Schwäche. Schwächen sind Anfälligkeiten, die Einheiten gegen bestimmte Schadensarten oder Effekte haben.",
   "title": "Schwäche erstellen",
   "cancel": "Abbrechen",
   "create": "Erstellen",
@@ -7,6 +7,6 @@
   "name": "Name",
   "namePlaceholder": "Feuer, Kälte, etc.",
   "description": "Beschreibung",
-  "descriptionPlaceholder": "Beschreiben Sie die Schwäche...",
+  "descriptionPlaceholder": "Beschreibe die Schwäche...",
   "minNameChars": "Der Name muss mindestens 3 Zeichen lang sein"
 }

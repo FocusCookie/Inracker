@@ -6,6 +6,7 @@ import {
 import { useEffect } from "react";
 import { useToast } from "./use-toast";
 import { useTranslation } from "react-i18next";
+import { formatError } from "@/lib/logger";
 
 export function useQueryWithToast<TQueryFnData, TError, TData = TQueryFnData>(
   options: UseQueryOptions<TQueryFnData, TError, TData> & {
@@ -20,16 +21,15 @@ export function useQueryWithToast<TQueryFnData, TError, TData = TQueryFnData>(
 
   useEffect(() => {
     if (query.isError) {
-      console.log("Query Error on ", queryOptions.queryKey);
-      console.log(query.error);
+      const formattedError = formatError(query.error);
 
       toast({
         variant: "destructive",
         title: t("somethingWentWrong"),
-        description: `${query.error || `Failed to load ${queryOptions.queryKey}`}`,
+        description: errorMessage || formattedError.message,
       });
     }
-  }, [query.isError, errorMessage]);
+  }, [query.isError, errorMessage, query.error]);
 
   return query;
 }

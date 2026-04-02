@@ -1,6 +1,7 @@
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { useToast } from "./use-toast";
 import { useTranslation } from "react-i18next";
+import { formatError } from "@/lib/logger";
 
 export function useMutationWithErrorToast<TData, TError, TVariables>(
   options: UseMutationOptions<TData, TError, TVariables>,
@@ -11,14 +12,12 @@ export function useMutationWithErrorToast<TData, TError, TVariables>(
   return useMutation({
     ...options,
     onError: (error, variables, context) => {
-      console.log("Mutation Error");
-      console.error({ error, variables, context });
+      const formattedError = formatError(error);
 
       toast({
         variant: "destructive",
         title: t("somethingWentWrong"),
-        // @ts-ignore
-        description: error?.message || undefined,
+        description: formattedError.message,
       });
     },
   });

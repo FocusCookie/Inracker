@@ -1,0 +1,12 @@
+{
+  "title": "Error Logs",
+  "refresh": "Refresh",
+  "clearLogs": "Clear Logs",
+  "logFileLocation": "Log File Location:",
+  "noLogs": "No error logs found.",
+  "debugToolsDescription": "Use these buttons to test if the error logging and toasts are working correctly.",
+  "viewVariables": "View Variables",
+  "viewStack": "View Stack Trace",
+  "route": "Route:",
+  "code": "Code:"
+}

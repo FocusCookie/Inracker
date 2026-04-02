@@ -6,5 +6,8 @@
   "upToDateTitle": "Up to Date",
   "upToDateDescription": "You are already using the latest version.",
   "errorTitle": "Check Failed",
-  "errorDescription": "Failed to check for updates. Please try again later."
+  "errorDescription": "Failed to check for updates. Please try again later.",
+  "downloadingTitle": "Downloading Update...",
+  "installingTitle": "Installing...",
+  "installingDescription": "The app will restart automatically."
 }

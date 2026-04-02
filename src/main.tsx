@@ -1,6 +1,6 @@
 import { Toaster } from "@/components/ui/toaster";
 import "@fontsource-variable/inter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryCache, MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import React from "react";
 import ReactDOM from "react-dom/client";
@@ -9,8 +9,28 @@ import { routeTree } from "./routeTree.gen";
 import "./styles/global.css";
 import { appDataDir } from "@tauri-apps/api/path";
 import { createTauriAppDataSubfolders } from "./lib/utils";
+import { formatError, logError } from "./lib/logger";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error, query) => {
+      const formattedError = formatError(error, {
+        variables: { queryKey: query.queryKey },
+        route: window.location.pathname,
+      });
+      logError(formattedError);
+    },
+  }),
+  mutationCache: new MutationCache({
+    onError: (error, variables, context, mutation) => {
+      const formattedError = formatError(error, {
+        variables,
+        route: window.location.pathname,
+      });
+      logError(formattedError);
+    },
+  }),
+});
 const router = createRouter({ routeTree });
 
 declare module "@tanstack/react-router" {

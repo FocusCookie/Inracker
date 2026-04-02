@@ -1,0 +1,7 @@
+{
+  "title": "Developer Tools",
+  "description": "Use these buttons to test if the error logging and toasts are working correctly.",
+  "triggerMutationError": "Trigger Mutation Error",
+  "triggerQueryError": "Trigger Query Error",
+  "warning": "These tools are intended for developers to verify the application's error handling systems."
+}

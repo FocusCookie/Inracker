@@ -4,7 +4,10 @@
   "viewChangelog": "Changelog im Repository ansehen",
   "updateNow": "Jetzt aktualisieren",
   "upToDateTitle": "Auf dem neuesten Stand",
-  "upToDateDescription": "Sie verwenden bereits die neueste Version.",
-  "errorTitle": "Fehler beim Prüfen",
-  "errorDescription": "Prüfung auf Updates fehlgeschlagen. Bitte versuchen Sie es später erneut."
+  "upToDateDescription": "Du verwendest bereits die neueste Version.",
+  "errorTitle": "Fehler beim Suchen nach Updates",
+  "errorDescription": "Prüfung auf Updates fehlgeschlagen. Bitte versuche es später erneut.",
+  "downloadingTitle": "Update wird heruntergeladen...",
+  "installingTitle": "Installation...",
+  "installingDescription": "Die App wird automatisch neu gestartet."
 }

@@ -18,6 +18,8 @@ import SettingsCategoryOpponents from "../SettingsCategoryOpponents/SettingsCate
 import SettingsCategoryNPCs from "../SettingsCategoryNPCs/SettingsCategoryNPCs";
 import SettingsCategoryAudio from "../SettingsCategoryAudio/SettingsCategoryAudio";
 import SettingsCategoryBackup from "../SettingsCategoryBackup/SettingsCategoryBackup";
+import SettingsCategoryLogs from "../SettingsCategoryLogs/SettingsCategoryLogs";
+import SettingsCategoryDeveloper from "../SettingsCategoryDeveloper/SettingsCategoryDeveloper";
 import { SquareX } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -144,6 +146,12 @@ function SettingsDrawer({
 
       case "backup":
         return <SettingsCategoryBackup />;
+
+      case "logs":
+        return <SettingsCategoryLogs />;
+
+      case "developer":
+        return <SettingsCategoryDeveloper />;
 
       default:
         return <SettingsCategoryGeneral />;

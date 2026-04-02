@@ -6,12 +6,14 @@ import {
 } from "@/schemas/settingsGeneral";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Database from "@/lib/database";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useMutationWithErrorToast } from "./useMutationWithErrorToast";
+import { useQueryWithToast } from "./useQueryWithErrorToast";
 import i18n from "@/i18next";
 
 export const useSettingsGeneral = () => {
   const queryClient = useQueryClient();
+  const [triggerQueryError, setTriggerQueryError] = useState(false);
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ["settings", "general"],
@@ -23,6 +25,18 @@ export const useSettingsGeneral = () => {
         language: (language as "en" | "de") || "en",
       };
     },
+  });
+
+  const testErrorQuery = useQueryWithToast({
+    queryKey: ["test-error-query", triggerQueryError],
+    queryFn: async () => {
+      if (triggerQueryError) {
+        setTriggerQueryError(false);
+        throw new Error("This is a test error from useQueryWithToast");
+      }
+      return null;
+    },
+    enabled: triggerQueryError,
   });
 
   const form = useForm<SettingsGeneral>({
@@ -53,5 +67,18 @@ export const useSettingsGeneral = () => {
     },
   });
 
-  return { form, mutation, isLoading };
+  const testErrorMutation = useMutationWithErrorToast({
+    mutationFn: async () => {
+      throw new Error("This is a test error from useMutationWithErrorToast");
+    },
+  });
+
+  return { 
+    form, 
+    mutation, 
+    testErrorMutation, 
+    testErrorQuery, 
+    setTriggerQueryError, 
+    isLoading 
+  };
 };

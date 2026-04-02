@@ -27,6 +27,8 @@ import {
   Sparkles,
   SquareX,
   Save,
+  FileText,
+  Bug,
 } from "lucide-react";
 import {
   Collapsible,
@@ -47,7 +49,9 @@ export type SettingsCategory =
   | "opponents"
   | "resistances"
   | "weaknesses"
-  | "backup";
+  | "backup"
+  | "logs"
+  | "developer";
 
 type Props = {
   onClose: () => void;
@@ -153,6 +157,17 @@ function SettingsSidebar({ activeItem, onClose, onSelect }: Props) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip={t("logs")}
+                  isActive={activeItem === "logs"}
+                  onClick={() => onSelect("logs")}
+                >
+                  <FileText />
+                  <span>{t("logs")}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
               <Collapsible asChild className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
@@ -227,14 +242,28 @@ function SettingsSidebar({ activeItem, onClose, onSelect }: Props) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarMenuButton
-          tooltip={t("close")}
-          className="cursor-pointer"
-          onClick={onClose}
-        >
-          <SquareX />
-          <span>{t("close")}</span>
-        </SidebarMenuButton>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip={t("developer")}
+              isActive={activeItem === "developer"}
+              onClick={() => onSelect("developer")}
+            >
+              <Bug />
+              <span>{t("developer")}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip={t("close")}
+              className="cursor-pointer"
+              onClick={onClose}
+            >
+              <SquareX />
+              <span>{t("close")}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   );

@@ -1,0 +1,12 @@
+{
+  "title": "Fehlerprotokolle",
+  "refresh": "Aktualisieren",
+  "clearLogs": "Protokolle löschen",
+  "logFileLocation": "Dateipfad der Protokolle:",
+  "noLogs": "Es wurden keine Fehlerprotokolle gefunden.",
+  "debugToolsDescription": "Benutze diese Buttons, um zu testen, ob das Fehler-Logging und die Toasts richtig funktionieren.",
+  "viewVariables": "Variablen ansehen",
+  "viewStack": "Stack-Trace anzeigen",
+  "route": "Route:",
+  "code": "Code:"
+}

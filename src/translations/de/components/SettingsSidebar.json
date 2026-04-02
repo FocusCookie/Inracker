@@ -12,6 +12,8 @@
   "resistances": "Widerstände",
   "weaknesses": "Schwächen",
   "backup": "Import / Export",
+  "logs": "Fehlerprotokolle",
+  "developer": "Entwickler-Tools",
   "close": "Schließen",
   "import-export": "Importieren & Exportieren"
 }

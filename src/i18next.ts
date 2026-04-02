@@ -151,6 +151,10 @@ import ComponentCreateImmunityDrawerEN from "@/translations/en/components/Create
 import ComponentCreateImmunityDrawerDE from "@/translations/de/components/CreateImmunityDrawer.json";
 import ComponentCreatePlayerDrawerEN from "@/translations/en/components/CreatePlayerDrawer.json";
 import ComponentCreatePlayerDrawerDE from "@/translations/de/components/CreatePlayerDrawer.json";
+import ComponentSettingsCategoryLogsEN from "@/translations/en/components/ComponentSettingsCategoryLogs.json";
+import ComponentSettingsCategoryLogsDE from "@/translations/de/components/ComponentSettingsCategoryLogs.json";
+import ComponentSettingsCategoryDeveloperEN from "@/translations/en/components/ComponentSettingsCategoryDeveloper.json";
+import ComponentSettingsCategoryDeveloperDE from "@/translations/de/components/ComponentSettingsCategoryDeveloper.json";
 import HookUseMutationWithErrorTaostEN from "@/translations/en/hooks/useMutationWithErrorTaost.json";
 import HookUseMutationWithErrorTaostDE from "@/translations/de/hooks/useMutationWithErrorTaost.json";
 
@@ -229,6 +233,8 @@ const resources = {
     ComponentResistanceCard: ComponentResistanceCardEN,
     ComponentCreateImmunityDrawer: ComponentCreateImmunityDrawerEN,
     ComponentCreatePlayerDrawer: ComponentCreatePlayerDrawerEN,
+    ComponentSettingsCategoryLogs: ComponentSettingsCategoryLogsEN,
+    ComponentSettingsCategoryDeveloper: ComponentSettingsCategoryDeveloperEN,
 
     // hygen-en-hooks - DO NOT DELETE THIS LINE
     HookUseAppUpdates: HookUseAppUpdatesEN,
@@ -314,6 +320,8 @@ const resources = {
     ComponentPartyCard: ComponentPartyCardDE,
     ComponentCreateImmunityDrawer: ComponentCreateImmunityDrawerDE,
     ComponentCreatePlayerDrawer: ComponentCreatePlayerDrawerDE,
+    ComponentSettingsCategoryLogs: ComponentSettingsCategoryLogsDE,
+    ComponentSettingsCategoryDeveloper: ComponentSettingsCategoryDeveloperDE,
 
     // hygen-de-hooks - DO NOT DELETE THIS LINE
     HookUseAppUpdates: HookUseAppUpdatesDE,
