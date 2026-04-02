@@ -33,6 +33,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Checkout main branch (tag trigger leaves us in detached HEAD)
+          git checkout main
           # Generate full changelog and overwrite CHANGELOG.md
           npx git-cliff --config cliff.toml --output CHANGELOG.md
           git add CHANGELOG.md
