@@ -3,13 +3,44 @@ on:
   push:
     tags:
       - "v*"
-  workflow_dispatch: #
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      changelog: ${{ steps.git-cliff.outputs.content }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Generate a changelog
+        uses: orhun/git-cliff-action@v4
+        id: git-cliff
+        with:
+          config: cliff.toml
+          args: --latest --strip header
+        env:
+          GITHUB_REPO: ${{ github.repository }}
+
+      - name: Update CHANGELOG.md
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Generate full changelog and overwrite CHANGELOG.md
+          npx git-cliff --config cliff.toml --output CHANGELOG.md
+          git add CHANGELOG.md
+          git commit -m "🚀 chore: update CHANGELOG.md for ${{ github.ref_name }} [skip ci]" || echo "No changes to commit"
+          git push origin main || echo "Failed to push CHANGELOG.md (possible branch protection)"
+
   release:
+    needs: prepare
     strategy:
       fail-fast: false
       matrix:
@@ -51,7 +82,7 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "Inracker v__VERSION__"
-          releaseBody: "See the assets to download this version and install."
+          releaseBody: ${{ needs.prepare.outputs.changelog }}
           releaseDraft: true
           prerelease: false
           npm-install: false
