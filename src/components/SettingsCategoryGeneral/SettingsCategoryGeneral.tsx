@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import Loader from "@/components/Loader/Loader";
 import { TypographyH1 } from "../ui/typographyH1";
-import { Separator } from "@/components/ui/separator";
+
 
 function SettingsCategoryGeneral() {
   const { t } = useTranslation("ComponentSettingsCategoryGeneral");

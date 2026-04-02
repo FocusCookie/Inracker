@@ -76,6 +76,7 @@ import ComponentResistanceCard from "@/translations/en/components/ResistanceCard
 import ComponentCreateImmunityDrawer from "@/translations/en/components/CreateImmunityDrawer.json";
 import ComponentCreatePlayerDrawer from "@/translations/en/components/CreatePlayerDrawer.json";
 import ComponentSettingsCategoryLogs from "@/translations/en/components/ComponentSettingsCategoryLogs.json";
+import ComponentSettingsCategoryUpdate from "@/translations/en/components/ComponentSettingsCategoryUpdate.json";
 import ComponentSettingsCategoryDeveloper from "@/translations/en/components/ComponentSettingsCategoryDeveloper.json";
 
 declare module "i18next" {
@@ -153,6 +154,7 @@ declare module "i18next" {
       ComponentCreateImmunityDrawer: typeof ComponentCreateImmunityDrawer;
       ComponentCreatePlayerDrawer: typeof ComponentCreatePlayerDrawer;
       ComponentSettingsCategoryLogs: typeof ComponentSettingsCategoryLogs;
+      ComponentSettingsCategoryUpdate: typeof ComponentSettingsCategoryUpdate;
       ComponentSettingsCategoryDeveloper: typeof ComponentSettingsCategoryDeveloper;
 
       // hygen-hooks - DO NOT DELETE THIS LINE

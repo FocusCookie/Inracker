@@ -7,7 +7,7 @@ function SettingsButton({}: Props) {
   const openOverlay = useOverlayStore((s) => s.open);
 
   function handleOpenSettings() {
-    openOverlay("settings", undefined);
+    openOverlay("settings", {});
   }
 
   return (
