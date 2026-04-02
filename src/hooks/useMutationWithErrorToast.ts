@@ -11,7 +11,7 @@ export function useMutationWithErrorToast<TData, TError, TVariables>(
 
   return useMutation({
     ...options,
-    onError: (error, variables, context) => {
+    onError: (error, _variables, _context) => {
       const formattedError = formatError(error);
 
       toast({

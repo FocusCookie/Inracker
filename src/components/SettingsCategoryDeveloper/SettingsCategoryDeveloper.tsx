@@ -9,7 +9,7 @@ function SettingsCategoryDeveloper() {
   const { testErrorMutation, setTriggerQueryError } = useSettingsGeneral();
 
   function handleTriggerTestError() {
-    testErrorMutation.mutate();
+    testErrorMutation.mutate({});
   }
 
   function handleTriggerTestQueryError() {

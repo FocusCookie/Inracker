@@ -22,7 +22,7 @@ const queryClient = new QueryClient({
     },
   }),
   mutationCache: new MutationCache({
-    onError: (error, variables, context, mutation) => {
+    onError: (error, variables, _context, _mutation) => {
       const formattedError = formatError(error, {
         variables,
         route: window.location.pathname,

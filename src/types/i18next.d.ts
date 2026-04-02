@@ -75,6 +75,8 @@ import ComponentPartyCard from "@/translations/en/components/PartyCard.json";
 import ComponentResistanceCard from "@/translations/en/components/ResistanceCard.json";
 import ComponentCreateImmunityDrawer from "@/translations/en/components/CreateImmunityDrawer.json";
 import ComponentCreatePlayerDrawer from "@/translations/en/components/CreatePlayerDrawer.json";
+import ComponentSettingsCategoryLogs from "@/translations/en/components/ComponentSettingsCategoryLogs.json";
+import ComponentSettingsCategoryDeveloper from "@/translations/en/components/ComponentSettingsCategoryDeveloper.json";
 
 declare module "i18next" {
   interface CustomTypeOptions {
@@ -150,6 +152,8 @@ declare module "i18next" {
       ComponentResistanceCard: typeof ComponentResistanceCard;
       ComponentCreateImmunityDrawer: typeof ComponentCreateImmunityDrawer;
       ComponentCreatePlayerDrawer: typeof ComponentCreatePlayerDrawer;
+      ComponentSettingsCategoryLogs: typeof ComponentSettingsCategoryLogs;
+      ComponentSettingsCategoryDeveloper: typeof ComponentSettingsCategoryDeveloper;
 
       // hygen-hooks - DO NOT DELETE THIS LINE
       HookUseAppUpdates: typeof HookUseAppUpdates;
