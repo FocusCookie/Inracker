@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 
 - 🐛 fix: resolve TypeScript build errors and missing i18n namespace ([c52e10f](https://github.com/FocusCookie/Inracker/commit/c52e10fa1458e7fedff7d8ba97fcf63150443dc9))
 
+### Performance
+
+- 🚀 chore: update CHANGELOG.md for v0.2.0 [skip ci] ([e7a5964](https://github.com/FocusCookie/Inracker/commit/e7a5964a8e1b2cb033f3e187287dcde21ceb3c75))
+
 ## [0.2.0] - 2026-04-02
 
 ### Bug Fixes
