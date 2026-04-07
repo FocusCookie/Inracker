@@ -4,7 +4,6 @@ import InitiativeCard, {
   EncounterOpponentEntity,
   PlayerEntity,
 } from "../InitiativeCard/InitiativeCard";
-import { cn } from "@/lib/utils";
 
 type Entity = PlayerEntity | EncounterOpponentEntity;
 
@@ -58,11 +57,11 @@ function Initiative({
   }
 
   return (
-    <div className="flex max-w-128 items-center gap-2 rounded-xl border border-white/80 bg-white/20 px-3 shadow-md backdrop-blur-sm">
+    <div className="flex w-fit max-w-full items-center gap-2 rounded-xl border border-white/80 bg-white/20 px-3 shadow-md backdrop-blur-sm">
       {showButtons && (
         <button
           onClick={() => scroll("left")}
-          className="flex h-28 w-8 items-center justify-center rounded border border-black bg-white/20 transition-colors hover:bg-white/30"
+          className="flex h-28 w-8 flex-shrink-0 items-center justify-center rounded border border-black bg-white/20 transition-colors hover:bg-white/30"
           type="button"
         >
           <ChevronLeft className="h-6 w-6 text-black" />
@@ -71,10 +70,7 @@ function Initiative({
 
       <div
         ref={scrollContainerRef}
-        className={cn(
-          "no-scrollbar flex h-full gap-4 scroll-smooth py-3",
-          showButtons ? "overflow-x-auto" : "overflow-visible",
-        )}
+        className="no-scrollbar flex h-full min-w-0 flex-1 gap-4 overflow-x-auto scroll-smooth py-3"
         style={{
           maxWidth: showButtons ? `${maxVisible * 6.5 + 1}rem` : undefined,
         }}
@@ -105,7 +101,7 @@ function Initiative({
       {showButtons && (
         <button
           onClick={() => scroll("right")}
-          className="flex h-28 w-8 items-center justify-center rounded border border-black bg-white/20 transition-colors hover:bg-white/30"
+          className="flex h-28 w-8 flex-shrink-0 items-center justify-center rounded border border-black bg-white/20 transition-colors hover:bg-white/30"
           type="button"
         >
           <ChevronRight className="h-6 w-6 text-black" />
