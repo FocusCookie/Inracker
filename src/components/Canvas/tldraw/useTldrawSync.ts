@@ -5,6 +5,7 @@ import type { InrackerCanvasElement } from "@/types/canvas";
 import type { CanvasElementWithId } from "../types";
 import type { Token } from "@/types/tokens";
 import type { MarkupElement } from "@/types/markup";
+import { hexToTldrawColor, tldrawToHexColor } from "./colorMapping";
 import {
   BACKGROUND_TYPE,
   ENCOUNTER_TYPE,
@@ -32,30 +33,6 @@ type Params = {
   onMarkupDelete: (markupId: number) => void;
   onMarkupDrawed: (markup: Omit<MarkupElement, "id">) => void;
   backgroundShapeId?: TLShapeId;
-};
-
-const HEX_TO_TLDRAW_COLOR: Record<string, string> = {
-  "#ffffff": "white",
-  "#f44336": "red",
-  "#ff9800": "orange",
-  "#ffc107": "orange",
-  "#ffeb3b": "yellow",
-  "#cddc39": "light-green",
-  "#4caf50": "green",
-  "#10b981": "green",
-  "#009688": "blue",
-  "#00bcd4": "light-blue",
-  "#0ea5e9": "light-blue",
-  "#2196f3": "blue",
-  "#3f51b5": "blue",
-  "#8b5cf6": "violet",
-  "#9c27b0": "violet",
-  "#d946ef": "violet",
-  "#e91e63": "red",
-  "#f43f5e": "red",
-  "#64748b": "grey",
-  "#9e9e9e": "grey",
-  "#000000": "black",
 };
 
 export function useTldrawSync({
@@ -243,11 +220,22 @@ export function useTldrawSync({
       const x = recentState ? recentState.x : m.x;
       const y = recentState ? recentState.y : m.y;
       const rotation = recentState ? recentState.rotation : m.rotation;
-      const props = recentState && recentState.props ? recentState.props : JSON.parse(m.props || "{}");
+      const rawProps = recentState && recentState.props ? recentState.props : JSON.parse(m.props || "{}");
+      const props = { ...rawProps };
 
-      // VALIDATION: tldraw native shapes expect specific color names
-      if (m.type !== "markup" && props.color && props.color.startsWith("#")) {
-        props.color = HEX_TO_TLDRAW_COLOR[props.color] || "black";
+      // Ensure color sync for all markup elements (both custom and native), except groups
+      if (m.color && m.type !== "group") {
+        props.color = hexToTldrawColor(m.color);
+      }
+
+      // Sync color for custom 'markup' type explicitly
+      if (m.type === "markup" && m.color) {
+        props.color = m.color;
+      }
+
+      // Enforce filled geo shapes so fill follows selected color.
+      if (m.type === "geo") {
+        props.fill = "fill";
       }
 
       const existingShape = editor.getShape(shapeId) as any;
@@ -255,8 +243,10 @@ export function useTldrawSync({
           existingShape.x !== x || 
           existingShape.y !== y || 
           existingShape.rotation !== rotation ||
-          JSON.stringify(existingShape.props) !== JSON.stringify(props) ||
-          existingShape.type !== (m.type || "geo");
+          existingShape.type !== (m.type || "geo") ||
+          (m.type === "markup" && existingShape.props.color !== m.color) ||
+          (m.type === "geo" && (existingShape.props.color !== props.color || existingShape.props.fill !== props.fill)) ||
+          JSON.stringify(existingShape.props) !== JSON.stringify(props);
 
       if (isDifferent) {
         const shape = {
@@ -513,9 +503,13 @@ export function useTldrawSync({
 
               const castShape = shape as any;
               
-              let color = castShape.props.color || "#000000";
-              const reverseColor = Object.entries(HEX_TO_TLDRAW_COLOR).find(([_, v]) => v === color);
-              if (reverseColor) color = reverseColor[0];
+              const tldrawColor = castShape.props.color || "black";
+              const color = tldrawToHexColor(tldrawColor);
+
+              const finalProps = { ...castShape.props };
+              if (castShape.type === "geo") {
+                finalProps.fill = "fill";
+              }
 
               onMarkupDrawed({
                 chapter: 0,
@@ -526,7 +520,7 @@ export function useTldrawSync({
                 rotation: castShape.rotation,
                 color: color,
                 type: castShape.type,
-                props: JSON.stringify(castShape.props),
+                props: JSON.stringify(finalProps),
               });
               editor.deleteShapes([shape.id]);
             });

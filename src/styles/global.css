@@ -315,6 +315,11 @@
   }
 }
 
+/* Keep geo fill translucent while preserving full-opacity stroke. */
+.tl-shape[data-shape-type="geo"] path[fill]:not([fill="none"]) {
+  fill-opacity: 0.25;
+}
+
 @layer utilities {
   /* Hide scrollbar for Webkit browsers */
   .no-scrollbar::-webkit-scrollbar {

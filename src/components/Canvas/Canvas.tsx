@@ -12,6 +12,7 @@ import { EncounterShapeUtil } from "./tldraw/EncounterShapeUtil";
 import { EncounterTool } from "./tldraw/EncounterTool";
 import { MarkupShapeUtil } from "./tldraw/MarkupShapeUtil";
 import { TokenShapeUtil } from "./tldraw/TokenShapeUtil";
+import { hexToTldrawColor } from "./tldraw/colorMapping";
 import { useTldrawSync } from "./tldraw/useTldrawSync";
 import { CanvasTldrawProvider } from "./tldraw/CanvasTldrawContext";
 import type { CanvasElementWithId } from "./types";
@@ -615,9 +616,15 @@ export default function Canvas({
           onMarkupDuplicate={onMarkupDuplicate}
           onMarkupColorChange={(markupId, color) => {
             const m = markup.find((item) => item.id === markupId);
-            if (m) {
+            if (m && m.type !== "group") {
               const props = JSON.parse(m.props || "{}");
-              props.color = color;
+              // Sync tldraw internal color
+              if (m.type === "geo") {
+                props.color = hexToTldrawColor(color);
+                props.fill = "fill";
+              } else {
+                props.color = color;
+              }
               onMarkupMove({ ...m, color, props: JSON.stringify(props) });
             }
           }}

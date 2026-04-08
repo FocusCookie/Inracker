@@ -31,6 +31,7 @@ import {
 import { cn } from "@/lib/utils";
 import { COMMON_COLORS } from "@/lib/colors";
 import { MarkupElement } from "@/types/markup";
+import { hexToTldrawColor } from "./tldraw/colorMapping";
 import { DrawingMode } from "./CanvasToolbar";
 
 type SelectionToolbarProps = {
@@ -104,9 +105,9 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
     { id: "arrow", icon: <ArrowUpRight className="w-4 h-4" />, label: t("arrow") },
     { id: "text", icon: <Type className="w-4 h-4" />, label: t("text") },
     { id: "note", icon: <StickyNote className="w-4 h-4" />, label: t("note") },
-    { id: "geo-rect", icon: <Square className="w-4 h-4" />, label: t("rectangle"), tool: "geo", geo: "rectangle", props: { "tldraw:geo": "rectangle" } },
-    { id: "geo-ellipse", icon: <Circle className="w-4 h-4" />, label: t("ellipse"), tool: "geo", geo: "ellipse", props: { "tldraw:geo": "ellipse" } },
-    { id: "geo-triangle", icon: <Triangle className="w-4 h-4" />, label: t("triangle"), tool: "geo", geo: "triangle", props: { "tldraw:geo": "triangle" } },
+    { id: "geo-rect", icon: <Square className="w-4 h-4" />, label: t("rectangle"), tool: "geo", geo: "rectangle", props: { "tldraw:geo": "rectangle", "tldraw:fill": "fill" } },
+    { id: "geo-ellipse", icon: <Circle className="w-4 h-4" />, label: t("ellipse"), tool: "geo", geo: "ellipse", props: { "tldraw:geo": "ellipse", "tldraw:fill": "fill" } },
+    { id: "geo-triangle", icon: <Triangle className="w-4 h-4" />, label: t("triangle"), tool: "geo", geo: "triangle", props: { "tldraw:geo": "triangle", "tldraw:fill": "fill" } },
   ];
 
   const showMarkupActions = selectedMarkups.length > 0;
@@ -159,7 +160,24 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
                     <Tooltip key={c.value}>
                       <TooltipTrigger asChild>
                         <button
-                          onClick={() => onMarkupColorChange(markup.id, c.value)}
+                          onClick={() => {
+                            onMarkupColorChange(markup.id, c.value);
+                            const tldrawColor = hexToTldrawColor(c.value);
+                            editor.updateInstanceState({ 
+                              stylesForNextShape: { 
+                                ...editor.getInstanceState().stylesForNextShape,
+                                "tldraw:color": tldrawColor,
+                                "tldraw:fill": "fill"
+                              } 
+                            });
+                            if (markup.type === "geo") {
+                              editor.updateShapes(ids.map(id => ({
+                                id,
+                                type: "geo",
+                                props: { color: tldrawColor as any, fill: "fill" }
+                              })));
+                            }
+                          }}
                           className={cn(
                             "h-4 w-4 rounded-full border border-black/10 hover:scale-110 transition-transform",
                             c.className,

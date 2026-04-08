@@ -30,7 +30,7 @@ export class MarkupShapeUtil extends BaseBoxShapeUtil<MarkupShape> {
             width={w}
             height={h}
             fill={color}
-            fillOpacity={0.4}
+            fillOpacity={0.25}
             stroke={color}
             strokeWidth={2}
             rx={4}
