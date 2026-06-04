@@ -1,10 +1,11 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import defaultDb from "@/lib/database";
 import { Log, LogType } from "@/types/logs";
 import { useMutationWithErrorToast } from "./useMutationWithErrorToast";
+import { useQueryWithToast } from "./useQueryWithErrorToast";
 
 export function useLogs(chapterId: number, database = defaultDb) {
-  return useQuery({
+  return useQueryWithToast({
     queryKey: ["logs", chapterId],
     queryFn: () => database.logs.getByChapterId(chapterId),
   });

@@ -4,7 +4,7 @@ import {
   settingsGeneralSchema,
   SettingsGeneral,
 } from "@/schemas/settingsGeneral";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import Database from "@/lib/database";
 import { useEffect, useState } from "react";
 import { useMutationWithErrorToast } from "./useMutationWithErrorToast";
@@ -15,7 +15,7 @@ export const useSettingsGeneral = () => {
   const queryClient = useQueryClient();
   const [triggerQueryError, setTriggerQueryError] = useState(false);
 
-  const { data: settings, isLoading } = useQuery({
+  const { data: settings, isLoading } = useQueryWithToast({
     queryKey: ["settings", "general"],
     queryFn: async () => {
       const secondsPerRound = await Database.settings.get("seconds_per_round");
