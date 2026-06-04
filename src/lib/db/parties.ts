@@ -25,7 +25,7 @@ export const getPartyById = async (
   return result[0];
 };
 
-export const getPartyDetailedById = async (
+const getPartyDetailedById = async (
   id: number,
 ): Promise<Party> => {
   const dbParties = await select<DBParty[]>( // Changed db.select to select
@@ -49,7 +49,7 @@ export const getPartyDetailedById = async (
   return { ...dbParty, players: playersList };
 };
 
-export const createParty = async (
+const createParty = async (
   party: Omit<Party, "id">,
 ): Promise<DBParty> => {
   const { name, icon, description, players } = party;
@@ -68,7 +68,7 @@ export const createParty = async (
   return createdParty;
 };
 
-export const updateParty = async (
+const updateParty = async (
   party: Party,
 ): Promise<Party> => {
   const { id, name, icon, description } = party;
@@ -83,7 +83,7 @@ export const updateParty = async (
   return updatedParty;
 };
 
-export const addPlayerToParty = async (
+const addPlayerToParty = async (
   partyId: number,
   playerId: number,
 ) => {
@@ -111,7 +111,7 @@ export const addPlayerToParty = async (
   return player;
 };
 
-export const removePlayerFromParty = async (
+const removePlayerFromParty = async (
   partyId: number,
   playerId: number,
 ) => {
@@ -137,7 +137,7 @@ export const removePlayerFromParty = async (
   }
 };
 
-export const deletePartyById = async (
+const deletePartyById = async (
   id: number,
 ): Promise<Party["id"]> => {
   const deletedParty = await getPartyById(id); // Removed db parameter
@@ -185,7 +185,7 @@ export const deletePartyById = async (
   return deletedParty.id;
 };
 
-export const getAllPartiesDetailed = async (): Promise<Party[]> => {
+const getAllPartiesDetailed = async (): Promise<Party[]> => {
   const partiesRaw = await getAllParties(); // Removed db parameter
   const detailedParties: Party[] = [];
 

@@ -11,7 +11,7 @@ import { getDetailedChapterById } from "./chapters";
 import { getDetailedEncounterTokens, deleteTokens } from "./tokens";
 import { deleteEncounterOpponents } from "./opponents";
 
-export const getAllEncounters = async (): Promise<Encounter[]> => {
+const getAllEncounters = async (): Promise<Encounter[]> => {
   const dbEncounters = await select<DBEncounter[]>("SELECT * FROM encounters");
   const prettyfiedEncounters: Encounter[] = [];
 
@@ -23,22 +23,7 @@ export const getAllEncounters = async (): Promise<Encounter[]> => {
   return prettyfiedEncounters;
 };
 
-export const getEncounterById = async (
-  id: DBEncounter["id"],
-): Promise<DBEncounter> => {
-  const result = await select<DBEncounter[]>(
-    "SELECT * FROM encounters WHERE id = $1",
-    [id],
-  );
-
-  if (!result.length) {
-    throw createDatabaseError(`Encounter with ID ${id} not found`);
-  }
-
-  return result[0];
-};
-
-export const getDetailedEncounterById = async (
+const getDetailedEncounterById = async (
   id: number,
 ): Promise<Encounter> => {
   const dbEncounters = await select<DBEncounter[]>(
@@ -104,7 +89,7 @@ export const getDetailedEncountersByIds = async (
     .map((enc) => enc.value);
 };
 
-export const getDetailedEncountersByChapterId = async (
+const getDetailedEncountersByChapterId = async (
   chapterId: Chapter["id"],
 ): Promise<Encounter[]> => {
   const chapter = await getDetailedChapterById(chapterId);
@@ -121,7 +106,7 @@ export const getDetailedEncountersByChapterId = async (
     .map((enc) => enc.value);
 };
 
-export const createEncounter = async (
+const createEncounter = async (
   encounter: Omit<Encounter, "id">,
 ): Promise<Encounter> => {
   const {
@@ -170,7 +155,7 @@ export const createEncounter = async (
   return createdEncounter;
 };
 
-export const updateEncounter = async (
+const updateEncounter = async (
   encounter: Encounter,
 ): Promise<Encounter> => {
   const {
@@ -217,7 +202,7 @@ export const updateEncounter = async (
   return getDetailedEncounterById(id);
 };
 
-export const updateEncounterProperty = async <
+const updateEncounterProperty = async <
   T extends keyof Encounter,
   V extends Encounter[T],
 >(

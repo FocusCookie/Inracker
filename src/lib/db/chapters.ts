@@ -11,7 +11,7 @@ import {
 } from "./tokens";
 import { getPartyById } from "./parties";
 
-export const getChapterById = async (
+const getChapterById = async (
   id: number,
 ): Promise<DBChapter> => {
   const result = await select<DBChapter[]>( // Changed db.select to select
@@ -62,7 +62,7 @@ export const getDetailedChapterById = async (
   };
 };
 
-export const createChapter = async (
+const createChapter = async (
   chapter: Omit<Chapter, "id">,
 ): Promise<DBChapter> => {
   const { name, icon, description, battlemap, state, party, encounters } =
@@ -110,7 +110,7 @@ export const getAllChaptersForParty = async (
   return prettyfiedChapters;
 };
 
-export const updateChapter = async (
+const updateChapter = async (
   chapter: Chapter,
 ): Promise<Chapter> => {
   const { id, battlemap, description, icon, name, party, state } = chapter;
@@ -123,7 +123,7 @@ export const updateChapter = async (
   return getDetailedChapterById(id); // Removed db parameter
 };
 
-export const updateChapterProperty = async <
+const updateChapterProperty = async <
   T extends keyof Chapter,
   V extends Chapter[T],
 >(
@@ -140,7 +140,7 @@ export const updateChapterProperty = async <
   return getDetailedChapterById(chapterId); // Removed db parameter
 };
 
-export const addEncounterToChapter = async (
+const addEncounterToChapter = async (
   chapterId: number,
   encounterId: number,
 ): Promise<Chapter> => {
@@ -156,7 +156,7 @@ export const addEncounterToChapter = async (
   return getDetailedChapterById(chapterId); // Removed db parameter
 };
 
-export const removeEncounterFromChapter = async (
+const removeEncounterFromChapter = async (
   chapterId: number,
   encounterId: number,
 ): Promise<Chapter> => {
@@ -229,7 +229,7 @@ export const deleteChapterById = async (
   return deletedChapter;
 };
 
-export const getAllChapters = async (
+const getAllChapters = async (
 ): Promise<Chapter[]> => {
   const dbChapters = await select<DBChapter[]>("SELECT * FROM chapters"); // Changed db.select to select
   const prettyfiedChapters: Chapter[] = [];

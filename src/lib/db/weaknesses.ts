@@ -3,7 +3,7 @@ import { execute, select, createDatabaseError } from "./core";
 import { getAllPlayers, getDetailedPlayerById } from "./players";
 import { getAllOpponents, getDetailedOpponentById } from "./opponents";
 
-export const getAllWeaknesses = async (): Promise<DBWeakness[]> =>
+const getAllWeaknesses = async (): Promise<DBWeakness[]> =>
   await select<DBWeakness[]>("SELECT * FROM weaknesses");
 
 export const getWeaknessById = async (
@@ -21,7 +21,7 @@ export const getWeaknessById = async (
   return result[0];
 };
 
-export const createWeakness = async (
+const createWeakness = async (
   weakness: Omit<Weakness, "id">,
 ): Promise<DBWeakness> => {
   const { description, icon, name } = weakness;
@@ -33,7 +33,7 @@ export const createWeakness = async (
   return getWeaknessById(result!.lastInsertId as number);
 };
 
-export const deleteWeaknessById = async (
+const deleteWeaknessById = async (
   id: DBWeakness["id"],
 ): Promise<DBWeakness> => {
   const deletedWeakness = await getWeaknessById(id);
@@ -81,7 +81,7 @@ export const deleteWeaknessById = async (
   return deletedWeakness;
 };
 
-export const updatedWeakness = async (
+const updatedWeakness = async (
   weakness: DBWeakness,
 ): Promise<DBWeakness> => {
   const { id, name, icon, description } = weakness;

@@ -3,10 +3,9 @@ import { CanvasElement } from "@/types/canvas";
 import { Chapter } from "@/types/chapters";
 import { Encounter } from "@/types/encounter";
 import { EncounterOpponent } from "@/types/opponents";
-import { Player } from "@/types/player";
 import { execute, select, createDatabaseError } from "./core"; // Updated import
 
-export const getTokenById = async (
+const getTokenById = async (
   id: Token["id"],
 ): Promise<DBToken> => {
   const result = await select<DBToken[]>( // Changed db.select to select
@@ -19,18 +18,6 @@ export const getTokenById = async (
   }
 
   return result[0];
-};
-
-export const existsTokenForChapterAndPlayerId = async (
-  chapter: Token["chapter"],
-  player: Player["id"],
-): Promise<boolean> => {
-  const result = await select<DBToken[]>( // Changed db.select to select
-    "SELECT * FROM tokens WHERE chapter = $1 AND entity = $2 AND type = $3",
-    [chapter, player, "player"],
-  );
-
-  return result.length > 0;
 };
 
 export const getEncounterOpponentToken = async (
@@ -55,7 +42,7 @@ export const getEncounterNPCToken = async (
   return result[0];
 };
 
-export const getDetailedTokenById = async (
+const getDetailedTokenById = async (
   id: Token["id"],
 ): Promise<Token> => {
   const dbTokens = await select<DBToken[]>( // Changed db.select to select
@@ -75,7 +62,7 @@ export const getDetailedTokenById = async (
   return { ...dbToken, coordinates };
 };
 
-export const getDetailedTokenByEntityId = async (
+const getDetailedTokenByEntityId = async (
   entityId: Token["entity"],
 ): Promise<Token> => {
   const dbTokens = await select<DBToken[]>( // Changed db.select to select
@@ -149,7 +136,7 @@ export const createToken = async (
   return createdToken;
 };
 
-export const existsToken = async (
+const existsToken = async (
   chapter: Token["chapter"],
   entity: Token["entity"],
   type: Token["type"],
@@ -162,7 +149,7 @@ export const existsToken = async (
   return result.length > 0;
 };
 
-export const createTokensForEncounter = async (
+const createTokensForEncounter = async (
   chapterId: Chapter["id"],
   encounter: Encounter,
 ): Promise<Token[]> => {
@@ -201,7 +188,7 @@ export const createTokensForEncounter = async (
   return createdTokens;
 };
 
-export const updateToken = async (
+const updateToken = async (
   token: Token,
 ): Promise<Token> => {
   const { id, coordinates } = token;
@@ -244,7 +231,7 @@ export const deleteTokens = async (
   return deletedTokens;
 };
 
-export const groupTokensIntoElement = async (
+const groupTokensIntoElement = async (
   entityIds: Array<Token["entity"]>,
   element: CanvasElement,
 ) => {

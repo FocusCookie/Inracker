@@ -12,7 +12,7 @@ import {
   FullCombatState,
 } from "@/types/combat";
 
-export const createCombat = async (
+const createCombat = async (
   chapterId: number,
   participantsData: {
     name: string;
@@ -81,7 +81,7 @@ export const createCombat = async (
   }
 };
 
-export const nextTurn = async (combatId: string) => {
+const nextTurn = async (combatId: string) => {
   try {
     const combatRes = await select<DBCombat[]>(
       "SELECT * FROM combats WHERE id = $1",
@@ -265,7 +265,7 @@ export const nextTurn = async (combatId: string) => {
   }
 };
 
-export const addEffect = async (effect: {
+const addEffect = async (effect: {
   combatId: string;
   participantId: string;
   name: string;
@@ -287,11 +287,11 @@ export const addEffect = async (effect: {
   );
 };
 
-export const removeEffect = async (effectId: string) => {
+const removeEffect = async (effectId: string) => {
   await execute("DELETE FROM combat_effects WHERE id = $1", [effectId]);
 };
 
-export const updateInitiative = async (
+const updateInitiative = async (
   participantId: string,
   newInitiative: number,
 ) => {
@@ -354,7 +354,7 @@ export const updateInitiative = async (
   }
 };
 
-export const getCombatState = async (
+const getCombatState = async (
   chapterId: number,
 ): Promise<FullCombatState | null> => {
   const combats = await select<DBCombat[]>(
@@ -397,7 +397,7 @@ export const getCombatState = async (
   };
 };
 
-export const addParticipant = async (data: {
+const addParticipant = async (data: {
   combatId: string;
   name: string;
   initiative: number;
@@ -419,7 +419,7 @@ export const addParticipant = async (data: {
   );
 };
 
-export const removeParticipant = async (participantId: string) => {
+const removeParticipant = async (participantId: string) => {
   try {
     await execute("DELETE FROM combat_effects WHERE participant_id = $1", [
       participantId,
@@ -432,13 +432,13 @@ export const removeParticipant = async (participantId: string) => {
   }
 };
 
-export const finishCombat = async (combatId: string) => {
+const finishCombat = async (combatId: string) => {
   await execute("UPDATE combats SET status = 'finished' WHERE id = $1", [
     combatId,
   ]);
 };
 
-export const resetInitiative = async (combatId: string) => {
+const resetInitiative = async (combatId: string) => {
   await execute(
     "UPDATE combat_participants SET initiative = 0 WHERE combat_id = $1",
     [combatId],

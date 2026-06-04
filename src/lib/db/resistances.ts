@@ -3,7 +3,7 @@ import { execute, select, createDatabaseError } from "./core"; // Updated import
 import { getAllPlayers, getDetailedPlayerById } from "./players";
 import { getAllOpponents, getDetailedOpponentById } from "./opponents";
 
-export const getAllResistances = async (): Promise<DBResistance[]> =>
+const getAllResistances = async (): Promise<DBResistance[]> =>
   await select<DBResistance[]>("SELECT * FROM resistances"); // Changed db.select to select
 
 export const getResistanceById = async (
@@ -21,7 +21,7 @@ export const getResistanceById = async (
   return result[0];
 };
 
-export const createResistance = async (
+const createResistance = async (
   immunity: Omit<Resistance, "id">,
 ): Promise<DBResistance> => {
   const { description, icon, name } = immunity;
@@ -33,7 +33,7 @@ export const createResistance = async (
   return getResistanceById(result!.lastInsertId as number); // Removed db parameter
 };
 
-export const deleteResistanceById = async (
+const deleteResistanceById = async (
   id: DBResistance["id"],
 ): Promise<DBResistance> => {
   const deletedResistance = await getResistanceById(id); // Removed db parameter
@@ -81,7 +81,7 @@ export const deleteResistanceById = async (
   return deletedResistance;
 };
 
-export const updatedResistances = async (
+const updatedResistances = async (
   resistance: DBResistance,
 ): Promise<DBResistance> => {
   const { id, name, icon, description } = resistance;

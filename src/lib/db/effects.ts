@@ -3,7 +3,7 @@ import { execute, select, createDatabaseError } from "./core"; // Updated import
 import { getAllPlayers, getDetailedPlayerById } from "./players";
 import { getAllOpponents, getDetailedOpponentById } from "./opponents";
 
-export const getAllEffects = async (): Promise<Effect[]> => {
+const getAllEffects = async (): Promise<Effect[]> => {
   const dbEffects = await select<DBEffect[]>("SELECT * FROM effects"); // Changed db.select to select
 
   return dbEffects.map((dbEffect) => {
@@ -44,7 +44,7 @@ export const getEffectById = async (
   return effect;
 };
 
-export const createEffect = async (
+const createEffect = async (
   effect: Omit<Effect, "id">,
 ): Promise<Effect> => {
   const { name, icon, description, duration, durationType, type, value } =
@@ -57,7 +57,7 @@ export const createEffect = async (
   return getEffectById(result!.lastInsertId as number); // Removed db parameter
 };
 
-export const updateEffect = async (
+const updateEffect = async (
   effect: Effect,
 ): Promise<Effect> => {
   const { id, name, icon, description, duration, durationType, type, value } =
@@ -71,7 +71,7 @@ export const updateEffect = async (
   return getEffectById(id); // Removed db parameter
 };
 
-export const deleteEffect = async (
+const deleteEffect = async (
   id: Effect["id"],
 ): Promise<Effect> => {
   const deletedEffect = await select<DBEffect[]>( // Changed db.select to select

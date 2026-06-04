@@ -3,7 +3,7 @@ import { execute, select, createDatabaseError } from "./core"; // Updated import
 import { getAllPlayers, getDetailedPlayerById } from "./players";
 import { getAllOpponents, getDetailedOpponentById } from "./opponents";
 
-export const getAllImmunities = async (): Promise<DBImmunity[]> =>
+const getAllImmunities = async (): Promise<DBImmunity[]> =>
   await select<DBImmunity[]>("SELECT * FROM immunities"); // Changed db.select to select
 
 export const getImmunityById = async (
@@ -21,7 +21,7 @@ export const getImmunityById = async (
   return result[0];
 };
 
-export const createImmunitiy = async (
+const createImmunitiy = async (
   immunity: Omit<Immunity, "id">,
 ): Promise<DBImmunity> => {
   const { description, icon, name } = immunity;
@@ -33,7 +33,7 @@ export const createImmunitiy = async (
   return getImmunityById(result!.lastInsertId as number); // Removed db parameter
 };
 
-export const deleteImmunityById = async (
+const deleteImmunityById = async (
   id: DBImmunity["id"],
 ): Promise<DBImmunity> => {
   const deletedImmunity = await getImmunityById(id); // Removed db parameter
@@ -81,7 +81,7 @@ export const deleteImmunityById = async (
   return deletedImmunity;
 };
 
-export const updateImmunity = async (
+const updateImmunity = async (
   immunity: DBImmunity,
 ): Promise<DBImmunity> => {
   const { id, name, icon, description } = immunity;
