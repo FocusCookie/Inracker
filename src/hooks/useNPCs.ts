@@ -1,10 +1,11 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import defaultDb from "@/lib/database";
 import { useMutationWithErrorToast } from "./useMutationWithErrorToast";
+import { useQueryWithToast } from "./useQueryWithErrorToast";
 import { NPC } from "@/types/npcs";
 
 export function useNPCs(database = defaultDb) {
-  return useQuery({
+  return useQueryWithToast({
     queryKey: ["npcs"],
     queryFn: () => database.npcs.getAllDetailed(),
   });
